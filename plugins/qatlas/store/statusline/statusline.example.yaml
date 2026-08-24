@@ -1,0 +1,83 @@
+# Globale Claude-Statusline-Konfiguration. Codex verwendet stattdessen seine nativen TUI-Einstellungen.
+format: 1
+
+# "fixed" verwenden, wenn der Terminalumbruch Widgets verbirgt.
+layout: wrap
+
+separator:
+  text: " • "
+  fg: "#aee414"
+  bold: true
+
+defaults:
+  label:
+    fg: "#7dcaf6"
+  value:
+    # Ein leerer Wert behält die Vordergrundfarbe des Terminals.
+    fg: ""
+
+# Die Map-Reihenfolge ist die Render-Reihenfolge. Fehlende Widgets sind bei vorhandener Map deaktiviert.
+widgets:
+  model:
+    on: true
+    value:
+      fg: "#f72585"
+  thinking:
+    on: true
+  dir:
+    on: true
+    value:
+      fg: "#f72585"
+  branch:
+    on: true
+    value:
+      fg: "#f72585"
+  diff:
+    on: true
+  out:
+    on: true
+  context:
+    on: true
+    bar:
+      # Die zuletzt erreichte Schwelle liefert die semantische Farbe.
+      thresholds:
+        - from: 0
+          fg: "#24e302"
+        - from: 30
+          fg: "#f0c808"
+        - from: 40
+          fg: "#ff6131"
+        - from: 70
+          fg: red
+  cost:
+    on: true
+  session:
+    on: true
+    bar:
+      thresholds:
+        - from: 0
+          fg: "#24e302"
+        - from: 30
+          fg: "#f0c808"
+        - from: 40
+          fg: "#ff6131"
+        - from: 85
+          fg: red
+  session-reset:
+    on: true
+  weekly:
+    on: true
+    bar:
+      thresholds:
+        - from: 0
+          fg: "#24e302"
+        - from: 30
+          fg: "#f0c808"
+        - from: 40
+          fg: "#ff6131"
+        - from: 85
+          fg: red
+  weekly-reset:
+    on: true
+  method:
+    on: true

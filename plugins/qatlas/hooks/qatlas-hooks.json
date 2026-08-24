@@ -4,6 +4,10 @@
       { "matcher": "startup|resume|clear|compact",
         "hooks": [
           { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/scripts/qatlas-migrations.js\"; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\scripts\\qatlas-migrations.js\" }; exit 0",
+            "timeout": 10, "statusMessage": "qatlas-Zustand wird geprüft..." },
+          { "type": "command",
             "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" qatlas; exit 0",
             "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" qatlas }; exit 0",
             "timeout": 5, "statusMessage": "qatlas-Kontext wird geladen..." },

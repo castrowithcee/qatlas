@@ -6,6 +6,8 @@ description: >
   Nutzertool arbeitet oder als primärer Orchestrator ausdrücklich verlangte Abschlussmeldungen sendet.
   Nicht für Änderungen am Quellcode der Qatlas CLI verwenden.
 license: MIT
+type: skill
+edit: locked
 ---
 
 # Qatlas-Core-CLI-MCP

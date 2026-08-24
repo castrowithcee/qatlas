@@ -6,7 +6,12 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { createConfig, readConfig } = require('./runtime/config-loader.js');
+const {
+  createConfig,
+  createStatusline,
+  readConfig,
+  readStatusline,
+} = require('./runtime/config-loader.js');
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT
   || path.resolve(__dirname, '..');
@@ -35,6 +40,19 @@ if (!configState.valid) {
   process.exit(1);
 }
 done.push('Konfiguration unverändert unter ' + configState.configFile);
+
+let statuslineState = readStatusline();
+if (!statuslineState.exists) {
+  createStatusline();
+  statuslineState = readStatusline();
+  done.push('Standard-Statusline geschrieben nach ' + statuslineState.statuslineFile);
+}
+if (!statuslineState.valid) {
+  console.error('Einrichtung gestoppt: ' + statuslineState.statuslineFile + ': '
+    + statuslineState.error.message);
+  process.exit(1);
+}
+done.push('Statusline-Konfiguration unverändert unter ' + statuslineState.statuslineFile);
 
 const cmdPath = rendererDst.replace(/\\/g, '/');
 let settings = {};

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 'use strict';
-// Rendert Claudes Session-JSON mit ~/.qatlas/plugins/config.yaml nach stdout.
-// Das Setup kopiert den Renderer und seine Runtime nach ~/.qatlas/plugins/.
+// Rendert Claudes Session-JSON mit ~/.qatlas/plugins/statusline.yaml nach stdout.
+// Das Setup kopiert Renderer und Runtime nach ~/.qatlas/plugins/.
 
 const { execSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { readConfig } = require('./runtime/config-loader.js');
+const { readStatusline } = require('./runtime/config-loader.js');
 
 const DEFAULT_WIDGETS = ['model', 'thinking', 'dir', 'branch', 'diff', 'out', 'context', 'cost', 'session', 'session-reset', 'weekly', 'weekly-reset', 'method'];
 
@@ -30,7 +30,7 @@ const NAMED = {
 const C = { reset: SGR(0), bold: SGR(1) };
 for (const n of Object.keys(NAMED)) C[n] = SGR(NAMED[n][0]);
 
-// Akzeptiert Palettennamen, #rgb, #rrggbb und rgb(r,g,b); Ungültiges fällt durch die Stilkaskade.
+// Akzeptiert Palettennamen, #rgb, #rrggbb und rgb(r,g,b); ungültige Werte fallen durch die Stilkaskade.
 function ansi(spec, isBg) {
     if (typeof spec !== 'string') return '';
     const s = spec.trim().toLowerCase().replace(/\s+/g, '');
@@ -48,10 +48,10 @@ function ansi(spec, isBg) {
     return SGR(`${isBg ? 48 : 38};2;${rgb.join(';')}`);
 }
 
-// Nach inneren Resets den äußeren Stil erneut öffnen.
+// Öffnet nach inneren Resets den äußeren Stil erneut.
 const paint = (text, pre) => (pre && text) ? pre + text.split(C.reset).join(C.reset + pre) + C.reset : text;
 
-// Konfiguration: Widgets akzeptieren Objekt, Boolean, Farbstring oder eine Namensliste.
+// Konfiguration: Widgets akzeptieren Objekt, Boolean, Farbstring oder Namensliste.
 function normWidget(v) {
     if (v === true) return { on: true };
     if (typeof v === 'string') return v.trim() ? { on: true, value: { fg: v } } : { on: true };
@@ -72,8 +72,7 @@ function normWidgets(w) {
 }
 
 function loadConfig() {
-    const cwd = (data.workspace && data.workspace.current_dir) || data.cwd || process.cwd();
-    const c = readConfig(cwd).config.statusline;
+    const c = readStatusline().statusline;
     const d = (c.defaults && typeof c.defaults === 'object') ? c.defaults : {};
     const style = (s) => (s && typeof s === 'object') ? s : {};
     const sep = Object.assign({}, (c.separator && typeof c.separator === 'object') ? c.separator : {});
@@ -115,7 +114,7 @@ const lv = (name, label, value, defLabel, defValue) => build(name, [
 // Leisten
 const DEFAULT_BAR = [{ from: 0, fg: 'green' }, { from: 35, fg: 'yellow' }, { from: 45, fg: 'orange' }, { from: 70, fg: 'red' }];
 
-// Die zuletzt erreichte gültige Schwelle gewinnt; ungültige eigene Schwellen fallen auf die Defaults zurück.
+// Die zuletzt erreichte gültige Schwelle gewinnt; ungültige eigene Schwellen fallen auf die Standards zurück.
 function barColor(name, pct) {
     const bar = (cfg.widgets[name] || {}).bar;
     const own = (bar && Array.isArray(bar.thresholds))
@@ -147,7 +146,7 @@ function hms(epochSec, withDays) {
     return withDays ? `${d}T ${h}Std ${m}Min` : `${Math.floor(s / 3600)}Std ${m}Min`;
 }
 
-// Git, pro Session 5 Sekunden zwischengespeichert
+// Git-Informationen pro Session fünf Sekunden zwischenspeichern.
 function run(cwd, cmd) {
     try { return execSync(cmd, { cwd, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); }
     catch { return null; }
@@ -190,7 +189,7 @@ function gitInfo(d) {
     return info;
 }
 
-// Widgets: Labels sind gedimmt, Werte nutzen die Terminalfarbe. Nur Diff und Schwellen tragen Semantikfarben.
+// Widgets: Labels sind gedimmt und Werte nutzen die Terminalfarbe. Nur Diffs und Schwellen tragen semantische Farben.
 const WIDGETS = {
     model: (d) => {
         const m = d.model && (d.model.display_name || d.model.id);
@@ -249,7 +248,7 @@ const WIDGETS = {
     method: (d) => lv('method', 'Methode', d.rate_limits ? 'Abo' : 'API', C.dim, '')
 };
 
-// Zusammensetzen
+// Ausgabe zusammensetzen.
 const git = gitInfo(data);
 const render = (type) => (WIDGETS[type] ? WIDGETS[type](data, git) : null);
 const SEP = cfg.separator.text;

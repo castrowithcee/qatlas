@@ -1,15 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 
-// Prüfung für qatlas: standardmäßig nur berichten, mit --apply Fehlendes ohne Überschreiben ergänzen.
-// Aufruf: node qatlas-doctor.js [--apply] [--target <dir>]
+// Prüft Qatlas und berichtet standardmäßig; ergänzt mit --apply Fehlendes ohne Überschreiben.
+// Aufruf: node qatlas-doctor.js [--apply] [--target <ordner>]
 
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { scaffoldTopUp } = require('./qatlas-scaffold-topup.js');
-const { readConfig, createConfig, syncManagedRuleset } = require('./runtime/config-loader.js');
+const {
+  createConfig,
+  readConfig,
+  readStatusline,
+  syncManagedRuleset,
+} = require('./runtime/config-loader.js');
 
 const argv = process.argv.slice(2);
 const apply = argv.includes('--apply');
@@ -20,9 +25,9 @@ const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT
   || path.resolve(__dirname, '..');
 const bundle = path.join(pluginRoot, 'scaffold');
 
-const missing = [];   // blockiert oder beeinträchtigt die Arbeit
-const notes = [];     // einmal erwähnenswert, aber kein Grund zum Blockieren
-const created = [];   // was --apply tatsächlich geschrieben hat
+const missing = [];   // Blockiert oder beeinträchtigt die Arbeit.
+const notes = [];     // Einmal erwähnenswert, aber kein Grund zum Blockieren.
+const created = [];   // Tatsächlich durch --apply geschriebene Dateien.
 
 function has(cmd, args) {
   try { execFileSync(cmd, args, { stdio: 'pipe' }); return true; }
@@ -58,7 +63,7 @@ if (!has('git', ['lfs', 'version'])) {
 const hostSettings = path.join(os.homedir(), '.claude', 'settings.json');
 if (fs.existsSync(path.dirname(hostSettings))) {
   let host = {};
-  try { host = JSON.parse(fs.readFileSync(hostSettings, 'utf8')); } catch { /* fehlt oder ist ungültig */ }
+  try { host = JSON.parse(fs.readFileSync(hostSettings, 'utf8')); } catch { /* Fehlt oder ist ungültig. */ }
   const want = [];
   const attributionOff = host.attribution
     && host.attribution.commit === ''
@@ -75,9 +80,8 @@ if (fs.existsSync(path.dirname(hostSettings))) {
   }
 }
 
-// Nutzerweite, pfadfreie Entscheidungen
+// Nutzerweite, pfadunabhängige Entscheidungen.
 const configState = readConfig(target);
-const config = configState.config;
 
 if (!configState.exists) {
   if (apply) {
@@ -95,6 +99,11 @@ if (!configState.exists) {
 }
 for (const diagnostic of configState.diagnostics) missing.push('config: ' + diagnostic);
 
+const statuslineState = readStatusline();
+if (statuslineState.exists && !statuslineState.valid) {
+  missing.push('statusline: ' + statuslineState.statuslineFile + ': ' + statuslineState.error.message);
+}
+
 const hadManagedRuleset = fs.existsSync(configState.rulesetFile);
 if (apply) {
   try {
@@ -107,15 +116,7 @@ if (apply) {
   missing.push('store: ~/.qatlas/rules/RULESET.md fehlt.');
 }
 
-// Abgelehnte Prüfungen nicht erneut melden.
-const muted = new Set(config.diagnostics.mute);
-for (const list of [missing, notes]) {
-  for (let i = list.length - 1; i >= 0; i--) {
-    if (muted.has(list[i].split(':')[0])) list.splice(i, 1);
-  }
-}
-
-// Scaffold: derselbe existenzbasierte Abgleich wie im Session-Hook.
+// Scaffold: derselbe existenzbasierte Abgleich wie im SessionStart-Hook.
 const hadScaffold = fs.existsSync(path.join(target, '.qatlas', 'project'));
 const { absent, created: scaffoldCreated } = scaffoldTopUp(target, bundle, { apply });
 
@@ -141,11 +142,11 @@ if (!apply) {
         }, null, 2) + '\n', { flag: 'wx', mode: 0o644 });
         created.push('.qatlas/project/updates/state.json');
       }
-    } catch { /* Ein Prüfstand darf die sichere Scaffold-Anlage nicht verhindern. */ }
+    } catch { /* Eine defekte Zustandsdatei darf die sichere Scaffold-Anlage nicht verhindern. */ }
   }
 }
 
-// Die projektlokale Plugin-Konfiguration entsteht nur beim ausdrücklich gestarteten Setup.
+// Projektlokale Plugin-Konfiguration entsteht nur beim ausdrücklich gestarteten Setup.
 const projectConfig = path.join(target, '.qatlas', 'plugins', 'config.yaml');
 if (apply && !fs.existsSync(projectConfig)) {
   try {
@@ -157,10 +158,10 @@ if (apply && !fs.existsSync(projectConfig)) {
   }
 }
 
-// .gitignore: nur fehlende Qatlas-Regeln anhängen, nie Nutzerinhalt ersetzen.
+// .gitignore: nur fehlende Qatlas-Regeln anhängen und Nutzerinhalt nie ersetzen.
 const gitignore = path.join(target, '.gitignore');
 let ignoreText = '';
-try { ignoreText = fs.readFileSync(gitignore, 'utf8'); } catch { /* noch keine vorhanden */ }
+try { ignoreText = fs.readFileSync(gitignore, 'utf8'); } catch { /* Noch keine Datei vorhanden. */ }
 const zones = ['zone-import', 'zone-export'];
 const missingZones = zones.filter(zone =>
   !new RegExp('^/\\.qatlas/project/' + zone + '/\\*\\s*$', 'm').test(ignoreText));

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
-// Repo-bezogene Update-Hinweise eines Plugins erkennen und nach der Nutzerentscheidung bestätigen.
+// Erkennt repo-spezifische Plugin-Updates und bestätigt sie nach der Nutzerentscheidung.
 
 const fs = require('fs');
 const path = require('path');
 
 let readConfig = () => ({ config: { 'session-start': { enabled: true } } });
 try { ({ readConfig } = require('./runtime/config-loader.js')); }
-catch { /* Fehlende Config-Hilfe darf explizite Update-Befehle nicht verhindern. */ }
+catch { /* Fehlende Config-Helfer dürfen ausdrückliche Update-Befehle nicht verhindern. */ }
 
 const pluginRoot = path.resolve(__dirname, '..');
 const isCodex = Boolean(process.env.PLUGIN_ROOT);
@@ -38,7 +38,7 @@ function pluginIdentity() {
     const manifest = JSON.parse(fs.readFileSync(path.join(pluginRoot, '.claude-plugin', 'plugin.json'), 'utf8'));
     const version = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
     if (manifest.name && /^\d+\.\d+\.\d+$/.test(version)) return { name: manifest.name, version };
-  } catch { /* Ungültiges Plugin erzeugt keinen Update-Hinweis. */ }
+  } catch { /* Ein ungültiges Plugin erzeugt keinen Update-Hinweis. */ }
   return null;
 }
 
@@ -61,34 +61,48 @@ function statePath(root) {
   return path.join(root, '.qatlas', 'project', 'updates', 'state.json');
 }
 
-function hasScaffold(root) {
+function hasCurrentScaffold(root) {
   try { return fs.statSync(path.join(root, '.qatlas', 'project')).isDirectory(); }
   catch { return false; }
 }
 
-function readState(root) {
-  try {
-    const parsed = JSON.parse(fs.readFileSync(statePath(root), 'utf8'));
-    return {
-      format: 1,
-      plugins: parsed && typeof parsed.plugins === 'object' && parsed.plugins ? parsed.plugins : {},
-    };
-  } catch {
-    return { format: 1, plugins: {} };
-  }
+function hasScaffold(root) {
+  if (hasCurrentScaffold(root)) return true;
+  return ['__qatlas__', '__callbell__'].some(name => {
+    try { return fs.statSync(path.join(root, name)).isDirectory(); }
+    catch { return false; }
+  });
 }
 
-function pendingUpdates(root, identity) {
+function readState(root) {
+  const candidates = [
+    statePath(root),
+    path.join(root, '__qatlas__', 'updates', 'state.json'),
+    path.join(root, '__callbell__', 'updates', 'state.json'),
+  ];
+  for (const file of candidates) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+      return {
+        format: 1,
+        plugins: parsed && typeof parsed.plugins === 'object' && parsed.plugins ? parsed.plugins : {},
+      };
+    } catch { /* Den nächsten bekannten Zustandsort versuchen. */ }
+  }
+  return { format: 1, plugins: {} };
+}
+
+function pendingUpdates(root, identity, sourceRoot = pluginRoot) {
   const stored = readState(root).plugins[identity.name];
   const checked = semver(stored) ? stored : '0.0.0';
   let names = [];
-  try { names = fs.readdirSync(path.join(pluginRoot, 'updates')); } catch { /* Keine Updates. */ }
+  try { names = fs.readdirSync(path.join(sourceRoot, 'updates')); } catch { /* Keine Updates. */ }
   const pending = names
     .filter(name => /^\d+\.\d+\.\d+\.md$/.test(name))
     .map(name => ({ name, version: name.slice(0, -3) }))
     .filter(entry => compare(entry.version, checked) > 0 && compare(entry.version, identity.version) <= 0)
     .sort((left, right) => compare(left.version, right.version))
-    .map(entry => path.join(pluginRoot, 'updates', entry.name));
+    .map(entry => path.join(sourceRoot, 'updates', entry.name));
   return { checked, pending };
 }
 
@@ -112,46 +126,53 @@ function writeState(root, identity) {
   fs.renameSync(temporary, target);
 }
 
-const root = resolveRoot();
-if (command === 'notice' && !readConfig(root).config['session-start'].enabled) process.exit(0);
-const identity = pluginIdentity();
-const scaffold = hasScaffold(root);
+function main() {
+  const root = resolveRoot();
+  if (command === 'notice' && !readConfig(root).config['session-start'].enabled) return;
+  const identity = pluginIdentity();
+  const scaffold = hasScaffold(root);
 
-if (!identity) process.exit(0);
+  if (!identity) return;
 
-if (command === 'ack') {
-  if (!scaffold) {
-    process.stderr.write('Kein .qatlas/project/-Scaffold im Zielrepo.\n');
-    process.exit(1);
+  if (command === 'ack') {
+    if (!hasCurrentScaffold(root)) {
+      process.stderr.write('Kein .qatlas/project/-Scaffold im Zielrepo. Migriere zuerst den Legacy-Zustand.\n');
+      process.exitCode = 1;
+      return;
+    }
+    writeState(root, identity);
+    process.stdout.write(`✓ ${identity.name} ${identity.version} für dieses Repo als geprüft gespeichert.\n`);
+    return;
   }
-  writeState(root, identity);
-  process.stdout.write(`✓ ${identity.name} ${identity.version} für dieses Repo als geprüft gespeichert.\n`);
-  process.exit(0);
+
+  if (!scaffold) return;
+
+  const { checked, pending } = pendingUpdates(root, identity);
+
+  if (command === 'status') {
+    process.stdout.write(`${identity.name}: geprüft ${checked}, installiert ${identity.version}, `
+      + `${pending.length} relevante Update-Anweisung(en).\n`);
+    for (const file of pending) process.stdout.write('- ' + JSON.stringify(file) + '\n');
+    return;
+  }
+
+  if (command !== 'notice' || !pending.length) return;
+
+  emitNotice([
+    `QATLAS-UPDATE: ${identity.name} wurde für dieses Repo zuletzt bis ${checked} geprüft; installiert ist ${identity.version}.`,
+    'Lies diese Update-Anweisungen vollständig und prüfe ausschließlich das aktuelle Repo:',
+    ...pending.map(file => '- ' + JSON.stringify(file)),
+    'Behandle vorhandene Repo-Dateien als primär und überschreibe sie nie pauschal mit Plugin-Vorlagen.',
+    'Sind keine Änderungen anwendbar, aktualisiere den Prüfstand ohne Rückfrage.',
+    'Andernfalls nenne für jeden anwendbaren Punkt knapp den konkreten Befund im Repo, die vorgeschlagene Änderung und ihre praktische Folge oder ihren Grund. Eine bloße Liste aus Dateinamen, Mengen oder Schlagwörtern reicht nicht; nenne bei Sammelbefunden ein repräsentatives Beispiel.',
+    'Frage erst danach, was vollständig, teilweise oder nicht übernommen werden soll.',
+    'Halte abgelehnte Änderungen nicht im Repo fest, außer der Nutzer verlangt dies ausdrücklich.',
+    'Aktualisiere nach der Prüfung oder Nutzerentscheidung in jedem Fall den Prüfstand, indem du das folgende Script mit den Argumenten ack --target <PROJEKT-ROOT> ausführst:',
+    'UPDATE-SCRIPT: ' + JSON.stringify(path.join(pluginRoot, 'scripts', 'qatlas-update.js')),
+    'PROJEKT-ROOT: ' + JSON.stringify(root),
+  ].join('\n'));
 }
 
-if (!scaffold) process.exit(0);
+if (require.main === module) main();
 
-const { checked, pending } = pendingUpdates(root, identity);
-
-if (command === 'status') {
-  process.stdout.write(`${identity.name}: geprüft ${checked}, installiert ${identity.version}, `
-    + `${pending.length} relevante Update-Anweisung(en).\n`);
-  for (const file of pending) process.stdout.write('- ' + JSON.stringify(file) + '\n');
-  process.exit(0);
-}
-
-if (command !== 'notice' || !pending.length) process.exit(0);
-
-emitNotice([
-  `QATLAS-UPDATE: ${identity.name} wurde für dieses Repo zuletzt bis ${checked} geprüft; installiert ist ${identity.version}.`,
-  'Lies diese Update-Anweisungen vollständig und prüfe ausschließlich das aktuelle Repo:',
-  ...pending.map(file => '- ' + JSON.stringify(file)),
-  'Behandle vorhandene Repo-Dateien als primär und überschreibe sie nie pauschal mit Plugin-Vorlagen.',
-  'Sind keine Änderungen anwendbar, aktualisiere den Prüfstand ohne Rückfrage.',
-  'Andernfalls nenne für jeden anwendbaren Punkt knapp den konkreten Befund im Repo, die vorgeschlagene Änderung und ihre praktische Folge oder ihren Grund. Eine bloße Liste aus Dateinamen, Mengen oder Schlagwörtern reicht nicht; nenne bei Sammelbefunden ein repräsentatives Beispiel.',
-  'Frage erst danach, was vollständig, teilweise oder nicht übernommen werden soll.',
-  'Halte abgelehnte Änderungen nicht im Repo fest, außer der Nutzer verlangt dies ausdrücklich.',
-  'Aktualisiere nach der Prüfung oder Nutzerentscheidung in jedem Fall den Prüfstand, indem du das folgende Script mit den Argumenten ack --target <PROJEKT-ROOT> ausführst:',
-  'UPDATE-SCRIPT: ' + JSON.stringify(path.join(pluginRoot, 'scripts', 'qatlas-update.js')),
-  'PROJEKT-ROOT: ' + JSON.stringify(root),
-].join('\n'));
+module.exports = { compare, pendingUpdates, semver };

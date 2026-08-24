@@ -21,7 +21,9 @@ Dateien.
 | Aufgabe im lokalen Qatlas-Backlog | `backlog/task.md` | Als `.qatlas/project/backlog/task-<id>-<slug>.md` oder im betreffenden Projekt anlegen und nach der Backlog-Referenz ausfüllen. |
 | Projekt im lokalen Qatlas-Backlog | `backlog/project-index.md` | Als `.qatlas/project/backlog/<project>/INDEX.md` anlegen und nach der Backlog-Referenz ausfüllen. |
 | Wiederkehrende Ablage pro Kunde oder Fall | `customers/customers-framework.md` und `customers/customer-index.md` | Als `<area>-customers/FRAMEWORK.md` und pro Kunde als `<area>-customers/<id>/INDEX.md` kopieren und anpassen. |
-| Statusline auf hellen und dunklen Terminalhintergründen | `statusline/dual-theme.yaml` | Dessen `statusline`-Abschnitt in `~/.qatlas/plugins/config.yaml` übernehmen; andere Bereiche nie ersetzen. |
+| Plugin-Steuerung nachschlagen | `config/config.example.yaml` | Als versionsgebundene Feldreferenz lesen. Die wirksame `~/.qatlas/plugins/config.yaml` nie pauschal damit ersetzen. |
+| Claude-Statusline nachschlagen | `statusline/statusline.example.yaml` | Als versionsgebundene Feldreferenz lesen. Die wirksame `~/.qatlas/plugins/statusline.yaml` nie pauschal damit ersetzen. |
+| Statusline auf hellen und dunklen Terminalhintergründen | `statusline/dual-theme.yaml` | Als vollständige Ausgangskonfiguration nach `~/.qatlas/plugins/statusline.yaml` übernehmen, wenn die bestehende Widget-Auswahl ersetzt werden darf. |
 
 Der installierte Store ist schreibgeschützt, weil sein versionsgebundener Pfad beim Update ersetzt wird.
 Kopiere benötigtes Material an sein Ziel und ändere es dort. `.qatlas/project/templates/` ist ausschließlich

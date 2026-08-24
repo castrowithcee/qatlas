@@ -49,6 +49,7 @@ function defaultStatusline() {
     };
   }
   return {
+    format: 1,
     layout: 'wrap',
     separator: { text: ' • ', fg: '#aee414', bold: true },
     defaults: { label: { fg: '#7dcaf6' }, value: { fg: '' } },
@@ -59,10 +60,10 @@ function defaultStatusline() {
 const DEFAULT_CONFIG = {
   format: 1,
   'session-start': { enabled: true, ruleset: true },
-  diagnostics: { mute: [] },
   notifications: { telegram: { enabled: false, connection: 'default' } },
-  statusline: defaultStatusline(),
 };
+
+const DEFAULT_STATUSLINE = defaultStatusline();
 
 const DEFAULT_CREDENTIALS = {
   format: 1,
@@ -75,6 +76,7 @@ function locations(projectRoot = null) {
     homeDir,
     configFile: path.join(homeDir, 'config.yaml'),
     credentialsFile: path.join(homeDir, 'credentials.yaml'),
+    statuslineFile: path.join(homeDir, 'statusline.yaml'),
     rulesetFile: path.join(os.homedir(), '.qatlas', 'rules', 'RULESET.md'),
     projectConfigFile: projectRoot
       ? path.join(path.resolve(projectRoot), '.qatlas', 'plugins', 'config.yaml') : null,
@@ -90,18 +92,26 @@ function parseFile(file) {
   }
 
   try {
-    const document = YAML.parseDocument(source, {
-      version: '1.2', schema: 'core', merge: false, resolveKnownTags: false,
-      uniqueKeys: true, stringKeys: true, logLevel: 'error',
-    });
-    if (document.errors.length) throw document.errors[0];
-    const value = document.toJS({ maxAliasCount: 0 });
-    if (!isObject(value)) throw new Error('Das YAML-Wurzeldokument muss eine Map sein.');
-    if (value.format !== 1) throw new Error('Das Feld format muss den Wert 1 haben.');
-    return { exists: true, valid: true, value };
+    return { exists: true, valid: true, value: parseYamlText(source) };
   } catch (error) {
     return { exists: true, valid: false, value: null, error };
   }
+}
+
+function parseYamlText(source) {
+  const document = YAML.parseDocument(String(source).replace(/^﻿/, ''), {
+    version: '1.2', schema: 'core', merge: false, resolveKnownTags: false,
+    uniqueKeys: true, stringKeys: true, logLevel: 'error',
+  });
+  if (document.errors.length) throw document.errors[0];
+  const value = document.toJS({ maxAliasCount: 0 });
+  if (!isObject(value)) throw new Error('Das YAML-Wurzeldokument muss eine Map sein.');
+  if (value.format !== 1) throw new Error('Das Feld format muss den Wert 1 haben.');
+  return value;
+}
+
+function stringifyYaml(value) {
+  return YAML.stringify(value, { lineWidth: 0, version: '1.2' });
 }
 
 function normalizeConfig(value) {
@@ -111,19 +121,16 @@ function normalizeConfig(value) {
     enabled: session.enabled !== false,
     ruleset: session.ruleset !== false,
   };
-  const diagnostics = isObject(config.diagnostics) ? config.diagnostics : {};
-  config.diagnostics = {
-    ...diagnostics,
-    mute: Array.isArray(diagnostics.mute)
-      ? diagnostics.mute.filter(item => typeof item === 'string') : [],
-  };
-  if (!isObject(config.statusline)) config.statusline = clone(DEFAULT_CONFIG.statusline);
-  if (isObject(value) && isObject(value.statusline)
-    && (isObject(value.statusline.widgets) || Array.isArray(value.statusline.widgets))) {
-    config.statusline.widgets = clone(value.statusline.widgets);
-  }
   if (!isObject(config.notifications)) config.notifications = clone(DEFAULT_CONFIG.notifications);
   return config;
+}
+
+function normalizeStatusline(value) {
+  const statusline = merge(DEFAULT_STATUSLINE, value);
+  if (isObject(value) && (isObject(value.widgets) || Array.isArray(value.widgets))) {
+    statusline.widgets = clone(value.widgets);
+  }
+  return statusline;
 }
 
 function readConfig(projectRoot = null) {
@@ -167,9 +174,21 @@ function readCredentials() {
   };
 }
 
+function readStatusline() {
+  const paths = locations();
+  const state = parseFile(paths.statuslineFile);
+  return {
+    ...paths,
+    exists: state.exists,
+    valid: state.valid,
+    statusline: normalizeStatusline(state.valid && state.value ? state.value : DEFAULT_STATUSLINE),
+    error: state.error,
+  };
+}
+
 function writeNew(file, value, mode) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, YAML.stringify(value, { lineWidth: 0, version: '1.2' }), {
+  fs.writeFileSync(file, stringifyYaml(value), {
     flag: 'wx', mode,
   });
   return file;
@@ -181,6 +200,10 @@ function createConfig() {
 
 function createCredentials() {
   return writeNew(locations().credentialsFile, DEFAULT_CREDENTIALS, 0o600);
+}
+
+function createStatusline() {
+  return writeNew(locations().statuslineFile, DEFAULT_STATUSLINE, 0o600);
 }
 
 function syncManagedRuleset(pluginRoot) {
@@ -200,17 +223,22 @@ function syncManagedRuleset(pluginRoot) {
     fs.copyFileSync(temporary, paths.rulesetFile);
     fs.unlinkSync(temporary);
   }
-  try { fs.chmodSync(paths.rulesetFile, 0o600); } catch { /* Kein POSIX-Modus. */ }
+  try { fs.chmodSync(paths.rulesetFile, 0o600); } catch { /* Keine POSIX-Modusunterstützung. */ }
   return { file: paths.rulesetFile, changed: true, created: previous === null };
 }
 
 module.exports = {
   DEFAULT_CONFIG,
   DEFAULT_CREDENTIALS,
+  DEFAULT_STATUSLINE,
   createConfig,
   createCredentials,
+  createStatusline,
   locations,
+  parseYamlText,
   readConfig,
   readCredentials,
+  readStatusline,
+  stringifyYaml,
   syncManagedRuleset,
 };

@@ -1,0 +1,14 @@
+# Globale Qatlas-Plugin-Konfiguration. Projekt-Overrides werden getrennt geladen.
+format: 1
+
+session-start:
+  # Nur deaktivieren, wenn kein passiver Qatlas-Kontext injiziert werden soll.
+  enabled: true
+  # Aktiv lassen, um die verwaltete globale Arbeitsvereinbarung zu laden.
+  ruleset: true
+
+notifications:
+  telegram:
+    # Credentials liegen in credentials.yaml, niemals in dieser Datei.
+    enabled: false
+    connection: default
