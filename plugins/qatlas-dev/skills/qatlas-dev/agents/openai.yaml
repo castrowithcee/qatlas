@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Dev"
+  short_description: "Einfachste tragfähige Lösung für Codearbeit wählen"
+  default_prompt: "Nutze $qatlas-dev, um für diese Codearbeit die einfachste vollständig tragfähige Lösung zu wählen."

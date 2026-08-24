@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core Filing"
+  short_description: "Inhaltsdateien sicher im Projekt einordnen"
+  default_prompt: "Nutze $qatlas-core-filing, um diese Inhaltsdatei passend im Projekt einzuordnen."

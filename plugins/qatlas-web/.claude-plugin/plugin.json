@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "qatlas-web",
+  "displayName": "Qatlas Web",
+  "version": "0.1.0",
+  "description": "Web-Capability für Qatlas: Produktprofil, Fähigkeiten, UI, Daten, Architektur, Sicherheit und Betrieb fachlich klären, ohne einen eigenen Arbeitsloop zu besitzen.",
+  "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
+  "homepage": "https://github.com/castrowithcee/qatlas",
+  "repository": "https://github.com/castrowithcee/qatlas",
+  "license": "MIT",
+  "keywords": ["web", "product", "architecture", "saas", "ui", "self-hosting"],
+  "skills": "./skills/",
+  "dependencies": ["qatlas@qatlas"]
+}

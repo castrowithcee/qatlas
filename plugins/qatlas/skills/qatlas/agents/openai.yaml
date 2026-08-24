@@ -1,0 +1,7 @@
+interface:
+  display_name: "Qatlas"
+  short_description: "Kontext halten und Arbeit sicher ausführen"
+  default_prompt: "Nutze $qatlas, um Qatlas einzurichten oder den passenden Arbeitsmodus für dieses Projekt zu starten."
+
+policy:
+  allow_implicit_invocation: false

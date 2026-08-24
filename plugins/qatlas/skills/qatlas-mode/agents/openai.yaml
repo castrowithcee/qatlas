@@ -1,0 +1,7 @@
+interface:
+  display_name: "Qatlas Mode"
+  short_description: "Sessionweiten Zusammenarbeitsmodus aktivieren"
+  default_prompt: "Nutze $qatlas-mode adhd, um die Antworten dieser Session handlungsfreundlich für ADHD zu formen."
+
+policy:
+  allow_implicit_invocation: false

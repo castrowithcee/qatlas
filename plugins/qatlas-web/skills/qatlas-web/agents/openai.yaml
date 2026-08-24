@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Web"
+  short_description: "Webprodukte fachlich klären und prüfen"
+  default_prompt: "Nutze $qatlas-web, um diese Webproduktfrage fachlich zu klären."

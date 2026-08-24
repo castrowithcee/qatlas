@@ -1,0 +1,21 @@
+{
+  "name": "qatlas",
+  "interface": { "displayName": "Qatlas" },
+  "plugins": [
+    { "name": "qatlas",
+      "source": { "source": "local", "path": "./plugins/qatlas" },
+      "policy": { "installation": "INSTALLED_BY_DEFAULT", "authentication": "ON_INSTALL" },
+      "category": "Productivity",
+      "description": "Gemeinsame Qatlas-Infrastruktur und Arbeitsloop: Sessionkontext, Regeln, Scaffold, Backlog, Memory, Einrichtung, Zielklärung, Planung, serielle Ausführung und sichere Verwaltungswerkzeuge." },
+    { "name": "qatlas-dev",
+      "source": { "source": "local", "path": "./plugins/qatlas-dev" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity",
+      "description": "Code-Pack: die faulste Lösung, die wirklich funktioniert, in drei Stufen plus ein Review-Skill. Benötigt qatlas." },
+    { "name": "qatlas-web",
+      "source": { "source": "local", "path": "./plugins/qatlas-web" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity",
+      "description": "Web-Capability: ergänzt Qatlas' Loops um Produktprofil, Fähigkeiten, UI, Daten, Architektur, Sicherheit und Betrieb, ohne einen eigenen Planungs- oder Task-Workflow. Benötigt qatlas." }
+  ]
+}

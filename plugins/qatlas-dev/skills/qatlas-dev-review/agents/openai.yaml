@@ -1,0 +1,7 @@
+interface:
+  display_name: "Qatlas Dev Review"
+  short_description: "Code gezielt auf unnötige Komplexität prüfen"
+  default_prompt: "Nutze $qatlas-dev-review, um diesen Code gezielt auf unnötige Komplexität zu prüfen."
+
+policy:
+  allow_implicit_invocation: false

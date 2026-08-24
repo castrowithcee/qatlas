@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" qatlas; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" qatlas }; exit 0",
+            "timeout": 5, "statusMessage": "qatlas-Kontext wird geladen..." },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" files; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" files }; exit 0",
+            "timeout": 5 },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" frontmatter; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" frontmatter }; exit 0",
+            "timeout": 5 },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" ruleset; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" ruleset }; exit 0",
+            "timeout": 5 },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" scaffold; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" scaffold }; exit 0",
+            "timeout": 5 },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" backlog; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" backlog }; exit 0",
+            "timeout": 5 },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" memory; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" memory }; exit 0",
+            "timeout": 5 },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" project-backlog; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" project-backlog }; exit 0",
+            "timeout": 5 },
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/scripts/qatlas-update.js\" notice; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\scripts\\qatlas-update.js\" notice }; exit 0",
+            "timeout": 5 }
+        ] }
+    ],
+    "Notification": [
+      { "matcher": "idle_prompt|agent_needs_input",
+        "hooks": [ { "type": "command",
+          "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/scripts/qatlas-telegram-notify.js\"; exit 0",
+          "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\scripts\\qatlas-telegram-notify.js\" }; exit 0",
+          "timeout": 10 } ] }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "qatlas-dev",
+  "displayName": "Qatlas Dev",
+  "version": "0.1.0",
+  "description": "Code-Pack für qatlas: ein fauler Senior-Entwickler, der die einfachste funktionierende Lösung baut, plus ein Review-Skill, der sie prüft.",
+  "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
+  "homepage": "https://github.com/castrowithcee/qatlas",
+  "repository": "https://github.com/castrowithcee/qatlas",
+  "license": "MIT",
+  "keywords": ["code", "yagni", "minimalism", "review", "refactoring"],
+  "skills": "./skills/",
+  "dependencies": ["qatlas@qatlas"],
+  "hooks": "./hooks/qatlas-dev-hooks.json"
+}

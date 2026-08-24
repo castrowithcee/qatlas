@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core CLI/MCP"
+  short_description: "Qatlas-Tools sicher einrichten und verwenden"
+  default_prompt: "Nutze $qatlas-core-cli-mcp als Einstieg, um die Qatlas CLI oder ihren MCP-Broker sicher zu verwenden."

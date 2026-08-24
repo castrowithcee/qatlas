@@ -1,0 +1,10 @@
+{
+  "name": "qatlas",
+  "owner": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
+  "description": "Qatlas als gemeinsame Infrastruktur und ausdrücklich gestarteter Arbeitsloop mit optionalen Fach-Packs.",
+  "plugins": [
+    { "name": "qatlas", "source": "./plugins/qatlas", "category": "productivity", "defaultEnabled": true, "description": "Gemeinsame Qatlas-Infrastruktur und Arbeitsloop: Sessionkontext, Regeln, Scaffold, Backlog, Memory, Einrichtung, Zielklärung, Planung, serielle Ausführung und sichere Verwaltungswerkzeuge." },
+    { "name": "qatlas-dev", "source": "./plugins/qatlas-dev", "category": "productivity", "description": "Code-Pack: die faulste Lösung, die wirklich funktioniert, in drei Stufen plus ein Review-Skill. Benötigt qatlas." },
+    { "name": "qatlas-web", "source": "./plugins/qatlas-web", "category": "productivity", "description": "Web-Capability: ergänzt Qatlas' Loops um Produktprofil, Fähigkeiten, UI, Daten, Architektur, Sicherheit und Betrieb, ohne einen eigenen Planungs- oder Task-Workflow. Benötigt qatlas." }
+  ]
+}

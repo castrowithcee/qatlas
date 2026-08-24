@@ -1,0 +1,11 @@
+# Zone __qatlas__/zone-import/: flüchtige Eingaben (Rohdateien, die der Agent verarbeitet) und ihr
+# processed/-Archiv. Kein Teil der Wissensbasis, nicht versioniert. Der Ordner bleibt über .gitkeep
+# bestehen, sein Inhalt wird ignoriert.
+/__qatlas__/zone-import/*
+!/__qatlas__/zone-import/.gitkeep
+
+# Zone __qatlas__/zone-export/: angeforderte Ergebnisse, die der Nutzer aus dem Repo entnimmt. Sie
+# enthalten oft echte, ungeschwärzte Daten und dürfen deshalb nie versioniert werden. Der Ordner bleibt
+# über .gitkeep bestehen, sein Inhalt wird ignoriert.
+/__qatlas__/zone-export/*
+!/__qatlas__/zone-export/.gitkeep

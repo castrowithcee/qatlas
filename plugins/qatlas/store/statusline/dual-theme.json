@@ -1,0 +1,238 @@
+{
+  "layout": "wrap",
+  "separator": {
+    "text": " • ",
+    "fg": "#67870c",
+    "bold": true
+  },
+  "defaults": {
+    "label": {
+      "fg": "#51829f",
+      "bold": false
+    },
+    "value": {
+      "fg": "",
+      "bold": false
+    }
+  },
+  "widgets": {
+    "model": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "#e9237e",
+        "bold": false
+      }
+    },
+    "thinking": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "dir": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "#e9237e",
+        "bold": false
+      }
+    },
+    "branch": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "#e9237e",
+        "bold": false
+      }
+    },
+    "diff": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "add": {
+        "fg": "#009040",
+        "bold": false
+      },
+      "del": {
+        "fg": "#d44f4f",
+        "bold": false
+      },
+      "sync": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "out": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "context": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "bar": {
+        "bold": false,
+        "thresholds": [
+          {
+            "from": 0,
+            "fg": "#179001"
+          },
+          {
+            "from": 30,
+            "fg": "#927a05"
+          },
+          {
+            "from": 40,
+            "fg": "#d55129"
+          },
+          {
+            "from": 70,
+            "fg": "red"
+          }
+        ]
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      },
+      "suffix": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "cost": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "session": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "bar": {
+        "bold": false,
+        "thresholds": [
+          {
+            "from": 0,
+            "fg": "#179001"
+          },
+          {
+            "from": 30,
+            "fg": "#927a05"
+          },
+          {
+            "from": 40,
+            "fg": "#d55129"
+          },
+          {
+            "from": 85,
+            "fg": "red"
+          }
+        ]
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "session-reset": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "weekly": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "bar": {
+        "bold": false,
+        "thresholds": [
+          {
+            "from": 0,
+            "fg": "#179001"
+          },
+          {
+            "from": 30,
+            "fg": "#927a05"
+          },
+          {
+            "from": 40,
+            "fg": "#d55129"
+          },
+          {
+            "from": 85,
+            "fg": "red"
+          }
+        ]
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "weekly-reset": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    },
+    "method": {
+      "on": true,
+      "label": {
+        "fg": "",
+        "bold": false
+      },
+      "value": {
+        "fg": "",
+        "bold": false
+      }
+    }
+  }
+}

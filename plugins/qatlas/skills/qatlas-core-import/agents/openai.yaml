@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core Import"
+  short_description: "Rohmaterial sicher in dauerhaften Inhalt überführen"
+  default_prompt: "Nutze $qatlas-core-import, um das Rohmaterial aus der Import-Zone sicher zu verarbeiten."

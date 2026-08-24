@@ -1,0 +1,24 @@
+# WEBPROJEKT START
+
+- Arbeitstitel:
+
+- Problem:
+  Was ist das Problem, wer hat es und wie wird es heute gelöst?
+
+- Vision und Mehrwert:
+  Wie soll die Lösung helfen und warum wäre sie besser oder nützlicher?
+
+- Erster sinnvoller Umfang:
+  Was soll eine erste Version unbedingt ermöglichen oder beweisen?
+
+- Mögliche Zukunft:
+  Was könnte daraus bei Erfolg werden, zum Beispiel privat, Open Source, SaaS oder Plattform?
+
+- Bekannte Rahmenbedingungen:
+  Zum Beispiel Geräte, Nutzerkonten, sensible Daten, Hosting, Budget, bestehende Systeme oder Termine.
+
+- Nicht gewünscht:
+  Was soll ausdrücklich nicht entstehen oder verwendet werden?
+
+- Offene Gedanken:
+  Alles Weitere darf frei formuliert und unvollständig sein.

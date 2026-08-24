@@ -1,0 +1,53 @@
+# Ausgangspunkt für ein neues GitHub Project. Vor Anwendung gegen Projektbedarf und aktuelle API-Fähigkeiten
+# prüfen. Diese Datei enthält keine IDs oder Zugangsdaten und ist keine pauschale Qatlas-Norm.
+schema: 1
+provider: github
+project:
+  title: "<project-title>"
+  visibility: private
+  item_model:
+    executable: issue
+    immature_idea: project-draft
+  fields:
+    - name: Status
+      type: single-select
+      required: true
+      options:
+        - Draft
+        - Ready
+        - Next
+        - In progress
+        - Review
+        - Waiting
+        - Done
+  optional_fields:
+    - name: Priority
+      type: single-select
+      options: [P0, P1, P2]
+    - name: Area
+      type: single-select
+      options: []
+  views:
+    - name: Backlog
+      layout: table
+      filter: "status:Draft,Ready,Next,Waiting"
+    - name: Next
+      layout: table
+      filter: "status:Next"
+    - name: In progress
+      layout: board
+      filter: 'status:"In progress"'
+    - name: Review
+      layout: table
+      filter: "status:Review"
+    - name: Waiting
+      layout: table
+      filter: "status:Waiting"
+    - name: Done
+      layout: table
+      filter: "status:Done"
+  optional_issue_labels:
+    - type:bug
+    - type:feature
+    - type:docs
+  automation: []
