@@ -9,7 +9,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { scaffoldTopUp } = require('./qatlas-scaffold-topup.js');
-const { readSettings, createSettings, syncManagedRuleset } = require('./qatlas-settings.js');
+const { readConfig, createConfig, syncManagedRuleset } = require('./runtime/config-loader.js');
 
 const argv = process.argv.slice(2);
 const apply = argv.includes('--apply');
@@ -76,25 +76,26 @@ if (fs.existsSync(path.dirname(hostSettings))) {
 }
 
 // Nutzerweite, pfadfreie Entscheidungen
-const settingsState = readSettings();
-const settings = settingsState.settings;
+const configState = readConfig(target);
+const config = configState.config;
 
-if (!settingsState.exists) {
+if (!configState.exists) {
   if (apply) {
     try {
-      createSettings();
-      created.push('~/.qatlas/settings.json');
+      createConfig();
+      created.push('~/.qatlas/plugins/config.yaml');
     } catch {
-      missing.push('store: ~/.qatlas/settings.json konnte nicht angelegt werden.');
+      missing.push('store: ~/.qatlas/plugins/config.yaml konnte nicht angelegt werden.');
     }
   } else {
-    missing.push('store: ~/.qatlas/settings.json fehlt.');
+    missing.push('store: ~/.qatlas/plugins/config.yaml fehlt.');
   }
-} else if (!settingsState.valid) {
-  missing.push('store: ~/.qatlas/settings.json ist ungültig und bleibt unangetastet.');
+} else if (!configState.valid) {
+  missing.push('store: ~/.qatlas/plugins/config.yaml oder die Projektkonfiguration ist ungültig und bleibt unangetastet.');
 }
+for (const diagnostic of configState.diagnostics) missing.push('config: ' + diagnostic);
 
-const hadManagedRuleset = fs.existsSync(settingsState.rulesetFile);
+const hadManagedRuleset = fs.existsSync(configState.rulesetFile);
 if (apply) {
   try {
     const synced = syncManagedRuleset(pluginRoot);
@@ -107,7 +108,7 @@ if (apply) {
 }
 
 // Abgelehnte Prüfungen nicht erneut melden.
-const muted = new Set(Array.isArray(settings.mute) ? settings.mute : []);
+const muted = new Set(config.diagnostics.mute);
 for (const list of [missing, notes]) {
   for (let i = list.length - 1; i >= 0; i--) {
     if (muted.has(list[i].split(':')[0])) list.splice(i, 1);
@@ -115,12 +116,12 @@ for (const list of [missing, notes]) {
 }
 
 // Scaffold: derselbe existenzbasierte Abgleich wie im Session-Hook.
-const hadScaffold = fs.existsSync(path.join(target, '__qatlas__'));
+const hadScaffold = fs.existsSync(path.join(target, '.qatlas', 'project'));
 const { absent, created: scaffoldCreated } = scaffoldTopUp(target, bundle, { apply });
 
 if (!apply) {
-  if (!fs.existsSync(path.join(target, '__qatlas__'))) {
-    missing.push('scaffold: Hier gibt es kein __qatlas__/, also weder Backlog, Memory noch Zonen.');
+  if (!fs.existsSync(path.join(target, '.qatlas', 'project'))) {
+    missing.push('scaffold: Hier gibt es kein .qatlas/project/, also weder Backlog, Memory noch Zonen.');
   } else if (absent.length) {
     missing.push('scaffold: ' + absent.length + ' Datei(en) fehlen: ' + absent.join(', '));
   }
@@ -132,32 +133,49 @@ if (!apply) {
         path.join(pluginRoot, '.claude-plugin', 'plugin.json'), 'utf8'));
       const version = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
       if (manifest.name && /^\d+\.\d+\.\d+$/.test(version)) {
-        const updateState = path.join(target, '__qatlas__', 'updates', 'state.json');
+        const updateState = path.join(target, '.qatlas', 'project', 'updates', 'state.json');
         fs.mkdirSync(path.dirname(updateState), { recursive: true });
         fs.writeFileSync(updateState, JSON.stringify({
           format: 1,
           plugins: { [manifest.name]: version },
         }, null, 2) + '\n', { flag: 'wx', mode: 0o644 });
-        created.push('__qatlas__/updates/state.json');
+        created.push('.qatlas/project/updates/state.json');
       }
     } catch { /* Ein Prüfstand darf die sichere Scaffold-Anlage nicht verhindern. */ }
   }
 }
 
-// .gitignore: nur fehlende Zonenregeln anhängen, nie Nutzerinhalt ersetzen.
+// Die projektlokale Plugin-Konfiguration entsteht nur beim ausdrücklich gestarteten Setup.
+const projectConfig = path.join(target, '.qatlas', 'plugins', 'config.yaml');
+if (apply && !fs.existsSync(projectConfig)) {
+  try {
+    fs.mkdirSync(path.dirname(projectConfig), { recursive: true });
+    fs.writeFileSync(projectConfig, 'format: 1\n', { flag: 'wx', mode: 0o644 });
+    created.push('.qatlas/plugins/config.yaml');
+  } catch {
+    missing.push('config: .qatlas/plugins/config.yaml konnte nicht angelegt werden.');
+  }
+}
+
+// .gitignore: nur fehlende Qatlas-Regeln anhängen, nie Nutzerinhalt ersetzen.
 const gitignore = path.join(target, '.gitignore');
 let ignoreText = '';
 try { ignoreText = fs.readFileSync(gitignore, 'utf8'); } catch { /* noch keine vorhanden */ }
 const zones = ['zone-import', 'zone-export'];
 const missingZones = zones.filter(zone =>
-  !new RegExp('^/__qatlas__/' + zone + '/\\*\\s*$', 'm').test(ignoreText));
-if (missingZones.length) {
+  !new RegExp('^/\\.qatlas/project/' + zone + '/\\*\\s*$', 'm').test(ignoreText));
+const localMissing = !/^\/\.qatlas\/local\/\s*$/m.test(ignoreText);
+if (missingZones.length || localMissing) {
   if (!apply) {
-    missing.push('.gitignore: Zonenregeln fehlen für ' + missingZones.join(' und ')
-      + '. Dadurch könnte vorübergehendes Material committed werden.');
+    const parts = [];
+    if (missingZones.length) parts.push('Zonenregeln für ' + missingZones.join(' und '));
+    if (localMissing) parts.push('Regel für .qatlas/local/');
+    missing.push('.gitignore: ' + parts.join(' sowie ') + ' fehlt. Dadurch könnte lokaler oder '
+      + 'vorübergehender Zustand committed werden.');
   } else {
     const add = fs.readFileSync(path.join(bundle, 'gitignore'), 'utf8').trim().split(/\r?\n\r?\n/)
-      .filter(block => missingZones.some(zone => block.includes('/__qatlas__/' + zone + '/*')))
+      .filter(block => missingZones.some(zone => block.includes('/.qatlas/project/' + zone + '/*'))
+        || (localMissing && block.includes('/.qatlas/local/')))
       .join('\n\n') + '\n';
     fs.writeFileSync(gitignore, ignoreText ? ignoreText.replace(/\s*$/, '\n\n') + add : add);
     created.push('.gitignore (ergänzt)');

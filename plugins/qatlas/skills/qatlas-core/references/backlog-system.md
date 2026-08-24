@@ -10,7 +10,7 @@ edit: locked
 # Planungssystem wechseln
 
 Dieser Skill führt einen seltenen Systemwechsel aus. Danach gibt es genau ein maßgebliches Planungssystem;
-`__qatlas__/backlog/BACKLOG.md` bleibt der beim Sessionstart geladene Wegweiser dorthin. Der Skill plant
+`.qatlas/project/backlog/BACKLOG.md` bleibt der beim Sessionstart geladene Wegweiser dorthin. Der Skill plant
 keine Produktarbeit und pflegt keinen dauerhaften Spiegel.
 
 Der ausdrückliche Aufruf autorisiert Bestandsaufnahme und Migrationsplanung. Bevor du Daten im Ziel anlegst,
@@ -19,7 +19,7 @@ Rückweg und hole die Zustimmung des Nutzers ein. Secrets und Tokens gehören ni
 
 ## 1. Ausgangslage bestimmen
 
-1. Lies Projektanweisungen und `__qatlas__/backlog/BACKLOG.md`. Fehlt das Qatlas-Scaffold, stoppe und
+1. Lies Projektanweisungen und `.qatlas/project/backlog/BACKLOG.md`. Fehlt das Qatlas-Scaffold, stoppe und
    verweise auf `qatlas setup`.
 2. Bestimme Quelle, Ziel und gewünschte Richtung. Unterstütze lokal nach extern, extern nach lokal und
    extern nach extern; unterstelle keinen Anbieter aus einem vorhandenen Git-Remote.
@@ -83,7 +83,7 @@ Rückverfolgung oder Links nötig sind.
 
 ## 4. Binding umschalten
 
-Erst nach erfolgreicher Verifikation wird `__qatlas__/backlog/BACKLOG.md` atomar zum neuen Wegweiser:
+Erst nach erfolgreicher Verifikation wird `.qatlas/project/backlog/BACKLOG.md` atomar zum neuen Wegweiser:
 
 - Bei lokalem Ziel enthält es den lokalen Roster nach der Backlog-Regel und ihrer Referenz.
 - Bei externem Ziel enthält es einen prominenten Link mit Titel und eine knappe Bindung: Anbieter,

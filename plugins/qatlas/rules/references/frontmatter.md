@@ -54,7 +54,7 @@ einen echten Zweck erfüllen. Die zusätzlichen Felder dieser Tabelle sind absch
 | `memory` | `shared` | Datei im festen Memory-Subsystem; keine weiteren Pflichtfelder. |
 
 Feste Ausnahmen mit `type: meta` und `edit: shared` sind jede `INDEX.md` beziehungsweise `index.md`, jede
-`HISTORY.md`, `__qatlas__/backlog/BACKLOG.md` und `__qatlas__/backlog/IDEAS.md`. Ein Projektindex trägt
+`HISTORY.md`, `.qatlas/project/backlog/BACKLOG.md` und `.qatlas/project/backlog/IDEAS.md`. Ein Projektindex trägt
 zusätzlich `status`.
 
 `status` ist ein Pflichtfeld oder Suchmerkmal, aber seine Werte gehören zum jeweiligen Lebenszyklus und

@@ -60,8 +60,9 @@ Fasse nur tatsächlich Angelegtes und offene Blocker zusammen. Bei der ersten Ei
 Orientierungspunkte:
 
 - `AGENTS.md` trägt die Projektanweisungen; `CLAUDE.md` bindet sie für Claude ein.
-- `__qatlas__/` trägt den Wegweiser zum maßgeblichen Planungssystem, Memory und die beiden Zonen.
-- `~/.qatlas/` trägt nutzerweite Einstellungen und die von Qatlas verwaltete `rules/RULESET.md`.
+- `.qatlas/project/` trägt den Wegweiser zum maßgeblichen Planungssystem, Memory und die beiden Zonen.
+- `~/.qatlas/plugins/config.yaml` trägt die nutzerweite Plugin-Konfiguration;
+  `~/.qatlas/rules/RULESET.md` bleibt die von Qatlas verwaltete Regelkopie.
 
 Schließe immer mit `Mehr: qatlas-help`. War nichts zu tun, antworte nur:
 

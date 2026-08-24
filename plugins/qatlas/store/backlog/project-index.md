@@ -9,7 +9,7 @@ status: active        # active | final | archived
 # Projekt: <Name>
 
 <!-- Kanonische Vorlage für einen Projektkopf im lokalen Qatlas-Backlog. Nach
-__qatlas__/backlog/<project>/INDEX.md kopieren. Aufgaben erhalten eigene Dateien; Reihenfolge und
+.qatlas/project/backlog/<project>/INDEX.md kopieren. Aufgaben erhalten eigene Dateien; Reihenfolge und
 Abhängigkeiten werden hier zusammengeführt. -->
 
 ## Ziel

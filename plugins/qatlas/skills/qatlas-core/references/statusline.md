@@ -28,7 +28,7 @@ Pfad ein. Nie fest codieren, denn der Installationspfad trägt die Version.
 ## Claude Code
 
 Claude Code führt einen externen Renderer aus und übergibt Session-JSON über stdin. Der Renderer liest die
-Nutzerwahl aus `~/.qatlas/statusline.json`; seine stabile Kopie ist ausgelieferte Payload, die der Nutzer
+Nutzerwahl aus `~/.qatlas/plugins/config.yaml`; seine stabile Kopie ist ausgelieferte Payload, die der Nutzer
 nie bearbeitet.
 
 ### Einrichten
@@ -36,17 +36,17 @@ nie bearbeitet.
 1. Führe aus: `node "<plugin-root>/scripts/qatlas-statusline-setup-claude.js"`
 2. Sage, dass die Zeile bei der nächsten Interaktion erscheint und eine frühere Claude-Statusline ersetzt.
 3. Frage, ob das Layout passt. Schneidet dynamischer Umbruch Widgets ab oder verhält sich im Terminal
-   schlecht, setze `"layout": "fixed"` in `~/.qatlas/statusline.json`.
+   schlecht, setze `statusline.layout: fixed` in `~/.qatlas/plugins/config.yaml`.
 
-Das Setup kopiert den Renderer nach `~/.qatlas/statusline.js`, schreibt oder migriert die vollständige
-Konfiguration und verweist aus `~/.claude/settings.json` mit 60 Sekunden Aktualisierungsintervall auf die
-stabile Kopie. Sie ist nötig, weil der Statusline-Befehl ohne Plugin-Kontext läuft.
+Das Setup kopiert Renderer und YAML-Runtime nach `~/.qatlas/plugins/`, legt eine fehlende
+`config.yaml` einmalig an und verweist aus `~/.claude/settings.json` mit 60 Sekunden
+Aktualisierungsintervall auf die stabile Kopie. Eine vorhandene Nutzerkonfiguration bleibt unverändert.
 
 ### Widgets
 
-Die Map `widgets` in `~/.qatlas/statusline.json` ist zugleich Menü und Render-Reihenfolge. Ein Widget
-erscheint bei `"on": true`. Das Setup hängt neu ausgelieferte Widgets ausgeschaltet an, ohne bestehende Wahl
-oder Reihenfolge zu verändern.
+Die Map `statusline.widgets` in `~/.qatlas/plugins/config.yaml` ist zugleich Menü und Render-Reihenfolge.
+Ein Widget erscheint bei `on: true`. Neu ausgelieferte, dort fehlende Widgets bleiben ausgeschaltet, bis
+der Nutzer sie ergänzt; bestehende Wahl und Reihenfolge bleiben unverändert.
 
 `model` | `thinking` | `dir` | `branch` | `diff` | `out` | `context` | `cost` | `session` |
 `session-reset` | `weekly` | `weekly-reset` | `method`
@@ -62,8 +62,9 @@ kennen nur zwei Rollen: Labels sind gedimmt, Werte nutzen die Terminal-Vordergru
 Farben bleiben bei Diff-Zahlen und Balkenschwellen.
 
 Die Erstinstallation schreibt eine Palette für dunkle Terminals als normale Konfiguration. Für hellen
-Hintergrund kopiere `<plugin-root>/store/statusline/dual-theme.json` über
-`~/.qatlas/statusline.json`; ein erneutes Setup ist unnötig.
+Hintergrund übernimm den Abschnitt aus `<plugin-root>/store/statusline/dual-theme.yaml` als
+`statusline`-Wert in `~/.qatlas/plugins/config.yaml`; ein erneutes Setup ist unnötig. Ersetze niemals die
+übrigen Konfigurationsbereiche.
 
 Farben werden in dieser Reihenfolge aufgelöst:
 
@@ -81,8 +82,9 @@ gestaltet. Der Kontextbalken bezieht sich auf das aktive Modellfenster, Nutzungs
 ### Argumente und Layout
 
 Bei Wünschen wie `disable out, weekly-reset`, `enable method`, `put cost first`, `make cost green` oder
-`dim all labels` bearbeite `~/.qatlas/statusline.json` direkt. Schalte `on`, verschiebe einen Widget-Block
-oder ändere den Stil seiner Teile. Führe das Setup nicht erneut aus.
+`dim all labels` bearbeite ausschließlich den Abschnitt `statusline` in
+`~/.qatlas/plugins/config.yaml`. Schalte `on`, verschiebe einen Widget-Block oder ändere den Stil seiner
+Teile. Führe das Setup nicht erneut aus.
 
 - `wrap` ist Standard. Widgets fließen von links nach rechts und brechen bei Bedarf um.
 - `fixed` nutzt vier Zeilen: model/thinking/dir; branch/diff; out/context/cost; Limits und method.
@@ -92,7 +94,7 @@ oder ändere den Stil seiner Teile. Führe das Setup nicht erneut aus.
 
 Codex besitzt Renderer und feste native Felder. Quelle ist die Tabelle `[tui]` in
 `$CODEX_HOME/config.toml`, mit Fallback auf `~/.codex/config.toml`. Erzeuge keinen Codex-Renderer und spiegle
-diese Wahl nicht nach `~/.qatlas/statusline.json`.
+diese Wahl nicht nach `~/.qatlas/plugins/config.yaml`.
 
 ### Einrichten
 

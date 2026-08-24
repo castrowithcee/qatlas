@@ -19,7 +19,7 @@ function stateDir() {
   if (!isCodex && process.env.CLAUDE_PLUGIN_DATA) {
     return path.join(process.env.CLAUDE_PLUGIN_DATA, 'dev-sessions');
   }
-  return path.join(os.homedir(), '.qatlas', 'dev-sessions');
+  return path.join(os.homedir(), '.qatlas', 'plugins', 'qatlas-dev', 'dev-sessions');
 }
 
 function statePath(sessionId) {

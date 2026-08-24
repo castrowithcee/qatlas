@@ -6,15 +6,14 @@
 const fs = require('fs');
 const path = require('path');
 
-let readSettings = () => ({ settings: { sessionStart: { enabled: true } } });
-try { ({ readSettings } = require('./qatlas-settings.js')); }
-catch { /* Fehlende Settings-Hilfe darf explizite Update-Befehle nicht verhindern. */ }
+let readConfig = () => ({ config: { 'session-start': { enabled: true } } });
+try { ({ readConfig } = require('./runtime/config-loader.js')); }
+catch { /* Fehlende Config-Hilfe darf explizite Update-Befehle nicht verhindern. */ }
 
 const pluginRoot = path.resolve(__dirname, '..');
 const isCodex = Boolean(process.env.PLUGIN_ROOT);
 const args = process.argv.slice(2);
 const command = ['notice', 'status', 'ack'].includes(args[0]) ? args[0] : 'notice';
-if (command === 'notice' && !readSettings().settings.sessionStart.enabled) process.exit(0);
 const flag = name => {
   const index = args.indexOf(name);
   return index >= 0 ? args[index + 1] : null;
@@ -59,11 +58,11 @@ function compare(left, right) {
 }
 
 function statePath(root) {
-  return path.join(root, '__qatlas__', 'updates', 'state.json');
+  return path.join(root, '.qatlas', 'project', 'updates', 'state.json');
 }
 
 function hasScaffold(root) {
-  try { return fs.statSync(path.join(root, '__qatlas__')).isDirectory(); }
+  try { return fs.statSync(path.join(root, '.qatlas', 'project')).isDirectory(); }
   catch { return false; }
 }
 
@@ -114,6 +113,7 @@ function writeState(root, identity) {
 }
 
 const root = resolveRoot();
+if (command === 'notice' && !readConfig(root).config['session-start'].enabled) process.exit(0);
 const identity = pluginIdentity();
 const scaffold = hasScaffold(root);
 
@@ -121,7 +121,7 @@ if (!identity) process.exit(0);
 
 if (command === 'ack') {
   if (!scaffold) {
-    process.stderr.write('Kein __qatlas__/-Scaffold im Zielrepo.\n');
+    process.stderr.write('Kein .qatlas/project/-Scaffold im Zielrepo.\n');
     process.exit(1);
   }
   writeState(root, identity);

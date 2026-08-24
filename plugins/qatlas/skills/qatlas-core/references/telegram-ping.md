@@ -22,9 +22,10 @@ nur den Beginn des Wartens.
 ## Funktionsweise
 
 Unter Claude feuert der `Notification`-Hook, wenn Claude untätig auf dich wartet, und startet das Sendescript.
-Das Secret liegt außerhalb jedes Repos in `~/.qatlas/telegram.json`, wird nur gelesen und nie geloggt. Die
-Konfiguration trägt ein ausdrückliches Feld `enabled`; der Ein-/Aus-Zustand wird nicht aus der bloßen Existenz
-der Datei geraten. Ausgeschaltet, fehlend oder unausgefüllt bleibt der Kanal still und die Session unverändert.
+Das Secret liegt außerhalb jedes Repos unter `connections.telegram` in
+`~/.qatlas/plugins/credentials.yaml`, wird nur gelesen und nie geloggt. Der Abschnitt
+`notifications.telegram` in `~/.qatlas/plugins/config.yaml` trägt den Ein-/Aus-Zustand und den Namen der
+Connection. Ausgeschaltet, fehlend oder unausgefüllt bleibt der Kanal still und die Session unverändert.
 
 Codex hat kein Untätigkeits- oder Attention-Event, sondern nur `Stop` pro Zug. Der automatische Ping ist
 deshalb vorerst Claude vorbehalten. Das Sendescript selbst ist hostneutral, sodass der manuelle Test auch
@@ -39,24 +40,24 @@ Verwende den vom Router aufgelösten `<plugin-root>`. Setze vor einem Script-Auf
 ein. Tippe hier nie `$CLAUDE_PLUGIN_ROOT` in eine Shell, denn der Host ersetzt es nur in Hook-Befehlen.
 Verwende auch keinen festen Pfad, weil der Installationspfad die Version trägt.
 
-1. **Grundlage anlegen.** Führe `--init` aus. Es erstellt `~/.qatlas/` und bei fehlender Datei das Gerüst
-   `telegram.json` mit `{ "enabled": false, "token": "", "chat_id": "" }` und meldet den Pfad:
+1. **Grundlage anlegen.** Führe `--init` aus. Es legt fehlende `config.yaml` und `credentials.yaml` unter
+   `~/.qatlas/plugins/` an, ohne vorhandene Dateien zu verändern, und meldet die Pfade:
    `node "<plugin-root>/scripts/qatlas-telegram-notify.js" --init`
 2. **Bot erstellen.** Schreibe in Telegram an `@BotFather`, sende `/newbot` und folge den Fragen. Du erhältst
    ein **Bot-Token** wie `123456:ABC-DEF...`.
 3. **Chat-ID holen.** Der Nutzer sendet seinem neuen Bot eine Nachricht, öffnet danach im Browser
    `https://api.telegram.org/bot<TOKEN>/getUpdates` und liest `message.chat.id` aus dem JSON. In der URL wird
    das echte Token eingesetzt. Nur hier erscheint es einmal in einer URL im Browser des Nutzers, nie in der Session.
-4. **Beide Werte eintragen.** Der Nutzer öffnet `~/.qatlas/telegram.json` in seinem Editor und fügt Token
-   und Chat-ID ein. Biete nicht an, dies für ihn zu schreiben; das Token soll aus dem Session-Transkript
-   bleiben. `enabled` bleibt unverändert, der Test schaltet es ein. Dieselbe Datei funktioniert auf jedem
-   Gerät. Die Zeile `Host` in der Nachricht zeigt, welches Gerät geklingelt hat.
-5. **Testen.** Führe `--test` aus. Bei Erfolg sendet es einen Ping und setzt `enabled: true`. Berichte die
-   Ausgabe:
+4. **Beide Werte eintragen.** Der Nutzer öffnet `~/.qatlas/plugins/credentials.yaml` in seinem Editor und
+   füllt `token` und `chat-id` unter `connections.telegram.default`. Biete nicht an, dies für ihn zu
+   schreiben; das Token soll aus dem Session-Transkript bleiben. Die Zeile `Host` in der Nachricht zeigt,
+   welches Gerät geklingelt hat.
+5. **Testen.** Führe `--test` aus und berichte die Ausgabe:
    `node "<plugin-root>/scripts/qatlas-telegram-notify.js" --test`
 
    Auf dem Gerät des Nutzers muss eine Nachricht eintreffen. Meldet das Script leere Werte oder eine
-   Ablehnung von Telegram, gib diese Zeile weiter. Sie nennt die Ursache, ohne das Token zu zeigen.
+   Ablehnung von Telegram, gib diese Zeile weiter. Sie nennt die Ursache, ohne das Token zu zeigen. Bei
+   Erfolg setze der Nutzer anschließend `notifications.telegram.enabled: true` in `config.yaml`.
 
 ## Die Nachricht
 
@@ -75,5 +76,6 @@ gebraucht“; der Body unterscheidet sie beim Öffnen. Das ist beabsichtigt, den
 
 ## Ausschalten
 
-Setze `"enabled": false` in `~/.qatlas/telegram.json`, um den Kanal stummzuschalten und die Werte zu
-behalten, oder lösche die Datei ganz. Beides schaltet nur den Kanal aus; alles andere bleibt unverändert.
+Setze `notifications.telegram.enabled: false` in `~/.qatlas/plugins/config.yaml`, um den Kanal
+stummzuschalten und die Credentials zu behalten. Das Löschen des Connection-Profils schaltet den Kanal
+ebenfalls aus, entfernt aber die Zugangsdaten.

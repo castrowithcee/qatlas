@@ -49,7 +49,7 @@ geforderte Isolation bereits.
 3. Bilde den Repo-Schlüssel aus den ersten acht kleingeschriebenen Hex-Zeichen eines SHA-256-Hashs über den
    kanonischen absoluten Pfad des gemeinsamen Git-Verzeichnisses. Der Repo-Slug entsteht aus dem Namen des
    primären Arbeitsbaums als kurzer ASCII-Slug. Verwende
-   `~/.qatlas/worktrees/<repo-schluessel>-<repo-slug>/<zweck>/`.
+   `~/.qatlas/state/worktrees/<repo-schluessel>-<repo-slug>/<zweck>/`.
 4. Prüfe Namens-, Branch- und Pfadkollisionen gegen das Git-Register und das Dateisystem. Überschreibe nichts.
    Gehört eine Kollision nicht eindeutig derselben Arbeit, bilde selbst einen unterscheidbaren Zweck oder
    stoppe bei weiterhin unklarer Zuordnung. Der Nutzer vergibt keinen technischen Namen.

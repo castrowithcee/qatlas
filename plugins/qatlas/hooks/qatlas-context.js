@@ -10,25 +10,14 @@ let scaffoldTopUp = null;
 try { ({ scaffoldTopUp } = require('../scripts/qatlas-scaffold-topup.js')); }
 catch { /* Fehlendes Top-up darf die Kontext-Injektion nicht verhindern. */ }
 
-let readSettings = () => ({ settings: { sessionStart: { enabled: true, ruleset: true } } });
+let readConfig = () => ({ config: { 'session-start': { enabled: true, ruleset: true } } });
 let syncManagedRuleset = null;
-try { ({ readSettings, syncManagedRuleset } = require('../scripts/qatlas-settings.js')); }
-catch { /* Fehlende Settings-Hilfe darf die übrigen Regeln nicht verhindern. */ }
+try { ({ readConfig, syncManagedRuleset } = require('../scripts/runtime/config-loader.js')); }
+catch { /* Fehlende Config-Hilfe darf die übrigen Regeln nicht verhindern. */ }
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT || '';
 const isCodex = Boolean(process.env.PLUGIN_ROOT);
 const block = process.argv[2] || '';
-const qatlasSettings = readSettings().settings;
-
-let managedRulesetFile = path.join(pluginRoot, 'rules', 'RULESET.md');
-if (block === 'ruleset' && pluginRoot && syncManagedRuleset) {
-  try { managedRulesetFile = syncManagedRuleset(pluginRoot).file; }
-  catch { /* Bei fehlendem Schreibrecht direkt aus dem Plugin lesen. */ }
-}
-
-if (!qatlasSettings.sessionStart.enabled
-  || (block === 'ruleset' && !qatlasSettings.sessionStart.ruleset)) process.exit(0);
-
 function resolveRoot() {
   if (process.env.CLAUDE_PROJECT_DIR) return process.env.CLAUDE_PROJECT_DIR;
   if (!process.stdin.isTTY) {
@@ -43,9 +32,19 @@ function resolveRoot() {
 
 const root = resolveRoot();
 const portable = value => value.split(path.sep).join('/');
+const qatlasConfig = readConfig(root).config;
+const sessionStart = qatlasConfig['session-start'];
+
+let managedRulesetFile = path.join(pluginRoot, 'rules', 'RULESET.md');
+if (block === 'ruleset' && pluginRoot && syncManagedRuleset) {
+  try { managedRulesetFile = syncManagedRuleset(pluginRoot).file; }
+  catch { /* Bei fehlendem Schreibrecht direkt aus dem Plugin lesen. */ }
+}
+
+if (!sessionStart.enabled || (block === 'ruleset' && !sessionStart.ruleset)) process.exit(0);
 
 function hasScaffold(dir) {
-  try { return fs.statSync(path.join(dir, '__qatlas__')).isDirectory(); }
+  try { return fs.statSync(path.join(dir, '.qatlas', 'project')).isDirectory(); }
   catch { return false; }
 }
 
@@ -71,11 +70,11 @@ const specifications = {
   backlog: { kind: 'REGEL', name: 'BACKLOG', file: path.join(pluginRoot, 'rules', 'BACKLOG.md'), scaffold: true },
   memory: {
     kind: 'PROJEKTZUSTAND', name: 'MEMORY',
-    file: path.join(root, '__qatlas__', 'memory', 'MEMORY.md'), scaffold: true, project: true,
+    file: path.join(root, '.qatlas', 'project', 'memory', 'MEMORY.md'), scaffold: true, project: true,
   },
   'project-backlog': {
     kind: 'PROJEKTZUSTAND', name: 'BACKLOG',
-    file: path.join(root, '__qatlas__', 'backlog', 'BACKLOG.md'), scaffold: true, project: true,
+    file: path.join(root, '.qatlas', 'project', 'backlog', 'BACKLOG.md'), scaffold: true, project: true,
   },
 };
 
@@ -116,8 +115,8 @@ lines.push('', body);
 
 if (block === 'qatlas') {
   lines.push('', scaffold
-    ? 'QATLAS SCAFFOLD: ja (__qatlas__/ ist vorhanden; SCAFFOLD- und BACKLOG-Regeln sowie die Projektindizes werden separat injiziert)'
-    : 'QATLAS SCAFFOLD: nein (kein __qatlas__/, daher kein lokaler Backlog, keine Zonen und kein Repo-Memory)');
+    ? 'QATLAS SCAFFOLD: ja (.qatlas/project/ ist vorhanden; SCAFFOLD- und BACKLOG-Regeln sowie die Projektindizes werden separat injiziert)'
+    : 'QATLAS SCAFFOLD: nein (kein .qatlas/project/, daher kein lokaler Backlog, keine Zonen und kein Repo-Memory)');
   lines.push('QATLAS PLUGIN ROOT: ' + portable(pluginRoot)
     + ' (versionsgebundene Quelle für Rules, Scripts und Store)');
   if (!scaffold) {

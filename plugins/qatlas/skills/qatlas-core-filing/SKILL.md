@@ -14,7 +14,7 @@ edit: locked
 
 # Ablage: wohin eine Datei gehört und wie der Baum wächst
 
-Dieser Skill platziert Inhalt im Projekt **außerhalb** von `__qatlas__/`. Diese Schicht folgt Qatlas'
+Dieser Skill platziert Inhalt im Projekt **außerhalb** von `.qatlas/project/`. Diese Schicht folgt Qatlas'
 Scaffold-Norm, und nichts hier gilt für sie.
 
 ## Arbeitskontext
@@ -30,7 +30,7 @@ Ein Repo kann beide Formen enthalten. Die Aufgabe am betroffenen Pfad entscheide
 
 ## Zwei Docs-Ordner, getrennt nach Leser
 
-- `__qatlas__/docs/` ist für den Agenten geschrieben: Hintergrund vor dem Handeln, durchsuchbares
+- `.qatlas/project/docs/` ist für den Agenten geschrieben: Hintergrund vor dem Handeln, durchsuchbares
   Projektwissen und die Gründe für die Bauweise. Die eigene Rule des Ordners gilt; die Bereichslogik und
   Schwellen unten gelten dort nicht.
 - Ein `docs/` am Repo-Root richtet sich an Menschen, die wie in einem Wiki etwas nachschlagen. Es gehört zum
@@ -38,7 +38,7 @@ Ein Repo kann beide Formen enthalten. Die Aufgabe am betroffenen Pfad entscheide
 
 Der Leser entscheidet, nie die Stärke der Bindung ans Repo. Beide können eng gebunden sein. „Das betrifft
 dieses Repo“ ist deshalb kein Argument für einen der Orte. Ein Root-`docs/` verweist NIEMALS auf die
-Metaebene, also weder auf `__qatlas__` noch auf eine Rule oder einen Skill.
+Metaebene, also weder auf `.qatlas/project` noch auf eine Rule oder einen Skill.
 
 ## Der Pfad ist die strukturelle Wahrheit
 
@@ -61,7 +61,7 @@ Register voraussetzt.
 
 ## Erst nach einer Vorlage schauen
 
-`__qatlas__/templates/` ist ausschließlich die versionierte Vorlagenbibliothek des Nutzers. Bevor du eine
+`.qatlas/project/templates/` ist ausschließlich die versionierte Vorlagenbibliothek des Nutzers. Bevor du eine
 wiederkehrende Bereichsstruktur neu erfindest, etwa für Kunden, Projekte oder Objekte, prüfe sie auf eine
 passende Vorlage und instanziiere diese. Qatlas legt dort keine eigenen Vorlagen ab und aktualisiert den
 Ordner nicht.
@@ -70,7 +70,7 @@ Der **Store** unter `<plugin-root>/store/` trägt ausschließlich Qatlas' versio
 Vorlagen. Die Backlog-Referenz weist seine kanonischen Task- und Projektvorlagen direkt an; sie werden nie
 aus dem Nutzerordner ersetzt. Bei einem anderen konkreten Bedarf lies `<plugin-root>/store/STORE.md`, wähle
 dort den passenden Eintrag, öffne ausschließlich dessen Dateien und kopiere oder verwende sie für das
-genannte Ziel. Eigene Vorlagen des Nutzers gehören nach `__qatlas__/templates/`, niemals in den Store.
+genannte Ziel. Eigene Vorlagen des Nutzers gehören nach `.qatlas/project/templates/`, niemals in den Store.
 
 ## Zuerst der Bereichsordner
 
@@ -95,8 +95,8 @@ sauber oder läuft ein Bereich über: rate nicht, schlag eine Anpassung vor und 
 | `playbook` | Neben dem wiederkehrenden Prozess, dem es dient (`<area>-<topic>/[<subtopic>/]playbooks/`); sonst flach `playbook-<name>.md`. |
 | `decision` | Zentral und datiert im Bereich: `<area>-<topic>/decisions/YYYY-MM-DD-….md`. Strukturelle und Meta-Entscheidungen betreffen das Framework, nicht einen Bereich. |
 | `meta` | Als reservierte Funktionsdatei ohne Präfix: Arbeitsrahmen in `<scope>/FRAMEWORK.md`, Bestand und Navigation in `<scope>/INDEX.md`. Die Kaskade beginnt mit den optionalen Knoten im Repo-Root; jeder weitere Knoten entsteht erst, wenn sein Scope ihn braucht. |
-| `task` | Im vom Nutzer oder Projekt festgelegten Planungssystem. Nur ohne solche Vorgabe gilt der lokale Qatlas-Backlog unter `__qatlas__/backlog/`; Ort und Lebenszyklus bestimmt dessen eigene Norm. |
-| `memory` | In `__qatlas__/memory/`, erschlossen über seinen Index. Ebenfalls keine Ablageentscheidung. |
+| `task` | Im vom Nutzer oder Projekt festgelegten Planungssystem. Nur ohne solche Vorgabe gilt der lokale Qatlas-Backlog unter `.qatlas/project/backlog/`; Ort und Lebenszyklus bestimmt dessen eigene Norm. |
+| `memory` | In `.qatlas/project/memory/`, erschlossen über seinen Index. Ebenfalls keine Ablageentscheidung. |
 
 Regeln und Skills werden nie von Hand platziert. Sie werden mit dem Plugin ausgeliefert und in die Session
 injiziert; eine Kopie davon im Repo ist ein Defekt, keine Platzierung.
@@ -115,14 +115,14 @@ injiziert; eine Kopie davon im Repo ist ein Defekt, keine Platzierung.
 
 ## Zonen
 
-Die zwei `__qatlas__/`-Zonen werden zentral verwaltet. Für die Ablage relevant:
+Die zwei `.qatlas/project/`-Zonen werden zentral verwaltet. Für die Ablage relevant:
 
 - **`<area>-<topic>/work/`**: die Werkbank des Bereichs: rohe, kopflose Arbeit in Arbeit, interne
   Unterstruktur erlaubt (zum Beispiel `work/2025/`). Sie hält die Bereichsebene **lesbar**:
   `<area>-<topic>/` sollte nur Typ-Ordner (und flache Typ-Dateien) zeigen. Alles, was sonst fremde Ordner
   erzeugen würde (Jahre, Ad-hoc-Gruppen), wandert in `work/` statt die Typ-Ordner zu verstecken.
-- **`__qatlas__/zone-import/`** (Wurzel): rohe externe Eingaben, flüchtig, gitignored.
-- **`__qatlas__/zone-export/`** (Wurzel): angeforderte menschliche Lieferobjekte, **nur auf ausdrückliche
+- **`.qatlas/project/zone-import/`** (Wurzel): rohe externe Eingaben, flüchtig, gitignored.
+- **`.qatlas/project/zone-export/`** (Wurzel): angeforderte menschliche Lieferobjekte, **nur auf ausdrückliche
   Anfrage**, ohne Typen, ohne Frontmatter. Nicht Teil der Wissensbasis; der Agent legt hier von sich aus
   nichts ab.
 
@@ -167,7 +167,7 @@ gepflegt; neue Knoten erhalten ausschließlich die kanonische Großschreibung.
 - **Kein Asset-Speicher.** Dies ist eine Planungsschicht, kein Speicher für Massen-, Medien- oder
   *wechselnde* Binärdateien. Erlaubt: ein kleines, stabiles Bild, wenn es *das* Artefakt ist (zum Beispiel
   ein Diagramm). Große Dateien → ein Dateispeicher oder Git LFS; flüchtige Eingaben →
-  `__qatlas__/zone-import/`.
+  `.qatlas/project/zone-import/`.
 - **Selten aber wichtig → ein Playbook.** Eine Prozedur, die nur ein paar Mal im Jahr gebraucht wird, lebt
   als eigenes Playbook und wird anderswo mit einem Einzeiler-Verweis referenziert, damit die Pflichtlektüre
   schlank bleibt.

@@ -9,14 +9,14 @@ edit: locked
 
 # Vollständiger Vertrag des lokalen Backlogs
 
-Dieser Vertrag gilt nur, wenn `__qatlas__/backlog/BACKLOG.md` den lokalen Qatlas-Backlog als
+Dieser Vertrag gilt nur, wenn `.qatlas/project/backlog/BACKLOG.md` den lokalen Qatlas-Backlog als
 maßgebliches Planungssystem ausweist. Bei externer Autorität gilt stattdessen deren Binding; ein lokaler
 Spiegel entsteht nicht.
 
 ## Aufgaben und Projekte
 
 - Ein Task ist eine eigenständig in einer Session leistbare Arbeitseinheit in
-  `__qatlas__/backlog/task-<id>-<slug>.md`. Die ID besteht aus sechs zufälligen kleingeschriebenen
+  `.qatlas/project/backlog/task-<id>-<slug>.md`. Die ID besteht aus sechs zufälligen kleingeschriebenen
   Hex-Zeichen, wird gegen alle offenen und archivierten Tasks geprüft und nie wiederverwendet.
 - Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `INDEX.md`. Sein Slug ist
   kebab-case, beginnt nicht mit `task-` und heißt nicht `done`.
@@ -50,7 +50,7 @@ bindende Entscheidung oder nötige Begründung nur für eine kleinere Datei.
 Lies vor einem neuen Task vollständig
 [die kanonische Taskvorlage](../../store/backlog/task.md), vor einem neuen Projektkopf zusätzlich
 [die kanonische Projektvorlage](../../store/backlog/project-index.md). Diese Vorlagen gelten auch ohne
-Planungsskill; Nutzervorlagen unter `__qatlas__/templates/` ersetzen sie nicht.
+Planungsskill; Nutzervorlagen unter `.qatlas/project/templates/` ersetzen sie nicht.
 
 Erzeuge eine Task-ID mit Node und wiederhole bei einer Kollision:
 

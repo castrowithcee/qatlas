@@ -70,7 +70,7 @@ Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
   verwalteter Projektzustand; `templates/` gehört dem Nutzer.
 - Der Pfad sagt, wo Inhalt liegt; Frontmatter sagt, was es ist. Das vollständige Inhaltsschema wird erst
   vor einer tatsächlichen Markdown-Änderung geladen.
-- `~/.qatlas/settings.json` schaltet Sessionstart und verwaltete Arbeitsvereinbarung nutzerweit.
+- `~/.qatlas/plugins/config.yaml` schaltet Sessionstart und verwaltete Arbeitsvereinbarung nutzerweit.
 
 Claude verwendet `/qatlas <modus>`, `/qatlas-core <modus>`, `/qatlas-mode <modus>` oder
 `/qatlas-help`; Codex verwendet die entsprechenden `$…`-Skills oder das `/skills`-Menü.

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 'use strict';
-// Rendert Claudes Session-JSON mit ~/.qatlas/statusline.json nach stdout.
-// Das Setup kopiert den Renderer für Plugin-Updates an den stabilen Pfad ~/.qatlas/statusline.js.
+// Rendert Claudes Session-JSON mit ~/.qatlas/plugins/config.yaml nach stdout.
+// Das Setup kopiert den Renderer und seine Runtime nach ~/.qatlas/plugins/.
 
 const { execSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { readConfig } = require('./runtime/config-loader.js');
 
-const CONFIG_FILE = path.join(os.homedir(), '.qatlas', 'statusline.json');
 const DEFAULT_WIDGETS = ['model', 'thinking', 'dir', 'branch', 'diff', 'out', 'context', 'cost', 'session', 'session-reset', 'weekly', 'weekly-reset', 'method'];
 
 // Eingabe
@@ -61,15 +61,19 @@ function normWidget(v) {
 
 function normWidgets(w) {
     const out = {};
-    if (Array.isArray(w)) { for (const n of w) if (typeof n === 'string') out[n] = { on: true }; }
-    else if (w && typeof w === 'object') { for (const n of Object.keys(w)) out[n] = normWidget(w[n]); }
+    if (Array.isArray(w)) {
+        for (const n of w) if (DEFAULT_WIDGETS.includes(n)) out[n] = { on: true };
+    } else if (w && typeof w === 'object') {
+        for (const n of Object.keys(w)) if (DEFAULT_WIDGETS.includes(n)) out[n] = normWidget(w[n]);
+    }
     if (!Object.keys(out).length) for (const n of DEFAULT_WIDGETS) out[n] = { on: true };
+    else for (const n of DEFAULT_WIDGETS) if (!(n in out)) out[n] = { on: false };
     return out;
 }
 
 function loadConfig() {
-    let c = {};
-    try { c = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); } catch { }
+    const cwd = (data.workspace && data.workspace.current_dir) || data.cwd || process.cwd();
+    const c = readConfig(cwd).config.statusline;
     const d = (c.defaults && typeof c.defaults === 'object') ? c.defaults : {};
     const style = (s) => (s && typeof s === 'object') ? s : {};
     const sep = Object.assign({}, (c.separator && typeof c.separator === 'object') ? c.separator : {});

@@ -1,73 +1,104 @@
 #!/usr/bin/env node
 'use strict';
 
-// Telegram-Ping. Hook-Modus schweigt, --init legt die leere Konfiguration an, --test meldet und aktiviert.
-// Der Token liegt nur in ~/.qatlas/telegram.json und erscheint nie in Ausgaben oder Fehlern.
+// Telegram-Ping. Konfiguration und Credentials bleiben getrennt unter ~/.qatlas/plugins/.
 
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const https = require('https');
 const { execFileSync } = require('child_process');
+const {
+  createConfig,
+  createCredentials,
+  readConfig,
+  readCredentials,
+} = require('./runtime/config-loader.js');
 
 const args = process.argv.slice(2);
 const TEST = args.includes('--test');
 const INIT = args.includes('--init');
 const TALK = TEST || INIT;
-const CONFIG = path.join(os.homedir(), '.qatlas', 'telegram.json');
-const BODY_MAX = 500; // Für die Smartphone-Vorschau; Telegram erlaubt 4096.
+const BODY_MAX = 500;
 
-// Der Hook-Modus schweigt und blockiert die Session nie mit einem Fehlercode.
-function say(msg) { if (TALK) process.stdout.write(msg + '\n'); }
+function say(message) { if (TALK) process.stdout.write(message + '\n'); }
 function done(code) { process.exit(TALK ? code : 0); }
 
 if (INIT) {
-  fs.mkdirSync(path.dirname(CONFIG), { recursive: true });
-  if (fs.existsSync(CONFIG)) {
-    say('Konfiguration bereits unter ' + CONFIG + '. Fülle leere Werte für "token" und "chat_id" aus und führe danach --test aus.');
-  } else {
-    fs.writeFileSync(CONFIG, JSON.stringify({ enabled: false, token: '', chat_id: '' }, null, 2) + '\n');
-    say('Gerüst angelegt unter ' + CONFIG + '. Öffne es, füge Bot-Token und Chat-ID ein und führe danach --test aus.');
+  let config = readConfig();
+  let credentials = readCredentials();
+  const created = [];
+  try {
+    if (!config.exists) created.push(createConfig());
+    if (!credentials.exists) created.push(createCredentials());
+  } catch (error) {
+    say('Gerüst konnte nicht angelegt werden: ' + error.message);
+    done(1);
   }
+  config = readConfig();
+  credentials = readCredentials();
+  if (!config.valid || !credentials.valid) {
+    const problems = config.diagnostics.slice();
+    if (!credentials.valid) problems.push(credentials.credentialsFile + ': ' + credentials.error.message);
+    say('Vorhandene YAML-Datei ist ungültig und bleibt unverändert: ' + problems.join('; '));
+    done(1);
+  }
+  if (created.length) say('Angelegt:\n- ' + created.join('\n- '));
+  else say('Konfiguration und Credentials sind bereits vorhanden. Bestehende Dateien bleiben unverändert.');
+  say('Trage Token und Chat-ID unter connections.telegram.default in credentials.yaml ein.');
   done(0);
 }
 
-let cfg;
-try { cfg = JSON.parse(fs.readFileSync(CONFIG, 'utf8')); }
-catch { say('Keine Konfiguration unter ' + CONFIG + '. Lege mit --init ein Gerüst an und fülle es aus.'); done(0); }
+const configState = readConfig();
+const credentialState = readCredentials();
+if (!configState.valid) {
+  say('Die Plugin-Konfiguration ist ungültig: ' + configState.diagnostics.join('; '));
+  done(1);
+}
+if (!credentialState.exists || !credentialState.valid) {
+  say('Keine gültigen Credentials unter ' + credentialState.credentialsFile + '. Lege mit --init ein Gerüst an.');
+  done(TEST ? 1 : 0);
+}
 
-const configured = !!(cfg && cfg.token && cfg.chat_id);
-// Nur false schaltet aus; ein fehlender Schlüssel bleibt abwärtskompatibel aktiv.
-const on = configured && cfg.enabled !== false;
+const telegram = configState.config.notifications.telegram || {};
+const profile = typeof telegram.connection === 'string' && telegram.connection ? telegram.connection : 'default';
+const provider = credentialState.credentials.connections
+  && credentialState.credentials.connections.telegram;
+const credential = provider && provider[profile] && typeof provider[profile] === 'object'
+  ? provider[profile] : {};
+const token = typeof credential.token === 'string' ? credential.token : '';
+const chatId = credential['chat-id'];
+const configured = Boolean(token && (typeof chatId === 'string' || typeof chatId === 'number'));
+const enabled = configured && telegram.enabled === true;
 
-if (!TEST) {
-  if (!on) done(0);
-} else if (!configured) {
-  say('Fülle zuerst "token" und "chat_id" in ' + CONFIG + ' aus. Mit --init legst du ein Gerüst an.');
+if (!TEST && !enabled) done(0);
+if (TEST && !configured) {
+  say('Fülle zuerst token und chat-id für connections.telegram.' + profile
+    + ' in ' + credentialState.credentialsFile + ' aus.');
   done(1);
 }
 
-// PLUGIN_ROOT unterscheidet Codex von Claude.
 const agent = process.env.PLUGIN_ROOT ? 'Codex' : 'Claude Code';
 const host = os.hostname();
-
 let payload = {};
 if (!TEST && !process.stdin.isTTY) {
   try {
-    const raw = fs.readFileSync(0, 'utf8').replace(/^﻿/, ''); // BOM tolerieren.
+    const raw = fs.readFileSync(0, 'utf8').replace(/^﻿/, '');
     if (raw) payload = JSON.parse(raw);
   } catch { /* Standardwerte verwenden. */ }
 }
 
-const cwd = (typeof payload.cwd === 'string' && payload.cwd) ? payload.cwd : process.cwd();
+const cwd = typeof payload.cwd === 'string' && payload.cwd ? payload.cwd : process.cwd();
 const dir = path.basename(cwd);
-
-// Bei Detached HEAD den kurzen SHA verwenden, außerhalb eines Repos den Branch weglassen.
 let branch = null;
 try {
-  branch = execFileSync('git', ['-C', cwd, 'rev-parse', '--abbrev-ref', 'HEAD'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+  branch = execFileSync('git', ['-C', cwd, 'rev-parse', '--abbrev-ref', 'HEAD'], {
+    stdio: ['ignore', 'pipe', 'ignore'],
+  }).toString().trim();
   if (branch === 'HEAD') {
-    branch = execFileSync('git', ['-C', cwd, 'rev-parse', '--short', 'HEAD'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    branch = execFileSync('git', ['-C', cwd, 'rev-parse', '--short', 'HEAD'], {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).toString().trim();
   }
 } catch { /* Kein Repo oder kein Git: keine Branch-Zeile. */ }
 
@@ -77,36 +108,39 @@ if (body.length > BODY_MAX) body = body.slice(0, BODY_MAX - 1).trimEnd() + '…'
 
 const project = branch ? dir + '/' + branch : dir;
 const text = '🔔 ' + host + ' · ' + agent + '\n' + project + '\n\n' + body;
-
-// Klartext vermeidet MarkdownV2-Probleme mit Branch-Namen und Nachrichtentexten.
-const data = JSON.stringify({ chat_id: cfg.chat_id, text });
-const req = https.request({
+const data = JSON.stringify({ chat_id: chatId, text });
+const request = https.request({
   hostname: 'api.telegram.org',
-  path: '/bot' + cfg.token + '/sendMessage',
+  path: '/bot' + token + '/sendMessage',
   method: 'POST',
   headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) },
   timeout: 8000,
-}, (res) => {
-  let out = '';
-  res.on('data', (c) => { out += c; });
-  res.on('end', () => {
-    if (res.statusCode === 200) {
-      // Ein erfolgreicher Test ändert nur enabled.
-      if (TEST && cfg.enabled !== true) {
-        try { cfg.enabled = true; fs.writeFileSync(CONFIG, JSON.stringify(cfg, null, 2) + '\n'); }
-        catch { /* Versand erfolgreich, Einschalten nach bestem Bemühen. */ }
-      }
-      say('Gesendet. Prüfe Telegram.' + (TEST ? ' Der Kanal ist eingeschaltet.' : ''));
+}, response => {
+  let output = '';
+  response.on('data', chunk => { output += chunk; });
+  response.on('end', () => {
+    if (response.statusCode === 200) {
+      say('Gesendet. Prüfe Telegram.' + (TEST
+        ? ' Aktiviere den Kanal anschließend in config.yaml mit notifications.telegram.enabled: true.' : ''));
       done(0);
     }
-    // Nie die Request-URL melden, sie enthält den Token.
-    let why = 'HTTP ' + res.statusCode;
-    try { const j = JSON.parse(out); if (j.description) why = j.description; } catch { /* Status behalten. */ }
-    say('Telegram hat die Nachricht abgelehnt: ' + why);
+    let reason = 'HTTP ' + response.statusCode;
+    try {
+      const parsed = JSON.parse(output);
+      if (parsed.description) reason = parsed.description;
+    } catch { /* Status behalten. */ }
+    say('Telegram hat die Nachricht abgelehnt: ' + reason);
     done(1);
   });
 });
-req.on('error', (e) => { say('Telegram nicht erreichbar: ' + (e.code || e.message)); done(1); });
-req.on('timeout', () => { req.destroy(); say('Zeitüberschreitung der Telegram-Anfrage.'); done(1); });
-req.write(data);
-req.end();
+request.on('error', error => {
+  say('Telegram nicht erreichbar: ' + (error.code || error.message));
+  done(1);
+});
+request.on('timeout', () => {
+  request.destroy();
+  say('Zeitüberschreitung der Telegram-Anfrage.');
+  done(1);
+});
+request.write(data);
+request.end();

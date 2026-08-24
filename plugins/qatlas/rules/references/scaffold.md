@@ -1,6 +1,6 @@
 ---
 description: >
-  Vollständige, vor schreibender Arbeit unter __qatlas__/ geladene Rule-Referenz für Funktionsdateien,
+  Vollständige, vor schreibender Arbeit unter .qatlas/project/ geladene Rule-Referenz für Funktionsdateien,
   Funktionsordner, Zonen, Versionierung und den Schutz vorhandener Nutzerdateien.
 license: MIT
 type: rule
@@ -9,7 +9,7 @@ edit: locked
 
 # Vollständiger Scaffold-Vertrag
 
-`__qatlas__/` ist Qatlas' versionierte, projekttypneutrale Zustands- und Arbeitsschicht. Der Agent
+`.qatlas/project/` ist Qatlas' versionierte, projekttypneutrale Zustands- und Arbeitsschicht. Der Agent
 pflegt diese Ebene. Sie reist grundsätzlich mit dem Repo; nur die beiden Zonen bleiben unversioniert. Eine
 Nutzerentscheidung darf das gesamte Scaffold lokal gitignorieren. Seine README erklärt den Aufbau,
 konkrete Verfahren leben in den zuständigen Skills. Vorhandene Nutzerdateien werden nie pauschal ersetzt.

@@ -11,7 +11,7 @@ edit: locked
 
 # Qatlas-Arbeitsvereinbarung
 
-Diese Regeln gelten vollständig, solange ihre Injektion in `~/.qatlas/settings.json` aktiviert ist.
+Diese Regeln gelten vollständig, solange ihre Injektion in `~/.qatlas/plugins/config.yaml` aktiviert ist.
 Der Nutzer kann sie dort gemeinsam mit dem Qatlas-Sessionstart oder einzeln abschalten. Native globale
 und projektlokale Agentenanweisungen haben Vorrang. Ist dieser Block unvollständig oder nur als Vorschau
 vorhanden, lies die im Block genannte Quelldatei vollständig, bevor du arbeitest.
