@@ -1,4 +1,5 @@
-# Globale Qatlas-Plugin-Konfiguration. Projekt-Overrides werden getrennt geladen.
+# Globale Qatlas-Plugin-Konfiguration. Projektkonfiguration wird getrennt geprüft; Overrides sind derzeit
+# nicht freigegeben.
 format: 1
 
 session-start:

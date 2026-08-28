@@ -57,6 +57,11 @@ Feste Ausnahmen mit `type: meta` und `edit: shared` sind jede `INDEX.md` beziehu
 `HISTORY.md`, `.qatlas/project/backlog/BACKLOG.md` und `.qatlas/project/backlog/IDEAS.md`. Ein Projektindex trägt
 zusätzlich `status`.
 
+Eine ausgelieferte kopierfertige Vorlage unter `store/` oder `skills/*/assets/` darf bereits das
+Frontmatter eines solchen Ausnahmeziels tragen, wenn ihr Body den konkreten Zieldateinamen nennt und vor dem
+Schreiben die Ersetzung aller Platzhalter verlangt. Beurteile ihr Frontmatter dann gegen dieses Ziel. Die
+Ausnahme gilt weder für gewöhnliche Inhaltsdateien noch für nutzereigene Vorlagen.
+
 `status` ist ein Pflichtfeld oder Suchmerkmal, aber seine Werte gehören zum jeweiligen Lebenszyklus und
 nicht in dieses allgemeine Inhaltsschema. Für lokale Tasks bestimmen die Backlog-Regel und ihre bedingt
 geladene Referenz die aktuelle Zustandsmenge. Projektindizes und andere Inhaltstypen behalten ihre eigenen

@@ -38,6 +38,11 @@ Nutzer- und Projektvorgaben bestimmen das Planungssystem. Nur ohne andere Vorgab
 Qatlas-Backlog. Ist ein vorgeschriebenes externes System nicht erreichbar, spiegle es nicht in lokale
 Dateien; stoppe vor schreibender Arbeit mit dem konkreten Hindernis.
 
+Der Laufvertrag konkretisiert den gewählten Scope, ersetzt aber nicht dessen Ausarbeitung. `run` prüft die
+Ausführungsgrundlage auf Aktualität, Umgebungs- und Git-Voraussetzungen; er soll den fachlichen Scope nicht
+erst durch eine neue Erstanalyse entdecken. Ein seit `shape` oder `backlog` veränderter Bestand ist trotzdem
+ein normaler Befund und wird nach den folgenden Reiferegeln behandelt.
+
 ## Tasks auswählen
 
 Ein Lauf bearbeitet höchstens fünf Tasks. Die Zahl der `next`-Tasks verändert diese Grenze nicht. Eine
@@ -54,9 +59,14 @@ größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für spätere Lä
 4. Lies nur die ausgewählten Tasks und ihre echten Blocker vollständig. Öffne Kommentare oder Historie nur
    bei einem Widerspruch, fehlender entscheidungsrelevanter Begründung oder ausdrücklichem Verweis des
    aktuellen Datensatzes.
-5. Prüfe jeden Task unmittelbar vor der Beanspruchung erneut. Hat sein Vertrag eine offene Frage zu
-   Ergebnis, Scope, Vorgehen oder Abnahme, setze ihn auf `draft`, informiere den Nutzer konkret und führe
-   ihn nicht aus. Eine technische Schwierigkeit allein ist keine offene Vertragsfrage.
+5. Prüfe jeden Task unmittelbar vor der Beanspruchung erneut. Beurteile nach seinem Inhalt, nicht nach dem
+   Vorhandensein einer bestimmten Überschrift, ob Ergebnis, Scope, Vorgehen, Abnahme und bei Arbeit an
+   vorhandenem Bestand die Ausführungsgrundlage weiterhin tragen. Fehlt eine Information, die diese Punkte
+   wesentlich verändern könnte, ist eine notwendige Berechtigung ungeklärt oder die Dokumentationswirkung
+   offen, setze ihn auf `draft`, informiere den Nutzer konkret und führe ihn nicht aus. Fehlt eine bereits
+   bekannte externe Voraussetzung, setze ihn auf `waiting`. Eine reversible technische Detailentscheidung
+   im vereinbarten Entscheidungsspielraum, eine technische Schwierigkeit oder eine zusätzliche Datei
+   innerhalb des fachlichen Scopes ist keine offene Vertragsfrage.
 6. Verändere keinen `in-progress`-Task mit einem laufenden oder unbekannten Subagent. Kläre zuerst dessen
    Eigentümer und Arbeitsstand.
 7. Prüfe bei Git Root, Branch, Upstream, Worktrees und vollständigen Status. Schreibende Arbeit beginnt nur
@@ -78,17 +88,38 @@ Der Orchestrator gibt jedem Subagent genau einen abgegrenzten Auftrag mit Task-I
 erlaubten Zielen, Scope-out, Abnahmekriterien, Prüfungen und Rückgabeformat. Er implementiert die fachliche
 Lösung nicht selbst. Kleine Status-, Integrations- und Verifikationsschritte bleiben bei ihm.
 
+Leite den Auftrag aus dem aktuellen Taskvertrag und dem bestätigten Preflight ab. Er enthält in dieser
+Reihenfolge:
+
+- **Ziel:** beobachtbares Ergebnis des Tasks.
+- **Arbeitsgrundlage:** Ausgangszustand, bestehende Einstiegspunkte, erwartete Änderungsflächen,
+  maßgebliche Quellen und benötigte Ausführungsvoraussetzungen. Kennzeichne erwartete Flächen als
+  Arbeitskarte, nicht als starre Dateifreigabe, und gib keine Secrets weiter.
+- **Scope:** erlaubte fachliche Ziele sowie ausdrücklicher Scope-out.
+- **Leitplanken:** bindende Architektur-, Sicherheits-, Kompatibilitäts- und Dokumentationsgrenzen sowie
+  der Entscheidungsspielraum.
+- **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
+- **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
+  erfüllt, oder eine Vertrags-, Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
+- **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, aktualisierte oder bestätigte
+  Dokumentation, Abweichungen von den erwarteten Änderungsflächen und ungelöste Risiken.
+
 Normalerweise setzt ein Subagent den Task um. Braucht derselbe Task legitim mehrere getrennte Rollen oder
 Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
 nachweislich ergänzen, dürfen keine konkurrierenden Lösungen bauen und bleiben gemeinsam im Fehlerbudget
 dieses einen Tasks. Ein weiterer Task beginnt erst, wenn der aktive Task abgeschlossen oder gesichert
 übergeben ist.
 
+Der Subagent darf eine nicht vorhergesagte Datei selbstständig einbeziehen, wenn sie nachweislich innerhalb
+des fachlichen Scopes liegt, und nennt die Abweichung in seiner Rückgabe. Wäre eine Wirkung außerhalb des
+Scopes nötig oder widerspricht der aktuelle Bestand einer bindenden fachlichen Quelle, stoppt er vor dieser
+Wirkung und gibt den Befund an den Orchestrator zurück. Er erweitert den Vertrag nicht selbst.
+
 Sende nach dem erfolgreichen Start genau eine knappe Karte:
 
 > **Aufgabe:** #84 - Dateizugriff auf SQL umstellen
 >
-> **Subagents:** terra · sol
+> **Subagents:** nicht ausgewiesen
 
 Verwende ID und Titel aus dem Spine. Nenne nur tatsächlich gewählte oder geerbte Modellnamen in kurzer
 Form; ist ein Modell nicht bekannt, schreibe `nicht ausgewiesen`. Fehlen die benötigten Subagents, stoppe
@@ -136,7 +167,19 @@ weiterlaufen.
 
 Integriere die Arbeit des aktiven Tasks, führe seine gemeinsamen Prüfungen aus und pflege Task,
 Abschlussbericht und Spine nach dem maßgeblichen Vertrag. Setze ihn erst auf `done`, wenn alle Kriterien auf
-dem Steuerbranch belegt sind.
+dem Steuerbranch belegt sind. Gleiche dabei den tatsächlichen Diff und das entstandene Verhalten gegen die
+Ausführungsgrundlage ab:
+
+- Lasse direkt betroffene Dokumentation, die durch die Umsetzung falsch geworden ist, innerhalb desselben
+  Tasks korrigieren und erneut prüfen.
+- Widerspricht eine maßgebliche fachliche Dokumentation dem beabsichtigten Ergebnis und könnte sie eine
+  Nutzerentscheidung ausdrücken, setze den Task auf `review`, statt eine Seite still zu überschreiben.
+- Ändere sachlich unabhängige fehlerhafte Dokumentation nicht opportunistisch und melde sie konkret. Erfasse
+  sie nur dann als eigenen Task, wenn der gewählte Run-Scope oder Taskvertrag das Anlegen weiterer Arbeit im
+  maßgeblichen Planungssystem ausdrücklich einschließt; andernfalls bleibt sie eine benannte Folgearbeit für
+  `shape` oder `backlog`.
+- Eine deklarierte Dokumentationswirkung `Ändern` oder `Prüfen` ist ein Abnahmekriterium. `Keine` bleibt nur
+  gültig, wenn der tatsächliche Diff keine zugehörige Aussage entwertet.
 
 Muss der Nutzer entscheiden, prüfen oder handeln, setze den Task auf `review`. Verhindert eine externe
 Voraussetzung, Ressource oder Umgebung die Fortsetzung, setze ihn nach dem maßgeblichen Statusmodell auf
@@ -159,4 +202,6 @@ Beende den Lauf, sobald eine dieser Bedingungen gilt:
 - Der Steuerbranch wurde seit dem Preflight fremd verändert.
 
 Sichere vor dem Ende Spine, Abschlussberichte und erlaubte lokale Commits. Berichte Ergebnis, maßgebliche
-Beweise und konkrete menschliche Übergaben knapp. Pushe nichts.
+Beweise und konkrete menschliche Übergaben knapp. Nenne pro bearbeitetem Task geänderte Dateien,
+ausgeführte Prüfungen, Dokumentationswirkung, Abweichungen von der erwarteten Arbeitskarte und ungelöste
+Risiken; Rohlogs bleiben draußen. Pushe nichts.

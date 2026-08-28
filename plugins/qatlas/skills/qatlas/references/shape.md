@@ -97,11 +97,36 @@ Ein Task ist für eine Session zugeschnitten, eigenständig verständlich und be
 lokalen Backlog bestimmen der zuvor geladene Vertrag und seine kanonische Vorlage Felder, Benennung und
 Lebenszyklus; bei einem externen System gilt dessen Binding.
 
+Bilde zuerst einen vorläufigen Paketschnitt und belege dann für jedes Paket, das an einem vorhandenen System
+arbeitet, seine Ausführungsgrundlage. Verfolge den tatsächlichen bestehenden Ablauf weit genug, um
+festzuhalten:
+
+- den beobachteten Ausgangszustand und die tragenden Einstiegspunkte,
+- die erwarteten Änderungsflächen in Implementierung, Konfiguration, Tests und Dokumentation mit Pfad oder
+  System und Grund,
+- vorhandene konkrete Prüfpfade sowie fehlende Prüfmöglichkeiten,
+- benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte, insbesondere eine nötige
+  Freigabe für `edit: locked`, ohne Secrets im Task festzuhalten,
+- die Dokumentationswirkung als `Ändern`, `Prüfen`, `Keine` mit Begründung oder `Ungeklärt` mit der
+  fehlenden Information.
+
+Erwartete Änderungsflächen sind eine belegte Arbeitskarte, keine unveränderliche Dateiliste. Scope-in und
+Scope-out bleiben die Autorität. Weitere Dateien innerhalb dieses fachlichen Scopes darf die Ausführung
+selbstständig einbeziehen; eine notwendige Wirkung außerhalb davon ist eine Vertragsfrage. Bei einem Paket
+ohne vorhandenen Bestand kennzeichne nicht anwendbare Punkte mit Begründung, statt eine künstliche
+Bestandsanalyse zu erfinden.
+
 - Verhindert eine offene Frage schon den sinnvollen Zuschnitt, kläre sie vor der Anlage.
 - Steht der Zuschnitt, aber Ergebnis, Scope, Vorgehen oder Abnahme bleiben konkret offen, lege `draft` an
   und halte die Frage im fachlich passenden Abschnitt fest. Erzeuge keinen allgemeinen Fragenfriedhof.
 - Arbeite geklärte Antworten am fachlichen Ort ein und entferne überholte Alternativen. Setze erst auf
-  `ready`, wenn der Task ohne bekannte Vertragsfrage eigenständig ausführbar ist.
+  `ready`, wenn der Task ohne bekannte Vertragsfrage eigenständig ausführbar und seine nötige
+  Ausführungsgrundlage belegt ist. `Ungeklärt` bei der Dokumentationswirkung oder ein ununtersuchter
+  Ist-Stand, der Ergebnis, Scope, Vorgehen oder Abnahme wesentlich verändern könnte, bleibt `draft`. Eine
+  fehlende externe Voraussetzung führt nach dem Statusmodell zu `waiting`; eine ungeklärte Berechtigung
+  bleibt `draft`.
+- Lasse reversible technische Details im ausdrücklichen Entscheidungsspielraum. Sie sind kein Grund für
+  eine Rückfrage oder einen künstlich unreifen Task.
 - Fasse die für die Ausführung nötige Projektwahrheit knapp zusammen und verweise auf stabile Quellen. Ein
   Link allein ersetzt keine bindende Aussage; eine vollständige Wiederholung der Projektdokumentation ist
   ebenso falsch.
@@ -145,7 +170,11 @@ Task aus.
 Der ausdrückliche Aufruf autorisiert Subagents für getrennte Bestandsanalyse, Evidenzgewinnung,
 Risikoprüfung und einen unabhängigen Vollständigkeitscheck. Delegiere nur unabhängige Fragen mit echtem
 Mehrwert. Subagents schreiben keine Tasks, treffen keine Produktentscheidung und bauen keinen konkurrierenden
-Plan; der Hauptagent führt Befunde, Gespräch, Dokumentation und Paketschnitt zusammen.
+Plan; der Hauptagent führt Befunde, Gespräch, Dokumentation und Paketschnitt zusammen. Ein beauftragter
+Bestands-Subagent arbeitet lesend und gibt mindestens Ausgangszustand, Einstiegspunkte, erwartete
+Änderungsflächen, Prüfpfade, Dokumentationswirkung, offene Vertragsfragen und eine begründete Empfehlung
+für `draft` oder `ready` zurück. Kleine, bereits klar belegbare Pakete brauchen keinen Subagent; die
+Ausführungsgrundlage bleibt trotzdem Pflicht.
 
 ## Abschluss
 

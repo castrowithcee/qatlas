@@ -32,6 +32,11 @@ Er bleibt in einem vollständigen Lesen eigenständig ausführbar:
 - Warum, Ergebnis, Scope, geltende Leitplanken, Abhängigkeiten, aktuelles Vorgehen und Abnahmekriterien
   enthalten nur weiterhin gültige Aussagen. Arbeite eine geklärte Entscheidung am fachlich passenden Ort
   ein und entferne dadurch überholte Alternativen.
+- Für Arbeit an einem vorhandenen System hält die Ausführungsgrundlage den belegten Ausgangszustand,
+  bestehende Einstiegspunkte, erwartete Änderungsflächen, konkrete Prüfpfade und die Wirkung auf maßgebliche
+  Dokumentation fest. Benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte sind ohne
+  Secrets benannt. Erwartete Flächen sind keine starre Dateifreigabe; Scope-in und Scope-out bleiben die
+  Autorität. Beurteile vorhandene Tasks nach diesem Inhalt, nicht nach einer bestimmten Überschrift.
 - Der `Abschlussbericht` ist der einzige statusabhängige Übergabepunkt. Er enthält bei `review` nur die
   aktuelle menschliche Übergabe, bei `waiting` Grund, Wiederaufnahmesignal, belegten Stand und nächsten
   Schritt und bei `done` den kompakten endgültigen Bericht. Ersetze und konsolidiere seinen bisherigen
@@ -64,15 +69,21 @@ Normalpfad: `draft -> ready -> next -> in-progress -> done`.
 
 Zulässige Rück- und Übergabepfade:
 
-- `ready -> draft | next`
+- `draft -> waiting`
+- `ready -> draft | next | waiting`
 - `next -> ready | draft | in-progress | waiting`
 - `in-progress -> next | draft | review | waiting | done`
 - `review -> next | draft | waiting | done`
 - `waiting -> draft | ready | next`
 
-- `draft`: Das Arbeitspaket selbst hat eine offene Frage zu Scope-in, Scope-out, Vorgehen oder Abnahme.
-- `ready`: Ohne bekannte Vertragsfrage eigenständig ausführbar, aber nicht Teil des nächsten
-  Ausführungshorizonts.
+- `draft`: Das Arbeitspaket selbst hat eine offene Frage zu Ergebnis, Scope-in, Scope-out, Vorgehen,
+  Abnahme oder zu einem ununtersuchten Ist-Stand, der diese Punkte wesentlich verändern könnte.
+- `ready`: Ohne bekannte Vertragsfrage eigenständig ausführbar und bei Arbeit an vorhandenem Bestand durch
+  eine ausreichende Ausführungsgrundlage belegt, aber nicht Teil des nächsten Ausführungshorizonts.
+  Notwendige Voraussetzungen und besondere Bearbeitungsrechte sind benannt und entweder verfügbar oder im
+  Taskvertrag beschaffbar. Eine fehlende externe Voraussetzung führt zu `waiting`, eine ungeklärte
+  Berechtigung oder Vertragsfrage zu `draft`. Eine reversible technische Detailentscheidung im
+  ausdrücklichen Entscheidungsspielraum verhindert `ready` nicht.
 - `next`: Ebenfalls vollständig ausführbar und für den kommenden Ausführungshorizont zusätzlich disponiert.
   Der Roster bestimmt Reihenfolge und Abhängigkeiten.
 - `in-progress`: Eine laufende Ausführung hat es beansprucht. Ohne sichtbaren Worker kläre zuerst die
@@ -80,7 +91,8 @@ Zulässige Rück- und Übergabepfade:
 - `review`: Der nächste Schritt ist eine konkrete Entscheidung, Prüfung oder Abnahme des Nutzers.
 - `waiting`: Eine externe Voraussetzung, Ressource oder ein Ereignis verhindert die Fortsetzung. Grund und
   Wiederaufnahmesignal müssen konkret sein; eine unerledigte interne Task-Abhängigkeit allein genügt nicht.
-- `done`: Abnahmekriterien erfüllt, keine offene Frage.
+- `done`: Abnahmekriterien erfüllt, vereinbarte Prüfungen belegt, Dokumentationswirkung abgearbeitet und
+  keine offene Frage.
 
 Bewusst zurückgestellte, aber weiterhin ausführbare Arbeit bleibt `ready` und wird nicht nach `next`
 disponiert. Dafür braucht es keinen eigenen Zustand.

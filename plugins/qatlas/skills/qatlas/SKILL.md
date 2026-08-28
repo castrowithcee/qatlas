@@ -62,6 +62,16 @@ Nutzer- und Projektvorgaben bestimmen das Planungssystem. Der lokale Qatlas-Back
 Autorität. Spiegle ein externes System nie in lokale Tasks und behaupte keine dortige Änderung, wenn es
 nicht erreichbar ist.
 
+`ready` und `next` bezeichnen belegte Ausführungsreife: Der Task beschreibt nicht nur Ziel, Scope und
+Abnahme, sondern beruht bei Arbeit an einem vorhandenen System auf einer ausreichenden Untersuchung des
+Ist-Stands. Bestehende Einstiegspunkte, erwartete Änderungsflächen, konkrete Prüfpfade und die Wirkung auf
+maßgebliche Dokumentation müssen so weit geklärt sein, dass `run` den Scope nicht erst entdecken muss.
+Benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte sind benannt und entweder belegt
+verfügbar, innerhalb des Taskvertrags beschaffbar oder als konkrete offene Voraussetzung sichtbar. Halte
+dabei keine Secrets im Task fest. Eine vollständige oder unveränderliche Dateiliste ist nicht nötig;
+reversible technische Details dürfen im Entscheidungsspielraum bleiben. Beurteile diese Reife nach dem
+tatsächlichen Inhalt, nie nach dem bloßen Vorhandensein einer bestimmten Überschrift oder Vorlage.
+
 Nutze installierte Fach-Packs, wenn ihre Methode zum Gegenstand passt. Der gewählte Qatlas-Modus behält
 Eigentum an Gespräch und Übergabe. `goal` hält seinen Stand ausschließlich im Gespräch; die übrigen
 Arbeitsmodi pflegen dauerhaftes Projektwissen, Spine und Status nur im Rahmen ihres jeweiligen Vertrags.

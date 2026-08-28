@@ -8,7 +8,8 @@ status: active
 
 # <Kundenkurzname> (<id>)
 
-<!-- Nach <area>-customers/<id>/INDEX.md kopieren. Keine Kontaktdaten. -->
+<!-- Nach <area>-customers/<id>/INDEX.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Keine
+Kontaktdaten. -->
 
 ## Worum es geht
 <!-- Kunde oder Fall in ein bis zwei Sätzen. -->

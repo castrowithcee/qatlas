@@ -24,6 +24,7 @@ edit: shared
 - **Betriebsgrenzen:** <knappe ständig nötige rate-, batch- oder capability-hinweise>
 - **Lokaler Spiegel:** keiner
 
-<!-- Vor dem Schreiben alle Platzhalter ersetzen. Nur Angaben aufnehmen, die ein Agent bei normaler
-     Planung, Orchestrierung und Taskarbeit ständig braucht. Der aktuelle Datensatz muss ohne Historie
-     ausführbar bleiben. Ausführliche Anbieter- und Migrationshinweise bleiben im zuständigen Skill. -->
+<!-- Nach .qatlas/project/backlog/BACKLOG.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Nur
+     Angaben aufnehmen, die ein Agent bei normaler Planung, Orchestrierung und Taskarbeit ständig braucht.
+     Der aktuelle Datensatz muss ohne Historie ausführbar bleiben. Ausführliche Anbieter- und
+     Migrationshinweise bleiben im zuständigen Skill. -->
