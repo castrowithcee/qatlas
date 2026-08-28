@@ -62,6 +62,11 @@ Nutzer- und Projektvorgaben bestimmen das Planungssystem. Der lokale Qatlas-Back
 Autorität. Spiegle ein externes System nie in lokale Tasks und behaupte keine dortige Änderung, wenn es
 nicht erreichbar ist.
 
+Der Nutzer ist Entscheider, nicht Mitleser des Planungssystems. Setzen `shape`, `backlog` oder `review`
+eine echte Nutzerentscheidung voraus, hole ihn knapp und ohne vorausgesetzte Tasklektüre ab, führe immer
+nur durch die aktuelle Aufgabe und gib eine ausdrückliche begründete Empfehlung. Das jeweilige
+Modusverfahren lädt dafür den gemeinsamen Entscheidungsdialog.
+
 `ready` und `next` bezeichnen belegte Ausführungsreife: Der Task beschreibt nicht nur Ziel, Scope und
 Abnahme, sondern beruht bei Arbeit an einem vorhandenen System auf einer ausreichenden Untersuchung des
 Ist-Stands. Bestehende Einstiegspunkte, erwartete Änderungsflächen, konkrete Prüfpfade und die Wirkung auf

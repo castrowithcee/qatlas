@@ -28,6 +28,12 @@ Der Nutzer hat `shape` bewusst gestartet. Damit steht die Ausarbeitungsabsicht f
 inhaltliche Richtung. Stelle nur Fragen, deren Antwort Ergebnis, Scope, dauerhafte Dokumentation,
 Paketschnitt oder Abnahme wesentlich verändert.
 
+Bleibt nach der eigenen Untersuchung eine echte Nutzerentscheidung zu einer vorhandenen oder werdenden
+Aufgabe offen, lies vor ihrer ersten Präsentation vollständig
+[Entscheidungen knapp vorlegen](decision-card.md) und führe den Nutzer nach diesem gemeinsamen Dialog.
+Freie Fragen, mit denen der Nutzer eine noch nicht ausformulierte Absicht erst beschreibt, bleiben davon
+unberührt.
+
 ## Eingang aufnehmen
 
 Der Eingang darf drei Reifegrade haben:

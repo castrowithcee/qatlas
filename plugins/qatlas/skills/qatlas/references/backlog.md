@@ -33,6 +33,11 @@ bereits vollständig geklärter Arbeit.
    vollständig, wenn er an der Reihe ist.
 4. Verändere keinen `in-progress`-Task mit laufendem oder unbekanntem Worker.
 
+Braucht mindestens ein Task der Gesprächsschlange eine echte Nutzerentscheidung, lies vor ihrer ersten
+Präsentation vollständig [Entscheidungen knapp vorlegen](decision-card.md). Nenne und führe die
+Entscheidungsschlange nach diesem gemeinsamen Dialog, ohne vorauszusetzen, dass der Nutzer die Tasks
+parallel liest.
+
 Bei großen Beständen halte immer nur einen sinnvollen Ausschnitt und den gerade besprochenen Task vollständig
 im Kontext. Die Größe des Bestands ist kein Grund, nach der Übersicht zu stoppen oder Drafts ungeprüft zu
 überspringen.
@@ -47,10 +52,10 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
    die Ausführungsgrundlage Ausgangszustand, bestehende Einstiegspunkte, erwartete Änderungsflächen,
    konkrete Prüfpfade, benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte sowie die
    Wirkung auf maßgebliche Dokumentation. Halte keine Secrets im Task fest. Braucht es eine
-   Nutzerentscheidung, stelle genau die nächste entscheidungsrelevante Frage mit einer begründeten
-   Empfehlung und warte auf die Antwort. Arbeite jede geklärte Antwort sofort am fachlich passenden Ort in
-   den aktuellen Taskvertrag ein und entferne überholte Varianten. Fahre danach mit der nächsten offenen
-   Frage oder dem nächsten Draft fort.
+   Nutzerentscheidung, stelle genau die nächste Entscheidung nach dem gemeinsamen Dialog vor und warte auf
+   die Antwort. Arbeite jede geklärte Antwort sofort am fachlich passenden Ort in den aktuellen
+   Taskvertrag ein und entferne überholte Varianten. Fahre danach mit der nächsten offenen Frage oder dem
+   nächsten Draft fort.
 2. **Reife belegen.** Setze einen Task nach dem Statusmodell des maßgeblichen Planungssystems auf `ready`,
    sobald keine bekannte Vertragsfrage bleibt und die nötige Ausführungsgrundlage belegt ist. Die
    Dokumentationswirkung lautet `Ändern`, `Prüfen`, `Keine` mit Begründung oder bleibt als `Ungeklärt`

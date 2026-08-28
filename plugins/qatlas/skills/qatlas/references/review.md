@@ -33,31 +33,12 @@ Umsetzung, Worker, Integration, externe Wirkungen und Pushes bleiben außerhalb 
    aktuellen Stand eingearbeitet ist.
 4. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neuer Review beginnt sauber; eine
    Fortsetzung darf nur ihren eindeutig zugeordneten Entscheidungsdiff weiterführen.
-5. Zeige einmal die vollständige Schlange mit genau einem Satz pro Task und beginne dann mit der ersten
-   Karte.
+5. Lies vor der ersten Übergabe vollständig
+   [Entscheidungen knapp vorlegen](decision-card.md). Nenne nur die Anzahl der Aufgaben in der Schlange und
+   beginne dann mit der ersten Karte nach diesem gemeinsamen Dialog.
 
-## Genau eine Karte zeigen
-
-```text
-Aufgabe 2/5 - <Titel>
-<Ein Satz, der Gegenstand und offene Übergabe verständlich macht.>
-
-Ist: <belegter Stand>
-Empfehlung: 2 - <Option>; <Begründung in einem Satz>
-
-1. <Option>
-2. <Option> (empfohlen)
-3. <Option>
-
-Antwort: 1, 2, 3 oder Freitext.
-```
-
-- Biete eine bis vier konkrete, grundsätzlich einander ausschließende Optionen. Mehrere nur, wenn es
-  sinnvoll ist, nicht erzwungen.
-- Erlaube Freitext immer und behandle ihn wörtlich.
-- Muss der Nutzer selbst handeln, nenne exakten Ort oder Befehl und den erwarteten Nachweis.
-- Warte nur auf diese Antwort. Kläre bei Mehrdeutigkeit nur diese Karte und gehe danach ohne
-  Zwischenbericht zur nächsten.
+Der gemeinsame Dialog regelt Orientierung und Darstellung. Die folgenden Abschnitte regeln weiterhin, wie
+`review` die Antwort festhält und den Lauf vollständig beendet.
 
 ## Antwort festhalten
 
