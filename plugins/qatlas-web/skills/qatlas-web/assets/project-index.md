@@ -9,7 +9,8 @@ status: active
 
 # <projekt>
 
-<!-- Nach <scope>/INDEX.md kopieren. Bestätigte Aussagen, Annahmen und offene Punkte sichtbar trennen. -->
+<!-- Nach <scope>/INDEX.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Bestätigte Aussagen,
+Annahmen und offene Punkte sichtbar trennen. -->
 
 ## Produktprofil
 
