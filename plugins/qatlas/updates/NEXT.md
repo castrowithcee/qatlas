@@ -16,12 +16,15 @@ edit: locked
 - Sind `.qatlas-project/` und eine frühere Projektwurzel parallel vorhanden, Prüfstände widersprüchlich oder
   Dateien nicht vollständig lesbar, ändere nichts. Kläre die Inhalte und die maßgebliche README konkret.
   Vorhandene `FRAMEWORK.md` und `INDEX.md` werden ihrem Inhalt nach zugeordnet; die Migration verschiebt sie
-  nicht blind.
+  nicht blind. Auch doppelte kanonische Projektwissens-IDs blockieren den Umzug und müssen vor der
+  Bestätigung eindeutig aufgelöst werden.
 - Nach ausdrücklicher Bestätigung führt derselbe Befehl mit `project --apply --target <projekt-root>` den
   eindeutigen Umzug aus. Er erhält Backlog-Binding, Memory, IDs, Zonen und Plugin-Bestätigungen, aktualisiert
   inventarisierte Pfadverweise und verlegt `updates/state.json` nach
   `.qatlas/plugins/updates/state.json`. Versionierte frühere Update-Anweisungen und die Migrationsmechanik
-  behalten historische Pfade.
+  behalten historische Pfade. Import- und Exportzonen reisen bytegleich mit; ihr Rohinhalt wird dabei nicht
+  umgeschrieben. Eingebettete Git-Repos und Worktrees bleiben außerhalb der semantischen Prüfung und
+  Pfadänderung.
 - Prüfe danach `.qatlas-project/README.md` als kaskadischen Einstieg und halte sie einschließlich Frontmatter
   bei höchstens 80 Zeilen und 500 Wörtern. Fachinhalte außerhalb des bisherigen Projektzustands bleiben an
   ihren vorhandenen Orten und werden weder eingesammelt noch umklassifiziert.

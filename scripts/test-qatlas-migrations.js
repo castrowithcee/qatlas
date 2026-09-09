@@ -249,17 +249,32 @@ function testExplicitProjectMigration() {
     format: 1, plugins: { qatlas: '0.2.1', 'qatlas-web': '0.1.0' },
   });
   write(path.join(f.project, 'AGENTS.md'), 'Lies .qatlas/project/README.md.\n');
+  write(path.join(f.project, 'fach-a', 'README.md'), '# Fach A\nUnverändert.\n');
+  write(path.join(f.project, 'fach-b', 'README.md'), '# Fach B\nUnverändert.\n');
   const binaryFile = path.join(f.project, 'asset.bin');
   const binary = Buffer.concat([
     Buffer.from([0xff, 0xfe]), Buffer.from('.qatlas/project'), Buffer.from([0x80]),
   ]);
   fs.writeFileSync(binaryFile, binary);
+  const zoneFramework = path.join(oldRoot, 'zone-import', 'processed', '2026-09', 'FRAMEWORK.md');
+  const zoneIndex = path.join(oldRoot, 'zone-export', 'INDEX.md');
+  write(zoneFramework, 'Rohartefakt mit .qatlas/project\n');
+  write(zoneIndex, 'Exportartefakt mit .qatlas/project\n');
+  const nestedReference = path.join(f.project, 'embedded', 'reference.md');
+  write(path.join(f.project, 'embedded', '.git'), 'gitdir: /tmp/nowhere\n');
+  write(nestedReference, 'Lies .qatlas/project/README.md.\n');
+  const nestedRepoReference = path.join(f.project, 'embedded-repo', 'reference.md');
+  write(path.join(f.project, 'embedded-repo', '.git', 'config'), '[core]\n\tbare = false\n');
+  write(nestedRepoReference, 'Lies .qatlas/project/README.md.\n');
 
   const inventory = migrateProject({ projectRoot: f.project });
   assert.strictEqual(inventory.applied, false);
   assert.strictEqual(inventory.inventory.source, '.qatlas/project');
   assert.deepStrictEqual(inventory.inventory.references.map(item => item.relative), ['AGENTS.md']);
   assert.ok(!inventory.inventory.references.some(item => item.relative === 'asset.bin'));
+  assert.ok(!inventory.inventory.references.some(item => item.relative.includes('zone-import')));
+  assert.ok(!inventory.inventory.references.some(item => item.relative.includes('zone-export')));
+  assert.ok(!inventory.inventory.references.some(item => item.relative.includes('embedded')));
   assert.ok(fs.existsSync(oldRoot), 'Inventar verändert nichts.');
 
   const result = migrateProject({ projectRoot: f.project, apply: true });
@@ -272,7 +287,18 @@ function testExplicitProjectMigration() {
   { qatlas: '0.2.1', 'qatlas-web': '0.1.0' });
   assert.strictEqual(fs.existsSync(path.join(newRoot, 'updates', 'state.json')), false);
   assert.strictEqual(fs.existsSync(oldRoot), false);
+  assert.strictEqual(fs.readFileSync(path.join(f.project, 'fach-a', 'README.md'), 'utf8'),
+    '# Fach A\nUnverändert.\n');
+  assert.strictEqual(fs.readFileSync(path.join(f.project, 'fach-b', 'README.md'), 'utf8'),
+    '# Fach B\nUnverändert.\n');
   assert.ok(fs.readFileSync(binaryFile).equals(binary), 'Binärdateien bleiben bytegenau erhalten.');
+  assert.strictEqual(fs.readFileSync(
+    path.join(newRoot, 'zone-import', 'processed', '2026-09', 'FRAMEWORK.md'), 'utf8'),
+  'Rohartefakt mit .qatlas/project\n');
+  assert.strictEqual(fs.readFileSync(path.join(newRoot, 'zone-export', 'INDEX.md'), 'utf8'),
+    'Exportartefakt mit .qatlas/project\n');
+  assert.strictEqual(fs.readFileSync(nestedReference, 'utf8'), 'Lies .qatlas/project/README.md.\n');
+  assert.strictEqual(fs.readFileSync(nestedRepoReference, 'utf8'), 'Lies .qatlas/project/README.md.\n');
   assert.strictEqual(projectMigrationInventory(f.project).unresolved, false);
   assert.strictEqual(migrateProject({ projectRoot: f.project, apply: true }).applied, false);
 }
@@ -281,10 +307,24 @@ function testProjectMigrationConflictsAndRecovery() {
   const both = fixture('project-both');
   write(path.join(both.project, '.qatlas', 'project', 'README.md'), 'alt\n');
   write(path.join(both.project, '.qatlas-project', 'README.md'), 'neu\n');
+  const targetZoneFramework = path.join(both.project, '.qatlas-project', 'zone-import', 'FRAMEWORK.md');
+  const targetZoneIndex = path.join(both.project, '.qatlas-project', 'zone-export', 'INDEX.md');
+  const targetZoneId = path.join(both.project, '.qatlas-project', 'zone-import', 'decision-0004-roh.md');
+  write(targetZoneFramework, 'Roh mit .qatlas/project\n');
+  write(targetZoneIndex, 'Roh mit .qatlas/project\n');
+  write(targetZoneId, 'Roh mit .qatlas/project\n');
+  write(path.join(both.project, '.qatlas', 'project', 'decisions', 'decision-0004-normal.md'), 'normal\n');
   const before = fs.readFileSync(path.join(both.project, '.qatlas', 'project', 'README.md'), 'utf8');
   const blocked = migrateProject({ projectRoot: both.project, apply: true });
   assert.ok(blocked.blocked.some(problem => problem.includes('Mehrere Qatlas-Projektwurzeln')));
+  assert.ok(!blocked.blocked.some(problem => problem.includes('FRAMEWORK-/INDEX')));
+  assert.ok(!blocked.blocked.some(problem => problem.includes('Doppelte Projektwissens-ID')));
+  assert.ok(!blocked.inventory.references.some(reference => reference.relative.includes('zone-import')));
+  assert.ok(!blocked.inventory.references.some(reference => reference.relative.includes('zone-export')));
   assert.strictEqual(fs.readFileSync(path.join(both.project, '.qatlas', 'project', 'README.md'), 'utf8'), before);
+  assert.strictEqual(fs.readFileSync(targetZoneFramework, 'utf8'), 'Roh mit .qatlas/project\n');
+  assert.strictEqual(fs.readFileSync(targetZoneIndex, 'utf8'), 'Roh mit .qatlas/project\n');
+  assert.strictEqual(fs.readFileSync(targetZoneId, 'utf8'), 'Roh mit .qatlas/project\n');
 
   const stateConflict = fixture('project-state-conflict');
   write(path.join(stateConflict.project, '__qatlas__', 'updates', 'state.json'), {
@@ -302,6 +342,28 @@ function testProjectMigrationConflictsAndRecovery() {
   const functionConflict = migrateProject({ projectRoot: functions.project, apply: true });
   assert.ok(functionConflict.blocked.some(problem => problem.includes('inhaltlich zugeordnet')));
   assert.ok(fs.existsSync(path.join(functions.project, '__callbell__', 'docs', 'FRAMEWORK.md')));
+
+  const duplicateIds = fixture('project-id-conflict');
+  write(path.join(duplicateIds.project, '__qatlas__', 'decisions', 'decision-0004-a.md'), 'a\n');
+  write(path.join(duplicateIds.project, '__qatlas__', 'marketplace', 'decision-0004-b.md'), 'b\n');
+  const duplicateResult = migrateProject({ projectRoot: duplicateIds.project, apply: true });
+  assert.ok(duplicateResult.blocked.some(problem => problem.includes('Doppelte Projektwissens-ID decision-0004')));
+  assert.ok(fs.existsSync(path.join(duplicateIds.project, '__qatlas__', 'decisions', 'decision-0004-a.md')));
+
+  const validIds = fixture('project-id-valid');
+  write(path.join(validIds.project, '__callbell__', 'backlog', 'BACKLOG.md'),
+    '# Lokaler Backlog\n- task-0001-offen.md\n');
+  write(path.join(validIds.project, '__callbell__', 'decisions', 'decision-0004-a.md'), 'a\n');
+  write(path.join(validIds.project, '__callbell__', 'architecture', 'adr-0004-b.md'), 'b\n');
+  write(path.join(validIds.project, '__callbell__', 'marketplace', 'decision-0005-c.md'), 'c\n');
+  write(path.join(validIds.project, '__callbell__', 'legacy', 'decision-a1b2c3-alt.md'), 'historisch\n');
+  write(path.join(validIds.project, '__callbell__', 'zone-import', 'decision-0004-raw.md'), 'roh\n');
+  write(path.join(validIds.project, 'fachlich', 'decision-0004-ausserhalb.md'), 'fachlich\n');
+  const validResult = migrateProject({ projectRoot: validIds.project, apply: true });
+  assert.strictEqual(validResult.applied, true);
+  assert.ok(fs.existsSync(path.join(validIds.project, '.qatlas-project', 'zone-import', 'decision-0004-raw.md')));
+  assert.ok(fs.readFileSync(path.join(validIds.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), 'utf8')
+    .includes('task-0001-offen.md'));
 
   const partial = fixture('project-partial');
   write(path.join(partial.project, '.qatlas-project', 'updates', 'state.json'), {

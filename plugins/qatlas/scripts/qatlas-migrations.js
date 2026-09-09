@@ -20,6 +20,7 @@ const {
 const HOME_MIGRATION = 'legacy-home-config-v1';
 const PROJECT_ROOT = '.qatlas-project';
 const LEGACY_PROJECT_ROOTS = ['.qatlas/project', '__qatlas__', '__callbell__'];
+const PROJECT_ID = /^(overview|decision|adr|convention|arch|req|plan|task|ops|quality|risk|history|memory|template)-(\d{4,})-[a-z0-9][a-z0-9-]*\.md$/;
 
 function isObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -66,7 +67,7 @@ function portable(value) {
   return value.split(path.sep).join('/');
 }
 
-function walkProjectFiles(root, directory = root) {
+function walkProjectFiles(root, directory = root, excluded = []) {
   const files = [];
   let entries;
   try { entries = fs.readdirSync(directory, { withFileTypes: true }); }
@@ -77,8 +78,10 @@ function walkProjectFiles(root, directory = root) {
     const file = path.join(directory, entry.name);
     const relative = portable(path.relative(root, file));
     if (entry.isDirectory()) {
-      if (relative === '.git' || relative === 'node_modules' || relative === '.qatlas/local') continue;
-      const nested = walkProjectFiles(root, file);
+      if (entry.name === '.git' || entry.name === 'node_modules' || relative === '.qatlas/local'
+        || excluded.some(item => file === item || file.startsWith(item + path.sep))
+        || (file !== root && fs.existsSync(path.join(file, '.git')))) continue;
+      const nested = walkProjectFiles(root, file, excluded);
       files.push(...nested.files);
       errors.push(...nested.errors);
     } else if (entry.isFile()) {
@@ -171,7 +174,11 @@ function projectMigrationInventory(projectRoot, { detailed = true } = {}) {
 
   const replacements = legacy.map(entry => [entry.name, PROJECT_ROOT]);
   const references = [];
-  const scanned = detailed && legacy.length ? walkProjectFiles(root) : { files: [], errors: [] };
+  const projectRoots = [...legacy.map(entry => entry.file), ...(hasCurrent ? [current] : [])];
+  const excluded = projectRoots.flatMap(projectRoot => ['zone-import', 'zone-export']
+    .map(zone => path.join(projectRoot, zone)));
+  const scanned = detailed && legacy.length
+    ? walkProjectFiles(root, root, excluded) : { files: [], errors: [] };
   conflicts.push(...scanned.errors);
   const functionalFiles = scanned.files.filter(file => legacy.some(entry => {
     const relative = portable(path.relative(entry.file, file));
@@ -181,6 +188,23 @@ function projectMigrationInventory(projectRoot, { detailed = true } = {}) {
   if (functionalFiles.length) {
     conflicts.push('Vorhandene FRAMEWORK-/INDEX-Dateien müssen vor dem Umzug inhaltlich zugeordnet werden: '
       + functionalFiles.map(file => portable(path.relative(root, file))).join(', '));
+  }
+  const ids = new Map();
+  for (const file of scanned.files) {
+    if (!legacy.some(entry => {
+      const relative = path.relative(entry.file, file);
+      return relative && !relative.startsWith('..' + path.sep) && !path.isAbsolute(relative);
+    })) continue;
+    const match = path.basename(file).match(PROJECT_ID);
+    if (!match) continue;
+    const key = match[1] + ':' + match[2];
+    if (!ids.has(key)) ids.set(key, []);
+    ids.get(key).push(file);
+  }
+  const idConflicts = [...ids.entries()].filter(([, files]) => files.length > 1);
+  for (const [id, files] of idConflicts) {
+    conflicts.push('Doppelte Projektwissens-ID ' + id.replace(':', '-') + ': '
+      + files.map(file => portable(path.relative(root, file))).join(', '));
   }
   for (const file of scanned.files) {
     const relative = portable(path.relative(root, file));
@@ -209,6 +233,7 @@ function projectMigrationInventory(projectRoot, { detailed = true } = {}) {
     target: PROJECT_ROOT,
     references,
     functionalFiles,
+    idConflicts,
     readme,
     conflicts,
     legacyState,
