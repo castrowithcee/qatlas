@@ -9,6 +9,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { scaffoldTopUp } = require('./qatlas-scaffold-topup.js');
+const { projectMigrationInventory } = require('./qatlas-migrations.js');
 const {
   createConfig,
   readConfig,
@@ -17,9 +18,11 @@ const {
 } = require('./runtime/config-loader.js');
 
 const argv = process.argv.slice(2);
-const apply = argv.includes('--apply');
+const requestedApply = argv.includes('--apply');
 const flag = (name) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : null; };
 const target = flag('--target') ? path.resolve(flag('--target')) : process.cwd();
+const migration = projectMigrationInventory(target, { detailed: false });
+const apply = requestedApply && !migration.unresolved;
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT
   || path.resolve(__dirname, '..');
@@ -28,6 +31,25 @@ const bundle = path.join(pluginRoot, 'scaffold');
 const missing = [];   // Blockiert oder beeinträchtigt die Arbeit.
 const notes = [];     // Einmal erwähnenswert, aber kein Grund zum Blockieren.
 const created = [];   // Tatsächlich durch --apply geschriebene Dateien.
+
+if (migration.unresolved) {
+  missing.push('migration: Der Projektzustand muss vor schreibender Qatlas-Arbeit inventarisiert und '
+    + 'ausdrücklich migriert werden. Führe `node qatlas-migrations.js project --target <ordner>` aus.');
+  if (requestedApply) notes.push('apply: Wegen der offenen Projektmigration wurde nichts verändert.');
+}
+
+const projectUpdateState = path.join(target, '.qatlas', 'plugins', 'updates', 'state.json');
+if (fs.existsSync(projectUpdateState)) {
+  try {
+    const state = JSON.parse(fs.readFileSync(projectUpdateState, 'utf8'));
+    if (!state || typeof state !== 'object' || Array.isArray(state)
+      || !state.plugins || typeof state.plugins !== 'object' || Array.isArray(state.plugins)) {
+      throw new Error('erwartet wird ein JSON-Objekt mit einer plugins-Map');
+    }
+  } catch (error) {
+    missing.push('update: ' + projectUpdateState + ' ist ungültig und bleibt unangetastet: ' + error.message);
+  }
+}
 
 function has(cmd, args) {
   try { execFileSync(cmd, args, { stdio: 'pipe' }); return true; }
@@ -117,12 +139,12 @@ if (apply) {
 }
 
 // Scaffold: derselbe existenzbasierte Abgleich wie im SessionStart-Hook.
-const hadScaffold = fs.existsSync(path.join(target, '.qatlas', 'project'));
+const hadScaffold = fs.existsSync(path.join(target, '.qatlas-project'));
 const { absent, created: scaffoldCreated } = scaffoldTopUp(target, bundle, { apply });
 
 if (!apply) {
-  if (!fs.existsSync(path.join(target, '.qatlas', 'project'))) {
-    missing.push('scaffold: Hier gibt es kein .qatlas/project/, also weder Backlog, Memory noch Zonen.');
+  if (!fs.existsSync(path.join(target, '.qatlas-project'))) {
+    missing.push('scaffold: Hier gibt es kein .qatlas-project/, also weder Backlog, Memory noch Zonen.');
   } else if (absent.length) {
     missing.push('scaffold: ' + absent.length + ' Datei(en) fehlen: ' + absent.join(', '));
   }
@@ -134,13 +156,13 @@ if (!apply) {
         path.join(pluginRoot, '.claude-plugin', 'plugin.json'), 'utf8'));
       const version = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
       if (manifest.name && /^\d+\.\d+\.\d+$/.test(version)) {
-        const updateState = path.join(target, '.qatlas', 'project', 'updates', 'state.json');
+        const updateState = path.join(target, '.qatlas', 'plugins', 'updates', 'state.json');
         fs.mkdirSync(path.dirname(updateState), { recursive: true });
         fs.writeFileSync(updateState, JSON.stringify({
           format: 1,
           plugins: { [manifest.name]: version },
         }, null, 2) + '\n', { flag: 'wx', mode: 0o644 });
-        created.push('.qatlas/project/updates/state.json');
+        created.push('.qatlas/plugins/updates/state.json');
       }
     } catch { /* Eine defekte Zustandsdatei darf die sichere Scaffold-Anlage nicht verhindern. */ }
   }
@@ -164,7 +186,7 @@ let ignoreText = '';
 try { ignoreText = fs.readFileSync(gitignore, 'utf8'); } catch { /* Noch keine Datei vorhanden. */ }
 const zones = ['zone-import', 'zone-export'];
 const missingZones = zones.filter(zone =>
-  !new RegExp('^/\\.qatlas/project/' + zone + '/\\*\\s*$', 'm').test(ignoreText));
+  !new RegExp('^/\\.qatlas-project/' + zone + '/\\*\\s*$', 'm').test(ignoreText));
 const localMissing = !/^\/\.qatlas\/local\/\s*$/m.test(ignoreText);
 if (missingZones.length || localMissing) {
   if (!apply) {
@@ -175,11 +197,28 @@ if (missingZones.length || localMissing) {
       + 'vorübergehender Zustand committed werden.');
   } else {
     const add = fs.readFileSync(path.join(bundle, 'gitignore'), 'utf8').trim().split(/\r?\n\r?\n/)
-      .filter(block => missingZones.some(zone => block.includes('/.qatlas/project/' + zone + '/*'))
+      .filter(block => missingZones.some(zone => block.includes('/.qatlas-project/' + zone + '/*'))
         || (localMissing && block.includes('/.qatlas/local/')))
       .join('\n\n') + '\n';
     fs.writeFileSync(gitignore, ignoreText ? ignoreText.replace(/\s*$/, '\n\n') + add : add);
     created.push('.gitignore (ergänzt)');
+  }
+}
+
+const projectReadme = path.join(target, '.qatlas-project', 'README.md');
+if (fs.existsSync(path.join(target, '.qatlas-project'))) {
+  try {
+    const readme = fs.readFileSync(projectReadme, 'utf8');
+    const readmeLines = readme.split(/\r?\n/);
+    if (readmeLines.at(-1) === '') readmeLines.pop();
+    const lines = readmeLines.length;
+    const words = readme.trim() ? readme.trim().split(/\s+/).length : 0;
+    if (lines > 80 || words > 500) {
+      missing.push('scaffold: .qatlas-project/README.md überschreitet mit ' + lines + ' Zeilen und '
+        + words + ' Wörtern das Budget 80/500. Die Datei bleibt unangetastet und vollständig lesbar.');
+    }
+  } catch (error) {
+    missing.push('scaffold: .qatlas-project/README.md ist nicht lesbar: ' + error.message);
   }
 }
 

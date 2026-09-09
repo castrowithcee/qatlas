@@ -18,6 +18,8 @@ const {
 } = require('./runtime/config-loader.js');
 
 const HOME_MIGRATION = 'legacy-home-config-v1';
+const PROJECT_ROOT = '.qatlas-project';
+const LEGACY_PROJECT_ROOTS = ['.qatlas/project', '__qatlas__', '__callbell__'];
 
 function isObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -53,6 +55,227 @@ function atomicWrite(file, content, mode = 0o600) {
     fs.unlinkSync(temporary);
   }
   try { fs.chmodSync(file, mode); } catch { /* Keine POSIX-Modusunterstützung. */ }
+}
+
+function isDirectory(directory) {
+  try { return fs.statSync(directory).isDirectory(); }
+  catch { return false; }
+}
+
+function portable(value) {
+  return value.split(path.sep).join('/');
+}
+
+function walkProjectFiles(root, directory = root) {
+  const files = [];
+  let entries;
+  try { entries = fs.readdirSync(directory, { withFileTypes: true }); }
+  catch (error) { return { files, errors: [directory + ': ' + error.message] }; }
+  const errors = [];
+  for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue;
+    const file = path.join(directory, entry.name);
+    const relative = portable(path.relative(root, file));
+    if (entry.isDirectory()) {
+      if (relative === '.git' || relative === 'node_modules' || relative === '.qatlas/local') continue;
+      const nested = walkProjectFiles(root, file);
+      files.push(...nested.files);
+      errors.push(...nested.errors);
+    } else if (entry.isFile()) {
+      files.push(file);
+    }
+  }
+  return { files, errors };
+}
+
+function readProjectState(file) {
+  if (!fs.existsSync(file)) return { format: 1, plugins: {} };
+  const value = parseJsonFile(file);
+  return {
+    ...value,
+    format: 1,
+    plugins: isObject(value.plugins) ? value.plugins : {},
+  };
+}
+
+function mergedProjectState(sourceFile, targetFile, conflicts) {
+  let source;
+  let target;
+  try { source = readProjectState(sourceFile); }
+  catch (error) { conflicts.push(sourceFile + ': ' + error.message); }
+  try { target = readProjectState(targetFile); }
+  catch (error) { conflicts.push(targetFile + ': ' + error.message); }
+  if (!source || !target) return null;
+  for (const [plugin, version] of Object.entries(source.plugins)) {
+    if (target.plugins[plugin] !== undefined && target.plugins[plugin] !== version) {
+      conflicts.push('Die Projekt-Prüfstände widersprechen sich für ' + plugin + ': '
+        + source.plugins[plugin] + ' und ' + target.plugins[plugin] + '.');
+    }
+  }
+  return { ...source, ...target, format: 1, plugins: { ...source.plugins, ...target.plugins } };
+}
+
+function isHistoricalUpdate(relative) {
+  return /(^|\/)updates\/\d+\.\d+\.\d+\.md$/.test(relative);
+}
+
+function isMigrationMechanic(relative) {
+  return /(^|\/)scripts\/qatlas-migrations\.js$/.test(relative);
+}
+
+function projectMigrationInventory(projectRoot, { detailed = true } = {}) {
+  const root = path.resolve(projectRoot);
+  const current = path.join(root, PROJECT_ROOT);
+  const legacy = LEGACY_PROJECT_ROOTS
+    .map(name => ({ name, file: path.join(root, ...name.split('/')) }))
+    .filter(entry => isDirectory(entry.file));
+  const hasCurrent = isDirectory(current);
+  const targetExists = fs.existsSync(current);
+  const roots = [...legacy.map(entry => entry.name), ...(hasCurrent ? [PROJECT_ROOT] : [])];
+  const conflicts = [];
+  if (targetExists && !hasCurrent) {
+    conflicts.push(current + ' existiert, ist aber kein lesbarer Projektwissensraum.');
+  }
+  if (roots.length > 1) {
+    conflicts.push('Mehrere Qatlas-Projektwurzeln müssen vor einer Migration inhaltlich verglichen werden: '
+      + roots.map(name => path.join(root, ...name.split('/'))).join(', '));
+  }
+
+  const source = legacy.length === 1 && !hasCurrent ? legacy[0] : null;
+  let readme = 'nicht vorhanden';
+  const readmeRoot = source ? source.file : hasCurrent ? current : null;
+  if (readmeRoot) {
+    const sourceReadme = path.join(readmeRoot, 'README.md');
+    try {
+      const stat = fs.statSync(sourceReadme);
+      if (!stat.isFile()) throw new Error('kein lesbares Dokument');
+      fs.readFileSync(sourceReadme, 'utf8');
+      readme = portable(path.relative(root, sourceReadme));
+    } catch (error) {
+      if (error && error.code !== 'ENOENT') {
+        if (source) {
+          conflicts.push(sourceReadme + ' ist nicht lesbar: ' + error.message);
+        }
+        readme = 'nicht lesbar';
+      }
+    }
+  }
+  const knowledgeRoot = source ? source.file : hasCurrent ? current : null;
+  const legacyState = knowledgeRoot ? path.join(knowledgeRoot, 'updates', 'state.json') : null;
+  const stateTarget = path.join(root, '.qatlas', 'plugins', 'updates', 'state.json');
+  const stateSources = [...legacy.map(entry => path.join(entry.file, 'updates', 'state.json')),
+    ...(hasCurrent ? [path.join(current, 'updates', 'state.json')] : [])]
+    .filter(file => fs.existsSync(file));
+  const state = legacyState && fs.existsSync(legacyState)
+    ? mergedProjectState(legacyState, stateTarget, conflicts) : null;
+
+  const replacements = legacy.map(entry => [entry.name, PROJECT_ROOT]);
+  const references = [];
+  const scanned = detailed && legacy.length ? walkProjectFiles(root) : { files: [], errors: [] };
+  conflicts.push(...scanned.errors);
+  const functionalFiles = scanned.files.filter(file => legacy.some(entry => {
+    const relative = portable(path.relative(entry.file, file));
+    return !relative.startsWith('../')
+      && /(^|\/)(FRAMEWORK|framework|INDEX|index)\.md$/.test(relative);
+  }));
+  if (functionalFiles.length) {
+    conflicts.push('Vorhandene FRAMEWORK-/INDEX-Dateien müssen vor dem Umzug inhaltlich zugeordnet werden: '
+      + functionalFiles.map(file => portable(path.relative(root, file))).join(', '));
+  }
+  for (const file of scanned.files) {
+    const relative = portable(path.relative(root, file));
+    if (isHistoricalUpdate(relative) || isMigrationMechanic(relative)) continue;
+    let text;
+    try {
+      const content = fs.readFileSync(file);
+      if (content.includes(0)) continue;
+      text = content.toString('utf8');
+      if (!Buffer.from(text, 'utf8').equals(content)) continue;
+    } catch (error) {
+      conflicts.push(file + ': ' + error.message);
+      continue;
+    }
+    const matches = replacements.filter(([from]) => text.includes(from)).map(([from]) => from);
+    if (matches.length) references.push({ file, relative, matches });
+  }
+
+  const pendingStateMove = Boolean(legacyState && fs.existsSync(legacyState));
+  const unresolved = Boolean(legacy.length || pendingStateMove || conflicts.length);
+  return {
+    root,
+    roots,
+    sources: legacy.map(entry => entry.name),
+    source: source ? source.name : null,
+    target: PROJECT_ROOT,
+    references,
+    functionalFiles,
+    readme,
+    conflicts,
+    legacyState,
+    stateSources,
+    stateTarget,
+    state,
+    unresolved,
+    ready: !conflicts.length && Boolean(source || pendingStateMove),
+  };
+}
+
+function migrateProject({ projectRoot = process.cwd(), apply = false } = {}) {
+  const inventory = projectMigrationInventory(projectRoot);
+  if (inventory.conflicts.length || !inventory.ready || !apply) {
+    return { applied: false, inventory, blocked: inventory.conflicts };
+  }
+
+  const source = inventory.source
+    ? path.join(inventory.root, ...inventory.source.split('/')) : null;
+  const target = path.join(inventory.root, PROJECT_ROOT);
+  const referenceSnapshots = new Map();
+  let stateTargetSnapshot = null;
+  const legacyStateSnapshot = inventory.legacyState && fs.existsSync(inventory.legacyState)
+    ? fs.readFileSync(inventory.legacyState) : null;
+  let movedRoot = false;
+  try {
+    for (const reference of inventory.references) {
+      const file = reference.file;
+      const before = fs.readFileSync(file, 'utf8');
+      let after = before;
+      for (const [from, to] of [[inventory.source, PROJECT_ROOT]]) {
+        if (from) after = after.split(from).join(to);
+      }
+      if (after !== before) {
+        referenceSnapshots.set(file, before);
+        atomicWrite(file, after, fs.statSync(file).mode & 0o777);
+      }
+    }
+
+    if (source) {
+      fs.renameSync(source, target);
+      movedRoot = true;
+    }
+
+    const migratedState = path.join(target, 'updates', 'state.json');
+    if (fs.existsSync(migratedState)) {
+      stateTargetSnapshot = fs.existsSync(inventory.stateTarget)
+        ? { exists: true, content: fs.readFileSync(inventory.stateTarget) } : { exists: false };
+      atomicWrite(inventory.stateTarget, JSON.stringify(inventory.state, null, 2) + '\n', 0o644);
+      fs.unlinkSync(migratedState);
+    }
+  } catch (error) {
+    if (legacyStateSnapshot) {
+      const restoredState = path.join(target, 'updates', 'state.json');
+      atomicWrite(restoredState, legacyStateSnapshot, 0o644);
+    }
+    if (stateTargetSnapshot) {
+      if (stateTargetSnapshot.exists) atomicWrite(inventory.stateTarget, stateTargetSnapshot.content, 0o644);
+      else if (fs.existsSync(inventory.stateTarget)) fs.unlinkSync(inventory.stateTarget);
+    }
+    if (movedRoot && isDirectory(target) && !fs.existsSync(source)) fs.renameSync(target, source);
+    for (const [file, content] of referenceSnapshots) atomicWrite(file, content, fs.statSync(file).mode & 0o777);
+    return { applied: false, inventory: projectMigrationInventory(projectRoot), blocked: [
+      'Projektmigration zurückgerollt: ' + error.message,
+    ] };
+  }
+  return { applied: true, inventory: projectMigrationInventory(projectRoot), blocked: [] };
 }
 
 function migrationPaths(homeDir) {
@@ -384,21 +607,18 @@ function migrateLegacyHome({ homeDir, pluginRoot, apply }) {
 }
 
 function projectMigrationProblems(projectRoot) {
-  const legacy = ['__callbell__', '__qatlas__'].filter(name => {
-    try { return fs.statSync(path.join(projectRoot, name)).isDirectory(); }
-    catch { return false; }
-  });
-  if (!legacy.length) return [];
-  const current = (() => {
-    try { return fs.statSync(path.join(projectRoot, '.qatlas', 'project')).isDirectory(); }
-    catch { return false; }
-  })();
-  if (legacy.length === 1 && !current) {
-    return [`${path.join(projectRoot, legacy[0])} muss nach .qatlas/project/ migriert werden.`];
+  const inventory = projectMigrationInventory(projectRoot, { detailed: false });
+  if (!inventory.unresolved) return [];
+  if (inventory.conflicts.length) return inventory.conflicts;
+  const lines = [];
+  if (inventory.source) {
+    lines.push(path.join(inventory.root, ...inventory.source.split('/'))
+      + ' muss ausdrücklich nach ' + path.join(inventory.root, PROJECT_ROOT) + ' migriert werden.');
   }
-  const roots = legacy.concat(current ? ['.qatlas/project'] : []);
-  return ['Mehrere Qatlas-Scaffolds müssen vor einer Zusammenführung verglichen werden: '
-    + roots.map(name => path.join(projectRoot, name)).join(', ')];
+  if (inventory.legacyState && fs.existsSync(inventory.legacyState)) {
+    lines.push(inventory.legacyState + ' muss nach ' + inventory.stateTarget + ' verlegt werden.');
+  }
+  return lines;
 }
 
 function machineMigrationProblems(homeDir) {
@@ -432,6 +652,8 @@ function runMigrations({
 }
 
 function resolveRoot() {
+  const targetIndex = process.argv.indexOf('--target');
+  if (targetIndex >= 0 && process.argv[targetIndex + 1]) return path.resolve(process.argv[targetIndex + 1]);
   if (process.env.CLAUDE_PROJECT_DIR) return path.resolve(process.env.CLAUDE_PROJECT_DIR);
   if (!process.stdin.isTTY) {
     try {
@@ -455,7 +677,38 @@ function emitContext(text) {
 }
 
 if (require.main === module) {
-  const result = runMigrations({ projectRoot: resolveRoot() });
+  const projectCommand = process.argv[2] === 'project';
+  const applyProject = projectCommand && process.argv.includes('--apply');
+  const projectRoot = resolveRoot();
+  if (projectCommand) {
+    const result = migrateProject({ projectRoot, apply: applyProject });
+    const inventory = result.inventory;
+    const lines = [
+      'QATLAS-PROJEKTMIGRATION:',
+      '- Quelle: ' + (inventory.sources.length ? inventory.sources.join(', ') : 'keine Legacy-Wurzel'),
+      '- Ziel: ' + inventory.target,
+      '- README: ' + inventory.readme,
+      '- Prüfstand: ' + (inventory.stateSources.length
+        ? inventory.stateSources.map(file => portable(path.relative(inventory.root, file))).join(', ') + ' -> '
+          + portable(path.relative(inventory.root, inventory.stateTarget))
+        : 'kein alter Prüfstand'),
+      '- Referenzen: ' + inventory.references.length,
+      ...inventory.references.map(reference => '  - ' + reference.relative),
+    ];
+    if (result.blocked.length) lines.push('- Konflikte:', ...result.blocked.map(problem => '  - ' + problem));
+    if (!applyProject && inventory.ready) {
+      lines.push('Noch nichts verändert. Prüfe dieses Inventar und führe nach Bestätigung denselben Befehl '
+        + 'mit `project --apply` aus.');
+    } else if (result.applied) {
+      lines.push('Migration vollständig ausgeführt und erneut geprüft.');
+    } else if (!inventory.unresolved && !result.applied) {
+      lines.push('Keine Projektmigration offen.');
+    }
+    process.stdout.write(lines.join('\n') + '\n');
+    process.exit(result.blocked.length ? 1 : 0);
+  }
+
+  const result = runMigrations({ projectRoot });
   const lines = [];
   if (result.applied.length) {
     lines.push('QATLAS-MIGRATION: Geräteweiter Legacy-Zustand wurde automatisch und verifiziert migriert.');
@@ -478,4 +731,11 @@ if (require.main === module) {
   emitContext(lines.join('\n'));
 }
 
-module.exports = { HOME_MIGRATION, runMigrations };
+module.exports = {
+  HOME_MIGRATION,
+  LEGACY_PROJECT_ROOTS,
+  PROJECT_ROOT,
+  migrateProject,
+  projectMigrationInventory,
+  runMigrations,
+};

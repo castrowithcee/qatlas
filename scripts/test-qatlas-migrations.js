@@ -5,12 +5,17 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const YAML = require('../plugins/qatlas/scripts/runtime/vendor/yaml-2.9.0.js');
 const {
   DEFAULT_CONFIG,
   DEFAULT_STATUSLINE,
 } = require('../plugins/qatlas/scripts/runtime/config-loader.js');
-const { runMigrations } = require('../plugins/qatlas/scripts/qatlas-migrations.js');
+const {
+  migrateProject,
+  projectMigrationInventory,
+  runMigrations,
+} = require('../plugins/qatlas/scripts/qatlas-migrations.js');
 const { pendingUpdates } = require('../plugins/qatlas/scripts/qatlas-update.js');
 
 const pluginRoot = path.resolve(__dirname, '..', 'plugins', 'qatlas');
@@ -35,6 +40,21 @@ function readYaml(file) {
   const document = YAML.parseDocument(fs.readFileSync(file, 'utf8'));
   if (document.errors.length) throw document.errors[0];
   return document.toJS();
+}
+
+function runNode(script, args, options = {}) {
+  return spawnSync(process.execPath, [script, ...args], {
+    cwd: options.cwd,
+    env: { ...process.env, HOME: options.home, CLAUDE_PLUGIN_ROOT: pluginRoot, ...options.env },
+    encoding: 'utf8',
+  });
+}
+
+function initProject(f) {
+  const result = spawnSync('git', ['init', '-q', f.project], { encoding: 'utf8' });
+  assert.strictEqual(result.status, 0, result.stderr);
+  spawnSync('git', ['-C', f.project, 'config', 'user.name', 'Qatlas Test']);
+  spawnSync('git', ['-C', f.project, 'config', 'user.email', 'qatlas@example.invalid']);
 }
 
 function migrate(fixture, apply = true) {
@@ -200,16 +220,194 @@ function testProjectDetection() {
 
   const collision = fixture('project-collision');
   fs.mkdirSync(path.join(collision.project, '__qatlas__'));
-  fs.mkdirSync(path.join(collision.project, '.qatlas', 'project'), { recursive: true });
-  assert.ok(migrate(collision).blocked.some(problem => problem.includes('Mehrere Qatlas-Scaffolds')));
+  fs.mkdirSync(path.join(collision.project, '.qatlas-project'), { recursive: true });
+  assert.ok(migrate(collision).blocked.some(problem => problem.includes('Mehrere Qatlas-Projektwurzeln')));
 
   const current = fixture('project-current');
-  fs.mkdirSync(path.join(current.project, '.qatlas', 'project'), { recursive: true });
+  fs.mkdirSync(path.join(current.project, '.qatlas-project'), { recursive: true });
   assert.deepStrictEqual(migrate(current).blocked, []);
+
+  const previous = fixture('project-previous');
+  fs.mkdirSync(path.join(previous.project, '.qatlas', 'project'), { recursive: true });
+  assert.ok(migrate(previous).blocked.some(problem => problem.includes('.qatlas/project')));
 
   const worktrees = fixture('legacy-worktrees');
   write(path.join(worktrees.home, '.callbell', 'worktrees', 'repo', 'marker'), 'x\n');
   assert.ok(migrate(worktrees).blocked.some(problem => problem.includes('git worktree move')));
+}
+
+function testExplicitProjectMigration() {
+  const f = fixture('project-migrate');
+  const oldRoot = path.join(f.project, '.qatlas', 'project');
+  write(path.join(oldRoot, 'README.md'), '# Alter Einstieg\n');
+  write(path.join(oldRoot, 'backlog', 'BACKLOG.md'), '# Externes Binding\nKeine lokalen Tasks.\n');
+  write(path.join(oldRoot, 'memory', 'MEMORY.md'), '- Erinnerung\n');
+  write(path.join(oldRoot, 'memory', 'memory-0042-stabil.md'), 'Inhalt\n');
+  write(path.join(oldRoot, 'zone-import', '.gitkeep'), '');
+  write(path.join(oldRoot, 'zone-export', '.gitkeep'), '');
+  write(path.join(oldRoot, 'updates', 'state.json'), {
+    format: 1, plugins: { qatlas: '0.2.1', 'qatlas-web': '0.1.0' },
+  });
+  write(path.join(f.project, 'AGENTS.md'), 'Lies .qatlas/project/README.md.\n');
+  const binaryFile = path.join(f.project, 'asset.bin');
+  const binary = Buffer.concat([
+    Buffer.from([0xff, 0xfe]), Buffer.from('.qatlas/project'), Buffer.from([0x80]),
+  ]);
+  fs.writeFileSync(binaryFile, binary);
+
+  const inventory = migrateProject({ projectRoot: f.project });
+  assert.strictEqual(inventory.applied, false);
+  assert.strictEqual(inventory.inventory.source, '.qatlas/project');
+  assert.deepStrictEqual(inventory.inventory.references.map(item => item.relative), ['AGENTS.md']);
+  assert.ok(!inventory.inventory.references.some(item => item.relative === 'asset.bin'));
+  assert.ok(fs.existsSync(oldRoot), 'Inventar verändert nichts.');
+
+  const result = migrateProject({ projectRoot: f.project, apply: true });
+  assert.strictEqual(result.applied, true);
+  const newRoot = path.join(f.project, '.qatlas-project');
+  assert.ok(fs.existsSync(path.join(newRoot, 'memory', 'memory-0042-stabil.md')));
+  assert.ok(fs.readFileSync(path.join(f.project, 'AGENTS.md'), 'utf8').includes('.qatlas-project/README.md'));
+  assert.deepStrictEqual(JSON.parse(fs.readFileSync(
+    path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), 'utf8')).plugins,
+  { qatlas: '0.2.1', 'qatlas-web': '0.1.0' });
+  assert.strictEqual(fs.existsSync(path.join(newRoot, 'updates', 'state.json')), false);
+  assert.strictEqual(fs.existsSync(oldRoot), false);
+  assert.ok(fs.readFileSync(binaryFile).equals(binary), 'Binärdateien bleiben bytegenau erhalten.');
+  assert.strictEqual(projectMigrationInventory(f.project).unresolved, false);
+  assert.strictEqual(migrateProject({ projectRoot: f.project, apply: true }).applied, false);
+}
+
+function testProjectMigrationConflictsAndRecovery() {
+  const both = fixture('project-both');
+  write(path.join(both.project, '.qatlas', 'project', 'README.md'), 'alt\n');
+  write(path.join(both.project, '.qatlas-project', 'README.md'), 'neu\n');
+  const before = fs.readFileSync(path.join(both.project, '.qatlas', 'project', 'README.md'), 'utf8');
+  const blocked = migrateProject({ projectRoot: both.project, apply: true });
+  assert.ok(blocked.blocked.some(problem => problem.includes('Mehrere Qatlas-Projektwurzeln')));
+  assert.strictEqual(fs.readFileSync(path.join(both.project, '.qatlas', 'project', 'README.md'), 'utf8'), before);
+
+  const stateConflict = fixture('project-state-conflict');
+  write(path.join(stateConflict.project, '__qatlas__', 'updates', 'state.json'), {
+    format: 1, plugins: { qatlas: '0.2.0' },
+  });
+  write(path.join(stateConflict.project, '.qatlas', 'plugins', 'updates', 'state.json'), {
+    format: 1, plugins: { qatlas: '0.2.1' },
+  });
+  const conflict = migrateProject({ projectRoot: stateConflict.project, apply: true });
+  assert.ok(conflict.blocked.some(problem => problem.includes('widersprechen')));
+  assert.ok(fs.existsSync(path.join(stateConflict.project, '__qatlas__')));
+
+  const functions = fixture('project-functions');
+  write(path.join(functions.project, '__callbell__', 'docs', 'FRAMEWORK.md'), '# Rahmen\n');
+  const functionConflict = migrateProject({ projectRoot: functions.project, apply: true });
+  assert.ok(functionConflict.blocked.some(problem => problem.includes('inhaltlich zugeordnet')));
+  assert.ok(fs.existsSync(path.join(functions.project, '__callbell__', 'docs', 'FRAMEWORK.md')));
+
+  const partial = fixture('project-partial');
+  write(path.join(partial.project, '.qatlas-project', 'updates', 'state.json'), {
+    format: 1, plugins: { qatlas: '0.2.1' },
+  });
+  const resumed = migrateProject({ projectRoot: partial.project, apply: true });
+  assert.strictEqual(resumed.applied, true);
+  assert.strictEqual(projectMigrationInventory(partial.project).unresolved, false);
+  assert.ok(fs.existsSync(path.join(partial.project, '.qatlas', 'plugins', 'updates', 'state.json')));
+}
+
+function hookOutput(f, block, codex = false) {
+  const script = path.join(pluginRoot, 'hooks', 'qatlas-context.js');
+  const env = codex ? { PLUGIN_ROOT: pluginRoot, CLAUDE_PLUGIN_ROOT: '' } : {};
+  const result = runNode(script, [block], { cwd: f.project, home: f.home, env });
+  assert.strictEqual(result.status, 0, result.stderr);
+  return codex ? JSON.parse(result.stdout).hookSpecificOutput.additionalContext : result.stdout;
+}
+
+function testProjectContext() {
+  const f = fixture('context');
+  write(path.join(f.project, '.qatlas-project', 'README.md'), '---\ntype: meta\nedit: shared\n---\n# Einstieg\nFachquelle: fach/README.md\n');
+  write(path.join(f.project, '.qatlas-project', 'memory', 'MEMORY.md'), '# Memory\n');
+  write(path.join(f.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), '# Backlog\n');
+  assert.strictEqual(hookOutput(f, 'project-root'), hookOutput(f, 'project-root', true));
+  assert.ok(hookOutput(f, 'project-root').includes('Fachquelle: fach/README.md'));
+  assert.ok(hookOutput(f, 'memory').includes('# Memory'));
+  assert.ok(hookOutput(f, 'project-backlog').includes('# Backlog'));
+
+  const missing = fixture('context-missing');
+  fs.mkdirSync(path.join(missing.project, '.qatlas-project'));
+  assert.ok(hookOutput(missing, 'project-root').includes('EINSTIEG FEHLT'));
+
+  const unreadable = fixture('context-unreadable');
+  fs.mkdirSync(path.join(unreadable.project, '.qatlas-project', 'README.md'), { recursive: true });
+  assert.ok(hookOutput(unreadable, 'project-root').includes('EINSTIEG IST NICHT LESBAR'));
+
+  const long = fixture('context-long');
+  write(path.join(long.project, '.qatlas-project', 'README.md'),
+    Array.from({ length: 82 }, (_, index) => 'Zeile ' + index).join('\n') + '\nENDE-DER-DATEI\n');
+  const longOutput = hookOutput(long, 'project-root');
+  assert.ok(longOutput.includes('README-BUDGET ÜBERSCHRITTEN'));
+  assert.ok(longOutput.includes('ENDE-DER-DATEI'));
+
+  const exact = fixture('context-exact-budget');
+  write(path.join(exact.project, '.qatlas-project', 'README.md'),
+    Array.from({ length: 80 }, (_, index) => 'Zeile ' + index).join('\n') + '\n');
+  assert.ok(!hookOutput(exact, 'project-root').includes('README-BUDGET ÜBERSCHRITTEN'));
+
+  const disabled = fixture('context-disabled');
+  write(path.join(disabled.project, '.qatlas-project', 'README.md'), '# Unsichtbar\n');
+  write(path.join(disabled.home, '.qatlas', 'plugins', 'config.yaml'),
+    'format: 1\nsession-start:\n  enabled: false\n  ruleset: true\n');
+  assert.strictEqual(hookOutput(disabled, 'project-root'), '');
+  const disabledNotice = runNode(path.join(pluginRoot, 'scripts', 'qatlas-update.js'),
+    ['notice', '--target', disabled.project], { cwd: disabled.project, home: disabled.home });
+  assert.strictEqual(disabledNotice.stdout, '');
+}
+
+function testDoctorSetupAndUpdateState() {
+  const f = fixture('doctor');
+  initProject(f);
+  write(path.join(f.project, '.gitignore'), '# fremd\n/custom/\n');
+  const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
+  const first = runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(first.status, 0, first.stderr);
+  assert.ok(fs.existsSync(path.join(f.project, '.qatlas-project', 'README.md')));
+  assert.ok(fs.existsSync(path.join(f.project, '.qatlas-project', 'zone-import', '.gitkeep')));
+  assert.ok(fs.existsSync(path.join(f.project, '.qatlas-project', 'zone-export', '.gitkeep')));
+  assert.ok(fs.existsSync(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json')));
+  assert.strictEqual(fs.existsSync(path.join(f.project, '.qatlas-project', 'updates')), false);
+  const ignore = fs.readFileSync(path.join(f.project, '.gitignore'), 'utf8');
+  assert.ok(ignore.includes('/custom/'));
+  assert.ok(ignore.includes('/.qatlas-project/zone-import/*'));
+
+  const backlog = path.join(f.project, '.qatlas-project', 'backlog', 'BACKLOG.md');
+  write(backlog, '# Extern\nhttps://example.invalid/project\nKeine lokalen Tasks.\n');
+  const second = runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(second.status, 0, second.stderr);
+  assert.ok(!second.stdout.includes('ANGELEGT'));
+  assert.ok(fs.readFileSync(backlog, 'utf8').includes('https://example.invalid/project'));
+  assert.deepStrictEqual(fs.readdirSync(path.dirname(backlog)).sort(), ['BACKLOG.md', 'IDEAS.md']);
+
+  fs.rmSync(path.join(f.project, '.qatlas-project', 'memory'), { recursive: true });
+  const third = runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(third.status, 0, third.stderr);
+  assert.strictEqual(fs.existsSync(path.join(f.project, '.qatlas-project', 'memory')), false,
+    'Ein bewusst entfernter Funktionsordner wird nicht neu erzeugt.');
+}
+
+function testWritingConsumersRespectMigration() {
+  const f = fixture('consumer-block');
+  initProject(f);
+  write(path.join(f.project, '.qatlas', 'project', 'README.md'), '# Alt\n');
+  write(path.join(f.project, '.gitignore'), '# unverändert\n');
+  const doctor = runNode(path.join(pluginRoot, 'scripts', 'qatlas-doctor.js'),
+    ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.ok(doctor.stdout.includes('Wegen der offenen Projektmigration wurde nichts verändert'));
+  assert.strictEqual(fs.readFileSync(path.join(f.project, '.gitignore'), 'utf8'), '# unverändert\n');
+  assert.strictEqual(fs.existsSync(path.join(f.project, 'AGENTS.md')), false);
+
+  const update = path.join(pluginRoot, 'scripts', 'qatlas-update.js');
+  const ack = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(ack.status, 1);
+  assert.ok(ack.stderr.includes('Projektmigration offen'));
+  assert.strictEqual(fs.existsSync(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json')), false);
 }
 
 function testSkippedUpdateVersions() {
@@ -217,18 +415,48 @@ function testSkippedUpdateVersions() {
   const fakePlugin = path.join(f.root, 'plugin');
   fs.mkdirSync(path.join(fakePlugin, '.claude-plugin'), { recursive: true });
   fs.mkdirSync(path.join(fakePlugin, 'updates'), { recursive: true });
-  fs.mkdirSync(path.join(f.project, '__callbell__'), { recursive: true });
+  fs.mkdirSync(path.join(f.project, '.qatlas-project'), { recursive: true });
   write(path.join(fakePlugin, '.claude-plugin', 'plugin.json'), { name: 'qatlas' });
   write(path.join(fakePlugin, 'VERSION'), '0.10.0\n');
   write(path.join(fakePlugin, 'updates', '0.4.0.md'), '# 0.4.0\n');
   write(path.join(fakePlugin, 'updates', '0.7.2.md'), '# 0.7.2\n');
-  write(path.join(f.project, '__callbell__', 'updates', 'state.json'), {
+  write(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), {
     format: 1, plugins: { qatlas: '0.2.0' },
   });
 
   const result = pendingUpdates(f.project, { name: 'qatlas', version: '0.10.0' }, fakePlugin);
   assert.strictEqual(result.checked, '0.2.0');
   assert.deepStrictEqual(result.pending.map(file => path.basename(file)), ['0.4.0.md', '0.7.2.md']);
+}
+
+function testUpdateCommandsAcrossVersions() {
+  const f = fixture('update-commands');
+  fs.mkdirSync(path.join(f.project, '.qatlas-project'), { recursive: true });
+  write(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), {
+    format: 1, plugins: { qatlas: '0.0.0' },
+  });
+  const update = path.join(pluginRoot, 'scripts', 'qatlas-update.js');
+  const notice = runNode(update, ['notice', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(notice.status, 0, notice.stderr);
+  assert.ok(notice.stdout.includes('0.2.0.md'));
+  assert.ok(notice.stdout.includes('0.2.1.md'));
+  const status = runNode(update, ['status', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.ok(status.stdout.includes('2 relevante Update-Anweisung(en)'));
+  const ack = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(ack.status, 0, ack.stderr);
+  const currentVersion = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
+  const state = JSON.parse(fs.readFileSync(
+    path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), 'utf8'));
+  assert.strictEqual(state.plugins.qatlas, currentVersion);
+  const after = runNode(update, ['status', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.ok(after.stdout.includes('0 relevante Update-Anweisung(en)'));
+
+  write(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), '{defekt}\n');
+  const invalid = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(invalid.status, 1);
+  assert.ok(invalid.stderr.includes('Prüfstand bleibt unverändert'));
+  assert.strictEqual(fs.readFileSync(
+    path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), 'utf8'), '{defekt}\n');
 }
 
 try {
@@ -240,8 +468,14 @@ try {
   testConflictingStatuslineTargets();
   testInvalidLegacyFile();
   testProjectDetection();
+  testExplicitProjectMigration();
+  testProjectMigrationConflictsAndRecovery();
+  testProjectContext();
+  testDoctorSetupAndUpdateState();
+  testWritingConsumersRespectMigration();
   testSkippedUpdateVersions();
-  process.stdout.write('✓ Qatlas-Migrationen: 9 Szenarien erfolgreich.\n');
+  testUpdateCommandsAcrossVersions();
+  process.stdout.write('✓ Qatlas-Migrationen: 15 Szenarien erfolgreich.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

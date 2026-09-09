@@ -54,8 +54,6 @@ Diese Namen sind exklusiv und tragen kein Präfix.
   Repo-Grenze erzeugt keine automatische Umordnung.
 - `templates/`: optionale, versionierte Vorlagenbibliothek des Nutzers. Qatlas legt dort nichts ab und
   aktualisiert nichts. Vorlagen tragen beschreibende Namen, nie reservierte Funktionsnamen.
-- `updates/`: lokaler Stand der projektbezogenen Plugin-Prüfung. Das zuständige Update-Verfahren verwaltet
-  ihn; dieser Vertrag definiert keine Migrationslogik.
 - `zone-import/`: gitignorierter Puffer für nicht vertrauenswürdiges Rohmaterial. Lege dauerhaften Inhalt
   richtig ab und verschiebe nur erfolgreich verarbeitete Originale nach `processed/<yyyy-mm>/`.
 - `zone-export/`: gitignorierter Puffer ausschließlich für ausdrücklich angeforderte Lieferobjekte. Lege
@@ -64,6 +62,10 @@ Diese Namen sind exklusiv und tragen kein Präfix.
 Die beiden Zonen sind stets vorhanden. Ein Original zu archivieren ist Routine, eine Zone zu leeren ist
 eine Löschung. Große oder veränderliche Binärdateien gehören in einen Dateispeicher oder Git LFS, nicht
 dauerhaft in eine Zone. Qatlas' aktuelle Vorlagen liegen im versionsgebundenen Plugin-Store.
+
+Technische Projektkonfiguration und der versionierte Prüfstand projektbezogener Plugin-Updates liegen unter
+`.qatlas/plugins/`. Checkout-lokaler Laufzeitzustand liegt unter `.qatlas/local/`. Keiner dieser technischen
+Orte ist Teil des Projektwissensraums.
 
 ## Dateikennungen
 

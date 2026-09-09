@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { projectMigrationInventory } = require('./qatlas-migrations.js');
 
 let readConfig = () => ({ config: { 'session-start': { enabled: true } } });
 try { ({ readConfig } = require('./runtime/config-loader.js')); }
@@ -58,11 +59,11 @@ function compare(left, right) {
 }
 
 function statePath(root) {
-  return path.join(root, '.qatlas', 'project', 'updates', 'state.json');
+  return path.join(root, '.qatlas', 'plugins', 'updates', 'state.json');
 }
 
 function hasCurrentScaffold(root) {
-  try { return fs.statSync(path.join(root, '.qatlas', 'project')).isDirectory(); }
+  try { return fs.statSync(path.join(root, '.qatlas-project')).isDirectory(); }
   catch { return false; }
 }
 
@@ -77,17 +78,19 @@ function hasScaffold(root) {
 function readState(root) {
   const candidates = [
     statePath(root),
+    path.join(root, '.qatlas-project', 'updates', 'state.json'),
+    path.join(root, '.qatlas', 'project', 'updates', 'state.json'),
     path.join(root, '__qatlas__', 'updates', 'state.json'),
     path.join(root, '__callbell__', 'updates', 'state.json'),
   ];
   for (const file of candidates) {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
-      return {
-        format: 1,
-        plugins: parsed && typeof parsed.plugins === 'object' && parsed.plugins ? parsed.plugins : {},
-      };
-    } catch { /* Den nächsten bekannten Zustandsort versuchen. */ }
+    if (!fs.existsSync(file)) continue;
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)
+      || !parsed.plugins || typeof parsed.plugins !== 'object' || Array.isArray(parsed.plugins)) {
+      throw new Error(file + ': Der Prüfstand muss ein JSON-Objekt mit einer plugins-Map sein.');
+    }
+    return { ...parsed, format: 1, plugins: parsed.plugins };
   }
   return { format: 1, plugins: {} };
 }
@@ -130,24 +133,48 @@ function main() {
   const root = resolveRoot();
   if (command === 'notice' && !readConfig(root).config['session-start'].enabled) return;
   const identity = pluginIdentity();
+  const migration = projectMigrationInventory(root, { detailed: false });
   const scaffold = hasScaffold(root);
 
   if (!identity) return;
 
+  if (migration.unresolved) {
+    if (command === 'status') {
+      process.stdout.write('Projektmigration offen: Prüfstand bleibt bis zur Inventarisierung und '
+        + 'ausdrücklichen Migration unverändert.\n');
+    } else if (command === 'ack') {
+      process.stderr.write('Projektmigration offen. Der Update-Stand wurde nicht bestätigt.\n');
+      process.exitCode = 1;
+    }
+    return;
+  }
+
   if (command === 'ack') {
     if (!hasCurrentScaffold(root)) {
-      process.stderr.write('Kein .qatlas/project/-Scaffold im Zielrepo. Migriere zuerst den Legacy-Zustand.\n');
+      process.stderr.write('Kein .qatlas-project/-Scaffold im Zielrepo. Richte Qatlas zuerst ein.\n');
       process.exitCode = 1;
       return;
     }
-    writeState(root, identity);
+    try { writeState(root, identity); }
+    catch (error) {
+      process.stderr.write('Prüfstand bleibt unverändert: ' + error.message + '\n');
+      process.exitCode = 1;
+      return;
+    }
     process.stdout.write(`✓ ${identity.name} ${identity.version} für dieses Repo als geprüft gespeichert.\n`);
     return;
   }
 
   if (!scaffold) return;
 
-  const { checked, pending } = pendingUpdates(root, identity);
+  let checked;
+  let pending;
+  try { ({ checked, pending } = pendingUpdates(root, identity)); }
+  catch (error) {
+    process.stderr.write('Prüfstand konnte nicht gelesen werden: ' + error.message + '\n');
+    process.exitCode = 1;
+    return;
+  }
 
   if (command === 'status') {
     process.stdout.write(`${identity.name}: geprüft ${checked}, installiert ${identity.version}, `

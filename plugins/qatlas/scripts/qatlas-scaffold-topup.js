@@ -36,15 +36,20 @@ function copyMissing(from, to) {
 
 // apply=false berichtet, apply=true ergänzt. Vorhandene Dateien bleiben unangetastet.
 function scaffoldTopUp(target, bundle, { apply = false, only = null, exclude = [] } = {}) {
-  const base = path.join(bundle, '.qatlas', 'project');
-  const selected = walk(base).filter(rel => (!only || only.includes(rel)) && !exclude.includes(rel));
-  const project = path.join(target, '.qatlas', 'project');
+  const base = path.join(bundle, '.qatlas-project');
+  const project = path.join(target, '.qatlas-project');
+  const existing = fs.existsSync(project);
+  const selected = walk(base).filter(rel => {
+    if ((only && !only.includes(rel)) || exclude.includes(rel)) return false;
+    if (!existing || rel === 'README.md') return true;
+    return fs.existsSync(path.join(project, path.dirname(rel)));
+  });
   const absent = selected.filter(rel => !fs.existsSync(path.join(project, rel)));
   const created = [];
   if (apply) {
     for (const rel of absent) {
       if (copyMissing(path.join(base, rel), path.join(project, rel))) {
-        created.push('.qatlas/project/' + rel);
+        created.push('.qatlas-project/' + rel);
       }
     }
   }

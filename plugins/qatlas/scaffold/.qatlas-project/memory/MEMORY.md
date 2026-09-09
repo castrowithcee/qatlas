@@ -10,4 +10,4 @@ edit: shared
 
 # Memory
 
-<!-- Eine Zeile pro Repo-Memory: - [Titel](datei.md) - kurzer Aufhänger. -->
+<!-- Eine Zeile pro Repo-Memory: - [Titel](memory-<id>-<slug>.md) - kurzer Aufhänger. -->

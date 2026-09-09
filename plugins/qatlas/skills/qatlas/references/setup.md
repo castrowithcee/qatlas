@@ -60,7 +60,10 @@ Fasse nur tatsächlich Angelegtes und offene Blocker zusammen. Bei der ersten Ei
 Orientierungspunkte:
 
 - `AGENTS.md` trägt die Projektanweisungen; `CLAUDE.md` bindet sie für Claude ein.
-- `.qatlas/project/` trägt den Wegweiser zum maßgeblichen Planungssystem, Memory und die beiden Zonen.
+- `.qatlas-project/README.md` ist der Einstieg in den repo-eigenen Projektzustand. Der Wissensraum trägt
+  außerdem den Wegweiser zum maßgeblichen Planungssystem, Memory und die beiden Zonen. Fachliche Inhalte
+  bleiben an ihren vorhandenen maßgeblichen Orten.
+- `.qatlas/plugins/` trägt technische Projektkonfiguration und den versionierten Update-Prüfstand.
 - `~/.qatlas/plugins/config.yaml` trägt die nutzerweite Plugin-Konfiguration;
   `~/.qatlas/rules/RULESET.md` bleibt die von Qatlas verwaltete Regelkopie.
 

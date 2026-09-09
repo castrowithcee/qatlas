@@ -23,7 +23,9 @@ node <plugin-root>/scripts/qatlas-update.js status
 ```
 
 Der erste Befehl prüft Node, Git, Git-Identität, optionale Git-LFS-Unterstützung, nutzerweiten Store,
-Scaffold, `.gitignore` und Ruleset. Der zweite vergleicht den für dieses Repo gespeicherten
+Projektwissensraum samt Root-README und Größenbudget, `.gitignore` und Ruleset. Bei einer alten oder
+parallelen Projektwurzel bleibt jeder schreibende Reparaturlauf gesperrt und nennt den Inventarbefehl. Der
+zweite Befehl vergleicht den unter `.qatlas/plugins/updates/state.json` für dieses Repo gespeicherten
 Qatlas-Prüfstand mit der installierten Qatlas-Version. Die optionalen Packs prüfen ihre eigene Version
 jeweils über ihren SessionStart-Hook; leite aus dem Qatlas-Befehl keinen Gesamtstand aller Plugins ab.
 
