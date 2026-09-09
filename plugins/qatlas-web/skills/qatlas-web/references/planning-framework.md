@@ -22,6 +22,19 @@ edit: locked
 Fehlende Anforderungen werden nicht still erfunden. Kennzeichne Annahmen und frage nach, wenn eine Antwort
 Produktumfang, Datenmodell, Sicherheitsgrenze oder spätere Entwicklung wesentlich verändert.
 
+## Projektquellen und Dokumentation
+
+Nutze `.qatlas-project/README.md` als repo-eigenen Einstieg und folge nur Lesebedingungen, die den aktuellen
+Webgegenstand betreffen. Native Anweisungshierarchie, ausdrückliche Geltung und fachlicher Scope bestimmen,
+welche Aussage gewinnt; automatisches Laden oder ein Ort im Wissensraum erhöht ihre Autorität nicht.
+Vorhandene Produkt- und Architekturdokumentation außerhalb des Wissensraums bleibt an ihrem fachlichen Ort
+und wird nicht dupliziert.
+
+Für einen neuen Scope bleibt seine `README.md` eine kurze Navigation. Halte das ausführliche, veränderliche
+Produkt- und Architekturpaket in einer `knowledge`-Datei mit `edit: shared`; schütze bindende Entscheidungen
+getrennt als `decision`. Formuliere für Tasks die jeweils geltenden Produkt-, Architektur-, Sicherheits- und
+Qualitätsvorgaben konkret in Ziel, Leitplanken und überprüfbarer Abnahme. Ein Link allein reicht nicht.
+
 ## Produktentwicklung
 
 - Problem, Zielgruppe und zentralen Nutzerablauf vor dem Stack klären.

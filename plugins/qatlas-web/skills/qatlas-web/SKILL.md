@@ -23,8 +23,10 @@ Webfrage und beginne nicht selbstständig, Dateien oder Tasks anzulegen.
 
 ## Fachlichen Scope bestimmen
 
-Lies vorhandene Projektanweisungen, Navigationsknoten, Produkt- und Architekturdokumentation sowie nur die
-für den aktuellen Gegenstand nötigen Referenzen. Lade nicht vorsorglich das gesamte Pack.
+Beginne bei einer vorhandenen `.qatlas-project/README.md` und folge nur passenden Lesebedingungen. Lies
+außerdem vorhandene native Projektanweisungen sowie Produkt- und Architekturdokumentation an ihren
+fachlichen Orten. Ihr Fundort, ihre Lesereihenfolge oder automatische Bereitstellung verleiht einer Aussage
+keinen zusätzlichen Rang. Lade nur die für den aktuellen Gegenstand nötigen Quellen und Pack-Referenzen.
 
 1. Lies bei Produkt- oder Architekturfragen `references/planning-framework.md`.
 2. Lies `references/product-profile.md`, wenn Problem, Zielgruppe, Nutzerablauf, MVP oder Erfolgssignal
@@ -61,8 +63,10 @@ Es rechtfertigt keine vorsorgliche Queue, keinen Service und kein zweites Datens
 ## Beiträge zu Qatlas-Modi
 
 - **Shape:** Liefere das bestätigungsfähige Webprodukt- und Architekturpaket. Wenn der aktive Shape-Modus
-  einen neuen fachlichen Scope dokumentiert, darf er die Assets `project-framework.md` und
-  `project-index.md` als Ausgangspunkt nutzen. `web-project-start.txt` ist eine optionale Eingabevorlage.
+  einen neuen fachlichen Scope dokumentiert, darf er `project-readme.md` für dessen knappe Navigation und
+  `project-knowledge.md` für die ausführliche, weiter pflegbare Fachbeschreibung als Ausgangspunkt nutzen.
+  Bindende Entscheidungen bleiben in geschützten Entscheidungsdateien am maßgeblichen fachlichen Ort.
+  `web-project-start.txt` ist eine optionale Eingabevorlage.
 - **Backlog:** Prüfe Web-Tasks auf fachliche Vollständigkeit und vertikale, beobachtbare Ergebnisse. Ändere
   keine Priorität oder Freigabe aus eigener Autorität.
 - **Run:** Gib Worker- oder Checker-Rollen nur die zum Task gehörenden Webgrenzen und prüfe reale Diffs und
@@ -77,3 +81,5 @@ Es rechtfertigt keine vorsorgliche Queue, keinen Service und kein zweites Datens
 - Keine TypeScript-, PostgreSQL- oder Docker-Compose-Migration ohne belegte Projektanforderung.
 - Keine allgemeine Reference Architecture in den Workspace kopieren; dort steht nur angewandte
   Projektwahrheit.
+- Im Projektwissensraum keine `FRAMEWORK.md` oder `INDEX.md` erzeugen und bestätigte Produktinformationen
+  nicht in eine überlange Navigations-README pressen.

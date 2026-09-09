@@ -34,6 +34,11 @@ Bestimme vor der ersten Änderung:
 5. **Beweise:** Welche Tests, Zustände oder Artefakte belegen den Abschluss?
 6. **Grenzen:** Welche Handlung braucht zwingend den Nutzer?
 
+Ist `.qatlas-project/README.md` vorhanden, beginne dort und folge nur den für den Laufvertrag relevanten
+Lesebedingungen. Prüfe fachliche Quellen auch außerhalb des Wissensraums an ihrem maßgeblichen Ort. Native
+Anweisungshierarchie, ausdrückliche Geltung und fachlicher Scope bestimmen den Rang; automatische
+Bereitstellung oder bloßes Lesen nicht.
+
 Nutzer- und Projektvorgaben bestimmen das Planungssystem. Nur ohne andere Vorgabe gilt der lokale
 Qatlas-Backlog. Ist ein vorgeschriebenes externes System nicht erreichbar, spiegle es nicht in lokale
 Dateien; stoppe vor schreibender Arbeit mit dem konkreten Hindernis.
@@ -61,7 +66,9 @@ größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für spätere Lä
    aktuellen Datensatzes.
 5. Prüfe jeden Task unmittelbar vor der Beanspruchung erneut. Beurteile nach seinem Inhalt, nicht nach dem
    Vorhandensein einer bestimmten Überschrift, ob Ergebnis, Scope, Vorgehen, Abnahme und bei Arbeit an
-   vorhandenem Bestand die Ausführungsgrundlage weiterhin tragen. Fehlt eine Information, die diese Punkte
+   vorhandenem Bestand die Ausführungsgrundlage und die konkret eingearbeiteten geltenden Entscheidungen,
+   Konventionen und Anforderungen weiterhin tragen. Eine Quellenliste ohne diese Aussagen ist kein
+   ausführbarer Vertrag. Fehlt eine Information, die diese Punkte
    wesentlich verändern könnte, ist eine notwendige Berechtigung ungeklärt oder die Dokumentationswirkung
    offen, setze ihn auf `draft`, informiere den Nutzer konkret und führe ihn nicht aus. Fehlt eine bereits
    bekannte externe Voraussetzung, setze ihn auf `waiting`. Eine reversible technische Detailentscheidung
@@ -97,7 +104,7 @@ Reihenfolge:
   Arbeitskarte, nicht als starre Dateifreigabe, und gib keine Secrets weiter.
 - **Scope:** erlaubte fachliche Ziele sowie ausdrücklicher Scope-out.
 - **Leitplanken:** bindende Architektur-, Sicherheits-, Kompatibilitäts- und Dokumentationsgrenzen sowie
-  der Entscheidungsspielraum.
+  der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink.
 - **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
 - **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
   erfüllt, oder eine Vertrags-, Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
@@ -172,6 +179,9 @@ Ausführungsgrundlage ab:
 
 - Lasse direkt betroffene Dokumentation, die durch die Umsetzung falsch geworden ist, innerhalb desselben
   Tasks korrigieren und erneut prüfen.
+- Ändert die Umsetzung autorisiert eine maßgebliche Grundlage, ermittle deren betroffene offene Tasks und
+  gleiche ihre konkreten Vorgaben gezielt ab. Ändere Ziel oder Abnahmekriterien nur mit der dafür nötigen
+  Entscheidung.
 - Widerspricht eine maßgebliche fachliche Dokumentation dem beabsichtigten Ergebnis und könnte sie eine
   Nutzerentscheidung ausdrücken, setze den Task auf `review`, statt eine Seite still zu überschreiben.
 - Ändere sachlich unabhängige fehlerhafte Dokumentation nicht opportunistisch und melde sie konkret. Erfasse

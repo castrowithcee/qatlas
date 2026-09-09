@@ -40,6 +40,10 @@ eindeutiger Auftrag hervorgeht. Der Agent bestimmt Branch, Zweck-Slug und Pfad v
 Ein `qatlas run` braucht kein zusätzliches `new`: Sein ausdrücklicher Aufruf autorisiert die im Git-Ablauf
 geforderte Isolation bereits.
 
+Muss der Arbeitszweck aus Projektwissen bestimmt werden, beginne bei einer vorhandenen
+`.qatlas-project/README.md` und folge nur passenden Lesebedingungen. Das maßgebliche Planungssystem und der
+aktuelle Taskvertrag bleiben für Taskstatus und Arbeitsumfang alleinige Autorität.
+
 1. Ermittle Git-Root, primären Arbeitsbaum, gemeinsames Git-Verzeichnis, Branches, Worktrees und vollständigen
    Status. Committe und stashe nichts. Lokale Änderungen bleiben in ihrem Arbeitsbaum und gelangen nicht in
    den neuen.

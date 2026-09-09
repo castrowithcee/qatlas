@@ -10,7 +10,7 @@ edit: locked
 # Planungssystem wechseln
 
 Dieser Skill führt einen seltenen Systemwechsel aus. Danach gibt es genau ein maßgebliches Planungssystem;
-`.qatlas/project/backlog/BACKLOG.md` bleibt der beim Sessionstart geladene Wegweiser dorthin. Der Skill plant
+`.qatlas-project/backlog/BACKLOG.md` bleibt der beim Sessionstart geladene Wegweiser dorthin. Der Skill plant
 keine Produktarbeit und pflegt keinen dauerhaften Spiegel.
 
 Der ausdrückliche Aufruf autorisiert Bestandsaufnahme und Migrationsplanung. Bevor du Daten im Ziel anlegst,
@@ -19,7 +19,8 @@ Rückweg und hole die Zustimmung des Nutzers ein. Secrets und Tokens gehören ni
 
 ## 1. Ausgangslage bestimmen
 
-1. Lies Projektanweisungen und `.qatlas/project/backlog/BACKLOG.md`. Fehlt das Qatlas-Scaffold, stoppe und
+1. Lies Projektanweisungen, `.qatlas-project/README.md` und `.qatlas-project/backlog/BACKLOG.md`. Folge aus
+   der README nur den für den Systemwechsel passenden Lesebedingungen. Fehlt das Qatlas-Scaffold, stoppe und
    verweise auf `qatlas setup`.
 2. Bestimme Quelle, Ziel und gewünschte Richtung. Unterstütze lokal nach extern, extern nach lokal und
    extern nach extern; unterstelle keinen Anbieter aus einem vorhandenen Git-Remote.
@@ -68,8 +69,9 @@ ableiten lassen.
 3. Erzeuge Zielobjekte idempotent und halte während des Laufs eine nicht versionierte Zuordnung von Quell-ID
    zu Ziel-ID. Schreibe keine Zugangsdaten oder unnötigen personenbezogenen Rohdaten hinein.
    Übernimm in den aktuellen Zieldatensatz nur weiterhin gültigen Taskvertrag, Entscheidungen und aktuelle
-   Übergabe. Migriere eine fachlich benötigte Chronologie getrennt, statt frühere Laufberichte in den
-   Pflichtkontext des Tasks zu verkleben.
+   Übergabe. Arbeite die geltenden Entscheidungen, Konventionen und Anforderungen als konkrete
+   Taskanweisungen und überprüfbare Abnahme ein; Quellenlinks allein genügen nicht. Migriere eine fachlich
+   benötigte Chronologie getrennt, statt frühere Laufberichte in den Pflichtkontext des Tasks zu verkleben.
 4. Verifiziere nach jedem Block Fehler, Anzahl und Stichproben. Bei Rate-Limit oder Teilfehler stoppe anhand
    der Antwort-Header, erhalte die Zuordnung und setze nicht blind erneut an.
 5. Ändere oder entferne die Quelle erst, wenn das Ziel vollständig verifiziert und der Nutzer dem Umschalten
@@ -83,7 +85,7 @@ Rückverfolgung oder Links nötig sind.
 
 ## 4. Binding umschalten
 
-Erst nach erfolgreicher Verifikation wird `.qatlas/project/backlog/BACKLOG.md` atomar zum neuen Wegweiser:
+Erst nach erfolgreicher Verifikation wird `.qatlas-project/backlog/BACKLOG.md` atomar zum neuen Wegweiser:
 
 - Bei lokalem Ziel enthält es den lokalen Roster nach der Backlog-Regel und ihrer Referenz.
 - Bei externem Ziel enthält es einen prominenten Link mit Titel und eine knappe Bindung: Anbieter,

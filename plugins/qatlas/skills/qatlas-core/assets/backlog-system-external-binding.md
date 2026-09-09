@@ -16,7 +16,8 @@ edit: shared
 - **Arbeitspakete:** <objekttyp und fachlicher container>
 - **Entwürfe:** <wo unausgereifte ideen leben und wann sie zu arbeit werden>
 - **Status:** <feldname>; `<wert>` = <bedeutung>, ...
-- **Aktueller Datensatz:** <objekt oder felder mit dem eigenständig ausführbaren aktuellen taskvertrag>
+- **Aktueller Datensatz:** <objekt oder felder mit dem eigenständig ausführbaren aktuellen taskvertrag,
+  der geltende vorgaben konkret statt nur als quellenlinks enthält>
 - **Historie:** <kanal für kommentare oder verlauf; nicht maßgeblich und nur bei begründetem bedarf lesen>
 - **Lesepolitik:** <auswahlmetadaten für status, reihenfolge, abhängigkeiten und eigentümerschaft; vollständiger
   aktueller datensatz nur für ausgewählte tasks; auslöser und begrenzung für historischen abruf>
@@ -24,7 +25,7 @@ edit: shared
 - **Betriebsgrenzen:** <knappe ständig nötige rate-, batch- oder capability-hinweise>
 - **Lokaler Spiegel:** keiner
 
-<!-- Nach .qatlas/project/backlog/BACKLOG.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Nur
+<!-- Nach .qatlas-project/backlog/BACKLOG.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Nur
      Angaben aufnehmen, die ein Agent bei normaler Planung, Orchestrierung und Taskarbeit ständig braucht.
      Der aktuelle Datensatz muss ohne Historie ausführbar bleiben. Ausführliche Anbieter- und
      Migrationshinweise bleiben im zuständigen Skill. -->

@@ -24,6 +24,13 @@ Qatlas-Backlog maßgeblich, lies vor der ersten Taskauswahl oder -änderung voll
 nicht auflösen, schreibe nicht in den lokalen Backlog. Bei einem externen System gilt stattdessen nur dessen
 Binding.
 
+Ist `.qatlas-project/README.md` vorhanden, nutze sie als repo-eigenen Einstieg und folge nur den zur
+aktuellen Aufgabe passenden Lesebedingungen. Suche in den so gewählten Scopes zuerst über das Frontmatter
+und öffne nur passende Bodies. Ordne jede gefundene Aussage nach nativer Anweisungshierarchie,
+ausdrücklicher Geltung und fachlichem Scope ein. Automatische Bereitstellung, Lesereihenfolge oder Ablage im
+Wissensraum erhöht ihre Autorität nicht. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihren
+Gegenstand maßgeblich.
+
 ## Modus wählen
 
 ### Einrichtung
@@ -61,6 +68,11 @@ normale Unterhaltung nie als Laufautorisierung.
 Nutzer- und Projektvorgaben bestimmen das Planungssystem. Der lokale Qatlas-Backlog gilt nur ohne andere
 Autorität. Spiegle ein externes System nie in lokale Tasks und behaupte keine dortige Änderung, wenn es
 nicht erreichbar ist.
+
+Ein Task übernimmt die für seinen Gegenstand geltenden Entscheidungen, Konventionen und Anforderungen als
+konkrete Anweisungen und überprüfbare Abnahme. Quellenlinks dienen der Nachprüfung und ersetzen diese
+Aussagen nicht. Ändert ein autorisierter Arbeitsmodus eine maßgebliche Grundlage, prüfe die davon betroffenen
+offenen Tasks gezielt auf veraltete Vorgaben; ändere dabei weder Ziel noch Abnahmekriterien still.
 
 Der Nutzer ist Entscheider, nicht Mitleser des Planungssystems. Setzen `shape`, `backlog` oder `review`
 eine echte Nutzerentscheidung voraus, hole ihn knapp und ohne vorausgesetzte Tasklektüre ab, führe immer

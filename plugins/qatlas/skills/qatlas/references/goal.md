@@ -34,9 +34,12 @@ gewünschte Weiterentwicklung sein. Kläre zuerst, wie reif er ist:
 - **Bereits beschrieben:** Prüfe Widersprüche, Lücken und unbelegte Annahmen, statt den Eingang neu zu
   erzählen.
 
-Lies vorhandene Projektquellen nur, wenn sie das Zielbild wesentlich begrenzen oder eine bereits getroffene
-Entscheidung enthalten. Eine grüne Wiese ist keine Standardannahme. Stelle gezielte Fragen statt eines
-Intake-Formulars und frage nichts erneut, was im Gespräch oder Bestand schon eindeutig beantwortet ist.
+Ist `.qatlas-project/README.md` vorhanden, beginne dort und folge nur den Lesebedingungen, die das Zielbild
+wesentlich begrenzen oder zu einer bereits getroffenen Entscheidung führen. Berücksichtige ebenso
+maßgebliche fachliche Quellen außerhalb des Wissensraums. Prüfe jede Aussage auf Geltung für den konkreten
+Gegenstand; bloßes Lesen macht sie nicht zur globalen Anweisung. Eine grüne Wiese ist keine
+Standardannahme. Stelle gezielte Fragen statt eines Intake-Formulars und frage nichts erneut, was im
+Gespräch oder Bestand schon eindeutig beantwortet ist.
 
 ## Zielbild entwickeln
 

@@ -1,16 +1,18 @@
 ---
 description: >
-  Bestätigtes Produkt- und Architekturpaket des Webprojekts mit Fähigkeiten, Stack, Zielhorizont,
+  Veränderliches Produkt- und Architekturwissen des Webprojekts mit Fähigkeiten, Stack, Zielhorizont,
   Einführungstriggern, Risiken und offenen Entscheidungen.
-type: meta
+type: knowledge
 edit: shared
-status: active
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
 ---
 
-# <projekt>
+# <projekt>: Produkt und Architektur
 
-<!-- Nach <scope>/INDEX.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Bestätigte Aussagen,
-Annahmen und offene Punkte sichtbar trennen. -->
+<!-- Nach <scope>/knowledge/<slug>.md kopieren und vor dem Schreiben alle Platzhalter ersetzen.
+     Bestätigte Aussagen, Annahmen und offene Punkte sichtbar trennen. Bindende Entscheidungen nicht hier
+     verstecken, sondern in einer geschützten decision-Datei am fachlich maßgeblichen Ort festhalten. -->
 
 ## Produktprofil
 
@@ -31,8 +33,7 @@ Annahmen und offene Punkte sichtbar trennen. -->
 
 ## Architektur und Stack jetzt
 
-<!-- Reference Architecture, Deployables, Frontend, Backend, Datenhaltung, Auth, Files, Integrationen,
-     Jobs, Deployment sowie Test-, Security- und Observability-Baseline. -->
+<!-- Deployables, Frontend, Backend, Datenhaltung, Auth, Files, Integrationen, Jobs und Deployment. -->
 
 ## Daten-, Eigentums- und Berechtigungsgrenzen
 
@@ -40,11 +41,11 @@ Annahmen und offene Punkte sichtbar trennen. -->
 
 ## UI- und Interaktionsprofil
 
-<!-- Projektbezogene visuelle Vorgaben, Zustände, Responsive Verhalten und Accessibility. -->
+<!-- Sichtbare Vorgaben, Zustände, Responsive Verhalten und Accessibility. -->
 
-## Betrieb und Risiko
+## Qualität, Betrieb und Risiko
 
-<!-- Hosting, Umgebungen, Schutzbedarf, Backup und Restore, Ausfallverhalten und relevante Kostenlimits. -->
+<!-- Tests, Security, Observability, Hosting, Umgebungen, Schutzbedarf, Backup, Restore und Kostenlimits. -->
 
 ## Zielhorizont und erhaltene Nahtstellen
 
@@ -54,10 +55,6 @@ Annahmen und offene Punkte sichtbar trennen. -->
 
 <!-- Nicht gebaute Fähigkeiten mit Grund und beobachtbarem Einführungstrigger. -->
 
-## Risiken, Annahmen und offene Entscheidungen
+## Annahmen und offene Entscheidungen
 
 <!-- Auswirkung, Empfehlung, Alternativen und spätester Entscheidungszeitpunkt. -->
-
-## Planung
-
-<!-- Maßgebliches Planungssystem, grobe Meilensteine und nächster vollständig geschnittener Meilenstein. -->

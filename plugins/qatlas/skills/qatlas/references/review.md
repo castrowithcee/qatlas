@@ -24,16 +24,19 @@ Umsetzung, Worker, Integration, externe Wirkungen und Pushes bleiben außerhalb 
 ## Schlange bilden
 
 1. Bestimme Planungssystem und ausdrücklich gewählten Scope.
-2. Lies zunächst nur Roster beziehungsweise externe Metadaten und bilde daraus die Schlange aus `review`
+2. Ist `.qatlas-project/README.md` vorhanden, folge von dort nur den Lesebedingungen, die für die gewählten
+   Übergaben relevant sind. Beziehe fachliche Quellen außerhalb des Wissensraums nach ihrem Gegenstand ein;
+   bloßes Lesen oder automatische Bereitstellung erhöht ihre Autorität nicht.
+3. Lies zunächst nur Roster beziehungsweise externe Metadaten und bilde daraus die Schlange aus `review`
    und ausdrücklich offenen Nutzerentscheidungen, Prüfungen oder Handlungen. Reife keine Drafts und
    verändere keinen Task mit laufendem Worker.
-3. Lies nur die Tasks der gebildeten Schlange vollständig. Sammle aus ihrem aktuellen Datensatz Ist-Stand,
+4. Lies nur die Tasks der gebildeten Schlange vollständig. Sammle aus ihrem aktuellen Datensatz Ist-Stand,
    Belege, offene Frage, Empfehlung und Folgen. Öffne Historie nur bei einem Widerspruch, fehlender
    entscheidungsrelevanter Begründung oder ausdrücklichem Verweis und frage nichts erneut, was bereits in den
    aktuellen Stand eingearbeitet ist.
-4. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neuer Review beginnt sauber; eine
+5. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neuer Review beginnt sauber; eine
    Fortsetzung darf nur ihren eindeutig zugeordneten Entscheidungsdiff weiterführen.
-5. Lies vor der ersten Übergabe vollständig
+6. Lies vor der ersten Übergabe vollständig
    [Entscheidungen knapp vorlegen](decision-card.md). Nenne nur die Anzahl der Aufgaben in der Schlange und
    beginne dann mit der ersten Karte nach diesem gemeinsamen Dialog.
 
@@ -43,7 +46,8 @@ Der gemeinsame Dialog regelt Orientierung und Darstellung. Die folgenden Abschni
 ## Antwort festhalten
 
 - Schreibe die Entscheidung an den vorhandenen fachlichen Ort im Task, nicht in ein separates Protokoll.
-  Pflege Task und Übergabe als aktuellen Snapshot nach dem maßgeblichen Vertrag.
+  Pflege Task und Übergabe als aktuellen Snapshot nach dem maßgeblichen Vertrag. Arbeite die daraus
+  geltenden Anweisungen und überprüfbaren Abnahmen konkret ein; ein Quellenlink allein reicht nicht.
 - Wähle den nächsten Status nach dem maßgeblichen Vertrag: `next`, wenn die Aufgabe nach einem neuen
   ausdrücklichen Lauf fortgesetzt werden kann, `review`, solange eine Nutzerhandlung offen bleibt,
   `waiting` bei einer externen Voraussetzung,
@@ -52,6 +56,10 @@ Der gemeinsame Dialog regelt Orientierung und Darstellung. Die folgenden Abschni
   maßgeblichen Planungssystems.
 - Aktualisiere nach jeder vollständig geklärten Aufgabe Spine und Zeitstempel nach dem maßgeblichen System.
 - Eine Antwort autorisiert keine Ausführungsarbeit. Dafür ist ein neuer ausdrücklicher Lauf nötig.
+
+Ändert die bestätigte Entscheidung eine maßgebliche Grundlage, pflege sie an deren fachlichem Ort und prüfe
+die davon betroffenen offenen Tasks gezielt auf veraltete Vorgaben. Ändere dabei keine anderen Ziele oder
+Abnahmekriterien still.
 
 ## Vollständig beenden
 

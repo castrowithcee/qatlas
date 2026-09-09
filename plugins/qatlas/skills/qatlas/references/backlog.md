@@ -26,12 +26,16 @@ bereits vollständig geklärter Arbeit.
 
 1. Bestimme das maßgebliche Planungssystem. Löse einen angegebenen Scope darin auf; ohne Angabe gilt der
    gesamte offene Backlog.
-2. Lies zuerst nur Roster beziehungsweise externe Metadaten: Status, Kurzstand, Reihenfolge,
+2. Ist `.qatlas-project/README.md` vorhanden, folge von dort nur den Lesebedingungen, die für den gewählten
+   Scope und seine offenen Vertragsfragen relevant sind. Fachliche Quellen außerhalb des Wissensraums
+   bleiben für ihren Gegenstand maßgeblich; bloßes Lesen oder automatische Bereitstellung erhöht ihren Rang
+   nicht.
+3. Lies zuerst nur Roster beziehungsweise externe Metadaten: Status, Kurzstand, Reihenfolge,
    Abhängigkeiten, Eigentümerschaft und vorhandene Wiedervorlagen.
-3. Bilde daraus getrennte Kandidatenmengen für `review`, `draft`, `waiting`, `ready` und `next`.
+4. Bilde daraus getrennte Kandidatenmengen für `review`, `draft`, `waiting`, `ready` und `next`.
    Bilde aus den Drafts in fachlich sinnvoller Reihenfolge die Gesprächsschlange. Lies jeden Task erst
    vollständig, wenn er an der Reihe ist.
-4. Verändere keinen `in-progress`-Task mit laufendem oder unbekanntem Worker.
+5. Verändere keinen `in-progress`-Task mit laufendem oder unbekanntem Worker.
 
 Braucht mindestens ein Task der Gesprächsschlange eine echte Nutzerentscheidung, lies vor ihrer ersten
 Präsentation vollständig [Entscheidungen knapp vorlegen](decision-card.md). Nenne und führe die
@@ -51,7 +55,9 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
    belegbare Antwort selbst aus dem aktuellen Projektstand. Bei Arbeit an einem vorhandenen System umfasst
    die Ausführungsgrundlage Ausgangszustand, bestehende Einstiegspunkte, erwartete Änderungsflächen,
    konkrete Prüfpfade, benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte sowie die
-   Wirkung auf maßgebliche Dokumentation. Halte keine Secrets im Task fest. Braucht es eine
+   Wirkung auf maßgebliche Dokumentation. Arbeite die für den Task geltenden Entscheidungen,
+   Konventionen und Anforderungen konkret in Ziel, Vorgehen und überprüfbare Abnahme ein; eine Quellenliste
+   allein reicht nicht. Halte keine Secrets im Task fest. Braucht es eine
    Nutzerentscheidung, stelle genau die nächste Entscheidung nach dem gemeinsamen Dialog vor und warte auf
    die Antwort. Arbeite jede geklärte Antwort sofort am fachlich passenden Ort in den aktuellen
    Taskvertrag ein und entferne überholte Varianten. Fahre danach mit der nächsten offenen Frage oder dem
@@ -79,6 +85,10 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
    Übersicht ist keine Disposition.
 6. **Bestehende Queue konsolidieren.** Entferne Doppelungen, löse widersprüchliche Reihenfolgen und prüfe
    Abhängigkeiten, ohne ausführbare Taskverträge unnötig umzuschreiben.
+
+Wird in diesem Modus eine maßgebliche Grundlage autorisiert geändert, ermittle ihre betroffenen offenen
+Tasks und gleiche deren aktuelle Verträge gezielt mit den neuen Vorgaben ab. Bewahre bestehende Ziele und
+Abnahmekriterien, sofern der Nutzer ihre Änderung nicht ebenfalls entschieden hat.
 
 ## Grenzen
 

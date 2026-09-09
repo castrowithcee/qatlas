@@ -64,10 +64,13 @@ Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
 
 ## Zusammenarbeit und Scaffold
 
+- `.qatlas-project/README.md` führt in den repo-eigenen Projektzustand und von dort bedarfsgerecht zu
+  fachlichen Quellen. Ihr Fundort oder automatisches Laden erhöht deren Autorität nicht.
 - Projektanweisungen und `BACKLOG.md` führen zum maßgeblichen Planungssystem. Der lokale Backlog wird nie
-  als Spiegel eines externen Systems gepflegt.
-- `zone-import/` und `zone-export/` sind flüchtige Puffer. Backlog, Memory und Update-Prüfstand sind
-  verwalteter Projektzustand; `templates/` gehört dem Nutzer.
+  als Spiegel eines externen Systems gepflegt. Taskverträge übernehmen geltende Vorgaben konkret; Links
+  dienen nur der Nachprüfung.
+- `zone-import/` und `zone-export/` sind flüchtige Puffer. Backlog und Memory sind einmaliger verwalteter
+  Projektzustand; `templates/` gehört dem Nutzer. Der Update-Prüfstand liegt im technischen Namespace.
 - Der Pfad sagt, wo Inhalt liegt; Frontmatter sagt, was es ist. Das vollständige Inhaltsschema wird erst
   vor einer tatsächlichen Markdown-Änderung geladen.
 - `~/.qatlas/plugins/config.yaml` schaltet Sessionstart und verwaltete Arbeitsvereinbarung nutzerweit.
