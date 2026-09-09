@@ -10,8 +10,8 @@ edit: locked
 # Vollständiges Frontmatter-Schema
 
 Jede inhaltliche Markdown-Datei beginnt mit Frontmatter. Rohzonen und ausdrücklich definierte strukturelle
-READMEs bleiben frei davon. Wende Typ, Bearbeitungsrecht und Pflichtfelder vor jeder Dateiänderung an; ändere
-einen vorhandenen `type` nur nach Rückfrage.
+READMEs außerhalb von `.qatlas-project/` bleiben frei davon. Wende Typ, Bearbeitungsrecht und Pflichtfelder
+vor jeder Dateiänderung an; ändere einen vorhandenen `type` nur nach Rückfrage.
 
 ## Suche
 
@@ -32,30 +32,33 @@ Optionale `tags` sind eine Liste aus lowercase-kebab-case-Werten, kein zweiter S
 Repo-Wissen hat Vorrang vor Trainingswissen. `fact` bleibt an seine externe Quelle, `decision` an eine
 Entscheidung des Nutzers gebunden. Der Agent hält keine eigene Entscheidung als `decision` fest.
 
-`edit: locked` schützt autoritative oder instruierende Inhalte. Ändere sie nur nach Freigabe und am
-vorhandenen Ort. `edit: shared` erlaubt Agent und Nutzer die Pflege im normalen Arbeitsfluss.
+`type` beschreibt die Art des Inhalts. `edit` beschreibt unabhängig davon die zulässige Pflege.
+`edit: locked` schützt akzeptierte Entscheidungen und tatsächlich normative oder instruierende Inhalte;
+ändere sie nur nach Freigabe und am vorhandenen Ort. `edit: shared` erlaubt Agent und Nutzer die Pflege im
+autorisierten Arbeitsfluss, aber keine Änderung der Projektabsicht ohne entsprechende Nutzerentscheidung.
+Eine Umbenennung oder Verschiebung ändert das Bearbeitungsrecht nicht.
 
 ## Typen und Pflichtfelder
 
-`description`, `type` und das feste `edit` sind immer vorhanden. `status` und `tags` sind optional, wenn sie
+`description`, `type` und `edit` sind immer vorhanden. `status` und `tags` sind optional, wenn sie
 einen echten Zweck erfüllen. Die zusätzlichen Felder dieser Tabelle sind abschließend:
 
-| `type` | `edit` | Bedeutung und zusätzliche Felder |
+| `type` | Bedeutung und zusätzliche Felder | Übliche Pflege |
 |---|---|---|
-| `meta` | `locked` | Dauerhafte Steuerung, Rahmen oder Navigation; keine Datumsfelder. |
-| `rule` | `locked` | Dauerhafte Verhaltensnorm; optional `paths`, keine Datumsfelder. |
-| `skill` | `locked` | Aktiv ausgelöstes Verfahren; `name`, optional `argument-hint` und `disable-model-invocation`, keine Datumsfelder. |
-| `fact` | `locked` | Extern gebundene Wahrheit; optional `source`, Pflichtfeld `updated`. |
-| `knowledge` | `shared` | Veränderliches Fachwissen und Synthese; `created`, `updated`. |
-| `playbook` | `locked` | Wiederholbares neutrales Verfahren; grundsätzlich keine Datumsfelder. |
-| `decision` | `locked` | Bindende Entscheidung des Nutzers; `created`. |
-| `history` | `shared` | Nur ergänztes Protokoll, wenn die Chronologie ausgewertet wird; `created`, `updated`. |
-| `task` | `shared` | Lokales Arbeitspaket; `status`, `created`, `updated`. |
-| `memory` | `shared` | Datei im festen Memory-Subsystem; keine weiteren Pflichtfelder. |
+| `meta` | Dauerhafte Steuerung, Rahmen oder Navigation; keine Datumsfelder. | Normativer Rahmen `locked`, Navigation und beschreibende Projektpflege `shared`. |
+| `rule` | Dauerhafte Verhaltensnorm; optional `paths`, keine Datumsfelder. | `locked` |
+| `skill` | Aktiv ausgelöstes Verfahren; `name`, optional `argument-hint` und `disable-model-invocation`, keine Datumsfelder. | `locked` |
+| `fact` | Extern gebundene Wahrheit; optional `source`, Pflichtfeld `updated`. | `shared`, wenn sie im Arbeitsfluss gegen die Quelle gepflegt werden soll; sonst begründet `locked`. |
+| `knowledge` | Veränderliches Fachwissen und Synthese; `created`, `updated`. | `shared` |
+| `playbook` | Wiederholbares neutrales Verfahren; grundsätzlich keine Datumsfelder. | Beschreibendes Verfahren `shared`, tatsächlich normative Vorgabe `locked`. |
+| `decision` | Entscheidung des Nutzers; `created`. | Akzeptierte Entscheidung `locked`, noch nicht akzeptierter Entwurf `shared`. |
+| `history` | Nur ergänztes Protokoll, wenn die Chronologie ausgewertet wird; `created`, `updated`. | `shared` |
+| `task` | Lokales Arbeitspaket; `status`, `created`, `updated`. | `shared` |
+| `memory` | Datei im festen Memory-Subsystem; keine weiteren Pflichtfelder. | `shared` |
 
-Feste Ausnahmen mit `type: meta` und `edit: shared` sind jede `INDEX.md` beziehungsweise `index.md`, jede
-`HISTORY.md`, `.qatlas/project/backlog/BACKLOG.md` und `.qatlas/project/backlog/IDEAS.md`. Ein Projektindex trägt
-zusätzlich `status`.
+Feste Ziele mit `type: meta` und `edit: shared` sind jede README im Projektwissensraum, jede `HISTORY.md`,
+`.qatlas-project/backlog/BACKLOG.md` und `.qatlas-project/backlog/IDEAS.md`. Ein Projektkopf im lokalen
+Backlog trägt zusätzlich `status`.
 
 Eine ausgelieferte kopierfertige Vorlage unter `store/` oder `skills/*/assets/` darf bereits das
 Frontmatter eines solchen Ausnahmeziels tragen, wenn ihr Body den konkreten Zieldateinamen nennt und vor dem
@@ -64,7 +67,7 @@ Ausnahme gilt weder für gewöhnliche Inhaltsdateien noch für nutzereigene Vorl
 
 `status` ist ein Pflichtfeld oder Suchmerkmal, aber seine Werte gehören zum jeweiligen Lebenszyklus und
 nicht in dieses allgemeine Inhaltsschema. Für lokale Tasks bestimmen die Backlog-Regel und ihre bedingt
-geladene Referenz die aktuelle Zustandsmenge. Projektindizes und andere Inhaltstypen behalten ihre eigenen
+geladene Referenz die aktuelle Zustandsmenge. Projektköpfe und andere Inhaltstypen behalten ihre eigenen
 Statusmodelle.
 
 `source` steht nur auf einem Snapshot von etwas Externem. Datumsfelder stehen nie auf `meta`, `rule` oder
@@ -72,11 +75,13 @@ Statusmodelle.
 
 ## Invarianten
 
-1. Ändere `type` nachträglich nur nach Rückfrage. Leite `edit` aus dem Typ oder einer festen Ausnahme ab.
+1. Ändere `type` nachträglich nur nach Rückfrage. Bestimme `edit` nach der tatsächlichen Verbindlichkeit und
+   Pflegebefugnis, nicht allein aus `type`, Pfad oder Dateiname.
 2. Mische Rahmen (`meta`, `rule`, `skill`) und Inhaltstypen nicht in derselben Datei.
 3. Eine Datei hat ein `edit`, bestimmt vom strengsten Material. Markiere keine Abschnitte einzeln.
 4. Teile eine Datei nicht künstlich nur für ihr Frontmatter auf.
-5. Ändere `fact` nur mit seiner Quelle und `decision` nur mit einer neuen Nutzerentscheidung.
+5. Ändere `fact` nur mit seiner Quelle und eine akzeptierte `decision` nur mit einer neuen
+   Nutzerentscheidung.
 
 Minimale Form für `knowledge`:
 

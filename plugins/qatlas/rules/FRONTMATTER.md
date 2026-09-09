@@ -9,13 +9,15 @@ edit: locked
 
 # Frontmatter
 
-Inhaltliche Markdown-Dateien tragen Frontmatter; Rohzonen und ausdrücklich strukturelle READMEs sind die
-festen Ausnahmen. Suche zuerst in `description`, `tags`, `type` und `status` und öffne danach nur passende
+Inhaltliche Markdown-Dateien tragen Frontmatter; Rohzonen und ausdrücklich strukturelle READMEs außerhalb
+des Projektwissensraums sind die festen Ausnahmen. Jede README in `.qatlas-project/` trägt `type: meta` und
+`edit: shared`. Suche zuerst in `description`, `tags`, `type` und `status` und öffne danach nur passende
 Bodies.
 
 Bevor du eine Markdown-Datei erstellst, inhaltlich änderst, umbenennst oder verschiebst, lies vollständig
 `<plugin-root>/rules/references/frontmatter.md`. Wende dort Typ, Bearbeitungsrecht, Pflichtfelder und Ausnahmen
 an. Reines Lesen, Suchen und Chat brauchen das vollständige Schema nicht.
 
-Ändere einen vorhandenen `type` nur nach Rückfrage. `edit: locked` braucht eine ausdrückliche Freigabe.
+Ändere einen vorhandenen `type` nur nach Rückfrage. `type` beschreibt den Inhalt und bestimmt nicht allein
+das Bearbeitungsrecht. `edit: locked` braucht eine ausdrückliche Freigabe.
 Offizielle Agentenstandards für Skills, Rules und Commands haben Vorrang.

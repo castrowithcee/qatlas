@@ -18,18 +18,19 @@ Vorschau vorhanden, lies die im Block genannte Quelldatei vollständig, bevor du
 Gewinne den Arbeitskontext aus der Nutzeranfrage, statt einen Zielpfad vorauszusetzen:
 
 1. Beginne nach den nativen Projektanweisungen an der Repo-Wurzel.
-2. Prüfe beim ersten Eintritt in jeden relevanten Scope auf `FRAMEWORK.md` und `framework.md`, danach auf
-   `INDEX.md` und `index.md`. Lies jeweils die eine vorhandene Form, das Framework vor dem Index.
-3. Sind Groß- und Kleinschreibung derselben Funktionsdatei gleichzeitig vorhanden, kläre, welche gilt.
-4. Nutze Nutzeranfrage und Index für den nächsten Scope. Fehlt ein Index, suche normal weiter und prüfe nur
-   tatsächlich betretene Scopes. Scanne den Baum nicht vorsorglich.
+2. Ist `.qatlas-project/README.md` vorhanden, lies sie als Einstieg in den repo-eigenen Projektzustand.
+3. Nutze Nutzeranfrage und README für den nächsten relevanten Scope. Lies dessen `README.md` beim ersten
+   Eintritt, wenn sie im Projektwissensraum vorhanden ist, und folge nur passenden Lesebedingungen.
+4. Fehlt ein solcher Einstieg, suche normal weiter und prüfe nur tatsächlich betretene Scopes. Scanne den
+   Baum nicht vorsorglich.
 5. Lies denselben Knoten nicht erneut, solange er sich nicht geändert hat.
 
-Beim Anlegen sind ausschließlich `FRAMEWORK.md` und `INDEX.md` kanonisch. Erzeuge keine zweite Form neben
-einer vorhandenen kleingeschriebenen Datei. `FRAMEWORK.md` beschreibt lokale Leitplanken, `INDEX.md` den
-wichtigen Bestand und nächste Einstiegspunkte. `README.md` bleibt für menschliche Leser und ist kein
-Navigationsknoten. Der reservierte Dateiname bleibt das Lesesignal, auch wenn sein Frontmatter abweicht;
-melde den Befund und ändere den `type` nur nach der Frontmatter-Regel.
+Eine README im Projektwissensraum beschreibt Scope, knappe Leitplanken und nächste Quellen. Ihr Ort oder
+ihre Lesereihenfolge verleiht den verlinkten Inhalten keine zusätzliche Autorität. Fachliche READMEs
+außerhalb dieses Raums behalten ihren vorhandenen Zweck und werden nur gelesen, wenn die Aufgabe ihren
+Scope betrifft. Vorhandene `FRAMEWORK.md`- und `INDEX.md`-Dateien außerhalb des Projektwissensraums behalten
+ihren Zweck und ihre lokale Geltung; berücksichtige sie im einschlägigen Scope nach ihren dortigen
+Lesebedingungen. Lege solche Knoten in `.qatlas-project/` nicht neu an.
 
 Was im Repo steht, beschreibt die Realität des Nutzers. Widerspricht es deinem Trainingswissen, folge der
 Datei und melde die Abweichung, statt sie still zu überschreiben.

@@ -11,10 +11,11 @@ updated: YYYY-MM-DD
 # Aufgabe: <Titel>
 
 <!-- Kanonische Vorlage für den lokalen Qatlas-Backlog. Nach
-.qatlas/project/backlog/task-<id>-<slug>.md oder in ein Projekt kopieren; <id> sind sechs kollisionsgeprüfte
-Hex-Zeichen. Eine Aufgabe passt in eine Session, bleibt auch mit erlaubten Links eigenständig und bildet
-immer nur ihren aktuellen, weiterhin gültigen Stand ab. Reihenfolge und Abhängigkeiten stehen zusätzlich im
-jeweiligen Index. Erst wenn alle für die eigenständige Ausführung nötigen Punkte geklärt oder ausdrücklich
+.qatlas-project/backlog/task-<id>-<slug>.md oder in ein Projekt kopieren; `<id>` ist die mindestens
+vierstellige, fortlaufende Dezimal-ID des Präfixes `task` über die gesamte Wissenswurzel. Eine Aufgabe passt
+in eine Session, bleibt auch mit erlaubten Links eigenständig und bildet immer nur ihren aktuellen, weiterhin
+gültigen Stand ab. Reihenfolge und Abhängigkeiten stehen zusätzlich im jeweiligen Projektkopf. Erst wenn alle
+für die eigenständige Ausführung nötigen Punkte geklärt oder ausdrücklich
 als nicht relevant markiert und bei Arbeit an vorhandenem Bestand durch eine ausreichende
 Ausführungsgrundlage belegt sind, wechselt der Task von draft zu ready. `next` folgt erst aus einer bewussten
 Disposition. Bei leerer Queue dürfen aus dem aktuellen Scope automatisch höchstens fünf Tasks von ready nach

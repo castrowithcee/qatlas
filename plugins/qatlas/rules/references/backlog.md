@@ -9,16 +9,17 @@ edit: locked
 
 # Vollständiger Vertrag des lokalen Backlogs
 
-Dieser Vertrag gilt nur, wenn `.qatlas/project/backlog/BACKLOG.md` den lokalen Qatlas-Backlog als
+Dieser Vertrag gilt nur, wenn `.qatlas-project/backlog/BACKLOG.md` den lokalen Qatlas-Backlog als
 maßgebliches Planungssystem ausweist. Bei externer Autorität gilt stattdessen deren Binding; ein lokaler
 Spiegel entsteht nicht.
 
 ## Aufgaben und Projekte
 
 - Ein Task ist eine eigenständig in einer Session leistbare Arbeitseinheit in
-  `.qatlas/project/backlog/task-<id>-<slug>.md`. Die ID besteht aus sechs zufälligen kleingeschriebenen
-  Hex-Zeichen, wird gegen alle offenen und archivierten Tasks geprüft und nie wiederverwendet.
-- Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `INDEX.md`. Sein Slug ist
+  `.qatlas-project/backlog/task-<id>-<slug>.md`. Die ID ist eine mindestens vierstellige, fortlaufende
+  Dezimalzahl des Präfixes `task` über die gesamte Wissenswurzel. Archive zählen mit; vor Vergabe und
+  Integration werden Kollisionen geprüft. IDs werden nicht wiederverwendet.
+- Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `README.md`. Sein Slug ist
   kebab-case, beginnt nicht mit `task-` und heißt nicht `done`.
 - Die Ordnerzugehörigkeit bestimmt die Projektmitgliedschaft; es gibt kein Feld `project:`.
 - Echte Abhängigkeiten und Reihenfolge stehen im Roster. Ein Link ersetzt keinen Kontext, den der Task zu
@@ -55,13 +56,17 @@ bindende Entscheidung oder nötige Begründung nur für eine kleinere Datei.
 Lies vor einem neuen Task vollständig
 [die kanonische Taskvorlage](../../store/backlog/task.md), vor einem neuen Projektkopf zusätzlich
 [die kanonische Projektvorlage](../../store/backlog/project-index.md). Diese Vorlagen gelten auch ohne
-Planungsskill; Nutzervorlagen unter `.qatlas/project/templates/` ersetzen sie nicht.
+Planungsskill; Nutzervorlagen unter `.qatlas-project/templates/` ersetzen sie nicht.
 
-Erzeuge eine Task-ID mit Node und wiederhole bei einer Kollision:
+Ermittle die nächste Task-ID aus allen passenden Dateinamen der Wissenswurzel, einschließlich Archive:
 
 ```sh
-node -e "process.stdout.write(require('crypto').randomBytes(3).toString('hex'))"
+find .qatlas-project -type f -name 'task-[0-9]*-*.md' -print
 ```
+
+Wähle eins mehr als die höchste gefundene Dezimalzahl und fülle auf mindestens vier Stellen auf. Beginne
+ohne Treffer mit `0001`. Prüfe die Kennung vor der Integration erneut; bei einer parallelen Kollision
+erhält der noch nicht integrierte Task die nächste freie ID samt angepassten Verweisen.
 
 ## Status und Eigentümerschaft
 
@@ -121,7 +126,7 @@ Projekt lebt, nicht dass ein Worker daran arbeitet.
 ## Roster
 
 `BACKLOG.md` ist die einzige Übersicht. Sie enthält eine Zeile pro nicht abgeschlossenem Root-Task und
-Projekt: Link, Status und kurzer Stand. Projektzeilen zeigen auf deren `INDEX.md`. Innerhalb fachlich
+Projekt: Link, Status und kurzer Stand. Projektzeilen zeigen auf deren `README.md`. Innerhalb fachlich
 zulässiger Reihenfolge stehen Tasks als `review`, `in-progress`, `next`, `waiting`, `ready`, `draft`;
 Projektzeilen folgen ihrer fachlichen Reihenfolge. Abgeschlossene Root-Tasks fallen heraus, Projekte dürfen
 ihre Bauhistorie behalten.

@@ -9,7 +9,7 @@ edit: locked
 
 # Backlog-Binding und lokaler Backlog
 
-Diese Regel gilt, sobald `.qatlas/project/` existiert. `.qatlas/project/backlog/BACKLOG.md` wird bei jedem
+Diese Regel gilt, sobald `.qatlas-project/` existiert. `.qatlas-project/backlog/BACKLOG.md` wird bei jedem
 Sessionstart geladen und nennt immer das einzige maßgebliche Planungssystem. Nutzer- oder Projektvorgaben
 haben Vorrang.
 
