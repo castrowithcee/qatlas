@@ -25,11 +25,11 @@ nicht auflösen, schreibe nicht in den lokalen Backlog. Bei einem externen Syste
 Binding.
 
 Ist `.qatlas-project/README.md` vorhanden, nutze sie als repo-eigenen Einstieg und folge nur den zur
-aktuellen Aufgabe passenden Lesebedingungen. Suche in den so gewählten Scopes zuerst über das Frontmatter
-und öffne nur passende Bodies. Ordne jede gefundene Aussage nach nativer Anweisungshierarchie,
-ausdrücklicher Geltung und fachlichem Scope ein. Automatische Bereitstellung, Lesereihenfolge oder Ablage im
-Wissensraum erhöht ihre Autorität nicht. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihren
-Gegenstand maßgeblich.
+aktuellen Aufgabe passenden Lesebedingungen. Lies eine benachbarte `FRAMEWORK.md`, wenn die README sie für
+den betroffenen Scope verlangt. Suche in den so gewählten Scopes zuerst über das Frontmatter und öffne nur
+passende Bodies. Ordne jede gefundene Aussage nach nativer Anweisungshierarchie, ausdrücklicher Geltung und
+fachlichem Scope ein. Automatische Bereitstellung, Lesereihenfolge oder Ablage im Wissensraum erhöht ihre
+Autorität nicht. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihren Gegenstand maßgeblich.
 
 ## Modus wählen
 

@@ -11,8 +11,8 @@ edit: locked
 
 Inhaltliche Markdown-Dateien tragen Frontmatter; Rohzonen und ausdrücklich strukturelle READMEs außerhalb
 des Projektwissensraums sind die festen Ausnahmen. Jede README in `.qatlas-project/` trägt `type: meta` und
-`edit: shared`. Suche zuerst in `description`, `tags`, `type` und `status` und öffne danach nur passende
-Bodies.
+`edit: shared`, jede dortige `FRAMEWORK.md` `type: meta` und `edit: locked`. Suche zuerst in `description`,
+`tags`, `type` und `status` und öffne danach nur passende Bodies.
 
 Bevor du eine Markdown-Datei erstellst, inhaltlich änderst, umbenennst oder verschiebst, lies vollständig
 `<plugin-root>/rules/references/frontmatter.md`. Wende dort Typ, Bearbeitungsrecht, Pflichtfelder und Ausnahmen

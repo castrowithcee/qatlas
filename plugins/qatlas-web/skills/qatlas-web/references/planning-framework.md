@@ -30,10 +30,13 @@ welche Aussage gewinnt; automatisches Laden oder ein Ort im Wissensraum erhöht 
 Vorhandene Produkt- und Architekturdokumentation außerhalb des Wissensraums bleibt an ihrem fachlichen Ort
 und wird nicht dupliziert.
 
-Für einen neuen Scope bleibt seine `README.md` eine kurze Navigation. Halte das ausführliche, veränderliche
-Produkt- und Architekturpaket in einer `knowledge`-Datei mit `edit: shared`; schütze bindende Entscheidungen
-getrennt als `decision`. Formuliere für Tasks die jeweils geltenden Produkt-, Architektur-, Sicherheits- und
-Qualitätsvorgaben konkret in Ziel, Leitplanken und überprüfbarer Abnahme. Ein Link allein reicht nicht.
+Für einen neuen Scope bleibt seine `README.md` ein kompakter Projektkopf und Einstieg. Braucht er eigene
+dauerhafte Arbeitsregeln, Besonderheiten oder Ausnahmen, ergänze eine lokale `FRAMEWORK.md` mit
+`edit: locked` und einer eindeutigen Lesebedingung in der README. Halte Fachwissen, beschreibenden
+Architekturstand, Anforderungen, Risiken und einzelne Entscheidungen in ihren jeweils passenden Dateien;
+verwende `knowledge` nicht als Sammeltyp für lokale Anweisungen. Formuliere für Tasks die jeweils geltenden
+Produkt-, Architektur-, Sicherheits- und Qualitätsvorgaben konkret in Ziel, Leitplanken und überprüfbarer
+Abnahme. Ein Link allein reicht nicht.
 
 ## Produktentwicklung
 

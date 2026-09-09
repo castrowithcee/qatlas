@@ -15,8 +15,9 @@ edit: locked
   verändert nichts.
 - Sind `.qatlas-project/` und eine frühere Projektwurzel parallel vorhanden, Prüfstände widersprüchlich oder
   Dateien nicht vollständig lesbar, ändere nichts. Kläre die Inhalte und die maßgebliche README konkret.
-  Vorhandene `FRAMEWORK.md` und `INDEX.md` werden ihrem Inhalt nach zugeordnet; die Migration verschiebt sie
-  nicht blind. Auch doppelte kanonische Projektwissens-IDs blockieren den Umzug und müssen vor der
+  Vorhandene `INDEX.md` werden ihrem Inhalt nach einer README oder einem anderen passenden Ziel zugeordnet;
+  die Migration verschiebt sie nicht blind. Eine `FRAMEWORK.md` bleibt als lokaler Arbeitsrahmen in ihrem
+  Scope erhalten. Auch doppelte kanonische Projektwissens-IDs blockieren den Umzug und müssen vor der
   Bestätigung eindeutig aufgelöst werden.
 - Nach ausdrücklicher Bestätigung führt derselbe Befehl mit `project --apply --target <projekt-root>` den
   eindeutigen Umzug aus. Er erhält Backlog-Binding, Memory, IDs, Zonen und Plugin-Bestätigungen, aktualisiert

@@ -20,10 +20,16 @@ pauschal ersetzt.
 ## Navigation
 
 Die Root-`README.md` erklärt den Projektzustand, grenzt fachliche Repo-Inhalte ab und nennt deren
-tatsächliche Einstiegspunkte. Innerhalb des Wissensraums übernimmt eine README für ihren Scope Navigation,
-knappe lokale Leitplanken und die nächsten relevanten Quellen mit eindeutigen Lesebedingungen. Sie ist kein
-Vollinventar, Fachartikel, Memory oder Arbeitsjournal. Ein weiterer README-Knoten entsteht nur bei einem
-eigenen Scope. Das lokale Routing gewinnt vor einem ausgelieferten Startpunkt.
+tatsächliche Einstiegspunkte. Eine README übernimmt für ihren Scope Navigation, knappe Orientierung und die
+nächsten relevanten Quellen mit eindeutigen Lesebedingungen. Sie ist kein Vollinventar, Fachartikel,
+Regelwerk, Memory oder Arbeitsjournal. Ein weiterer README-Knoten entsteht nur bei einem eigenen Scope. Das
+lokale Routing gewinnt vor einem ausgelieferten Startpunkt.
+
+Braucht ein Scope eigene dauerhafte Arbeitsregeln, Besonderheiten oder Ausnahmen, steht eine optionale
+`FRAMEWORK.md` neben seiner README. Die README nennt konkret, für welche Arbeit sie vorher zu lesen ist.
+Das Framework bleibt auf seinen Scope begrenzt, enthält keine allgemeine Fachkunde und wiederholt weder
+native Projektanweisungen noch einzelne begründete Entscheidungen. Ausführliches Wissen und beschreibender
+Projektstand bleiben an ihrem fachlich passenden Ort.
 
 Jede README im Wissensraum trägt `type: meta` und `edit: shared` und bleibt einschließlich Frontmatter bei
 höchstens 80 Zeilen und 500 durch Leerraum getrennten Wörtern. Lagere Details aus, ohne bindende Aussagen
@@ -34,6 +40,7 @@ nicht ab. Pflegebefugnis für Navigation und Fakten erzeugt keine neue Regelauto
 ## Funktionsdateien und -ordner
 
 - `README.md`: Einstieg und Navigation eines Scopes, `type: meta`, `edit: shared`.
+- `FRAMEWORK.md`: optionaler bestätigter Arbeitsrahmen eines Scopes, `type: meta`, `edit: locked`.
 - `MEMORY.md`: Index des Repo-Memorys.
 - `BACKLOG.md`: beim Sessionstart geladener Wegweiser zum maßgeblichen lokalen oder externen
   Planungssystem.
@@ -48,7 +55,7 @@ Diese Namen sind exklusiv und tragen kein Präfix.
   injiziert; öffne daraus nur aufgabenrelevante Dateien, prüfe ihre Aussagen gegen den aktuellen Stand und
   aktualisiere vorhandene Memories statt sie zu duplizieren. Neue Memories entstehen auch auf ausdrückliche
   Bitte des Nutzers, tragen `type: memory` und `edit: shared` und erhalten genau eine Indexzeile.
-- Wissensbereiche wie `overview/`, `decisions/`, `conventions/`, `architecture/` und `knowledge/`
+- Inhaltsbereiche wie `overview/`, `decisions/`, `conventions/`, `architecture/` und `knowledge/`
   entstehen erst mit ihrem ersten Inhalt. Ein zunächst flacher Wissensraum darf bei echtem Bedarf bewusst
   nach Gegenständen gegliedert werden; gemeinsame Aussagen bleiben einmal am gemeinsamen Ort. Eine neue
   Repo-Grenze erzeugt keine automatische Umordnung.
@@ -81,9 +88,11 @@ auf Kollisionen. Bei parallelen neuen Einträgen erhält der noch nicht integrie
 nächste freie ID; passe seine Verweise an. IDs werden nicht wiederverwendet, Präfix und ID bleiben stabil,
 und historische Kennungen werden nicht kosmetisch neu nummeriert.
 
-Dateien in `knowledge/` verwenden sprechende Namen ohne verpflichtendes Präfix oder Nummer, behalten aber
-Frontmatter. Funktionsdateien, technische Formate und rohe Zonenartefakte folgen ihren festen Namen oder
-eigenen Formaten. Bei mehrdeutigen Funktionsnamen nenne den Scope.
+Dateien in `knowledge/` enthalten tatsächliches Fachwissen oder Synthesen und verwenden sprechende Namen
+ohne verpflichtendes Präfix oder Nummer, behalten aber Frontmatter. Scopebezogene Arbeitsregeln und
+Ausnahmen gehören in `FRAMEWORK.md`, nicht in `knowledge/`. Funktionsdateien, technische Formate und rohe
+Zonenartefakte folgen ihren festen Namen oder eigenen Formaten. Bei mehrdeutigen Funktionsnamen nenne den
+Scope.
 
 ## Pflege und Geltung
 

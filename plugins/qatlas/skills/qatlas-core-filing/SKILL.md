@@ -35,13 +35,18 @@ Projektwissensraums um.
 ## Navigation im Projektwissensraum
 
 Die Root-`README.md` trennt Projektzustand und fachliche Einstiegspunkte. Eine weitere README entsteht erst,
-wenn ein Scope einen eigenen Einstieg braucht. Sie erklärt Scope, knappe Leitplanken und nächste relevante
+wenn ein Scope einen eigenen Einstieg braucht. Sie erklärt Scope, knappe Orientierung und nächste relevante
 Quellen mit eindeutigen Lesebedingungen. Sie ist kein Vollinventar und trägt `type: meta`, `edit: shared`.
 Halte sie einschließlich Frontmatter bei höchstens 80 Zeilen und 500 durch Leerraum getrennten Wörtern.
 
 Lies beim Eintritt nur die README des relevanten Scopes und danach die für die Aufgabe passenden Quellen.
 Das lokale Routing gewinnt vor ausgelieferten Startpunkten. Eine README darf Navigation und Fakten pflegen,
 aber keine neue Projektentscheidung treffen oder fachliche Regeln globalisieren.
+
+Braucht ein Scope eigene dauerhafte Arbeitsregeln, Besonderheiten oder Ausnahmen, lege neben seiner README
+eine `FRAMEWORK.md` mit `type: meta` und `edit: locked` an. Die README nennt die konkrete Lesebedingung. Das
+Framework gilt nur in diesem Scope, enthält keine allgemeine Fachkunde und dupliziert weder native
+Agentenanweisungen noch einzelne begründete Entscheidungen.
 
 ## Bedarfsgerechter Baum
 
@@ -82,9 +87,11 @@ vier Stellen auf. Beginne ohne Treffer mit `0001`. Prüfe vor dem Schreiben und 
 Kollisionen. Bei parallelen neuen Einträgen erhält der noch nicht integrierte Eintrag die nächste freie ID;
 passe seine Verweise an. Verwende IDs nie wieder und nummeriere historische Kennungen nicht kosmetisch neu.
 
-`knowledge/` verwendet sprechende Dateinamen ohne verpflichtendes Präfix oder Nummer, behält aber
-Frontmatter. README, BACKLOG, IDEAS, MEMORY und andere festgelegte Funktionsdateien, technische Formate sowie
-rohe Zonenartefakte behalten ihre Namen. Bei einem mehrdeutigen Funktionsnamen nenne den Scope.
+`knowledge/` enthält tatsächliches Fachwissen oder Synthesen und verwendet sprechende Dateinamen ohne
+verpflichtendes Präfix oder Nummer, behält aber Frontmatter. Scopebezogene Arbeitsregeln und Ausnahmen
+gehören in `FRAMEWORK.md`. README, FRAMEWORK, BACKLOG, IDEAS, MEMORY und andere festgelegte
+Funktionsdateien, technische Formate sowie rohe Zonenartefakte behalten ihre Namen. Bei einem mehrdeutigen
+Funktionsnamen nenne den Scope.
 
 ## Typ und Pflegebefugnis
 

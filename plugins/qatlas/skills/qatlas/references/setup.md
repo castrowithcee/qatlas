@@ -62,7 +62,8 @@ Orientierungspunkte:
 - `AGENTS.md` trägt die Projektanweisungen; `CLAUDE.md` bindet sie für Claude ein.
 - `.qatlas-project/README.md` ist der Einstieg in den repo-eigenen Projektzustand. Der Wissensraum trägt
   außerdem den Wegweiser zum maßgeblichen Planungssystem, Memory und die beiden Zonen. Fachliche Inhalte
-  bleiben an ihren vorhandenen maßgeblichen Orten.
+  bleiben an ihren vorhandenen maßgeblichen Orten; ein Scope erhält nur bei eigenen dauerhaften
+  Besonderheiten eine optionale `FRAMEWORK.md` neben seiner README.
 - `.qatlas/plugins/` trägt technische Projektkonfiguration und den versionierten Update-Prüfstand.
 - `~/.qatlas/plugins/config.yaml` trägt die nutzerweite Plugin-Konfiguration;
   `~/.qatlas/rules/RULESET.md` bleibt die von Qatlas verwaltete Regelkopie.

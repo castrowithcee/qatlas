@@ -57,8 +57,9 @@ einen echten Zweck erfüllen. Die zusätzlichen Felder dieser Tabelle sind absch
 | `memory` | Datei im festen Memory-Subsystem; keine weiteren Pflichtfelder. | `shared` |
 
 Feste Ziele mit `type: meta` und `edit: shared` sind jede README im Projektwissensraum, jede `HISTORY.md`,
-`.qatlas-project/backlog/BACKLOG.md` und `.qatlas-project/backlog/IDEAS.md`. Ein Projektkopf im lokalen
-Backlog trägt zusätzlich `status`.
+`.qatlas-project/backlog/BACKLOG.md` und `.qatlas-project/backlog/IDEAS.md`. Eine `FRAMEWORK.md` im
+Projektwissensraum trägt `type: meta` und `edit: locked`; sie enthält nur bestätigte, für ihren Scope
+geltende Arbeitsregeln. Ein Projektkopf im lokalen Backlog trägt zusätzlich `status`.
 
 Eine ausgelieferte kopierfertige Vorlage unter `store/` oder `skills/*/assets/` darf bereits das
 Frontmatter eines solchen Ausnahmeziels tragen, wenn ihr Body den konkreten Zieldateinamen nennt und vor dem

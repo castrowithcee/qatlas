@@ -64,7 +64,8 @@ Ausarbeitung, kein eigener Modus.
 ## Vor dem Zuschnitt klären
 
 Beginne bei `.qatlas-project/README.md`, sofern sie existiert, und folge nur den für das Vorhaben passenden
-Lesebedingungen. Untersuche außerdem vorhandene native Anweisungen, fachliche Dokumentation,
+Lesebedingungen. Lies eine benachbarte `FRAMEWORK.md`, wenn die README sie für den betroffenen Scope
+verlangt. Untersuche außerdem vorhandene native Anweisungen, fachliche Dokumentation,
 Implementierung und relevante externe Quellen, bevor du eine grüne Wiese planst. Bewerte Aussagen nach
 nativer Hierarchie, ausdrücklicher Geltung und fachlichem Scope; ihr Fundort oder ihre automatische
 Bereitstellung verleiht ihnen keinen zusätzlichen Rang. Kläre mindestens:
@@ -86,10 +87,13 @@ bleiben beim Nutzer.
 Schreibe zuerst die bestätigte Wahrheit, die mehrere Tasks oder spätere Sessions benötigen. Wähle nach dem
 Gegenstand den im Repo maßgeblichen Ort. `.qatlas-project/` beschreibt das Repo als Projekt und seine
 Pflege; Produktwissen, persönliche Regeln und andere Fachinhalte bleiben an ihren fachlichen Orten.
-`README.md` ist im Wissensraum die knappe Navigation für ihren Scope. Umfangreiche beschreibende
-Dokumentation bleibt `shared`; bindende Entscheidungen werden am fachlich passenden, geschützten Ort
-festgehalten. Folge der Ablage- und Frontmatter-Norm, dupliziere keine vorhandene Spezifikation und erzeuge
-keinen konkurrierenden Dokumentationsbaum.
+`README.md` ist die knappe Navigation und der Projektkopf ihres Scopes. Braucht der Scope eigene dauerhafte
+Arbeitsregeln, Besonderheiten oder Ausnahmen, halte sie in einer benachbarten `FRAMEWORK.md` fest und nenne
+in der README die konkrete Lesebedingung. Tatsächliches Fachwissen, beschreibender Projektstand und einzelne
+Entscheidungen bleiben getrennt an ihrem passenden Ort. Umfangreiche beschreibende Dokumentation bleibt
+`shared`; Frameworks und bindende Entscheidungen bleiben geschützt. Folge der Ablage- und
+Frontmatter-Norm, dupliziere keine vorhandene Spezifikation und erzeuge keinen konkurrierenden
+Dokumentationsbaum.
 
 Dokumentiere kompakt:
 

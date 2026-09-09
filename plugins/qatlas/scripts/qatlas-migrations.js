@@ -183,10 +183,10 @@ function projectMigrationInventory(projectRoot, { detailed = true } = {}) {
   const functionalFiles = scanned.files.filter(file => legacy.some(entry => {
     const relative = portable(path.relative(entry.file, file));
     return !relative.startsWith('../')
-      && /(^|\/)(FRAMEWORK|framework|INDEX|index)\.md$/.test(relative);
+      && /(^|\/)(INDEX|index)\.md$/.test(relative);
   }));
   if (functionalFiles.length) {
-    conflicts.push('Vorhandene FRAMEWORK-/INDEX-Dateien müssen vor dem Umzug inhaltlich zugeordnet werden: '
+    conflicts.push('Vorhandene INDEX-Dateien müssen vor dem Umzug inhaltlich zugeordnet werden: '
       + functionalFiles.map(file => portable(path.relative(root, file))).join(', '));
   }
   const ids = new Map();

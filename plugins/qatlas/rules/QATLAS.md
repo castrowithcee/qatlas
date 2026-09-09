@@ -20,17 +20,18 @@ Gewinne den Arbeitskontext aus der Nutzeranfrage, statt einen Zielpfad vorauszus
 1. Beginne nach den nativen Projektanweisungen an der Repo-Wurzel.
 2. Ist `.qatlas-project/README.md` vorhanden, lies sie als Einstieg in den repo-eigenen Projektzustand.
 3. Nutze Nutzeranfrage und README für den nächsten relevanten Scope. Lies dessen `README.md` beim ersten
-   Eintritt, wenn sie im Projektwissensraum vorhanden ist, und folge nur passenden Lesebedingungen.
+   Eintritt, wenn sie für diesen Scope als Einstieg dient, und folge nur passenden Lesebedingungen. Verweist
+   sie für die aktuelle Arbeit auf eine benachbarte `FRAMEWORK.md`, lies diese vor der Bearbeitung.
 4. Fehlt ein solcher Einstieg, suche normal weiter und prüfe nur tatsächlich betretene Scopes. Scanne den
    Baum nicht vorsorglich.
 5. Lies denselben Knoten nicht erneut, solange er sich nicht geändert hat.
 
-Eine README im Projektwissensraum beschreibt Scope, knappe Leitplanken und nächste Quellen. Ihr Ort oder
-ihre Lesereihenfolge verleiht den verlinkten Inhalten keine zusätzliche Autorität. Fachliche READMEs
-außerhalb dieses Raums behalten ihren vorhandenen Zweck und werden nur gelesen, wenn die Aufgabe ihren
-Scope betrifft. Vorhandene `FRAMEWORK.md`- und `INDEX.md`-Dateien außerhalb des Projektwissensraums behalten
-ihren Zweck und ihre lokale Geltung; berücksichtige sie im einschlägigen Scope nach ihren dortigen
-Lesebedingungen. Lege solche Knoten in `.qatlas-project/` nicht neu an.
+Eine README beschreibt Scope, knappe Orientierung und nächste Quellen. Eine optionale `FRAMEWORK.md`
+daneben enthält die für diesen Scope bestätigten Arbeitsregeln, Besonderheiten und Ausnahmen, die nicht
+global gelten. Ihr Ort oder ihre Lesereihenfolge verleiht verlinkten Inhalten keine zusätzliche Autorität.
+Fachliche READMEs und Frameworks außerhalb des Projektwissensraums behalten ihren lokalen Zweck. Bestehende
+`INDEX.md`-Dateien außerhalb des Projektwissensraums behalten ebenfalls ihren Zweck; lege im
+Projektwissensraum keine neuen an.
 
 Was im Repo steht, beschreibt die Realität des Nutzers. Widerspricht es deinem Trainingswissen, folge der
 Datei und melde die Abweichung, statt sie still zu überschreiben.

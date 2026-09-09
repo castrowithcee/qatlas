@@ -55,7 +55,7 @@ bindende Entscheidung oder nötige Begründung nur für eine kleinere Datei.
 
 Lies vor einem neuen Task vollständig
 [die kanonische Taskvorlage](../../store/backlog/task.md), vor einem neuen Projektkopf zusätzlich
-[die kanonische Projektvorlage](../../store/backlog/project-index.md). Diese Vorlagen gelten auch ohne
+[die kanonische Projektvorlage](../../store/backlog/project-readme.md). Diese Vorlagen gelten auch ohne
 Planungsskill; Nutzervorlagen unter `.qatlas-project/templates/` ersetzen sie nicht.
 
 Ermittle die nächste Task-ID aus allen passenden Dateinamen der Wissenswurzel, einschließlich Archive:

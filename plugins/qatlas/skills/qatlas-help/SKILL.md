@@ -65,7 +65,8 @@ Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
 ## Zusammenarbeit und Scaffold
 
 - `.qatlas-project/README.md` führt in den repo-eigenen Projektzustand und von dort bedarfsgerecht zu
-  fachlichen Quellen. Ihr Fundort oder automatisches Laden erhöht deren Autorität nicht.
+  fachlichen Quellen. Eine optionale `FRAMEWORK.md` enthält nur die lokalen Arbeitsregeln, Besonderheiten
+  und Ausnahmen ihres Scopes. Ihr Fundort oder automatisches Laden erhöht deren Autorität nicht.
 - Projektanweisungen und `BACKLOG.md` führen zum maßgeblichen Planungssystem. Der lokale Backlog wird nie
   als Spiegel eines externen Systems gepflegt. Taskverträge übernehmen geltende Vorgaben konkret; Links
   dienen nur der Nachprüfung.

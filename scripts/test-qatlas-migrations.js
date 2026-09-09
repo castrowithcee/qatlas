@@ -243,6 +243,7 @@ function testExplicitProjectMigration() {
   write(path.join(oldRoot, 'backlog', 'BACKLOG.md'), '# Externes Binding\nKeine lokalen Tasks.\n');
   write(path.join(oldRoot, 'memory', 'MEMORY.md'), '- Erinnerung\n');
   write(path.join(oldRoot, 'memory', 'memory-0042-stabil.md'), 'Inhalt\n');
+  write(path.join(oldRoot, 'FRAMEWORK.md'), '# Lokaler Rahmen\nUnverändert.\n');
   write(path.join(oldRoot, 'zone-import', '.gitkeep'), '');
   write(path.join(oldRoot, 'zone-export', '.gitkeep'), '');
   write(path.join(oldRoot, 'updates', 'state.json'), {
@@ -281,6 +282,8 @@ function testExplicitProjectMigration() {
   assert.strictEqual(result.applied, true);
   const newRoot = path.join(f.project, '.qatlas-project');
   assert.ok(fs.existsSync(path.join(newRoot, 'memory', 'memory-0042-stabil.md')));
+  assert.strictEqual(fs.readFileSync(path.join(newRoot, 'FRAMEWORK.md'), 'utf8'),
+    '# Lokaler Rahmen\nUnverändert.\n');
   assert.ok(fs.readFileSync(path.join(f.project, 'AGENTS.md'), 'utf8').includes('.qatlas-project/README.md'));
   assert.deepStrictEqual(JSON.parse(fs.readFileSync(
     path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), 'utf8')).plugins,
@@ -317,7 +320,7 @@ function testProjectMigrationConflictsAndRecovery() {
   const before = fs.readFileSync(path.join(both.project, '.qatlas', 'project', 'README.md'), 'utf8');
   const blocked = migrateProject({ projectRoot: both.project, apply: true });
   assert.ok(blocked.blocked.some(problem => problem.includes('Mehrere Qatlas-Projektwurzeln')));
-  assert.ok(!blocked.blocked.some(problem => problem.includes('FRAMEWORK-/INDEX')));
+  assert.ok(!blocked.blocked.some(problem => problem.includes('Vorhandene INDEX-Dateien')));
   assert.ok(!blocked.blocked.some(problem => problem.includes('Doppelte Projektwissens-ID')));
   assert.ok(!blocked.inventory.references.some(reference => reference.relative.includes('zone-import')));
   assert.ok(!blocked.inventory.references.some(reference => reference.relative.includes('zone-export')));
@@ -339,9 +342,11 @@ function testProjectMigrationConflictsAndRecovery() {
 
   const functions = fixture('project-functions');
   write(path.join(functions.project, '__callbell__', 'docs', 'FRAMEWORK.md'), '# Rahmen\n');
+  write(path.join(functions.project, '__callbell__', 'docs', 'INDEX.md'), '# Index\n');
   const functionConflict = migrateProject({ projectRoot: functions.project, apply: true });
   assert.ok(functionConflict.blocked.some(problem => problem.includes('inhaltlich zugeordnet')));
   assert.ok(fs.existsSync(path.join(functions.project, '__callbell__', 'docs', 'FRAMEWORK.md')));
+  assert.ok(fs.existsSync(path.join(functions.project, '__callbell__', 'docs', 'INDEX.md')));
 
   const duplicateIds = fixture('project-id-conflict');
   write(path.join(duplicateIds.project, '__qatlas__', 'decisions', 'decision-0004-a.md'), 'a\n');

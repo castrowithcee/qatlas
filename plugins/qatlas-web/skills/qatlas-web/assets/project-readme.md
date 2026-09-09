@@ -1,16 +1,25 @@
 ---
 description: >
-  Einstieg in den fachlichen Webprojekt-Scope mit knapper Orientierung und bedingten Verweisen auf
-  Produktwissen, Entscheidungen, Planung und vorhandene technische Quellen.
+  Projektkopf und Einstieg eines fachlichen Webscopes mit Status, knapper Orientierung und bedingten
+  Verweisen auf Rahmen, Projektstand, Entscheidungen, Planung und technische Quellen.
 type: meta
 edit: shared
+status: active
 ---
 
 # <projekt>
 
 <!-- Nach <scope>/README.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Nicht benötigte
-     Abschnitte und Beispielverweise entfernen. Die README knapp halten; ausführliche Produkt- und
-     Architekturbeschreibung gehört in eine knowledge-Datei. -->
+     Abschnitte und Beispielverweise entfernen. Die README bleibt Projektkopf und Navigation; ausführliche
+     Inhalte gehören in die jeweils passende Fachdatei. -->
+
+## Status
+
+<Aktueller Zustand, nächster fachlicher Horizont und wichtigster offener Punkt in wenigen Sätzen.>
+
+## Auftrag
+
+<Problem, Zielgruppe, Mehrwert, zentraler Nutzerablauf und bewusst ausgeschlossene Ziele in knapper Form.>
 
 ## Scope
 
@@ -18,8 +27,9 @@ edit: shared
 
 ## Einstieg
 
-- Lies `<pfad-zum-produktwissen>` bei Fragen zu Produktprofil, Fähigkeiten, Architektur, UI, Daten,
-  Sicherheit oder Betrieb.
+- Lies `FRAMEWORK.md` vor Arbeit in diesem Scope, sofern lokale Besonderheiten oder Ausnahmen dort geregelt
+  sind; entferne diesen Punkt, wenn kein lokaler Rahmen nötig ist.
+- Lies `<pfad-zum-projektstand>` bei Fragen zum aktuellen Produkt, zu Fähigkeiten oder Architektur.
 - Lies `<pfad-zur-entscheidung>` nur, wenn ihr Gegenstand die aktuelle Aufgabe betrifft.
 - Nutze `<pfad-zur-technischen-quelle>` für den tatsächlichen Bestand und seine konkreten Codepfade.
 - Folge für Arbeitspakete dem einmaligen maßgeblichen Backlog-Binding des Projekts; lege hier keinen

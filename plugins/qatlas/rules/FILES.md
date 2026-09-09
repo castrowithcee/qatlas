@@ -19,9 +19,10 @@ eine Datei veränderst.
   Müller wird `mueller`.
 - Reservierte Funktions- und Agentendateien behalten ihre festgelegte Großschreibung: `README.md`,
   `AGENTS.md`, `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `HISTORY.md`, `FRAMEWORK.md` und
-  `INDEX.md`. Lege in `.qatlas-project/` kein neues `FRAMEWORK.md` oder `INDEX.md` an; dort ist `README.md`
-  der kanonische Navigationsknoten. Vorhandene Funktionsdateien außerhalb behalten ihren Zweck und ihre
-  lokale Geltung.
+  `INDEX.md`. `README.md` ist der kanonische Navigationsknoten. Eine optionale `FRAMEWORK.md` steht daneben,
+  wenn der Scope eigene bestätigte Arbeitsregeln, Besonderheiten oder Ausnahmen braucht. Lege in
+  `.qatlas-project/` kein neues `INDEX.md` an. Vorhandene Funktionsdateien außerhalb behalten ihren Zweck
+  und ihre lokale Geltung.
 - Neue Inhaltsdateien in `.qatlas-project/` heißen `<präfix>-<id>-<slug>.md`. Die ID ist je Präfix über die
   gesamte Wissenswurzel einschließlich Archive fortlaufend, mindestens vierstellig und dauerhaft stabil.
   Prüfe vor Vergabe und Integration auf Kollisionen. `knowledge/`, Funktionsdateien, technische Formate und
