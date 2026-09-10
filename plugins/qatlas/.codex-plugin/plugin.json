@@ -1,6 +1,6 @@
 {
   "name": "qatlas",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Qatlas verbindet passiven Sessionkontext, Regeln und Projektzustand mit ausdrücklich gestarteter Einrichtung, Planung, serieller Ausführung und sicheren Verwaltungswerkzeugen.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
