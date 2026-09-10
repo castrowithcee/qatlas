@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "qatlas-web",
   "displayName": "Qatlas Web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Web-Capability für Qatlas: Produktprofil, Fähigkeiten, UI, Daten, Architektur, Sicherheit und Betrieb fachlich klären, ohne einen eigenen Arbeitsloop zu besitzen.",
   "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
   "homepage": "https://github.com/castrowithcee/qatlas",

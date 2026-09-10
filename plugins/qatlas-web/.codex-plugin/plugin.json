@@ -1,6 +1,6 @@
 {
   "name": "qatlas-web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Web-Capability für Qatlas: Produktprofil, Fähigkeiten, UI, Daten, Architektur, Sicherheit und Betrieb fachlich klären, ohne einen eigenen Arbeitsloop zu besitzen.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
