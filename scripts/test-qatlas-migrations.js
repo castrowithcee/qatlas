@@ -505,10 +505,11 @@ function testUpdateCommandsAcrossVersions() {
   const update = path.join(pluginRoot, 'scripts', 'qatlas-update.js');
   const notice = runNode(update, ['notice', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(notice.status, 0, notice.stderr);
-  assert.ok(notice.stdout.includes('0.2.0.md'));
-  assert.ok(notice.stdout.includes('0.2.1.md'));
+  const expectedUpdates = fs.readdirSync(path.join(pluginRoot, 'updates'))
+    .filter(name => /^\d+\.\d+\.\d+\.md$/.test(name));
+  for (const name of expectedUpdates) assert.ok(notice.stdout.includes(name));
   const status = runNode(update, ['status', '--target', f.project], { cwd: f.project, home: f.home });
-  assert.ok(status.stdout.includes('2 relevante Update-Anweisung(en)'));
+  assert.ok(status.stdout.includes(`${expectedUpdates.length} relevante Update-Anweisung(en)`));
   const ack = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(ack.status, 0, ack.stderr);
   const currentVersion = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
