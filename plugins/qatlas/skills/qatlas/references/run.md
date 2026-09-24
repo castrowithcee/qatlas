@@ -155,7 +155,8 @@ Beweise selbst und klassifiziert jeden Fehlschlag:
 
 ### Höchstens zwei Korrekturen
 
-Der initiale Umsetzungsversuch zählt nicht als Korrektur. Danach sind pro Task insgesamt höchstens zwei
+Der initiale Umsetzungsversuch zählt nicht als Korrektur, ebenso wenig seine planmäßige Fortsetzung nach
+einem geprüften und gesicherten Meilenstein. Danach sind pro Task insgesamt höchstens zwei
 gezielte Korrekturversuche erlaubt, auch wenn mehrere Abnahmekriterien betroffen sind. Jede Korrektur braucht
 neue Evidenz und eine daraus abgeleitete Änderung; bloßes Umformulieren, ein anderer Subagent oder eine neue
 Session setzt den Zähler nicht zurück.

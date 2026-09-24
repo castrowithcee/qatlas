@@ -103,7 +103,8 @@ nur eindeutig gefahrlos aufräumbare Einträge; lege alle übrigen mit ihrem Hin
    nichts und zeige den konkreten Zustand. Eine für einen laufenden oder unbekannten Worker oder
    Orchestrator beanspruchte Arbeit bleibt bestehen.
 3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <pfad>` und ohne
-   `--force`. Der Branch bleibt zunächst erhalten.
+   `--force`. Entferne danach mit `rmdir` nur dadurch leer gewordene Zwischenordner bis zum Repo-Ordner
+   im zentralen Ablageort. Der Branch bleibt zunächst erhalten.
 4. Lösche den lokalen Branch nur mit `git branch -d`, wenn sein Ziel aus Spine, Auftrag oder ausdrücklichem
    Nutzerkontext eindeutig ist und Git die vollständige Integration in genau dieses Ziel bestätigt.
    Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht.
