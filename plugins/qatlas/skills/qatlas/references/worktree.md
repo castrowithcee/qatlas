@@ -47,13 +47,25 @@ aktuelle Taskvertrag bleiben für Taskstatus und Arbeitsumfang alleinige Autorit
 1. Ermittle Git-Root, primären Arbeitsbaum, gemeinsames Git-Verzeichnis, Branches, Worktrees und vollständigen
    Status. Committe und stashe nichts. Lokale Änderungen bleiben in ihrem Arbeitsbaum und gelangen nicht in
    den neuen.
-2. Leite einen kurzen ASCII-Zweck-Slug aus dem Task oder Auftrag ab. Ein lokaler Task verwendet
-   `qatlas/task-<id>-<slug>`; andernfalls entsteht ein eindeutiger `qatlas/<zweck>`-Branch. Verwende einen
-   vorhandenen Branch oder Worktree nur weiter, wenn er nachweislich derselben offenen Arbeit gehört.
+2. Leite einen kurzen ASCII-Zweck-Slug aus dem Task oder Auftrag ab. Folgt das Repo nachweislich einer
+   eigenen Branch-Konvention aus Projektvorgaben oder durchgängig benannten Branches, gilt sie. Sonst heißt
+   ein Task-Branch `task/<id>-<slug>`; `<id>` ist die Kennung aus dem Spine als ASCII-Slug, `<slug>` stammt
+   aus dem Task-Dateinamen oder Titel. Arbeit ohne Task erhält einen eindeutigen `work/<zweck>`-Branch. Ein
+   Unterbranch hängt an den Namen seines Task-Branches `--<rolle>` an, einen innerhalb des Tasks eindeutigen
+   ASCII-Slug seiner fachlichen Rolle oder seines Zielbereichs, etwa `task/0042-export--tests`. Was der Agent
+   selbst benennt, nennt nie Qatlas, einen Agenten, Host oder ein Modell, weil Branchnamen über
+   Merge-Nachrichten und Remote-Refs in die Historie des Repos gelangen können. Git lässt keinen Branch neben
+   einem gleichnamigen Unterpfad zu. Ein Unterbranch trennt seine Rolle deshalb mit `--` statt `/`, und
+   besteht bereits ein Branch `task` oder `work`, ersetzt `-` den Schrägstrich hinter diesem Präfix, etwa
+   `task-0042-export`. Verwende einen vorhandenen Branch oder Worktree nur weiter, wenn er nachweislich
+   derselben offenen Arbeit gehört.
 3. Bilde den Repo-Schlüssel aus den ersten acht kleingeschriebenen Hex-Zeichen eines SHA-256-Hashs über den
    kanonischen absoluten Pfad des gemeinsamen Git-Verzeichnisses. Der Repo-Slug entsteht aus dem Namen des
    primären Arbeitsbaums als kurzer ASCII-Slug. Verwende
-   `~/.qatlas/state/worktrees/<repo-schluessel>-<repo-slug>/<zweck>/`.
+   `~/.qatlas/state/worktrees/<repo-schluessel>-<repo-slug>/<branch>/`; `<branch>` ist der vollständige
+   Branchname, jeder Schrägstrich darin eine Ordnerebene, etwa `.../task/0042-export--tests/`. Weil
+   Branchnamen eindeutig sind und keiner neben einem gleichnamigen Unterpfad besteht, liegen Worktrees dort
+   nebeneinander, nie ineinander.
 4. Prüfe Namens-, Branch- und Pfadkollisionen gegen das Git-Register und das Dateisystem. Überschreibe nichts.
    Gehört eine Kollision nicht eindeutig derselben Arbeit, bilde selbst einen unterscheidbaren Zweck oder
    stoppe bei weiterhin unklarer Zuordnung. Der Nutzer vergibt keinen technischen Namen.
@@ -63,6 +75,14 @@ aktuelle Taskvertrag bleiben für Taskstatus und Arbeitsumfang alleinige Autorit
    Branch gilt der aus Auftrag oder Spine folgende Startpunkt, sonst das aktuelle `HEAD`.
 6. Lege den Worktree ausschließlich mit `git worktree add` an; verwende weder `-B` noch `--force`. Prüfe den
    Eintrag danach erneut über `git worktree list --porcelain`.
+
+Der Namensraum eines Tasks umfasst seinen Task-Branch, dessen Unterbranches und die daraus abgeleiteten
+Worktrees. Er gehört dem Orchestrator, der den Task im maßgeblichen Planungssystem beansprucht hat; der
+Namensraum eines Orchestrators ist die Summe seiner Task-Namensräume. Nur dieser Orchestrator legt darin
+Branches und Worktrees an, integriert und entfernt sie; ein anderer Orchestrator schreibt darin nichts. Ein
+Name belegt keine Eigentümerschaft; maßgeblich bleiben Beanspruchung und Git-Register. Worktrees gehören
+einer Arbeit, nie einer Agentenidentität: Lege keinen dauerhaften Worktree pro Agent, Host oder Modell an.
+Dauerhaft bleibt nur ein bewusst eingerichteter Integrations- oder echter Maintenance-Arbeitsbaum.
 
 Melde nach erfolgreicher Anlage Zweck, Branch, Startpunkt und absoluten Pfad. Weise knapp darauf hin, dass
 eine neue Agenten-Session in diesem Pfad starten muss. Kopiere keine `.env`, Secrets, Abhängigkeiten oder
@@ -77,14 +97,16 @@ nur eindeutig gefahrlos aufräumbare Einträge; lege alle übrigen mit ihrem Hin
 
 1. Lies das Register erneut und löse die Auswahl eindeutig auf. Entferne niemals den primären oder den
    aktuellen Arbeitsbaum.
-2. Prüfe im Ziel Status, ungetrackte Dateien, Branch, Upstream und nicht integrierte Commits. Ist der
-   Arbeitsbaum nicht sauber oder das Integrationsziel nicht eindeutig belegt, entferne nichts und zeige den
-   konkreten Zustand. Eine für einen laufenden oder unbekannten Worker beanspruchte Arbeit bleibt bestehen.
+2. Prüfe im Ziel Status, ungetrackte Dateien, Branch, Upstream und nicht integrierte Commits. Das
+   Integrationsziel eines Unterbranches ist sein Task-Branch, das eines Task-Branches der Steuerbranch aus
+   dem Spine. Ist der Arbeitsbaum nicht sauber oder das Integrationsziel nicht eindeutig belegt, entferne
+   nichts und zeige den konkreten Zustand. Eine für einen laufenden oder unbekannten Worker oder
+   Orchestrator beanspruchte Arbeit bleibt bestehen.
 3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <pfad>` und ohne
    `--force`. Der Branch bleibt zunächst erhalten.
 4. Lösche den lokalen Branch nur mit `git branch -d`, wenn sein Ziel aus Spine, Auftrag oder ausdrücklichem
-   Nutzerkontext eindeutig ist und Git die vollständige Integration bestätigt. Remote-Branches werden nur
-   auf ausdrücklichen Wunsch gelöscht.
+   Nutzerkontext eindeutig ist und Git die vollständige Integration in genau dieses Ziel bestätigt.
+   Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht.
 5. Zeige anschließend den verbleibenden Bestand erneut nummeriert.
 
 Will der Nutzer einen schmutzigen oder nicht integrierten Strang verwerfen, behandle das als eigene

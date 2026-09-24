@@ -1,8 +1,8 @@
 ---
 description: >
   Serieller autonomer Arbeitslauf für höchstens fünf ausführbare Tasks: Ein Orchestrator disponiert,
-  überwacht und integriert, während Subagents genau einen Task zur Zeit umsetzen und nach spätestens zwei
-  erfolglosen Korrekturen gesichert an den Nutzer übergeben.
+  überwacht und integriert genau einen aktiven Task zur Zeit, den Subagents mit je einem abgegrenzten
+  Auftrag umsetzen, und übergibt ihn nach spätestens zwei erfolglosen Korrekturen gesichert an den Nutzer.
 type: playbook
 edit: locked
 license: MIT
@@ -50,8 +50,9 @@ ein normaler Befund und wird nach den folgenden Reiferegeln behandelt.
 
 ## Tasks auswählen
 
-Ein Lauf bearbeitet höchstens fünf Tasks. Die Zahl der `next`-Tasks verändert diese Grenze nicht. Eine
-größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für spätere Läufe erhalten.
+Ein Lauf bearbeitet höchstens fünf Tasks. Die Grenze begrenzt den Laufhorizont; sie ist keine Commitzahl,
+keine Subagentzahl und keine Aussage über parallele Tasks. Die Zahl der `next`-Tasks verändert sie nicht.
+Eine größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für spätere Läufe erhalten.
 
 1. Lies zuerst nur Roster beziehungsweise externe Metadaten des gewählten Scopes. Ermittle Status,
    Kurzstand, Reihenfolge, Abhängigkeiten und Besitzsignale. Bei einem ausdrücklich gewählten einzelnen
@@ -74,20 +75,21 @@ größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für spätere Lä
    bekannte externe Voraussetzung, setze ihn auf `waiting`. Eine reversible technische Detailentscheidung
    im vereinbarten Entscheidungsspielraum, eine technische Schwierigkeit oder eine zusätzliche Datei
    innerhalb des fachlichen Scopes ist keine offene Vertragsfrage.
-6. Verändere keinen `in-progress`-Task mit einem laufenden oder unbekannten Subagent. Kläre zuerst dessen
-   Eigentümer und Arbeitsstand.
+6. Verändere keinen `in-progress`-Task mit einem laufenden oder unbekannten Subagent oder Orchestrator.
+   Kläre zuerst dessen Eigentümer und Arbeitsstand. Arbeitet ein weiterer Orchestrator im selben Repo oder
+   Planungssystem, beanspruche nur nach den Regeln für mehrere Orchestratoren im Git-Ablauf.
 7. Prüfe bei Git Root, Branch, Upstream, Worktrees und vollständigen Status. Schreibende Arbeit beginnt nur
    auf einem sauberen, seit dem Preflight unveränderten Steuerbranch. Wende vor dem ersten schreibenden
    Git-Schritt den vom Einstieg genannten Git-Ablauf an.
 
-Plane die Auswahl nicht als unveränderlichen Batch. Nach jedem abgeschlossenen oder übergebenen Task
-bewertet der Orchestrator Reihenfolge, Abhängigkeiten und verbleibende Laufkapazität neu.
+Plane die Auswahl nicht als unveränderlichen Batch. Nach jedem abgeschlossenen oder gesichert übergebenen
+Task bewertet der Orchestrator Auswahl, Reihenfolge, Abhängigkeiten und verbleibende Laufkapazität neu.
 
 ## Genau einen Task ausführen
 
-Es ist immer höchstens ein Task `in-progress`. Beanspruche ihn unmittelbar vor der ersten schreibenden
-Ausführung im Spine. Kein Subagent verändert Spine oder Branchverwaltung, erstellt Commits oder startet
-eigene Subagents.
+Pro Lauf ist immer höchstens ein Task `in-progress`; die bis zu fünf Tasks laufen nacheinander. Beanspruche
+ihn unmittelbar vor der ersten schreibenden Ausführung im Spine. Kein Subagent verändert Spine oder
+Branchverwaltung, erstellt Commits oder startet eigene Subagents.
 
 ### Subagents beauftragen
 
@@ -107,15 +109,16 @@ Reihenfolge:
   der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink.
 - **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
 - **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
-  erfüllt, oder eine Vertrags-, Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
+  erfüllt, bei einer größeren Umsetzung der vereinbarte Meilenstein erreicht, oder eine Vertrags-,
+  Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
 - **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, aktualisierte oder bestätigte
   Dokumentation, Abweichungen von den erwarteten Änderungsflächen und ungelöste Risiken.
 
 Normalerweise setzt ein Subagent den Task um. Braucht derselbe Task legitim mehrere getrennte Rollen oder
 Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
 nachweislich ergänzen, dürfen keine konkurrierenden Lösungen bauen und bleiben gemeinsam im Fehlerbudget
-dieses einen Tasks. Ein weiterer Task beginnt erst, wenn der aktive Task abgeschlossen oder gesichert
-übergeben ist.
+dieses einen Tasks. Gleichzeitig schreibende Subagents isoliert der Git-Ablauf. Ein weiterer Task beginnt
+erst, wenn der aktive Task abgeschlossen oder gesichert übergeben ist.
 
 Der Subagent darf eine nicht vorhergesagte Datei selbstständig einbeziehen, wenn sie nachweislich innerhalb
 des fachlichen Scopes liegt, und nennt die Abweichung in seiner Rückgabe. Wäre eine Wirkung außerhalb des
@@ -209,6 +212,7 @@ Beende den Lauf, sobald eine dieser Bedingungen gilt:
 - Ein fehlgeschlagener Task blockiert die verbleibende Arbeit.
 - Es bleibt nur Arbeit mit unerfüllten Abhängigkeiten, `waiting`, `draft` oder menschlicher Übergabe.
 - Eine Scope-, Risiko-, Außenwirkungs- oder Berechtigungsgrenze ist erreicht.
+- Beanspruchung, Eigentümerschaft oder Integrationsbesitz eines benötigten Tasks ist nicht eindeutig belegt.
 - Der Steuerbranch wurde seit dem Preflight fremd verändert.
 
 Sichere vor dem Ende Spine, Abschlussberichte und erlaubte lokale Commits. Berichte Ergebnis, maßgebliche
