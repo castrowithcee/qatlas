@@ -111,7 +111,7 @@ maßgebliche Oberfläche zum interaktiven Anzeigen, Umschalten und Sortieren der
 ### Native Unterschiede
 
 - `branch-changes` zählt committete Änderungen gegen den Standardbranch. Es ist nicht Claudes uncommitteter
-  Diff plus Zustand `commit needed`, `push needed` oder `pushed`.
+  Diff plus Zustand wie `Änderungen vorhanden`, `Push nötig` oder `aktuell`.
 - Tokenzähler gelten kumulativ für die Session, nicht nur für Claudes letzten `out`-Wert.
 - Codex zeigt Kontext und primäre/sekundäre Nutzungslimits, aber nicht Kosten, Reset-Countdown, Methode oder
   die entsprechenden Qatlas-Widgets.

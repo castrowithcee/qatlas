@@ -171,7 +171,7 @@ function gitInfo(d) {
         }
         const dirty = run(cwd, 'git --no-optional-locks status --porcelain');
         let sync;
-        if (dirty && dirty.trim() !== '') sync = 'Commit nötig';
+        if (dirty && dirty.trim() !== '') sync = 'Änderungen vorhanden';
         else {
             const counts = run(cwd, 'git --no-optional-locks rev-list --left-right --count HEAD...@{u}');
             if (counts === null) sync = 'kein Upstream';

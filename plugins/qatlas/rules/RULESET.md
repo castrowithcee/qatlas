@@ -19,16 +19,18 @@ vorhanden, lies die im Block genannte Quelldatei vollständig, bevor du arbeites
 
 ## Git beim Sessionstart
 
-Prüfe vor der eigentlichen Arbeit das Repo, in dem die Session beginnt. Betrifft die Arbeit später ein
-eingebettetes oder benachbartes Repo, prüfe dieses vor dem ersten Eingriff ebenfalls:
+Prüfe vor der eigentlichen Arbeit lokal das Repo, in dem die Session beginnt. Betrifft die Arbeit später
+ein eingebettetes oder benachbartes Repo, prüfe dieses vor dem ersten Eingriff ebenfalls:
 
 1. Ermittle Repo-Root, Branch und Upstream; nimm weder `origin` noch `main` pauschal an.
 2. Führe `git worktree list --porcelain` aus und verändere andere Worktrees nicht.
-3. Führe bei vorhandenem Remote `git fetch` aus. Scheitert es, melde vor der Arbeit, dass der entfernte
-   Stand nicht geprüft werden konnte.
-4. Prüfe `git status` und die Abweichung zwischen `HEAD` und Upstream.
-5. Ist der Arbeitsbaum sauber und der Branch nur zurück, aktualisiere per Fast-Forward, bevorzugt mit
-   `git pull --ff-only`.
+3. Prüfe `git status` und die bekannte Abweichung zwischen `HEAD` und Upstream. Sie beruht auf dem
+   zuletzt geholten Remotestand; gib sie nicht als aktuellen Remotestand aus.
+4. Führe `git fetch` erst aus, wenn der Auftrag einen aktuellen Remotevergleich, eine schreibende
+   Integration, einen Sync oder einen Push braucht. Scheitert es, melde, dass der entfernte Stand nicht
+   geprüft werden konnte. Rein lesende Arbeit löst keinen Netzwerkzugriff aus.
+5. Aktualisiere einen Branch nie allein wegen des Sessionstarts. Ein Fast-Forward mit `git pull --ff-only`
+   gehört nur in einen ausdrücklich autorisierten Sync- oder Arbeitsablauf.
 6. Ändere bei lokalen Änderungen, Divergenz oder drohenden Konflikten nichts automatisch. Berichte den
    Zustand, bevor du darauf aufbaust.
 
@@ -44,7 +46,9 @@ eingebettetes oder benachbartes Repo, prüfe dieses vor dem ersten Eingriff eben
   der Test muss auch dann harmlos bleiben, wenn der Schutz überhaupt nicht läuft.
 - Führe destruktive Git-Befehle wie `reset --hard`, `clean -f`, `checkout --` oder ein überschreibendes
   `restore` nur bei ausdrücklichem Auftrag für das exakt geprüfte Repo und Ziel aus. Verwende niemals
-  Force-Push und schreibe geteilte Historie nicht eigenmächtig um.
+  `git push --force`. `--force-with-lease` bleibt eine ausdrücklich beauftragte Ausnahme für einen
+  exklusiv besessenen, ungeschützten Branch nach aktuellem Fetch. Schreibe geteilte Historie nicht
+  eigenmächtig um.
 - Kannst du Wirkung oder Ziel nicht sicher begrenzen, führe den Befehl nicht aus und frage nach.
 
 ## Datenschutz
