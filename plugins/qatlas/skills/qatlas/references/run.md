@@ -48,6 +48,58 @@ Ausführungsgrundlage auf Aktualität, Umgebungs- und Git-Voraussetzungen; er so
 erst durch eine neue Erstanalyse entdecken. Ein seit `shape` oder `backlog` veränderter Bestand ist trotzdem
 ein normaler Befund und wird nach den folgenden Reiferegeln behandelt.
 
+## Orchestrierung konfigurieren
+
+Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run`;
+die folgende Vorlage dient allein ihrer Einrichtung und ist keine zweite Modellliste für laufende Runs.
+Fehlt die Datei, zeige die Vorlage und frage, ob du sie dort anlegen sollst. Lege sie erst nach Zustimmung
+an. Ohne Datei und ohne Zustimmung beginne keinen Task; die Modellgrenzen wären nicht belegt.
+
+```yaml
+# Nur qatlas run liest diese Datei; sie ändert keine Host-Einstellungen.
+format: 1
+
+# Die Beschreibungen bestimmen den Zuschnitt, nicht die Größe eines Backlog-Tasks.
+profiles:
+  light: "Enger Auftrag mit eindeutigem Vorgehen und direkter Prüfung."
+  standard: "Mehrere abhängige Schritte oder technische Abwägungen im Task."
+  demanding: "Schwierige Diagnose oder eng gekoppelte Umsetzung, die sich nicht sinnvoll kleiner schneiden lässt."
+
+# Worker-Effort wird gesetzt, nicht vom Orchestrator geerbt.
+# Das Orchestrator-Modell muss bereits beim Start des Runs stimmen.
+# Bei neuen oder entfallenen Modellen Profile prüfen, nie still ersetzen.
+hosts:
+  codex:
+    orchestrator: gpt-6-sol
+    workers:
+      light:     { model: gpt-6-luna, effort: high }
+      standard:  { model: gpt-6-sol,  effort: high }
+      demanding: { model: gpt-6-sol,  effort: xhigh }
+  claude-code:
+    orchestrator: opus
+    workers:
+      light:     { model: haiku,  effort: high }
+      standard:  { model: sonnet, effort: high }
+      demanding: { model: opus,   effort: xhigh }
+```
+
+Prüfe bei einer vorhandenen Datei Format, Host, die drei beschriebenen Profile, Orchestrator-Modell und
+alle gewählten Worker-Profile.
+Die Profile sind eine Allowlist: Verwende weder ein nicht eingetragenes Modell noch ein anderes Effort und
+lasse Worker diese Werte nicht unbemerkt vom Orchestrator erben. Prüfe die eingetragenen Modelle und
+Effort-Stufen gegen die aktuell im Host verfügbare Auswahl; verifiziere zweifelhafte oder neue Modelle
+anhand aktueller offizieller Host-Angaben. Ist ein Eintrag veraltet oder ist ein neues Modell für ein Profil
+plausibel besser, schlage die konkrete Änderung mit Grund vor. Ändere die nutzereigene Datei nur nach
+Zustimmung. Ein neues Modell ersetzt einen gültigen Eintrag nicht still. Ein ungültiges Orchestrator-Modell
+oder ein für den nötigen Auftrag nicht nutzbares Profil stoppt vor der Task-Beanspruchung; andere gültige
+Profile bleiben nutzbar. Behaupte keine Prüfung der Modellverfügbarkeit, die der Host nicht erlaubt.
+
+Codex setzt beim Spawn Modell und Reasoning-Effort ausdrücklich. Claude Code verwendet für `high` den
+Plugin-Subagent `qatlas:run-high`, für `xhigh` `qatlas:run-xhigh`, und übergibt das Modell ausdrücklich beim
+Aufruf. Ist der passende Subagent nicht verfügbar oder ersetzt der Host Modell oder Effort durch andere
+Werte, starte mit diesem Profil nicht. Die Konfiguration enthält keine `medium`-, `max`- oder
+`ultra`-Ausweichstufe.
+
 ## Tasks auswählen
 
 Ein Lauf bearbeitet höchstens fünf Tasks. Die Grenze begrenzt den Laufhorizont; sie ist keine Commitzahl,
@@ -97,6 +149,12 @@ Der Orchestrator gibt jedem Subagent genau einen abgegrenzten Auftrag mit Task-I
 erlaubten Zielen, Scope-out, Abnahmekriterien, Prüfungen und Rückgabeformat. Er implementiert die fachliche
 Lösung nicht selbst. Kleine Status-, Integrations- und Verifikationsschritte bleiben bei ihm.
 
+Ein Task darf innerhalb seines bestehenden Vertrags in kleinere Worker-Aufträge zerlegt werden; daraus
+entstehen keine neuen Backlog-Tasks. Wähle für jeden Auftrag zuerst `light`. Nutze `standard`, wenn der
+konkrete Auftrag dessen beschriebenes Urteil verlangt, und `demanding` nur bei belegter Schwierigkeit oder
+wenn ein kleinerer Zuschnitt nicht trägt. Ein kleiner Worker muss dafür nicht erst scheitern. Begründe
+`standard` und `demanding` vor dem Spawn kurz; ein Modellwechsel setzt das Korrekturbudget nicht zurück.
+
 Leite den Auftrag aus dem aktuellen Taskvertrag und dem bestätigten Preflight ab. Er enthält in dieser
 Reihenfolge:
 
@@ -108,6 +166,7 @@ Reihenfolge:
 - **Leitplanken:** bindende Architektur-, Sicherheits-, Kompatibilitäts- und Dokumentationsgrenzen sowie
   der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink.
 - **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
+- **Worker-Profil:** gewähltes Profil mit Modell, Effort und bei `standard` oder `demanding` dem Grund.
 - **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
   erfüllt, bei einer größeren Umsetzung der vereinbarte Meilenstein erreicht, oder eine Vertrags-,
   Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
@@ -129,11 +188,12 @@ Sende nach dem erfolgreichen Start genau eine knappe Karte:
 
 > **Aufgabe:** #84 - Dateizugriff auf SQL umstellen
 >
-> **Subagents:** nicht ausgewiesen
+> **Subagents:** light: Luna (high)
 
-Verwende ID und Titel aus dem Spine. Nenne nur tatsächlich gewählte oder geerbte Modellnamen in kurzer
-Form; ist ein Modell nicht bekannt, schreibe `nicht ausgewiesen`. Fehlen die benötigten Subagents, stoppe
-vor der Umsetzung und melde diese Voraussetzung. Der Orchestrator ersetzt sie nicht als stiller Subagent.
+Verwende ID und Titel aus dem Spine. Nenne pro gestarteten Subagent das gewählte Profil und die tatsächlich
+verwendete Modell-Effort-Kombination in kurzer Form; bei unbekannter oder abweichender Kombination stoppe
+den betreffenden Auftrag. Fehlen die benötigten Subagents, stoppe vor der Umsetzung und melde diese
+Voraussetzung. Der Orchestrator ersetzt sie nicht als stiller Subagent.
 
 ### Überwachen
 
@@ -219,4 +279,4 @@ Beende den Lauf, sobald eine dieser Bedingungen gilt:
 Sichere vor dem Ende Spine, Abschlussberichte und erlaubte lokale Commits. Berichte Ergebnis, maßgebliche
 Beweise und konkrete menschliche Übergaben knapp. Nenne pro bearbeitetem Task geänderte Dateien,
 ausgeführte Prüfungen, Dokumentationswirkung, Abweichungen von der erwarteten Arbeitskarte und ungelöste
-Risiken; Rohlogs bleiben draußen. Pushe nichts.
+Risiken sowie die eingesetzten Worker-Profile mit Modell und Effort; Rohlogs bleiben draußen. Pushe nichts.
