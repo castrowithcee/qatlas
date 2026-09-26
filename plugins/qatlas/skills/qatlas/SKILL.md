@@ -1,12 +1,11 @@
 ---
 name: qatlas
 description: >
-  Steuert auf ausdrücklichen Aufruf Qatlas' Einrichtung und Arbeitsloop: ein Projekt einrichten, Ziele
-  klären, Arbeit ausarbeiten und disponieren, Aufgaben autonom ausführen, Übergaben klären und gemeinsame
-  Git-Worktrees verwalten. Ohne Modus nur den nächsten sinnvollen Einstieg empfehlen. Niemals automatisch
-  starten.
+  Steuert auf ausdrücklichen Aufruf den Qatlas-Arbeitsloop: Ziele klären, Arbeit ausarbeiten und
+  disponieren, Aufgaben autonom ausführen und menschliche Übergaben klären. Ohne Modus nur den nächsten
+  sinnvollen Einstieg empfehlen. Niemals automatisch starten.
 disable-model-invocation: true
-argument-hint: "[setup|goal|shape|backlog|run|review|worktree] [context]"
+argument-hint: "[goal|shape|backlog|run|review] [context]"
 license: MIT
 type: skill
 edit: locked
@@ -14,8 +13,9 @@ edit: locked
 
 # Qatlas
 
-Qatlas verbindet passive Sessioninfrastruktur mit ausdrücklich gestarteten Werkzeugen und
-Arbeitsschleifen. Der Nutzer besitzt den Start jedes Modus; ein Modus autorisiert nie still den nächsten.
+Der Qatlas-Arbeitsloop startet nur auf ausdrücklichen Aufruf. Der Nutzer besitzt den Start jedes Modus;
+ein Modus autorisiert nie still den nächsten. Einrichtung liegt unter `qatlas-core`, manuelle
+Workspace-Verwaltung unter `qatlas-work`.
 
 Für `shape`, `backlog`, `run` und `review` bestimme zuerst das maßgebliche Planungssystem. Ist der lokale
 Qatlas-Backlog maßgeblich, lies vor der ersten Taskauswahl oder -änderung vollständig
@@ -33,33 +33,22 @@ Autorität nicht. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihr
 
 ## Modus wählen
 
-### Einrichtung
-
-- **`setup`:** Lies vollständig [Qatlas einrichten](references/setup.md) und führe nur dieses Verfahren
-  aus.
-### Arbeitsloop
-
 - **`goal [Idee, Vision oder Ziel]`:** Lies vollständig [Zielbild klären](references/goal.md). Kläre das
   Zielbild ausschließlich im Gespräch und ohne dauerhafte Änderung.
-- **`shape [Idee oder Quelle]`:** Lies vollständig [Ideen ausarbeiten](references/shape.md). Erzeuge aus
-  Chat, Import oder bestehender Arbeit bestätigtes Projektwissen, ausführbare Arbeitspakete und bei leerem
-  Horizont eine begrenzte `next`-Auswahl. Setze nichts um.
-- **`backlog [Scope]`:** Lies vollständig [Backlog disponieren](references/backlog.md). Besprich ohne Scope
-  die offenen Vertragsfragen aller Drafts im maßgeblichen Backlog; ein Scope begrenzt diese Menge. Reife
-  geklärte Tasks zu `ready`, bilde einen sinnvollen `next`-Horizont und prüfe ruhende Arbeit. Setze nichts
-  um.
+- **`shape [Idee oder Quelle]`:** Lies vollständig [Ideen ausarbeiten](references/shape.md). Kläre eine
+  reife Idee, dokumentiere bestätigtes Wissen, schneide kleine, ausführungsreife Arbeitspakete und ordne
+  den nächsten Horizont. Setze nichts um.
+- **`backlog [Scope]`:** Lies vollständig [Backlog disponieren](references/backlog.md). Schärfe und teile
+  vorhandene Drafts bei Bedarf, kläre durch neue Ergebnisse reif gewordene Arbeit und repariere Reihenfolge
+  oder Queue. Setze nichts um.
 - **`run [Task, Projekt oder Backlog]`:** Lies vollständig [Arbeit ausführen](references/run.md). Führe
   höchstens fünf ausführbare Tasks seriell durch einen Orchestrator und seine Subagents aus. Lies vor dem
   ersten schreibenden Git-Schritt zusätzlich vollständig [den Git-Ablauf](references/git-workflow.md).
 - **`review [Scope]`:** Lies vollständig [Übergaben klären](references/review.md). Kläre ausschließlich
   Entscheidungen, Prüfungen und Nutzerhandlungen. Beginne danach keine Ausführung.
-- **`worktree`:** Lies vollständig [Git-Worktrees verwalten](references/worktree.md). Ohne weitere Angabe
-  zeige nur die nummerierte Übersicht. `worktree new [Auftrag]` legt für den aktuellen Kontext einen
-  Worktree an; jeder andere Rest ist eine natürliche Auswahl oder Aufräumanweisung. Namen und Pfade bestimmt
-  immer der Agent.
 
 Ohne Modus lies nur den bereits geladenen Projektzustand, nenne knapp den nächsten sinnvollen Modus und
-ändere nichts. Fehlt ein Qatlas-Scaffold, empfehle `qatlas setup`. Ist ein genannter Modus nicht
+ändere nichts. Fehlt ein Qatlas-Scaffold, empfehle `qatlas-core setup`. Ist ein genannter Modus nicht
 eindeutig, nenne die verfügbaren Modi jeweils in einem kurzen Satz und frage nach genau einem. Deute eine
 normale Unterhaltung nie als Laufautorisierung.
 
@@ -97,14 +86,12 @@ Ein Fach-Pack liefert Methode und Prüfperspektive, keinen konkurrierenden Workf
 Jede Schleife endet mit ihrem eigenen Ergebnis:
 
 - `goal` endet mit einem bestätigten Zielbild im Gespräch und ohne dauerhafte Änderung.
-- `shape` endet mit bestätigtem Wissen, `draft`- oder `ready`-Arbeit und einem gepflegten `next`-Horizont.
-- `backlog` endet mit einzeln besprochenen Drafts, einem konsolidierten Arbeitsvorrat und einem geordneten
-  `next`-Horizont.
+- `shape` endet mit bestätigtem Wissen, möglichst ausführungsreifen Paketen des nächsten Horizonts und
+  einer begründeten Reihenfolge; echte offene Vertragsfragen bleiben als `draft` sichtbar.
+- `backlog` endet mit geschärften vorhandenen Tasks, geklärten Abhängigkeiten und einer konsistenten Queue.
 - `run` endet nach höchstens fünf seriell bearbeiteten Tasks oder an einer definierten Stopbedingung.
 - `review` endet nach den gewählten menschlichen Übergaben.
 
-`worktree` ist keine Arbeitsschleife und startet keine Umsetzung. Der Modus verwaltet nur die gemeinsame
-Isolation, die ein späterer oder bereits autorisierter Lauf verwenden kann.
-
 `goal` ist eine optionale Vorstufe. Ein direkter Einstieg mit `shape` bleibt gültig. Der Übergang von
-`goal` zu `shape` und jeder Übergang zu `run` brauchen einen neuen ausdrücklichen Nutzeraufruf.
+`goal` zu `shape` und jeder Übergang zu `run` brauchen einen neuen ausdrücklichen Nutzeraufruf. `backlog`
+ist ein optionaler Wartungs- und Wiedereinstieg, kein notwendiger Schritt zwischen `shape` und `run`.

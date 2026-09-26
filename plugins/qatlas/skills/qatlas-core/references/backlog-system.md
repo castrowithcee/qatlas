@@ -21,7 +21,7 @@ Rückweg und hole die Zustimmung des Nutzers ein. Secrets und Tokens gehören ni
 
 1. Lies Projektanweisungen, `.qatlas-project/README.md` und `.qatlas-project/backlog/BACKLOG.md`. Folge aus
    der README nur den für den Systemwechsel passenden Lesebedingungen. Fehlt das Qatlas-Scaffold, stoppe und
-   verweise auf `qatlas setup`.
+   verweise auf `qatlas-core setup`.
 2. Bestimme Quelle, Ziel und gewünschte Richtung. Unterstütze lokal nach extern, extern nach lokal und
    extern nach extern; unterstelle keinen Anbieter aus einem vorhandenen Git-Remote.
 3. Ermittle für beide Seiten Titel, Container oder Projekt, Task-Artefakt, Entwurfsform, Status, Felder,

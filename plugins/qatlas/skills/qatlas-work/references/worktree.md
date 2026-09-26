@@ -1,7 +1,7 @@
 ---
 description: >
   Bedingt geladener Vertrag für die nummerierte Übersicht, kontextgeleitete Anlage und sichere Bereinigung
-  zentraler Git-Worktrees durch Qatlas Worktree und Qatlas Run.
+  zentraler Git-Worktrees durch Qatlas Work Tree und Qatlas Run.
 type: playbook
 edit: locked
 license: MIT
@@ -9,7 +9,7 @@ license: MIT
 
 # Git-Worktrees verwalten
 
-Lies diese Referenz nur, wenn der Nutzer `qatlas worktree` aufruft oder der Git-Ablauf eines
+Lies diese Referenz nur, wenn der Nutzer `qatlas-work tree` aufruft oder der Git-Ablauf eines
 `qatlas run` einen Worktree verlangt. Git registriert alle Worktrees eines Repos gemeinsam; dieses
 Register ist die maßgebliche Quelle. Der Ordner unter `~/.qatlas/` ist nur der gemeinsame Ablageort für
 alle Agenten desselben Nutzers.
@@ -32,7 +32,7 @@ bezeichnet. Hat sich die Zuordnung verändert, zeige die neue Liste und ändere 
 
 ## Anlegen
 
-`qatlas worktree new [Auftrag]` legt einen Worktree für die Arbeit im aktuellen Kontext an. Der optionale
+`qatlas-work tree new [Auftrag]` legt einen Worktree für die Arbeit im aktuellen Kontext an. Der optionale
 Text beschreibt die Arbeit in natürlicher Sprache; er ist niemals ein technischer Name. Ohne Text gelten
 der aktuelle Task, das Projekt und der Gesprächskontext. Frage nur nach dem Arbeitszweck, wenn daraus kein
 eindeutiger Auftrag hervorgeht. Der Agent bestimmt Branch, Zweck-Slug und Pfad vollständig selbst.

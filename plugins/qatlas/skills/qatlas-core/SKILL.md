@@ -1,11 +1,11 @@
 ---
 name: qatlas-core
 description: >
-  Bündelt ausdrücklich aufgerufene Qatlas-Verwaltung: Projektzustand diagnostizieren, Statusline und
-  Telegram-Ping konfigurieren oder das maßgebliche Planungssystem wechseln. Nur durch qatlas-core mit
-  einem Modus starten. Ohne Argument eine kompakte Karte der verfügbaren Modi zeigen und nichts ausführen.
+  Bündelt ausdrücklich aufgerufene Qatlas-Kernverwaltung: ein Projekt einrichten, Projektzustand
+  diagnostizieren, Statusline und Telegram-Ping konfigurieren oder das maßgebliche Planungssystem wechseln.
+  Ohne Argument eine kompakte Karte der verfügbaren Modi zeigen und nichts ausführen.
 disable-model-invocation: true
-argument-hint: "[doctor|statusline|ping [telegram]|backlog-system] [Argumente]"
+argument-hint: "[setup|doctor|statusline|ping [telegram]|backlog-system] [Argumente]"
 license: MIT
 type: skill
 edit: locked
@@ -25,6 +25,7 @@ Antworte ausschließlich mit der folgenden Karte als gerendertes Markdown. Lies 
 
 | Argument | Aufgabe |
 |---|---|
+| `setup` | Richtet Qatlas und seinen Projektzustand ein. |
 | `doctor` | Prüft Qatlas, Scaffold, Abhängigkeiten und den Projektupdate-Stand ohne Reparatur. |
 | `statusline` | Richtet die Statusline des aktuellen Hosts ein oder passt sie an. |
 | `ping` oder `ping telegram` | Richtet Telegram-Benachrichtigungen beim Warten ein oder testet sie. |
@@ -37,6 +38,7 @@ Aufruf: `qatlas-core <argument>`
 `<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`; ohne Hook liegt er zwei Ebenen
 über dieser `SKILL.md`. Setze in der gewählten Referenz immer diesen aufgelösten Root ein.
 
+- **`setup`:** Lies vollständig [Qatlas einrichten](references/setup.md) und führe nur dieses Verfahren aus.
 - **`doctor`:** Lies vollständig [Qatlas diagnostizieren](references/doctor.md) und führe nur dieses
   Verfahren aus.
 - **`statusline [Argumente]`:** Lies vollständig

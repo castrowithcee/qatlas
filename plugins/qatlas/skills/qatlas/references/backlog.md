@@ -1,7 +1,7 @@
 ---
 description: >
-  Interaktive Reifung und bewusste Umpriorisierung des maßgeblichen Backlogs von unreifen Paketen über den
-  nächsten Ausführungshorizont bis zu menschlichen oder extern wartenden Aufgaben.
+  Optionaler Wiedereinstieg zum Schärfen und Teilen vorhandener Drafts, Klären neuer Voraussetzungen
+  sowie Reparieren von Abhängigkeiten, Reihenfolge und nächstem Ausführungshorizont.
 type: playbook
 edit: locked
 license: MIT
@@ -9,8 +9,10 @@ license: MIT
 
 # Backlog disponieren
 
-Aus einem vorhandenen Arbeitsvorrat entsteht eine verständliche, ausführbare und bewusst geordnete Queue.
-Dieser Modus verändert Planung und Taskverträge, führt aber keine fachliche Arbeit aus.
+Aus vorhandenen Tasks entsteht wieder ein verständlicher, ausführbarer und bewusst geordneter
+Arbeitsvorrat. Dieser Modus ist ein optionaler Wiedereinstieg bei unklaren, manuell angelegten oder durch
+neue Ergebnisse überholten Aufgaben. Er verändert Planung und Taskverträge, führt aber keine fachliche
+Arbeit aus. Zwischen `shape` und `run` ist er kein Pflichtschritt.
 
 Ohne angegebenen Scope ist der gesamte maßgebliche Backlog gewählt. Das Hauptziel ist dann immer, die
 offenen Vertragsfragen seiner Drafts einzeln zu besprechen und jeden geklärten Task auf `ready` zu setzen.
@@ -19,8 +21,9 @@ Planungssystem eindeutig bestimmbare Teilmenge. Frage nicht nach einem Scope, nu
 angegeben hat.
 
 Verwende diesen Modus außerdem, wenn ruhende Arbeit geprüft, mehrere Scopes gegeneinander priorisiert oder
-eine bestehende `next`-Menge bewusst geändert werden soll. Er ist keine Voraussetzung für die Ausführung
-bereits vollständig geklärter Arbeit.
+eine bestehende `next`-Menge bewusst geändert werden soll. Ein vorhandener Draft kann eine erneute
+Untersuchung und denselben fachlichen Zuschnitt wie bei `shape` brauchen; bearbeite ihn hier am bestehenden
+Ort, statt für die Klärung einen neuen Loop zu verlangen.
 
 ## Bestand bilden
 
@@ -60,8 +63,12 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
    allein reicht nicht. Halte keine Secrets im Task fest. Braucht es eine
    Nutzerentscheidung, stelle genau die nächste Entscheidung nach dem gemeinsamen Dialog vor und warte auf
    die Antwort. Arbeite jede geklärte Antwort sofort am fachlich passenden Ort in den aktuellen
-   Taskvertrag ein und entferne überholte Varianten. Fahre danach mit der nächsten offenen Frage oder dem
-   nächsten Draft fort.
+   Taskvertrag ein und entferne überholte Varianten. Ist ein manuell angelegter oder gewachsener Task für
+   einen Worker zu groß oder enthält er eigenständig abnehmbare Ergebnisse, teile ihn in kleinere Tasks
+   mit je eigenem Ziel, Prüfpfad und sinnvoller Abhängigkeit. Übernimm die geltenden Entscheidungen und
+   Sicherheitsgrenzen konkret in jeden betroffenen Vertrag. Bewahre bestätigtes Ziel und Abnahme der
+   ursprünglichen Arbeit vollständig; lass keinen leeren Resttask zurück. Fahre
+   danach mit der nächsten offenen Frage oder dem nächsten Draft fort.
 2. **Reife belegen.** Setze einen Task nach dem Statusmodell des maßgeblichen Planungssystems auf `ready`,
    sobald keine bekannte Vertragsfrage bleibt und die nötige Ausführungsgrundlage belegt ist. Die
    Dokumentationswirkung lautet `Ändern`, `Prüfen`, `Keine` mit Begründung oder bleibt als `Ungeklärt`
@@ -84,7 +91,9 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
    sinnvoller Integration; bei weniger als fünf passenden Tasks nimm entsprechend weniger. Eine bloße
    Übersicht ist keine Disposition.
 6. **Bestehende Queue konsolidieren.** Entferne Doppelungen, löse widersprüchliche Reihenfolgen und prüfe
-   Abhängigkeiten, ohne ausführbare Taskverträge unnötig umzuschreiben.
+   Abhängigkeiten, ohne ausführbare Taskverträge unnötig umzuschreiben. Ein `ready`-Task mit noch unerfüllter
+   Abhängigkeit bleibt vertraglich reif, gehört aber nicht als ausführbarer Kandidat nach `next`. Hängt
+   seine Abnahme von einer noch unbekannten Entscheidung im Vorgänger ab, bleibt er `draft`.
 
 Wird in diesem Modus eine maßgebliche Grundlage autorisiert geändert, ermittle ihre betroffenen offenen
 Tasks und gleiche deren aktuelle Verträge gezielt mit den neuen Vorgaben ab. Bewahre bestehende Ziele und

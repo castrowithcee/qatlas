@@ -42,6 +42,6 @@ Fasse Befunde nach Priorität zusammen: Blocker, fehlende Projektbestandteile, H
 Erfinde keine Reparatur und melde nicht pauschal Drift, nur weil Plugin-Vorlage und vorhandene Repo-Datei
 inhaltlich verschieden sind.
 
-Will der Nutzer Fehlendes ergänzen, verwende anschließend `qatlas setup` oder führe den Doctor nach
+Will der Nutzer Fehlendes ergänzen, verwende anschließend `qatlas-core setup` oder führe den Doctor nach
 der Freigabe mit `--apply` aus. Beide Verfahren kopieren nur fehlende Dateien und ergänzen `.gitignore`.
 Bestätige Update-Stände niemals als Reparatur eines ungeprüften Befunds.

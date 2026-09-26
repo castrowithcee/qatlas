@@ -46,7 +46,8 @@ Dateien; stoppe vor schreibender Arbeit mit dem konkreten Hindernis.
 Der Laufvertrag konkretisiert den gewählten Scope, ersetzt aber nicht dessen Ausarbeitung. `run` prüft die
 Ausführungsgrundlage auf Aktualität, Umgebungs- und Git-Voraussetzungen; er soll den fachlichen Scope nicht
 erst durch eine neue Erstanalyse entdecken. Ein seit `shape` oder `backlog` veränderter Bestand ist trotzdem
-ein normaler Befund und wird nach den folgenden Reiferegeln behandelt.
+ein normaler Befund und wird nach den folgenden Reiferegeln behandelt. Ein bloß großer Task wird nicht
+automatisch zum Auftrag an ein stärkeres Modell.
 
 ## Orchestrierung konfigurieren
 
@@ -153,11 +154,24 @@ Der Orchestrator gibt jedem Subagent genau einen abgegrenzten Auftrag mit Task-I
 erlaubten Zielen, Scope-out, Abnahmekriterien, Prüfungen und Rückgabeformat. Er implementiert die fachliche
 Lösung nicht selbst. Kleine Status-, Integrations- und Verifikationsschritte bleiben bei ihm.
 
-Ein Task darf innerhalb seines bestehenden Vertrags in kleinere Worker-Aufträge zerlegt werden; daraus
-entstehen keine neuen Backlog-Tasks. Wähle für jeden Auftrag zuerst `light`. Nutze `standard`, wenn der
-konkrete Auftrag dessen beschriebenes Urteil verlangt, und `demanding` nur bei belegter Schwierigkeit oder
-wenn ein kleinerer Zuschnitt nicht trägt. Ein kleiner Worker muss dafür nicht erst scheitern. Begründe
-`standard` und `demanding` vor dem Spawn kurz; ein Modellwechsel setzt das Korrekturbudget nicht zurück.
+Beurteile vor jedem Spawn den tatsächlichen Auftrag und seinen Prüfaufwand: Welche Ergebnisse sind
+eigenständig abnehmbar, welche Schritte hängen voneinander ab, welche Sicherheits- und Zielgrenzen gelten,
+und welche Abnahmen kann der Orchestrator nach der Rückgabe selbst belegen? Mehrere unabhängige Tool- oder
+Endpunktgruppen, verschiedene Risiko- und Berechtigungsgrenzen oder ein Umfang, der einen Worker über
+viele Implementierungs- und Prüfschritte bindet, verlangen einen kleineren Zuschnitt.
+
+Liegt die gesamte Abnahme bereits in einem tragfähigen Taskvertrag, teile ihn bei Bedarf in geordnete
+Worker-Aufträge A, B und weitere mit je eigenem überprüfbarem Meilenstein. Daraus entstehen keine neuen
+Backlog-Tasks. Prüfe und sichere jeden Meilenstein vor dem nächsten Auftrag; spätere Aufträge übernehmen
+den bestätigten Stand. Enthält der Task dagegen eigenständige Ergebnisse, deren Grenzen, Reihenfolge oder
+Abnahme der Vertrag noch nicht klärt, setze ihn nach der Reifeprüfung auf `draft` und übergib den Zuschnitt
+an `shape` oder `backlog`. Erfinde die fehlende Planung nicht im Run.
+
+Wähle für jeden abgegrenzten Auftrag zuerst `light`. Nutze `standard`, wenn dessen beschriebene technische
+Abwägungen nötig sind, und `demanding` bei belegter schwieriger Diagnose oder eng gekoppelter Umsetzung,
+die sich nicht sinnvoll weiter teilen lässt. Umfang allein begründet `demanding` nicht. Ein kleiner Worker
+muss dafür nicht erst scheitern. Begründe `standard` und `demanding` vor dem Spawn kurz; ein Modellwechsel
+setzt das Korrekturbudget nicht zurück.
 
 Leite den Auftrag aus dem aktuellen Taskvertrag und dem bestätigten Preflight ab. Er enthält in dieser
 Reihenfolge:
@@ -168,7 +182,9 @@ Reihenfolge:
   Arbeitskarte, nicht als starre Dateifreigabe, und gib keine Secrets weiter.
 - **Scope:** erlaubte fachliche Ziele sowie ausdrücklicher Scope-out.
 - **Leitplanken:** bindende Architektur-, Sicherheits-, Kompatibilitäts- und Dokumentationsgrenzen sowie
-  der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink.
+  der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink. Prüfe
+  insbesondere die Bindung fremder Objekt-IDs an das gewählte Ziel und den Umgang mit nicht
+  vertrauenswürdigen Inhalten, soweit der Task solche Grenzen berührt.
 - **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
 - **Worker-Profil:** gewähltes Profil mit Modell, Effort und bei `standard` oder `demanding` dem Grund.
 - **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
@@ -177,8 +193,8 @@ Reihenfolge:
 - **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, aktualisierte oder bestätigte
   Dokumentation, Abweichungen von den erwarteten Änderungsflächen und ungelöste Risiken.
 
-Normalerweise setzt ein Subagent den Task um. Braucht derselbe Task legitim mehrere getrennte Rollen oder
-Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
+Einen kleinen Task setzt normalerweise ein Subagent um. Braucht derselbe Task legitim mehrere getrennte
+Rollen oder Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
 nachweislich ergänzen, dürfen keine konkurrierenden Lösungen bauen und bleiben gemeinsam im Fehlerbudget
 dieses einen Tasks. Gleichzeitig schreibende Subagents isoliert der Git-Ablauf. Ein weiterer Task beginnt
 erst, wenn der aktive Task abgeschlossen oder gesichert übergeben ist.
@@ -202,12 +218,15 @@ Voraussetzung. Der Orchestrator ersetzt sie nicht als stiller Subagent.
 ### Überwachen
 
 Beobachte Arbeitsstand und Rückgaben gegen Taskvertrag, tatsächlichen Diff und vereinbarte Beweise. Greife
-ein, wenn ein Subagent den Scope verlässt, ohne Fortschritt festhängt oder eine ausgeschlossene Wirkung
-vorbereitet. Begrenze oder stoppe seinen Auftrag, statt durch weitere unspezifische Prompts Token zu
-verbrauchen.
+ein, wenn ein Subagent den Scope verlässt, einen vorgeschriebenen Prüf- oder Referenzvergleich auslässt,
+ohne Fortschritt festhängt oder eine ausgeschlossene Wirkung vorbereitet. Begrenze oder stoppe seinen
+Auftrag, statt durch weitere unspezifische Prompts Token zu verbrauchen.
 
 Eine Erfolgsmeldung des Subagents ist kein Abschlussbeleg. Der Orchestrator prüft Ergebnis, Diff und
-Beweise selbst und klassifiziert jeden Fehlschlag:
+Beweise selbst. Gleiche jede Abnahme und jede übergreifende Sicherheitsgrenze mit dem tatsächlichen
+Verhalten ab; grüne Standardtests ersetzen weder ausdrücklich vereinbarte Randfälle noch einen
+Referenzvergleich. Prüfe übergreifende Invarianten spätestens bei der Integration aller Meilensteine
+erneut. Klassifiziere jeden Fehlschlag:
 
 - **Ausführungsfehler:** Ein falscher Pfad, Tippfehler, Quoting oder ungeeigneter Flag hat die Lösung noch
   nicht geprüft. Korrigiere den Aufruf einmal gezielt. Wiederholt sich derselbe Fehler, behandle ihn als

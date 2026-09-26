@@ -1,6 +1,6 @@
 interface:
   display_name: "Qatlas Core"
-  short_description: "Diagnose, Statusline, Ping oder Planungssystem verwalten"
+  short_description: "Projekt einrichten und Qatlas-Kern verwalten"
   default_prompt: "Nutze $qatlas-core doctor, um den Qatlas-Projektzustand ohne Änderungen zu prüfen."
 
 policy:

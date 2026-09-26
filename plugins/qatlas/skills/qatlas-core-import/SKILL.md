@@ -18,7 +18,7 @@ bestimmt den Header, die Scaffold-Norm die Zonen, und die Ablagelogik des Projek
 Regeln hier nicht.
 
 Der Skill braucht `.qatlas-project/zone-import/`. Fehlt die Zone, suche nicht an anderen Orten nach vermeintlichen
-Eingängen, sondern melde das fehlende Scaffold und verweise auf `qatlas setup`.
+Eingängen, sondern melde das fehlende Scaffold und verweise auf `qatlas-core setup`.
 
 ## Invarianten
 

@@ -16,19 +16,19 @@ Markdown aus. Das Lesen der Karte in diesem Skill zählt nicht als Ausgabe. Beha
 angezeigt worden. Ändere keinen Zustand und ergänze keinen Kommentar.
 
 Qatlas ist die Standardinstallation. Seine Regeln und der Sessionkontext wirken passiv; Einrichtung,
-Verwaltungswerkzeuge und Arbeitsloop starten ausschließlich durch einen Nutzeraufruf.
+Workspace-Verwaltung und Arbeitsloop starten ausschließlich durch einen Nutzeraufruf.
 
 ## Qatlas-Einstieg
 
 | Aufruf | Aufgabe |
 |---|---|
-| **qatlas setup** | Richtet Scaffold, Projekt-Ruleset und nutzerweite Einstellungen ein. |
 | **qatlas goal** | Klärt Idee, Zielbild und kleinsten tragfähigen Umfang ausschließlich im Gespräch. |
-| **qatlas shape** | Dokumentiert bestätigtes Wissen, schneidet ausführbare Arbeit und bildet bei leerem Horizont bis zu fünf `next`-Tasks. |
-| **qatlas backlog** | Bespricht ohne Scope alle Drafts einzeln bis `ready`, prüft wartende Arbeit und bildet einen sinnvollen `next`-Horizont. |
-| **qatlas run** | Führt höchstens fünf Tasks seriell aus; der Orchestrator steuert und Subagents setzen jeweils den aktiven Task um. |
+| **qatlas shape** | Klärt eine reife Idee, dokumentiert nötiges Wissen und schneidet kleine, ausführungsreife Tasks in sinnvoller Reihenfolge. |
+| **qatlas backlog** | Schärft und teilt vorhandene Drafts, klärt neue Voraussetzungen und repariert die Queue bei Bedarf. |
+| **qatlas run** | Führt höchstens fünf Tasks seriell aus; der Orchestrator schneidet Worker-Aufträge zu und prüft ihre Ergebnisse. |
 | **qatlas review** | Klärt menschliche Entscheidungen, Prüfungen und Abnahmen einzeln und beginnt keine Ausführung. |
-| **qatlas worktree** | Zeigt gemeinsame Git-Worktrees nummeriert, legt mit `new` kontextgeleitet an und räumt sicher auf. |
+| **qatlas-work tree** | Zeigt gemeinsame Git-Worktrees nummeriert, legt mit `new` kontextgeleitet an und räumt sicher auf. |
+| **qatlas-core setup** | Richtet Scaffold, Projekt-Ruleset und nutzerweite Einstellungen ein. |
 | **qatlas-core doctor** | Prüft Store, Scaffold, Abhängigkeiten und den repo-lokalen Plugin-Update-Stand. |
 | **qatlas-core statusline** | Konfiguriert die Statusline des aktuellen Hosts. |
 | **qatlas-core ping** oder **qatlas-core ping telegram** | Richtet einen einseitigen Telegram-Push beim Warten ein. |
@@ -36,7 +36,7 @@ Verwaltungswerkzeuge und Arbeitsloop starten ausschließlich durch einen Nutzera
 | **qatlas-mode adhd** | Formt die Zusammenarbeit für den Rest der Session handlungsfreundlich für ADHD. |
 | **qatlas-help** | Zeigt diese zentrale Karte. |
 
-`qatlas`, `qatlas-core` und `qatlas-mode` sind Router. `qatlas-help` bleibt der einzige direkte
+`qatlas`, `qatlas-work`, `qatlas-core` und `qatlas-mode` sind Router. `qatlas-help` bleibt der einzige direkte
 Einzweck-Einstieg.
 
 ## Automatische Fähigkeiten
@@ -76,5 +76,5 @@ Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
   vor einer tatsächlichen Markdown-Änderung geladen.
 - `~/.qatlas/plugins/config.yaml` schaltet Sessionstart und verwaltete Arbeitsvereinbarung nutzerweit.
 
-Claude verwendet `/qatlas <modus>`, `/qatlas-core <modus>`, `/qatlas-mode <modus>` oder
+Claude verwendet `/qatlas <modus>`, `/qatlas-work <modus>`, `/qatlas-core <modus>`, `/qatlas-mode <modus>` oder
 `/qatlas-help`; Codex verwendet die entsprechenden `$…`-Skills oder das `/skills`-Menü.

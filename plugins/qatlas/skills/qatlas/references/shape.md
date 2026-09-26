@@ -1,8 +1,7 @@
 ---
 description: >
-  Ausarbeitung einer Idee oder vorhandenen Eingabe zu bestätigtem, kompakt dokumentiertem Projektwissen
-  und eigenständig ausführbaren Arbeitspaketen mit einem begrenzten nächsten Ausführungshorizont, ohne die
-  geplante Arbeit umzusetzen.
+  Ausarbeitung einer reifen Idee oder vorhandenen Eingabe zu bestätigtem Projektwissen, kleinen,
+  ausführungsreifen Arbeitspaketen und ihrer Reihenfolge im nächsten Horizont, ohne sie umzusetzen.
 type: playbook
 edit: locked
 license: MIT
@@ -10,9 +9,9 @@ license: MIT
 
 # Ideen ausarbeiten
 
-Eine Absicht, ein Gespräch oder eine vorbereitete Eingabe geht hinein. Bestätigtes Projektwissen und ein
-tragfähiger Arbeitszuschnitt kommen heraus. Planung ist dabei Gespräch, Bestandsarbeit und Dokumentation,
-nicht nur das Erzeugen von Tasks.
+Eine geklärte Idee, ein Gespräch oder eine vorbereitete Eingabe geht hinein. Kleine, möglichst bis `ready`
+geklärte Arbeitspakete mit begründeter Reihenfolge kommen heraus. Bestandsarbeit, Rückfragen und nötige
+Dokumentation dienen diesem Zuschnitt; die geplante Arbeit wird nicht umgesetzt.
 
 ## Autorität und Planungssystem
 
@@ -22,7 +21,7 @@ Vorrang. Erzeuge weder ein lokales Ersatz- noch ein Spiegel-Backlog. Ist das ma�
 erreichbar, darf die Ausarbeitung im Gespräch fortfahren; melde Arbeitspakete aber nicht als dort angelegt.
 
 Nur ohne andere Vorgabe gilt der lokale Qatlas-Backlog. Fehlt dafür das Scaffold, verweise auf
-`qatlas setup`, bevor du unter `.qatlas-project/` schreibst.
+`qatlas-core setup`, bevor du unter `.qatlas-project/` schreibst.
 
 Der Nutzer hat `shape` bewusst gestartet. Damit steht die Ausarbeitungsabsicht fest, nicht schon die
 inhaltliche Richtung. Stelle nur Fragen, deren Antwort Ergebnis, Scope, dauerhafte Dokumentation,
@@ -109,9 +108,18 @@ der dafür nötigen Freigabe.
 
 ## Arbeitspakete schneiden
 
-Ein Task ist für eine Session zugeschnitten, eigenständig verständlich und beobachtbar abnehmbar. Beim
-lokalen Backlog bestimmen der zuvor geladene Vertrag und seine kanonische Vorlage Felder, Benennung und
-Lebenszyklus; bei einem externen System gilt dessen Binding.
+Ein Task ist für eine Session zugeschnitten, eigenständig verständlich und beobachtbar abnehmbar. Schneide
+den nächsten ausführbaren Horizont so, dass ein kleineres Worker-Modell einen Task im Regelfall als
+abgegrenzten Auftrag bearbeiten kann. Beim lokalen Backlog bestimmen der zuvor geladene Vertrag und seine
+kanonische Vorlage Felder, Benennung und Lebenszyklus; bei einem externen System gilt dessen Binding.
+
+Trenne fachlich eigenständig abnehmbare Ergebnisse bereits hier in eigene Tasks. Mehrere unabhängige
+Tool- oder Endpunktgruppen, verschiedene Risiko- und Berechtigungsgrenzen oder ein erwarteter Umfang, der
+einen Worker über viele Implementierungs- und Prüfschritte bindet, sind Signale zum Teilen. Als Prüfwert
+dienen mehr als etwa drei bis vier neue Operationen oder erwartete 500 bis 800 neue Zeilen; Zahlen sind
+keine starre Grenze. Halte eng gekoppelte Schritte zusammen, wenn getrennte Abnahme künstlich wäre.
+Jedes Paket braucht einen eigenen beobachtbaren Abschluss und einen konkreten Prüfpfad. Plane die
+Integration und fachliche Reihenfolge zwischen abhängigen Paketen mit.
 
 Bilde zuerst einen vorläufigen Paketschnitt und belege dann für jedes Paket, das an einem vorhandenen System
 arbeitet, seine Ausführungsgrundlage. Verfolge den tatsächlichen bestehenden Ablauf weit genug, um
@@ -147,13 +155,20 @@ Bestandsanalyse zu erfinden.
   Anweisungen und Abnahmekriterien in den Task ein. Nenne stabile Quellen knapp zur Nachprüfung. Ein Link
   allein ersetzt keine bindende Aussage; eine vollständige Wiederholung der Projektdokumentation ist ebenso
   falsch.
+- Benenne übergreifende Sicherheits- und Zielgrenzen ausdrücklich dort, wo sie gelten: etwa die Bindung
+  einer Objekt-ID an das gewählte Ziel, die Behandlung fremder Inhalte als Daten und erforderliche
+  Berechtigungen. Verankere vorgeschriebene Referenzvergleiche und Randfallprüfungen in der Abnahme, damit
+  ein grüner Standardtest sie nicht still ersetzt.
 - Halte den Task als aktuellen Snapshot. Ein neuer Task beginnt ohne Planungsprotokoll und frühere
   Übergaben.
 
-Überblicke ein großes Vorhaben in Projektdokumentation und Meilensteinen, materialisiere aber nur
-hinreichend verstandene, eigenständige Pakete. Zerlege den nächsten fachlichen Horizont vollständig; erzeuge
-keine hunderten Dateien nur, um eine ferne Idee vorzutäuschen. Es gilt keine harte Taskzahl, sondern
-ausführbare Reife.
+Kläre Ziel, Zuschnitt, Abnahme und Ausführungsgrundlage der Pakete im nächsten Horizont durch eigene
+Untersuchung und gezielte Nutzerentscheidungen möglichst bis `ready`. Beende die Ausarbeitung nicht mit
+vermeidbaren Drafts. Eine tatsächlich offene Vertragsfrage, fehlende Berechtigung oder noch nicht
+vorliegende Grundlage bleibt nach dem Statusmodell sichtbar; erfinde keine Gewissheit. `ready` verlangt
+keine Vorentscheidung jedes reversiblen technischen Details. Überblicke spätere Horizonte in
+Projektdokumentation und Meilensteinen, materialisiere aber nur hinreichend verstandene Pakete. Es gilt
+keine harte Taskzahl, sondern ausführbare Reife.
 
 Gruppiere nur zusammengehörige oder abhängige Pakete in einem Projekt. Pflege den maßgeblichen Roster und
 die fachlich ausführbare Reihenfolge mit. Setze in diesem Modus niemals `in-progress`.

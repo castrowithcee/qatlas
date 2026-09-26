@@ -43,8 +43,8 @@ Prüfe vor der Beanspruchung, ob die Arbeit einen eigenen Worktree braucht. Er i
 
 Nur genau ein serieller Schreiber ohne gleichzeitigen weiteren Schreiber darf auf einem sauberen,
 exklusiven Branch ohne eigenen Worktree arbeiten. Sobald ein Task-Branch, Unterbranch oder Worktree
-entsteht, lies vollständig [Git-Worktrees verwalten](worktree.md) und verwende dessen zentralen Pfad-,
-Benennungs- und Sicherheitsvertrag. Die Laufautorisierung ersetzt dabei das manuelle `qatlas worktree new`.
+entsteht, lies vollständig [Git-Worktrees verwalten](../../qatlas-work/references/worktree.md) und verwende
+dessen zentralen Pfad-, Benennungs- und Sicherheitsvertrag. Die Laufautorisierung deckt die Anlage ab.
 
 Ein Worktree trennt nur Arbeitsdateien, Index und `HEAD`. Refs, Objekte, Stash, Hooks und
 Repo-Konfiguration teilen alle Worktrees eines Repos; Ports, Datenbanken, Build-Ausgaben, Caches und
@@ -111,7 +111,7 @@ künstliche Parallelität.
   nicht um.
 - Entferne nach dem Aufräumvertrag der Worktree-Referenz nur vom aktuellen Lauf erzeugte, saubere und
   vollständig integrierte Worktrees und Branches. Übernommene, inzwischen integrierte Einträge nennt der
-  Laufbericht zur Bereinigung über `qatlas worktree`.
+  Laufbericht zur Bereinigung über `qatlas-work tree`.
 
 ## Mehrere Orchestratoren
 

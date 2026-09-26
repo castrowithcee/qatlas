@@ -1,0 +1,7 @@
+interface:
+  display_name: "Qatlas Work"
+  short_description: "Worktrees außerhalb des Arbeitsloops verwalten"
+  default_prompt: "Nutze $qatlas-work tree, um Git-Worktrees anzuzeigen oder gezielt zu verwalten."
+
+policy:
+  allow_implicit_invocation: false
