@@ -50,10 +50,13 @@ ein normaler Befund und wird nach den folgenden Reiferegeln behandelt.
 
 ## Orchestrierung konfigurieren
 
-Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run`;
-die folgende Vorlage dient allein ihrer Einrichtung und ist keine zweite Modellliste für laufende Runs.
-Fehlt die Datei, zeige die Vorlage und frage, ob du sie dort anlegen sollst. Lege sie erst nach Zustimmung
-an. Ohne Datei und ohne Zustimmung beginne keinen Task; die Modellgrenzen wären nicht belegt.
+Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run`
+und ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Die folgende Vorlage beschreibt nur
+das Format; `null` markiert noch auszufüllende Modellwerte. Fehlt die Datei, ermittle die für den Host
+verfügbaren Modell-IDs beziehungsweise nativen Aliase und Effort-Stufen. Zeige eine konkret ausgefüllte
+Vorlage und frage, ob du sie dort anlegen sollst. Schreibe keine Platzhalter; sind Werte nicht prüfbar,
+frage nach ihnen. Lege die Datei erst nach Zustimmung an. Ohne Datei und ohne Zustimmung beginne keinen
+Task; die Modellgrenzen wären nicht belegt.
 
 ```yaml
 # Nur qatlas run liest diese Datei; sie ändert keine Host-Einstellungen.
@@ -67,24 +70,25 @@ profiles:
 
 # Worker-Effort wird gesetzt, nicht vom Orchestrator geerbt.
 # Das Orchestrator-Modell muss bereits beim Start des Runs stimmen.
-# Bei neuen oder entfallenen Modellen Profile prüfen, nie still ersetzen.
+# Modellwerte sind Host-IDs oder native Host-Aliase; bei neuen Modellen nie still ersetzen.
 hosts:
   codex:
-    orchestrator: gpt-6-sol
+    orchestrator: null
     workers:
-      light:     { model: gpt-6-luna, effort: high }
-      standard:  { model: gpt-6-sol,  effort: high }
-      demanding: { model: gpt-6-sol,  effort: xhigh }
+      light:     { model: null, effort: high }
+      standard:  { model: null, effort: high }
+      demanding: { model: null, effort: xhigh }
   claude-code:
-    orchestrator: opus
+    orchestrator: null
     workers:
-      light:     { model: haiku,  effort: high }
-      standard:  { model: sonnet, effort: high }
-      demanding: { model: opus,   effort: xhigh }
+      light:     { model: null, effort: high }
+      standard:  { model: null, effort: high }
+      demanding: { model: null, effort: xhigh }
 ```
 
 Prüfe bei einer vorhandenen Datei Format, Host, die drei beschriebenen Profile, Orchestrator-Modell und
-alle gewählten Worker-Profile.
+alle gewählten Worker-Profile. Akzeptiere als Modellwerte nur vom Host unterstützte IDs oder native Aliase;
+deute bloße Familiennamen nicht selbst als Aliase.
 Die Profile sind eine Allowlist: Verwende weder ein nicht eingetragenes Modell noch ein anderes Effort und
 lasse Worker diese Werte nicht unbemerkt vom Orchestrator erben. Prüfe die eingetragenen Modelle und
 Effort-Stufen gegen die aktuell im Host verfügbare Auswahl; verifiziere zweifelhafte oder neue Modelle
@@ -97,8 +101,8 @@ Profile bleiben nutzbar. Behaupte keine Prüfung der Modellverfügbarkeit, die d
 Codex setzt beim Spawn Modell und Reasoning-Effort ausdrücklich. Claude Code verwendet für `high` den
 Plugin-Subagent `qatlas:run-high`, für `xhigh` `qatlas:run-xhigh`, und übergibt das Modell ausdrücklich beim
 Aufruf. Ist der passende Subagent nicht verfügbar oder ersetzt der Host Modell oder Effort durch andere
-Werte, starte mit diesem Profil nicht. Die Konfiguration enthält keine `medium`-, `max`- oder
-`ultra`-Ausweichstufe.
+Werte, starte mit diesem Profil nicht. Eine andere Effort-Stufe, auch `medium`, `max` oder `ultra`, ist
+keine zulässige Ausweichstufe.
 
 ## Tasks auswählen
 
