@@ -2,7 +2,7 @@
 name: qatlas-help
 description: >
   Zeigt auf ausdrücklichen Aufruf die zentrale Karte des Qatlas-Plugins, seiner Einstiege, automatischen
-  Fähigkeiten und optionalen Fach-Packs. Kein dauerhafter Modus und keine automatische Hilfe.
+  Fähigkeiten und optionalen Packs. Kein dauerhafter Modus und keine automatische Hilfe.
 disable-model-invocation: true
 license: MIT
 type: skill
@@ -55,12 +55,12 @@ braucht eine separate eindeutige Autorität aus Auftrag, Taskvertrag oder gelten
 Abschlussmeldungen sendet nur der primäre Orchestrator. Scope-Erweiterungen sowie Produkt- und
 Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
 
-## Optionale Fach-Packs
+## Optionale Packs
 
 | Pack | Zweck |
 |---|---|
 | **qatlas-dev** | Aktiviert sich bei tatsächlicher Codearbeit; `qatlas-dev lite`, `qatlas-dev` oder `qatlas-dev ultra` setzen die Sessionstufe, `qatlas-dev-review` prüft Over-Engineering. |
-| **qatlas-web** | Liefert bei aktiver Webprodukt-Arbeit automatisch die passende Produkt-, UI-, Daten-, Architektur- und Betriebsmethode. |
+| **qatlas-council** | Berät nur auf Aufruf mit unabhängigen Subagents zu Ideen und Vorhaben; `qatlas-council arch` prüft technische Architektur für Web, Mobile, CLI und Host-Plugins in drei Phasen. Dokumentation und Tasks bleiben bei `qatlas shape`. |
 
 ## Zusammenarbeit und Scaffold
 
@@ -76,5 +76,6 @@ Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
   vor einer tatsächlichen Markdown-Änderung geladen.
 - `~/.qatlas/plugins/config.yaml` schaltet Sessionstart und verwaltete Arbeitsvereinbarung nutzerweit.
 
-Claude verwendet `/qatlas <modus>`, `/qatlas-work <modus>`, `/qatlas-core <modus>`, `/qatlas-mode <modus>` oder
-`/qatlas-help`; Codex verwendet die entsprechenden `$…`-Skills oder das `/skills`-Menü.
+Claude verwendet `/qatlas <modus>`, `/qatlas-work <modus>`, `/qatlas-core <modus>`, `/qatlas-mode <modus>`,
+`/qatlas-council [arch]` oder `/qatlas-help`; Codex verwendet die entsprechenden `$…`-Skills, insbesondere
+`$qatlas-council [arch]`, oder das `/skills`-Menü.

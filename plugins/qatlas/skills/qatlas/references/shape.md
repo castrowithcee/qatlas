@@ -60,6 +60,12 @@ Betroffener, Betreiber, Käufer, Erbauer oder Skeptiker. Führe nur tragende Ein
 ein; simuliere weder Personen noch Konsens. Diese Perspektivprüfung ist eine Methode innerhalb der
 Ausarbeitung, kein eigener Modus.
 
+Braucht eine noch offene Richtungs- oder Architekturentscheidung tatsächlich unabhängige Fachurteile,
+empfiehl bei installiertem Council-Pack den gesonderten Aufruf `qatlas-council` oder `qatlas-council arch`
+mit der konkreten Frage. Starte Council nicht selbst und mache es nicht zur Pflichtstation. Führe die
+übrige Ausarbeitung weiter; eine für die Dokumentation oder Taskreife nötige Nutzerentscheidung bleibt
+bis zu ihrer Klärung offen.
+
 ## Vor dem Zuschnitt klären
 
 Beginne bei `.qatlas-project/README.md`, sofern sie existiert, und folge nur den für das Vorhaben passenden
