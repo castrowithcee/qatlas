@@ -1,0 +1,7 @@
+interface:
+  display_name: "Qatlas Council"
+  short_description: "Unabhängige Blicke auf Ideen und Architektur"
+  default_prompt: "Nutze $qatlas-council für eine unabhängige Beratung zu dieser Frage."
+
+policy:
+  allow_implicit_invocation: false

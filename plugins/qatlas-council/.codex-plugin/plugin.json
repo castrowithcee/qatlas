@@ -1,0 +1,23 @@
+{
+  "name": "qatlas-council",
+  "version": "0.1.0",
+  "description": "Ausdrücklich gestartete Beratung durch unabhängige Subagents für Vorhaben und technische Architekturentscheidungen.",
+  "author": { "name": "Qatlas" },
+  "homepage": "https://github.com/castrowithcee/qatlas",
+  "repository": "https://github.com/castrowithcee/qatlas",
+  "license": "MIT",
+  "keywords": ["decision", "architecture", "subagents", "planning"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Qatlas Council",
+    "shortDescription": "Ideen und Architektur unabhängig prüfen",
+    "longDescription": "Optionales Qatlas-Pack für ausdrücklich gestartete Beratung durch mehrere unabhängige Subagents. Der allgemeine Einstieg prüft Ideen und Vorhaben; arch prüft technische Architektur in drei Phasen und lädt nur passende Plattformperspektiven. Council empfiehlt im Gespräch. Qatlas Shape dokumentiert bestätigte Entscheidungen und plant Arbeit. Benötigt qatlas.",
+    "developerName": "Qatlas",
+    "category": "Productivity",
+    "capabilities": ["Instructions", "Multi-agent orchestration"],
+    "defaultPrompt": [
+      "Prüfe diese Idee mit qatlas-council aus unabhängigen Blickwinkeln.",
+      "Prüfe diese Architekturfrage mit qatlas-council arch."
+    ]
+  }
+}
