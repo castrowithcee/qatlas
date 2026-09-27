@@ -61,11 +61,12 @@ aktuelle Taskvertrag bleiben für Taskstatus und Arbeitsumfang alleinige Autorit
    derselben offenen Arbeit gehört.
 3. Bilde den Repo-Schlüssel aus den ersten acht kleingeschriebenen Hex-Zeichen eines SHA-256-Hashs über den
    kanonischen absoluten Pfad des gemeinsamen Git-Verzeichnisses. Der Repo-Slug entsteht aus dem Namen des
-   primären Arbeitsbaums als kurzer ASCII-Slug. Verwende
-   `~/.qatlas/state/worktrees/<repo-schluessel>-<repo-slug>/<branch>/`; `<branch>` ist der vollständige
+   primären Arbeitsbaums als kurzer ASCII-Slug. Verwende für neue Worktrees
+   `~/.qatlas/state/worktrees/<repo-slug>-<repo-schluessel>/<branch>/`; `<branch>` ist der vollständige
    Branchname, jeder Schrägstrich darin eine Ordnerebene, etwa `.../task/0042-export--tests/`. Weil
    Branchnamen eindeutig sind und keiner neben einem gleichnamigen Unterpfad besteht, liegen Worktrees dort
-   nebeneinander, nie ineinander.
+   nebeneinander, nie ineinander. Bereits registrierte Worktrees am bisherigen Pfad bleiben dort; verschiebe
+   sie nicht allein wegen der neuen Namensreihenfolge.
 4. Prüfe Namens-, Branch- und Pfadkollisionen gegen das Git-Register und das Dateisystem. Überschreibe nichts.
    Gehört eine Kollision nicht eindeutig derselben Arbeit, bilde selbst einen unterscheidbaren Zweck oder
    stoppe bei weiterhin unklarer Zuordnung. Der Nutzer vergibt keinen technischen Namen.
