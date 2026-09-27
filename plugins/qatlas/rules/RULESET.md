@@ -1,7 +1,7 @@
 ---
 description: >
-  Optionale, nutzerweit schaltbare Arbeitsvereinbarung für Git-Sessionstart, sichere Befehle und Tests
-  sowie Datenschutz.
+  Optionale, nutzerweit schaltbare Arbeitsvereinbarung für Git-Sessionstart, parallele Agentenarbeit,
+  sichere Befehle und Tests sowie Datenschutz.
 license: MIT
 type: rule
 edit: locked
@@ -33,6 +33,21 @@ ein eingebettetes oder benachbartes Repo, prüfe dieses vor dem ersten Eingriff 
    gehört nur in einen ausdrücklich autorisierten Sync- oder Arbeitsablauf.
 6. Ändere bei lokalen Änderungen, Divergenz oder drohenden Konflikten nichts automatisch. Berichte den
    Zustand, bevor du darauf aufbaust.
+
+## Parallele Agentenarbeit
+
+Prüfe unmittelbar vor der ersten schreibenden Operation in jedem betroffenen Git-Repo und bei einer
+Übernahme erneut Worktrees, Branches und die vorhandene gemeinsame Task-Zuordnung. Ein registrierter
+Worktree beweist nicht, ob sein bisheriger Agent noch arbeitet. Kläre ungeklärtes Eigentum, bevor du einen
+vorhandenen Arbeitsstand veränderst.
+
+- Jeder gleichzeitig schreibende Agent arbeitet in einem eigenen registrierten Worktree auf einem exklusiven
+  Branch. Zwei Schreiber nutzen nie denselben Arbeitsbaum. Bestimme für einen gemeinsamen Zielbranch genau
+  einen Integrationsbesitzer.
+- Überlappen Änderungen an Dateien, Schnittstellen oder Migrationen so, dass sie nicht sicher getrennt
+  integriert werden können, führe die Arbeiten seriell oder als ausdrücklich abhängige Branches aus.
+- Trenne gemeinsam genutzte Schreibziele wie Build-Ausgaben, Caches, Dienste, Ports und Datenbanken oder
+  nutze sie nacheinander. Tests und Builds, die Dateien erzeugen, zählen als schreibende Arbeit.
 
 ## Sichere Befehle und Tests
 
