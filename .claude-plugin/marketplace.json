@@ -1,10 +1,10 @@
 {
   "name": "qatlas",
   "owner": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
-  "description": "Qatlas als gemeinsame Infrastruktur und ausdrücklich gestarteter Arbeitsloop mit optionalen Fach-Packs.",
+  "description": "Qatlas als gemeinsame Infrastruktur und ausdrücklich gestarteter Arbeitsloop mit optionalen Packs.",
   "plugins": [
     { "name": "qatlas", "source": "./plugins/qatlas", "category": "productivity", "defaultEnabled": true, "description": "Gemeinsame Qatlas-Infrastruktur mit Arbeitsloop für Zielklärung, Planung, Ausführung und Review sowie ausdrücklicher Kern- und Workspace-Verwaltung." },
     { "name": "qatlas-dev", "source": "./plugins/qatlas-dev", "category": "productivity", "description": "Code-Pack: die faulste Lösung, die wirklich funktioniert, in drei Stufen plus ein Review-Skill. Benötigt qatlas." },
-    { "name": "qatlas-web", "source": "./plugins/qatlas-web", "category": "productivity", "description": "Web-Capability: ergänzt Qatlas' Loops um Produktprofil, Fähigkeiten, UI, Daten, Architektur, Sicherheit und Betrieb, ohne einen eigenen Planungs- oder Task-Workflow. Benötigt qatlas." }
+    { "name": "qatlas-council", "source": "./plugins/qatlas-council", "category": "productivity", "description": "Optionales Beratungspack: startet nur auf Aufruf unabhängige Subagents für Ideen, Vorhaben und mit arch für technische Architekturentscheidungen. Benötigt qatlas." }
   ]
 }

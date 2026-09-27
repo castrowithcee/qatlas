@@ -12,10 +12,10 @@
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity",
       "description": "Code-Pack: die faulste Lösung, die wirklich funktioniert, in drei Stufen plus ein Review-Skill. Benötigt qatlas." },
-    { "name": "qatlas-web",
-      "source": { "source": "local", "path": "./plugins/qatlas-web" },
+    { "name": "qatlas-council",
+      "source": { "source": "local", "path": "./plugins/qatlas-council" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity",
-      "description": "Web-Capability: ergänzt Qatlas' Loops um Produktprofil, Fähigkeiten, UI, Daten, Architektur, Sicherheit und Betrieb, ohne einen eigenen Planungs- oder Task-Workflow. Benötigt qatlas." }
+      "description": "Optionales Beratungspack: startet nur auf Aufruf unabhängige Subagents für Ideen, Vorhaben und mit arch für technische Architekturentscheidungen. Benötigt qatlas." }
   ]
 }
