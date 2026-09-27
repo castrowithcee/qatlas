@@ -63,6 +63,12 @@ konkrete Anweisungen und überprüfbare Abnahme. Quellenlinks dienen der Nachpr�
 Aussagen nicht. Ändert ein autorisierter Arbeitsmodus eine maßgebliche Grundlage, prüfe die davon betroffenen
 offenen Tasks gezielt auf veraltete Vorgaben; ändere dabei weder Ziel noch Abnahmekriterien still.
 
+Der ausdrückliche Aufruf von `shape` oder `run` ist zugleich die Freigabe, vorhandene gesperrte
+Projektdokumentation (`edit: locked`) im gewählten Scope nachzuziehen, soweit Gespräch, Taskvertrag oder
+belegtes Umsetzungsergebnis ihren neuen Inhalt tragen. Agentenanweisungen, Rules, Skills
+und akzeptierte Nutzerentscheidungen deckt diese Freigabe nicht. `goal`, `backlog` und `review` erhalten
+sie nicht.
+
 Der Nutzer ist Entscheider, nicht Mitleser des Planungssystems. Setzen `shape`, `backlog` oder `review`
 eine echte Nutzerentscheidung voraus, hole ihn knapp und ohne vorausgesetzte Tasklektüre ab, führe immer
 nur durch die aktuelle Aufgabe und gib eine ausdrückliche begründete Empfehlung. Das jeweilige

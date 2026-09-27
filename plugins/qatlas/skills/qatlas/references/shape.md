@@ -109,7 +109,8 @@ Dokumentiere kompakt:
 - echte offene Entscheidungen, klar getrennt von bestätigten Aussagen.
 
 Schreibe keinen Gesprächsverlauf, keine verworfenen Varianten ohne fortwirkende Bedeutung und keine
-Taskdetails in die Projektdokumentation. Ändere einen gesperrten Rahmen oder eine Nutzerentscheidung nur mit
+Taskdetails in die Projektdokumentation. Gesperrte Projektdokumentation ziehst du mit der Freigabe aus dem
+gemeinsamen Vertrag nach; jeden anderen gesperrten Rahmen und jede Nutzerentscheidung änderst du nur mit
 der dafür nötigen Freigabe.
 
 ## Arbeitspakete schneiden
@@ -136,7 +137,7 @@ festzuhalten:
   System und Grund,
 - vorhandene konkrete Prüfpfade sowie fehlende Prüfmöglichkeiten,
 - benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte, insbesondere eine nötige
-  Freigabe für `edit: locked`, ohne Secrets im Task festzuhalten,
+  Freigabe für `edit: locked`, die der Run-Aufruf nicht abdeckt, ohne Secrets im Task festzuhalten,
 - die Dokumentationswirkung als `Ändern`, `Prüfen`, `Keine` mit Begründung oder `Ungeklärt` mit der
   fehlenden Information.
 

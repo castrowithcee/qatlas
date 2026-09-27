@@ -184,7 +184,9 @@ Reihenfolge:
 - **Leitplanken:** bindende Architektur-, Sicherheits-, Kompatibilitäts- und Dokumentationsgrenzen sowie
   der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink. Prüfe
   insbesondere die Bindung fremder Objekt-IDs an das gewählte Ziel und den Umgang mit nicht
-  vertrauenswürdigen Inhalten, soweit der Task solche Grenzen berührt.
+  vertrauenswürdigen Inhalten, soweit der Task solche Grenzen berührt. Weise den Subagent an: Lässt der
+  Vertrag eine Ziel- oder Berechtigungsgrenze offen, wählt er die engere Auslegung und nennt sie in seiner
+  Rückgabe; Zugriff oder Wirkung erweitert er nie aus eigener Deutung.
 - **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
 - **Worker-Profil:** gewähltes Profil mit Modell, Effort und bei `standard` oder `demanding` dem Grund.
 - **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
@@ -266,6 +268,11 @@ Ausführungsgrundlage ab:
 
 - Lasse direkt betroffene Dokumentation, die durch die Umsetzung falsch geworden ist, innerhalb desselben
   Tasks korrigieren und erneut prüfen.
+- Führt die Umsetzung eine übergreifende Pflicht für künftige Arbeit im Scope ein oder legt sie eine
+  verdeckte Kopplung offen, die solche Arbeit binden muss, halte sie in der vorhandenen Projektdokumentation
+  fest, vorrangig bei den betroffenen Entscheidungen, Anforderungen oder dem Fachwissen in
+  `.qatlas-project/`. Sie gilt damit als geänderte maßgebliche Grundlage; ein Abschlussbericht allein reicht
+  dafür nicht.
 - Ändert die Umsetzung autorisiert eine maßgebliche Grundlage, ermittle deren betroffene offene Tasks und
   gleiche ihre konkreten Vorgaben gezielt ab. Ändere Ziel oder Abnahmekriterien nur mit der dafür nötigen
   Entscheidung.
