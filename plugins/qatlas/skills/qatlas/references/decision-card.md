@@ -1,7 +1,7 @@
 ---
 description: >
-  Gemeinsames Gesprächsmuster für schnelle, einzeln geführte Nutzerentscheidungen zu Aufgaben in Shape,
-  Backlog und Review, ohne vorausgesetzte Lektüre des Planungssystems.
+  Gemeinsames Gesprächsmuster für schnelle, einzeln geführte Nutzerentscheidungen zu Aufgaben in Shape
+  und Review, ohne vorausgesetzte Lektüre des Planungssystems.
 type: playbook
 edit: locked
 license: MIT
@@ -9,7 +9,7 @@ license: MIT
 
 # Entscheidungen knapp vorlegen
 
-Dieser Vertrag gilt, wenn `shape`, `backlog` oder `review` eine echte Nutzerentscheidung zu einer oder
+Dieser Vertrag gilt, wenn `shape` oder `review` eine echte Nutzerentscheidung zu einer oder
 mehreren Aufgaben braucht. Der jeweilige Modus behält die Verantwortung für Auswahl, fachliche Prüfung,
 Persistenz, Status und Abschluss. Diese Reference regelt nur die Übergabe im Gespräch.
 

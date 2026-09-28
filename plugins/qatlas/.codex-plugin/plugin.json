@@ -1,6 +1,6 @@
 {
   "name": "qatlas",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Qatlas verbindet passiven Sessionkontext, Regeln und Projektzustand mit ausdrücklich gestarteter Einrichtung, Planung, serieller Ausführung und sicheren Verwaltungswerkzeugen.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
@@ -12,7 +12,7 @@
   "interface": {
     "displayName": "Qatlas",
     "shortDescription": "Kontext halten und Arbeit sicher ausführen",
-    "longDescription": "Qatlas vereint passive Infrastruktur mit ausdrücklich gestarteten Einstiegen: qatlas für Zielklärung, Shape, optionale Backlog-Pflege, serielle Ausführung und Review; qatlas-core für Einrichtung und seltene Kernverwaltung; qatlas-work für Workspace-Arbeit außerhalb des Loops. Sessionkontext, Regeln, Scaffold, Backlog-Binding, Memory, Ablage, Import, Git und sichere Tooloperationen über CLI oder MCP bleiben gemeinsam im Plugin. Der Orchestrator steuert genau einen aktiven Task, schneidet Worker-Aufträge zu und prüft ihre Ergebnisse. Der Run-Aufruf allein erlaubt keine externe oder irreversible Wirkung; eine konkrete Qatlas-Operation braucht separate eindeutige Autorität aus Auftrag, Taskvertrag oder geltender Agentendatei.",
+    "longDescription": "Qatlas vereint passive Infrastruktur mit ausdrücklich gestarteten Einstiegen: qatlas für Zielklärung anhand einer Idee, eines Tasks oder einer Datei, Shape für neue Ideen oder vorhandene Tasks und den Backlog-Scope, serielle Ausführung und Review; qatlas-core für Einrichtung und seltene Kernverwaltung; qatlas-work für Workspace-Arbeit außerhalb des Loops. Sessionkontext, Regeln, Scaffold, Backlog-Binding, Memory, Ablage, Import, Git und sichere Tooloperationen über CLI oder MCP bleiben gemeinsam im Plugin. Der Orchestrator steuert genau einen aktiven Task, schneidet Worker-Aufträge zu und prüft ihre Ergebnisse. Der Run-Aufruf allein erlaubt keine externe oder irreversible Wirkung; eine konkrete Qatlas-Operation braucht separate eindeutige Autorität aus Auftrag, Taskvertrag oder geltender Agentendatei.",
     "developerName": "Qatlas",
     "category": "Productivity",
     "capabilities": ["Instructions", "Lifecycle hooks", "Multi-agent orchestration"],
@@ -21,7 +21,7 @@
       "Prüfe dieses Projekt mit qatlas-core doctor.",
       "Klär mit qatlas goal das Zielbild und den kleinsten tragfähigen Umfang dieser Idee.",
       "Arbeite diese Idee mit qatlas shape aus.",
-      "Disponiere mit qatlas backlog die nächste Arbeitsqueue.",
+      "Disponiere mit qatlas shape backlog die nächste Arbeitsqueue.",
       "Führe mit qatlas run bis zu fünf Aufgaben dieses Projekts seriell aus.",
       "Klär mit qatlas review die offenen menschlichen Übergaben.",
       "Zeige mit qatlas-work tree die gemeinsamen Git-Worktrees dieses Projekts."

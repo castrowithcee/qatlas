@@ -22,9 +22,10 @@ Workspace-Verwaltung und Arbeitsloop starten ausschließlich durch einen Nutzera
 
 | Aufruf | Aufgabe |
 |---|---|
-| **qatlas goal** | Klärt Idee, Zielbild und kleinsten tragfähigen Umfang ausschließlich im Gespräch. |
-| **qatlas shape** | Klärt eine reife Idee, dokumentiert nötiges Wissen und schneidet kleine, ausführungsreife Tasks in sinnvoller Reihenfolge. |
-| **qatlas backlog** | Schärft und teilt vorhandene Drafts, klärt neue Voraussetzungen und repariert die Queue bei Bedarf. |
+| **qatlas goal [Idee, Task oder Datei]** | Klärt Zielbild und kleinsten tragfähigen Umfang ausschließlich im Gespräch; Task oder Datei dienen als Grundlage. |
+| **qatlas shape [Idee oder Datei]** | Dokumentiert bestätigtes Wissen und schneidet kleine, ausführungsreife Tasks in sinnvoller Reihenfolge. |
+| **qatlas shape <Task>** | Klärt und schärft einen eindeutig bezeichneten bestehenden Task am vorhandenen Ort. |
+| **qatlas shape backlog [Scope]** | Schärft vorhandene Drafts, klärt Voraussetzungen und repariert die Queue bei Bedarf. |
 | **qatlas run** | Führt höchstens fünf Tasks seriell aus; der Orchestrator schneidet Worker-Aufträge zu und prüft ihre Ergebnisse. |
 | **qatlas review** | Klärt menschliche Entscheidungen, Prüfungen und Abnahmen einzeln und beginnt keine Ausführung. |
 | **qatlas-work tree** | Zeigt gemeinsame Git-Worktrees nummeriert, legt mit `new` kontextgeleitet an und räumt sicher auf. |

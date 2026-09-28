@@ -45,7 +45,7 @@ Dateien; stoppe vor schreibender Arbeit mit dem konkreten Hindernis.
 
 Der Laufvertrag konkretisiert den gewählten Scope, ersetzt aber nicht dessen Ausarbeitung. `run` prüft die
 Ausführungsgrundlage auf Aktualität, Umgebungs- und Git-Voraussetzungen; er soll den fachlichen Scope nicht
-erst durch eine neue Erstanalyse entdecken. Ein seit `shape` oder `backlog` veränderter Bestand ist trotzdem
+erst durch eine neue Erstanalyse entdecken. Ein seit `shape` veränderter Bestand ist trotzdem
 ein normaler Befund und wird nach den folgenden Reiferegeln behandelt. Ein bloß großer Task wird nicht
 automatisch zum Auftrag an ein stärkeres Modell.
 
@@ -147,7 +147,7 @@ Worker-Aufträge A, B und weitere mit je eigenem überprüfbarem Meilenstein. Da
 Backlog-Tasks. Prüfe und sichere jeden Meilenstein vor dem nächsten Auftrag; spätere Aufträge übernehmen
 den bestätigten Stand. Enthält der Task dagegen eigenständige Ergebnisse, deren Grenzen, Reihenfolge oder
 Abnahme der Vertrag noch nicht klärt, setze ihn nach der Reifeprüfung auf `draft` und übergib den Zuschnitt
-an `shape` oder `backlog`. Erfinde die fehlende Planung nicht im Run.
+an `shape <eindeutiger Task>` zur Klärung am bestehenden Ort. Erfinde die fehlende Planung nicht im Run.
 
 Wähle für jeden abgegrenzten Auftrag zuerst `light`. Nutze `standard`, wenn dessen beschriebene technische
 Abwägungen nötig sind, und `demanding` bei belegter schwieriger Diagnose oder eng gekoppelter Umsetzung,
@@ -264,7 +264,7 @@ Ausführungsgrundlage ab:
 - Ändere sachlich unabhängige fehlerhafte Dokumentation nicht opportunistisch und melde sie konkret. Erfasse
   sie nur dann als eigenen Task, wenn der gewählte Run-Scope oder Taskvertrag das Anlegen weiterer Arbeit im
   maßgeblichen Planungssystem ausdrücklich einschließt; andernfalls bleibt sie eine benannte Folgearbeit für
-  `shape` oder `backlog`.
+  `shape`.
 - Eine deklarierte Dokumentationswirkung `Ändern` oder `Prüfen` ist ein Abnahmekriterium. `Keine` bleibt nur
   gültig, wenn der tatsächliche Diff keine zugehörige Aussage entwertet.
 
@@ -292,4 +292,6 @@ Beende den Lauf, sobald eine dieser Bedingungen gilt:
 Sichere vor dem Ende Spine, Abschlussberichte und erlaubte lokale Commits. Berichte Ergebnis, maßgebliche
 Beweise und konkrete menschliche Übergaben knapp. Nenne pro bearbeitetem Task geänderte Dateien,
 ausgeführte Prüfungen, Dokumentationswirkung, Abweichungen von der erwarteten Arbeitskarte und ungelöste
-Risiken sowie die eingesetzten Worker-Profile mit Modell und Effort; Rohlogs bleiben draußen. Pushe nichts.
+Risiken sowie die eingesetzten Worker-Profile mit Modell und Effort; Rohlogs bleiben draußen. Bleiben
+vorhandene Drafts als nächste Arbeit, nenne `shape <eindeutiger Task>` für einen oder `shape backlog`
+für mehrere. Eine neue Idee geht an `shape` ohne Task-Scope. Starte den Modus nicht selbst. Pushe nichts.

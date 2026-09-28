@@ -1,29 +1,34 @@
 ---
 description: >
-  Optionaler Wiedereinstieg zum Schärfen und Teilen vorhandener Drafts, Klären neuer Voraussetzungen
-  sowie Reparieren von Abhängigkeiten, Reihenfolge und nächstem Ausführungshorizont.
+  Shape-Verfahren für einen eindeutigen vorhandenen Task oder den Backlog-Scope: Drafts schärfen und
+  teilen, Voraussetzungen klären sowie Abhängigkeiten, Reihenfolge und nächsten Horizont reparieren.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Backlog disponieren
+# Vorhandene Arbeit ausarbeiten
 
 Aus vorhandenen Tasks entsteht wieder ein verständlicher, ausführbarer und bewusst geordneter
-Arbeitsvorrat. Dieser Modus ist ein optionaler Wiedereinstieg bei unklaren, manuell angelegten oder durch
-neue Ergebnisse überholten Aufgaben. Er verändert Planung und Taskverträge, führt aber keine fachliche
-Arbeit aus. Zwischen `shape` und `run` ist er kein Pflichtschritt.
+Arbeitsvorrat. Dieses Verfahren ist ein optionaler Wiedereinstieg bei unklaren, manuell angelegten oder
+durch neue Ergebnisse überholten Aufgaben. Er verändert Planung und Taskverträge, führt aber keine
+fachliche Arbeit aus. Nach der Ausarbeitung einer neuen Idee ist er kein Pflichtschritt vor `run`.
 
-Ohne angegebenen Scope ist der gesamte maßgebliche Backlog gewählt. Das Hauptziel ist dann immer, die
-offenen Vertragsfragen seiner Drafts einzeln zu besprechen und jeden geklärten Task auf `ready` zu setzen.
-Ein angegebener Scope begrenzt die Bearbeitung auf einen Task, ein Projekt oder eine andere im
-Planungssystem eindeutig bestimmbare Teilmenge. Frage nicht nach einem Scope, nur weil der Nutzer keinen
-angegeben hat.
+`shape <eindeutiger Task>` wählt genau diesen bestehenden Task. `shape backlog [Scope]` wählt die
+angegebene Teilmenge; ohne weiteren Scope ist der gesamte maßgebliche offene Backlog gewählt. Das
+Hauptziel bei einem Backlog-Scope ist, die offenen Vertragsfragen seiner Drafts einzeln zu besprechen und
+jeden geklärten Task auf `ready` zu setzen. Ein angegebener Backlog-Scope begrenzt die Bearbeitung auf
+einen Task, ein Projekt oder eine andere im Planungssystem eindeutig bestimmbare Teilmenge. Frage nicht
+nach einem Scope, nur weil der Nutzer `shape backlog` ohne weiteren Scope aufgerufen hat.
 
-Verwende diesen Modus außerdem, wenn ruhende Arbeit geprüft, mehrere Scopes gegeneinander priorisiert oder
+`shape backlog [Scope]` erteilt keine Freigabe zum Ändern gesperrter Projektdokumentation. Ein gezieltes
+`shape <Task>` folgt dagegen der Shape-Freigabe des gemeinsamen Vertrags. Erfordert eine Aufgabe im
+Backlog-Scope eine Änderung an `edit: locked`, hole die dafür nötige ausdrückliche Freigabe ein.
+
+Verwende diesen Zweig außerdem, wenn ruhende Arbeit geprüft, mehrere Scopes gegeneinander priorisiert oder
 eine bestehende `next`-Menge bewusst geändert werden soll. Ein vorhandener Draft kann eine erneute
 Untersuchung und denselben fachlichen Zuschnitt wie bei `shape` brauchen; bearbeite ihn hier am bestehenden
-Ort, statt für die Klärung einen neuen Loop zu verlangen.
+Ort, statt für die Klärung einen anderen Einstieg zu verlangen.
 
 ## Bestand bilden
 
