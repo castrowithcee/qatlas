@@ -12,6 +12,7 @@ const { scaffoldTopUp } = require('./qatlas-scaffold-topup.js');
 const { projectMigrationInventory } = require('./qatlas-migrations.js');
 const {
   createConfig,
+  parseYamlText,
   readConfig,
   readStatusline,
   syncManagedRuleset,
@@ -120,6 +121,27 @@ if (!configState.exists) {
   missing.push('store: ~/.qatlas/plugins/config.yaml oder die Projektkonfiguration ist ungültig und bleibt unangetastet.');
 }
 for (const diagnostic of configState.diagnostics) missing.push('config: ' + diagnostic);
+
+// Die optionale Run-Konfiguration gehört dem Nutzer und wird nie mit --apply erzeugt.
+const orchestraFile = path.join(os.homedir(), '.qatlas', 'plugins', 'orchestra.yaml');
+if (!fs.existsSync(orchestraFile)) {
+  notes.push('orchestra: ~/.qatlas/plugins/orchestra.yaml fehlt. Für qatlas run im Setup mit '
+    + 'geprüften Host-Modellen anlegen; Doctor erzeugt keine Platzhalter.');
+} else {
+  try {
+    const orchestra = parseYamlText(fs.readFileSync(orchestraFile, 'utf8'));
+    const isMap = value => value && typeof value === 'object' && !Array.isArray(value);
+    if (!isMap(orchestra.profiles) || !isMap(orchestra.hosts)
+      || !Object.keys(orchestra.hosts).length
+      || !['light', 'standard', 'demanding'].every(name =>
+        typeof orchestra.profiles[name] === 'string')) {
+      throw new Error('Profile oder Hosts fehlen.');
+    }
+  } catch (error) {
+    missing.push('orchestra: ' + orchestraFile + ' ist ungültig und bleibt unangetastet: '
+      + error.message);
+  }
+}
 
 const statuslineState = readStatusline();
 if (statuslineState.exists && !statuslineState.valid) {

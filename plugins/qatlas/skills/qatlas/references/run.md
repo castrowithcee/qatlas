@@ -52,58 +52,40 @@ automatisch zum Auftrag an ein stärkeres Modell.
 ## Orchestrierung konfigurieren
 
 Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run`
-und ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Die folgende Vorlage beschreibt nur
-das Format; `null` markiert noch auszufüllende Modellwerte. Fehlt die Datei, ermittle die für den Host
-verfügbaren Modell-IDs beziehungsweise nativen Aliase und Effort-Stufen. Zeige eine konkret ausgefüllte
-Vorlage und frage, ob du sie dort anlegen sollst. Schreibe keine Platzhalter; sind Werte nicht prüfbar,
-frage nach ihnen. Lege die Datei erst nach Zustimmung an. Ohne Datei und ohne Zustimmung beginne keinen
-Task; die Modellgrenzen wären nicht belegt.
-
-```yaml
-# Nur qatlas run liest diese Datei; sie ändert keine Host-Einstellungen.
-format: 1
-
-# Die Beschreibungen bestimmen den Zuschnitt, nicht die Größe eines Backlog-Tasks.
-profiles:
-  light: "Enger Auftrag mit eindeutigem Vorgehen und direkter Prüfung."
-  standard: "Mehrere abhängige Schritte oder technische Abwägungen im Task."
-  demanding: "Schwierige Diagnose oder eng gekoppelte Umsetzung, die sich nicht sinnvoll kleiner schneiden lässt."
-
-# Worker-Effort wird gesetzt, nicht vom Orchestrator geerbt.
-# Das Orchestrator-Modell muss bereits beim Start des Runs stimmen.
-# Modellwerte sind Host-IDs oder native Host-Aliase; bei neuen Modellen nie still ersetzen.
-hosts:
-  codex:
-    orchestrator: null
-    workers:
-      light:     { model: null, effort: high }
-      standard:  { model: null, effort: high }
-      demanding: { model: null, effort: xhigh }
-  claude-code:
-    orchestrator: null
-    workers:
-      light:     { model: null, effort: high }
-      standard:  { model: null, effort: high }
-      demanding: { model: null, effort: xhigh }
-```
+und ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Die kommentierte Vorlage liegt unter
+`<plugin-root>/store/config/orchestra.example.yaml`; `null` bei einem Modellwert markiert dort einen
+Platzhalter, `effort: null` dagegen ein Modell ohne Effort-Unterstützung. Die Claude-Code-Vorlage schlägt
+Haiku, Sonnet und Opus für `light`, `standard` und `demanding` vor.
+Fehlt die Nutzerdatei, lies die Vorlage und ermittle die für den aktuellen Host verfügbaren Modell-IDs
+beziehungsweise nativen Aliase und Effort-Stufen. Zeige eine konkret ausgefüllte Fassung mit nur diesem
+Host und frage, ob du sie dort anlegen sollst. Schreibe keine Platzhalter; sind Werte nicht prüfbar, frage
+nach ihnen. Lege die Datei erst nach Zustimmung an. Ohne Datei und ohne Zustimmung beginne keinen Task; die
+Modellgrenzen wären nicht belegt.
 
 Prüfe bei einer vorhandenen Datei Format, Host, die drei beschriebenen Profile, Orchestrator-Modell und
 alle gewählten Worker-Profile. Akzeptiere als Modellwerte nur vom Host unterstützte IDs oder native Aliase;
-deute bloße Familiennamen nicht selbst als Aliase.
-Die Profile sind eine Allowlist: Verwende weder ein nicht eingetragenes Modell noch ein anderes Effort und
-lasse Worker diese Werte nicht unbemerkt vom Orchestrator erben. Prüfe die eingetragenen Modelle und
-Effort-Stufen gegen die aktuell im Host verfügbare Auswahl; verifiziere zweifelhafte oder neue Modelle
+deute bloße Familiennamen nicht selbst als Aliase. Fehlt die Sektion des aktuellen Hosts, schlage ihre
+konkret ausgefüllte Ergänzung vor und ändere die Nutzerdatei erst nach Zustimmung; beginne bis dahin keinen
+Task.
+Die Profile sind eine Allowlist: Verwende weder ein nicht eingetragenes Modell noch eine andere
+Effort-Einstellung. Setze `effort: null` nur für ein Modell, das keinen Effort unterstützt; für alle anderen
+Worker wird Effort ausdrücklich gesetzt und nicht vom Orchestrator geerbt. Prüfe die eingetragenen Modelle
+und Effort-Stufen gegen die aktuell im Host verfügbare Auswahl; verifiziere zweifelhafte oder neue Modelle
 anhand aktueller offizieller Host-Angaben. Ist ein Eintrag veraltet oder ist ein neues Modell für ein Profil
 plausibel besser, schlage die konkrete Änderung mit Grund vor. Ändere die nutzereigene Datei nur nach
 Zustimmung. Ein neues Modell ersetzt einen gültigen Eintrag nicht still. Ein ungültiges Orchestrator-Modell
 oder ein für den nötigen Auftrag nicht nutzbares Profil stoppt vor der Task-Beanspruchung; andere gültige
 Profile bleiben nutzbar. Behaupte keine Prüfung der Modellverfügbarkeit, die der Host nicht erlaubt.
 
-Codex setzt beim Spawn Modell und Reasoning-Effort ausdrücklich. Claude Code verwendet für `high` den
-Plugin-Subagent `qatlas:run-high`, für `xhigh` `qatlas:run-xhigh`, und übergibt das Modell ausdrücklich beim
-Aufruf. Ist der passende Subagent nicht verfügbar oder ersetzt der Host Modell oder Effort durch andere
-Werte, starte mit diesem Profil nicht. Eine andere Effort-Stufe, auch `medium`, `max` oder `ultra`, ist
-keine zulässige Ausweichstufe.
+Codex setzt beim Spawn Modell und Reasoning-Effort ausdrücklich. Claude Code verwendet für die Effort-Stufen
+`low`, `medium`, `high`, `xhigh` und `max` jeweils den Plugin-Subagent `qatlas:run-low`,
+`qatlas:run-medium`, `qatlas:run-high`, `qatlas:run-xhigh` beziehungsweise `qatlas:run-max` und übergibt
+das Modell ausdrücklich beim Aufruf. Wähle nur eine vom jeweiligen Host und Modell unterstützte Stufe;
+`ultra` ist keine Claude-Code-Effort-Stufe. Für `effort: null` verwende ausschließlich bei einem Modell ohne
+Effort-Unterstützung `qatlas:run-no-effort` ohne Effort-Frontmatter. Dessen Extended Thinking folgt der
+Claude-Code-Session und wird von `orchestra.yaml` nicht gesteuert. Ist der passende Subagent nicht
+verfügbar oder ersetzt der Host Modell oder eine gewählte Effort-Stufe durch andere Werte, starte mit
+diesem Profil nicht. Weiche nicht auf eine andere Effort-Stufe aus.
 
 ## Tasks auswählen
 
@@ -188,7 +170,8 @@ Reihenfolge:
   Vertrag eine Ziel- oder Berechtigungsgrenze offen, wählt er die engere Auslegung und nennt sie in seiner
   Rückgabe; Zugriff oder Wirkung erweitert er nie aus eigener Deutung.
 - **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
-- **Worker-Profil:** gewähltes Profil mit Modell, Effort und bei `standard` oder `demanding` dem Grund.
+- **Worker-Profil:** gewähltes Profil mit Modell, Effort oder dessen fehlender Unterstützung und bei
+  `standard` oder `demanding` dem Grund.
 - **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
   erfüllt, bei einer größeren Umsetzung der vereinbarte Meilenstein erreicht, oder eine Vertrags-,
   Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.

@@ -1,0 +1,33 @@
+# Nur qatlas run liest die nutzereigene Kopie unter ~/.qatlas/plugins/orchestra.yaml.
+# Diese Datei ändert keine Host-Einstellungen und steuert keine anderen Subagent-Aufrufe.
+format: 1
+
+# Die Beschreibungen bestimmen den Zuschnitt, nicht die Größe eines Backlog-Tasks.
+profiles:
+  light: "Enger Auftrag mit eindeutigem Vorgehen und direkter Prüfung."
+  standard: "Mehrere abhängige Schritte oder technische Abwägungen im Task."
+  demanding: "Schwierige Diagnose oder eng gekoppelte Umsetzung, die sich nicht sinnvoll kleiner schneiden lässt."
+
+# Worker-Effort wird gesetzt, wenn das Modell ihn unterstützt.
+# Das Orchestrator-Modell muss bereits beim Start des Runs stimmen.
+# Modellwerte sind Host-IDs oder native Host-Aliase; bei neuen Modellen nie still ersetzen.
+# Wähle für jedes Profil nur eine Kombination, die Host und Modell unterstützen.
+hosts:
+  codex:
+    orchestrator: null
+    workers:
+      # Verfügbare Effort-Stufen hängen vom gewählten Codex-Modell ab.
+      light:     { model: null, effort: high }
+      standard:  { model: null, effort: high }
+      demanding: { model: null, effort: xhigh }
+  claude-code:
+    orchestrator: null
+    workers:
+      # Vorschlag: Haiku für light, Sonnet für standard, Opus für demanding.
+      # Qatlas liefert Agenten für low, medium, high, xhigh und max mit.
+      # Welche davon laufen, hängt vom gewählten Claude-Modell und Host-Grenzen ab.
+      # Modelle ohne Effort, etwa Haiku 4.5, brauchen effort: null.
+      # Deren Extended Thinking folgt der Claude-Code-Session und ist hier nicht einstellbar.
+      light:     { model: haiku,  effort: null }
+      standard:  { model: sonnet, effort: high }
+      demanding: { model: opus,   effort: high }

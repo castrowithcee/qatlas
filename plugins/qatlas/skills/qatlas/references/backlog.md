@@ -64,7 +64,8 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
    Nutzerentscheidung, stelle genau die nächste Entscheidung nach dem gemeinsamen Dialog vor und warte auf
    die Antwort. Arbeite jede geklärte Antwort sofort am fachlich passenden Ort in den aktuellen
    Taskvertrag ein und entferne überholte Varianten. Ist ein manuell angelegter oder gewachsener Task für
-   einen Worker zu groß oder enthält er eigenständig abnehmbare Ergebnisse, teile ihn in kleinere Tasks
+   ein kleineres Worker-Modell im Regelfall nicht als abgegrenzter Auftrag tragfähig oder enthält er
+   eigenständig abnehmbare Ergebnisse, teile ihn in kleinere Tasks
    mit je eigenem Ziel, Prüfpfad und sinnvoller Abhängigkeit. Übernimm die geltenden Entscheidungen und
    Sicherheitsgrenzen konkret in jeden betroffenen Vertrag. Bewahre bestätigtes Ziel und Abnahme der
    ursprünglichen Arbeit vollständig; lass keinen leeren Resttask zurück. Fahre

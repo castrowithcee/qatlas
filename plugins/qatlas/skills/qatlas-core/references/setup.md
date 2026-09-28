@@ -40,6 +40,19 @@ Hat Doctor `AGENTS.md` neu aus `scaffold/agents-template.md` angelegt, konkretis
 
 Eine bereits vorhandene `AGENTS.md` gehört dem Nutzer und wird von diesem Verfahren nicht umgeschrieben.
 
+## Run-Konfiguration einrichten
+
+Fehlt `~/.qatlas/plugins/orchestra.yaml`, lies die kommentierte Vorlage unter
+`<plugin-root>/store/config/orchestra.example.yaml`. Ermittle die für den aktuellen Host verfügbaren
+Modell-IDs beziehungsweise nativen Aliase und die vom jeweiligen Modell unterstützten Effort-Stufen.
+Die Vorlage schlägt für Claude Code Haiku, Sonnet und Opus für `light`, `standard` und `demanding` vor;
+prüfe diese Kombinationen gegen den tatsächlich verwendeten Anbieter und übernimm sie nicht ungeprüft.
+Fülle nur die Sektion des aktuellen Hosts mit konkreten Werten aus und entferne ungenutzte Host-Sektionen.
+Für ein Modell ohne Effort-Unterstützung, etwa Haiku 4.5, setze `effort: null`. Zeige dem Nutzer die fertige
+Fassung und frage, ob du sie als nutzereigene Datei anlegen sollst. Schreibe keine Platzhalter und ersetze
+eine vorhandene Datei nie pauschal. Ohne bestätigte Modellwerte bleibt `run` bis zur späteren Einrichtung
+gesperrt; das übrige Setup ist abgeschlossen.
+
 ## Git klären
 
 Meldet Doctor ein fehlendes Git-Repo, frage kurz, ob du `git init` ausführen sollst. Handle erst nach der
@@ -67,6 +80,8 @@ Orientierungspunkte:
 - `.qatlas/plugins/` trägt technische Projektkonfiguration und den versionierten Update-Prüfstand.
 - `~/.qatlas/plugins/config.yaml` trägt die nutzerweite Plugin-Konfiguration;
   `~/.qatlas/rules/RULESET.md` bleibt die von Qatlas verwaltete Regelkopie.
+- `~/.qatlas/plugins/orchestra.yaml` legt nur für `qatlas run` die Modelle und Effort-Stufen fest, wenn sie
+  in diesem Setup mit dem Nutzer angelegt wurde.
 
 Schließe immer mit `Mehr: qatlas-help`. War nichts zu tun, antworte nur:
 
