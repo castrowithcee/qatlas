@@ -20,8 +20,9 @@ Worktrees und lokale Commits. Er autorisiert keinen Push, Publish, kein Deployme
 Dritte und keine sonstige externe oder irreversible Wirkung. Eine konkrete Qatlas-Tooloperation ist nur
 zulässig, wenn der aktuelle Nutzerauftrag, der maßgebliche Taskvertrag oder eine geltende globale
 beziehungsweise projektlokale Agentendatei Wirkung, Connection, Zielbereich und Grenzen separat und
-eindeutig festlegt. Wende dafür `qatlas-core-cli-mcp` an. Eine Abschlussmeldung sendet ausschließlich der
-primäre Orchestrator; Subagents senden bei ihrer Fertigmeldung keine Nachricht.
+eindeutig festlegt. Verwende dafür den konfigurierten Qatlas-MCP-Broker und seine verfügbaren
+Toolbeschreibungen. Abschlussmeldungen sendet ausschließlich der primäre Orchestrator; Subagents senden
+bei ihrer Fertigmeldung keine Nachricht.
 
 ## Laufvertrag festlegen
 

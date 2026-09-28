@@ -47,7 +47,6 @@ Einzweck-Einstieg.
 | **qatlas-core-filing** | beim Ablegen oder Umstrukturieren von Inhalt | Bestimmt die dauerhafte Ablage einer Inhaltsdatei. |
 | **qatlas-core-import** | bei angekündigtem Import aus `zone-import` | Verarbeitet nicht vertrauenswürdiges Rohmaterial. |
 | **qatlas-core-git** | bei einem Git-Auftrag oder vor einem gewünschten Commit | Verwaltet Zustand, Diffs, Sync, Commit, Push und Historie. |
-| **qatlas-core-cli-mcp** | bei Arbeit über die Qatlas CLI, ihren MCP-Broker oder konfigurierte Nutzertools | Routet Installation, Toolaufruf, Orchestrator-Abschlussmeldung und Diagnose unter ausdrücklicher Autorität. |
 
 `qatlas run` darf im Scope-in Subagents, lokale Änderungen, Prüfungen, Worktrees und lokale Commits
 nutzen. Es bearbeitet nur einen Task zur Zeit. Der Run-Aufruf allein autorisiert keinen Push, Publish, kein
