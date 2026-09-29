@@ -29,7 +29,7 @@ an.
   Ein Test-, Build- oder Formatierungslauf, der Dateien, Caches oder Ausgaben erzeugt, ist schreibend.
 - Status, Abschlussbericht, Spine und Refs ändert nur der Orchestrator: die Refs seines Task-Namensraums
   und als Integrationsbesitzer den Steuerbranch. Kein Subagent legt Branches oder Worktrees an, wechselt
-  sie oder ändert Repo-Konfiguration und Hooks.
+  sie oder ändert Repo-Konfiguration und Hooks. Staging und Commits führt ebenfalls nur der Orchestrator aus.
 
 ## Isolation entscheiden
 
@@ -93,7 +93,8 @@ künstliche Parallelität.
   die Spitze des Steuerbranches seinem zuletzt geprüften Stand entspricht. Ein fremd veränderter
   Steuerbranch stoppt die automatische Integration; Aktualisierung und Konfliktbehandlung sind ein eigener
   bewusster Schritt.
-- Schreibe keine geteilte Historie um und löse Konflikte nicht automatisch.
+- Schreibe keine geteilte Historie um und löse Konflikte nicht automatisch. Delegiere einen Konflikt als
+  eigenen Integrationsauftrag und prüfe die Lösung vor der Übernahme.
 
 ## Übergeben und wiederaufnehmen
 
@@ -106,9 +107,9 @@ künstliche Parallelität.
 - Wer den Task erneut beansprucht, übernimmt dessen Namensraum erst, wenn kein laufender oder unbekannter
   Worker ihn nutzt und die Branches den im Task genannten Stand tragen. Eine Abweichung klärt er vor jeder
   Änderung.
-- Integriere nach einer Klärung vor weiterer Delegation den aktuellen Steuerbranch in den Task-Branch und
-  diesen in jeden weiterzuführenden Unterbranch. Prüfe jeden Integrationsdiff und schreibe die Historie
-  nicht um.
+- Prüfe nach einer Klärung, ob der Task-Branch für die Fortsetzung Änderungen des aktuellen Steuerbranches
+  braucht. Integriere ihn nur dann; prüfe ebenso für jeden weiterzuführenden Unterbranch, ob er den neuen
+  Stand des Task-Branches braucht. Prüfe jeden Integrationsdiff und schreibe die Historie nicht um.
 - Entferne nach dem Aufräumvertrag der Worktree-Referenz nur vom aktuellen Lauf erzeugte, saubere und
   vollständig integrierte Worktrees und Branches. Übernommene, inzwischen integrierte Einträge nennt der
   Laufbericht zur Bereinigung über `qatlas-work tree`.

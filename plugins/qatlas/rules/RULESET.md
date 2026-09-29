@@ -26,9 +26,10 @@ ein eingebettetes oder benachbartes Repo, prüfe dieses vor dem ersten Eingriff 
 2. Führe `git worktree list --porcelain` aus und verändere andere Worktrees nicht.
 3. Prüfe `git status` und die bekannte Abweichung zwischen `HEAD` und Upstream. Sie beruht auf dem
    zuletzt geholten Remotestand; gib sie nicht als aktuellen Remotestand aus.
-4. Führe `git fetch` erst aus, wenn der Auftrag einen aktuellen Remotevergleich, eine schreibende
-   Integration, einen Sync oder einen Push braucht. Scheitert es, melde, dass der entfernte Stand nicht
-   geprüft werden konnte. Rein lesende Arbeit löst keinen Netzwerkzugriff aus.
+4. Führe `git fetch` erst aus, wenn der aktuelle Remotestand für den Auftrag nötig ist, insbesondere für
+   einen Remotevergleich, Sync oder Push. Ein rein lokaler Merge löst keinen Fetch aus. Scheitert ein
+   nötiger Fetch, melde, dass der entfernte Stand nicht geprüft werden konnte. Ein rein lokaler Leseauftrag
+   löst keinen Netzwerkzugriff aus.
 5. Aktualisiere einen Branch nie allein wegen des Sessionstarts. Ein Fast-Forward mit `git pull --ff-only`
    gehört nur in einen ausdrücklich autorisierten Sync- oder Arbeitsablauf.
 6. Ändere bei lokalen Änderungen, Divergenz oder drohenden Konflikten nichts automatisch. Berichte den

@@ -19,7 +19,8 @@ lokalen Sammelcommit am vollständigen Ende.
 
 ## Scope-out
 
-Umsetzung, Worker, Integration, externe Wirkungen und Pushes bleiben außerhalb dieses Laufs.
+Umsetzung, Worker, technische Tests, Integration, externe Wirkungen und Pushes bleiben außerhalb dieses
+Laufs.
 
 ## Schlange bilden
 

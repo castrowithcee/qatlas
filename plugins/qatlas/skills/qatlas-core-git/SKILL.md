@@ -14,35 +14,16 @@ edit: locked
 
 # qatlas-core-git
 
-Verwalte Git als eigenen Arbeitszweck. Die automatische Prüfung beim Sessionstart lädt diesen Skill nicht.
-Sobald Git selbst bearbeitet werden soll, gilt der passende Zweig unten.
+Verwalte Git als eigenen Arbeitszweck oder wende diese gemeinsame Git-Norm in einem ausdrücklich gestarteten
+Qatlas-Verfahren an. Die automatische Prüfung beim Sessionstart lädt diesen Skill nicht.
 
 ## Scope-in
 
-Der Aufruf umfasst nur das ausdrücklich verlangte Git-Ziel und die davon betroffenen Repos, Branches,
-Worktrees und Remotes. Löse jedes Repo separat auf und erweitere einen Status-, Diff- oder Sync-Auftrag nicht
-von selbst um Commit, Push, Historienänderung oder einen Eingriff in ein benachbartes Repo.
-
-## Vordefinierte Orchestrierungs-Autorisierungen
-
-Ein ausdrücklicher Aufruf von `qatlas run` autorisiert für genau diesen Lauf lokale Commits und
-Integrationsschritte, ohne jede Commit-Nachricht vorher einzeln freigeben zu lassen. Die Ausnahme gilt nur
-für den von Qatlas geprüften Steuerbranch sowie die von diesem Lauf eindeutig beanspruchten Task-Branches
-und Worktrees. Der Orchestrator, nicht der Subagent, führt die Git-Schritte aus.
-
-Auch dort muss der Orchestrator jeden vollständigen Diff lesen, fremde Änderungen ausschließen und die
-vorhandene Nachrichtenkonvention einhalten. Er berichtet danach jede vollständige Nachricht und Commit-ID.
-Die Ausnahme erlaubt keinen Push, Force-Push, automatischen Stash, kein Umschreiben geteilter Historie und
-keine Integration auf einen seit dem Preflight fremd veränderten Steuerbranch. Ein Konflikt wird nicht
-automatisch aufgelöst, sondern als eigener Integrationsauftrag delegiert. Nur von diesem Lauf erzeugte,
-saubere und vollständig integrierte Worktrees und Branches dürfen ohne weitere Rückfrage entfernt werden.
-
-Ein ausdrücklicher Aufruf von `qatlas review` autorisiert ausschließlich Backlog- und
-Entscheidungsänderungen sowie genau einen Sammelcommit pro betroffenem Repo, nachdem die vollständige
-Review-Schlange geklärt ist. Zwischencommits, Subagenten, Implementierung, Integration und Prüfungen sind
-dort nicht autorisiert. Endet der Dialog vorher oder bleibt eine Aufgabe offen, entsteht kein Commit. Die
-spätere Ausführung eines geklärten Tasks braucht einen neuen ausdrücklichen Aufruf eines passenden Skills.
-Außerhalb dieser Grenzen braucht jeder Commit den folgenden ausdrücklichen Auftrag.
+Ein direkter Aufruf umfasst nur das ausdrücklich verlangte Git-Ziel und die davon betroffenen Repos,
+Branches, Worktrees und Remotes. Löse jedes Repo separat auf und erweitere einen Status-, Diff- oder
+Sync-Auftrag nicht von selbst um Commit, Push, Historienänderung oder einen Eingriff in ein benachbartes Repo.
+Bei `qatlas run` und `qatlas review` bestimmt der jeweilige Ablauf den Scope für lokale Commits und
+Integrationen; die gemeinsamen Prüf-, Nachrichten- und Schutzregeln unten gelten zusätzlich.
 
 ## Zustand und Synchronisierung
 
@@ -50,8 +31,9 @@ Außerhalb dieser Grenzen braucht jeder Commit den folgenden ausdrücklichen Auf
    benachbarte Worktrees.
 2. Prüfe `git status` sowie die passenden Diffs für gestagte und ungestagte Änderungen.
 3. Ein Status- oder Diffauftrag bleibt lokal und nennt die Abweichung zum Upstream als Stand des zuletzt
-   geholten Remotes. Führe `git fetch` erst aus, wenn der Auftrag einen aktuellen Remotevergleich, eine
-   schreibende Integration, einen Sync oder einen Push braucht, und nur für die betroffenen Remotes.
+   geholten Remotes. Führe `git fetch` erst aus, wenn der aktuelle Remotestand für den Auftrag nötig ist,
+   insbesondere für einen Remotevergleich, Sync oder Push, und nur für die betroffenen Remotes. Ein rein
+   lokaler Merge löst keinen Fetch aus.
 4. Aktualisiere einen sauberen, nur zurückliegenden Branch ausschließlich in einem ausdrücklich
    autorisierten Sync- oder Arbeitsablauf und ausschließlich per Fast-Forward, bevorzugt mit
    `git pull --ff-only`.
@@ -94,9 +76,10 @@ für diesen Scope autorisiert sind. Sichere vor Übergabe oder Pause einen wiede
 
 ## Commit und Push
 
-Lokale Commits brauchen eine ausdrückliche Autorisierung des Nutzers. Sie kann einen einzelnen Commit oder
-alle sachlich passenden Commits eines klar begrenzten Arbeitslaufs umfassen. Innerhalb eines so autorisierten
-Laufs braucht weder jeder Commit noch jede Commit-Nachricht eine zusätzliche Einzelfreigabe:
+Ein klar begrenzter Umsetzungsauftrag autorisiert lokale Commits eigener Änderungen in den betroffenen Repos
+und auf den für den Auftrag zulässigen Branches. Auch ein ausdrücklicher Commit-Auftrag kann einen einzelnen
+Commit oder alle sachlich passenden Commits eines klar begrenzten Arbeitslaufs autorisieren. Weder jeder
+Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
 
 1. Ermittle für jeden betroffenen Pfad das genaue Repo-Root. Ein eingebettetes Repo mit eigener `.git`-Struktur
    ist ein eigenes Repo. Jedes Repo erhält einen eigenen gestagten Diff, eine eigene Nachricht und einen
@@ -116,9 +99,9 @@ Laufs braucht weder jeder Commit noch jede Commit-Nachricht eine zusätzliche Ei
      anderen Repos hinein. Was über den Commit hinausreicht, gehört in die betroffene Dokumentation,
      Entscheidung, Aufgabe oder Pull Request.
    - Verwende keinen Co-Author-Trailer, kein Tool-Branding und keine „generated with“-Zeile.
-4. Kläre die Autorisierung vor dem ersten Commit. Ein ausdrücklicher Commit-Auftrag oder ein Verfahren, das
-   lokale Commits für seinen klaren Scope autorisiert, genügt für alle sachlich nötigen Commits dieses
-   Scopes. Ein bloßer Umsetzungsauftrag enthält keine stillschweigende Commit-Autorisierung.
+4. Prüfe vor dem ersten Commit, ob ein klar begrenzter Umsetzungsauftrag, ein ausdrücklicher Commit-Auftrag
+   oder ein Verfahren mit Commit-Autorisierung vorliegt. Ein Status-, Diff- oder Sync-Auftrag allein
+   autorisiert keinen Commit.
 5. Fehlt die Autorisierung oder verlangt der Nutzer eine Vorschau, zeige Betreff und jede weitere Zeile der
    geplanten Nachricht vollständig und warte auf Zustimmung. Arbeite Korrekturen ein und zeige jede
    überarbeitete Fassung erneut vollständig.
@@ -147,8 +130,8 @@ Ein äußerer Commit darf einen Zusammenhang mit einem eingebetteten Repo erklä
 als eigenen Inhalt ausgeben. „Lokalen Runbook entfernen“ und „Betriebsdokumentation ergänzen“ sind zwei
 autarke Nachrichten in zwei Repos, nicht eine gemeinsame Erzählung.
 
-Biete diesen Skill an, wenn eine fertige Änderung noch uncommittet und kein Commit autorisiert ist. Greife
-nicht ohne einen ausdrücklichen Commit-Auftrag oder einen autorisierten Arbeitslauf zu `git commit`.
+Biete diesen Skill an, wenn eine fertige Änderung noch uncommittet und weder ein Umsetzungs- noch ein
+Commit-Auftrag für sie erkennbar ist. Greife nur innerhalb eines autorisierten Scopes zu `git commit`.
 
 ## Historie und Force-Push
 
@@ -166,7 +149,7 @@ nicht ohne einen ausdrücklichen Commit-Auftrag oder einen autorisierten Arbeits
 
 - Nicht ausdrücklich betroffene Repos, Branches, Worktrees und Remotes bleiben unverändert.
 - Committe keine Secrets, Zugangsdaten oder personenbezogenen Daten, auch nicht über Git LFS.
-- Stoppe bei Unsicherheit oder Konflikten und frage, statt zu raten.
+- Stoppe bei unklarer Berechtigung, Eigentümerschaft oder fachlicher Konfliktlösung und frage, statt zu raten.
 - Beschreibe in der Commit-Nachricht nur den Inhalt dieses Commits in diesem Repo. Arbeit außerhalb davon
   gehört in die Antwort an den Nutzer.
 

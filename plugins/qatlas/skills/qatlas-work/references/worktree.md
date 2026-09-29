@@ -100,15 +100,15 @@ nur eindeutig gefahrlos aufräumbare Einträge; lege alle übrigen mit ihrem Hin
    aktuellen Arbeitsbaum.
 2. Prüfe im Ziel Status, ungetrackte Dateien, Branch, Upstream und nicht integrierte Commits. Das
    Integrationsziel eines Unterbranches ist sein Task-Branch, das eines Task-Branches der Steuerbranch aus
-   dem Spine. Ist der Arbeitsbaum nicht sauber oder das Integrationsziel nicht eindeutig belegt, entferne
-   nichts und zeige den konkreten Zustand. Eine für einen laufenden oder unbekannten Worker oder
-   Orchestrator beanspruchte Arbeit bleibt bestehen.
+   dem Spine. Prüfe mit `git merge-base --is-ancestor <branch> <ziel>`, ob die Branch-Spitze in genau diesem
+   Ziel enthalten ist. Ist der Arbeitsbaum nicht sauber, das Integrationsziel nicht eindeutig belegt oder
+   diese Prüfung nicht erfolgreich, entferne nichts und zeige den konkreten Zustand. Eine für einen
+   laufenden oder unbekannten Worker oder Orchestrator beanspruchte Arbeit bleibt bestehen.
 3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <pfad>` und ohne
    `--force`. Entferne danach mit `rmdir` nur dadurch leer gewordene Zwischenordner bis zum Repo-Ordner
    im zentralen Ablageort. Der Branch bleibt zunächst erhalten.
-4. Lösche den lokalen Branch nur mit `git branch -d`, wenn sein Ziel aus Spine, Auftrag oder ausdrücklichem
-   Nutzerkontext eindeutig ist und Git die vollständige Integration in genau dieses Ziel bestätigt.
-   Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht.
+4. Lösche den lokalen Branch nach der Zielprüfung aus Schritt 2 nur mit `git branch -d`. Schlägt der Befehl
+   fehl, erzwinge die Löschung nicht. Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht.
 5. Zeige anschließend den verbleibenden Bestand erneut nummeriert.
 
 Will der Nutzer einen schmutzigen oder nicht integrierten Strang verwerfen, behandle das als eigene

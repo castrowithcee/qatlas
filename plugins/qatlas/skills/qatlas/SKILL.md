@@ -49,6 +49,10 @@ Autorität nicht. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihr
 - **`review [Scope]`:** Lies vollständig [Übergaben klären](references/review.md). Kläre ausschließlich
   Entscheidungen, Prüfungen und Nutzerhandlungen. Beginne danach keine Ausführung.
 
+Bei Git lies für `run` vor dem ersten schreibenden Git-Schritt und für `review` vor dem Sammelcommit
+vollständig [die gemeinsame Git-Norm](../qatlas-core-git/SKILL.md). Der jeweilige Modus bestimmt, welche
+lokalen Commits und Integrationen autorisiert sind.
+
 Das Wort `backlog` ist nach `shape` ein reservierter Scope, keine Idee. Löse eine eindeutige Taskkennung
 oder Task-URL im maßgeblichen Planungssystem auf; `#10` bezeichnet nur bei entsprechender Bindung ein
 Issue im dort festgelegten Repo. Deute einen fehlenden oder mehrdeutigen Task nicht als neue Idee.
