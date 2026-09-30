@@ -3,7 +3,7 @@ description: >
   Aktuelle GitHub-Besonderheiten für Issues und Projects: selektiver Kontextabruf, gh-Zugang, Tokenwahl,
   getrennte REST- und GraphQL-Limits, gebündelte Mutationen und nicht pauschal automatisierbare Konfiguration.
 source: https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects
-updated: 2026-08-14
+updated: 2026-09-30
 license: MIT
 type: fact
 edit: locked
@@ -28,6 +28,24 @@ tragen den eigenständig ausführbaren Kontext.
 - Bei begründetem Historienbedarf rufe Kommentare paginiert, seit einem bekannten Zeitpunkt oder über eine
   begrenzte GraphQL-Connection wie `comments(last: N)` ab. Der neueste Kommentar allein ist nicht
   maßgeblich; der konsolidierte Body ist es.
+
+## Abschluss
+
+Issue-Zustand und Project-Status sind in GitHub getrennt: Ein Status `Done` schließt kein Issue, und ein
+geschlossenes Issue ändert keinen Status. Maßgeblich für den Abschluss ist der Issue-Zustand; `Done` bildet
+ihn im Project nur ab.
+
+- Schließe ein Issue im selben Schritt, in dem sein Task `done` wird, mit
+  `gh issue close <nummer> --reason completed`, und setze `Status` auf `Done`.
+- Wird ein Issue bewusst verworfen oder als Duplikat erkannt, schließe es mit `--reason "not planned"`
+  beziehungsweise `--duplicate-of <nummer>` und setze `Status` ebenfalls auf `Done`.
+- Wird ein geschlossenes Issue wieder aufgenommen, öffne es mit `gh issue reopen` und setze den Status nach
+  dem tatsächlichen nächsten Schritt.
+- Die Project-Workflows `Item closed` und `Auto-close issue` halten beide Ebenen auch bei manueller Pflege in
+  der Oberfläche synchron. Sie sind derzeit nur in der UI unter `Workflows` einschaltbar; ohne sie bleibt
+  der Agent für beide Schritte verantwortlich.
+- Findet eine Bestandsaufnahme ein offenes Issue auf `Done` oder ein geschlossenes Issue auf einem anderen
+  Status, melde den Widerspruch und gleiche ihn erst nach Bestätigung ab.
 
 ## Zugang und geringste Berechtigung
 
@@ -88,6 +106,8 @@ Für größere Migrationen gilt:
 - GitHub CLI Auth: https://cli.github.com/manual/gh_auth_login
 - GitHub CLI Projects und Scope: https://cli.github.com/manual/gh_project
 - GitHub CLI Issue View: https://cli.github.com/manual/gh_issue_view
+- GitHub CLI Issue Close: https://cli.github.com/manual/gh_issue_close
+- Built-in-Automationen für Projects: https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations
 - REST Issue Comments: https://docs.github.com/en/rest/issues/comments
 - GraphQL Issue: https://docs.github.com/en/graphql/reference/objects#issue
 
