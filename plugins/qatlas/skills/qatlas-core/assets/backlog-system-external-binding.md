@@ -16,6 +16,8 @@ edit: shared
 - **Arbeitspakete:** <objekttyp und fachlicher container>
 - **Entwürfe:** <wo unausgereifte ideen leben und wann sie zu arbeit werden>
 - **Status:** <feldname>; `<wert>` = <bedeutung>, ...
+- **Abschluss:** <wie ein erledigter, verworfener oder doppelter task im system geschlossen wird und wie der
+  status diesem zustand im selben schritt folgt>
 - **Aktueller Datensatz:** <objekt oder felder mit dem eigenständig ausführbaren aktuellen taskvertrag,
   der geltende vorgaben konkret statt nur als quellenlinks enthält>
 - **Historie:** <kanal für kommentare oder verlauf; nicht maßgeblich und nur bei begründetem bedarf lesen>

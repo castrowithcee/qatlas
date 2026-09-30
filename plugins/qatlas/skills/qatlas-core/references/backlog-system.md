@@ -89,9 +89,9 @@ Erst nach erfolgreicher Verifikation wird `.qatlas-project/backlog/BACKLOG.md` a
 
 - Bei lokalem Ziel enthält es den lokalen Roster nach der Backlog-Regel und ihrer Referenz.
 - Bei externem Ziel enthält es einen prominenten Link mit Titel und eine knappe Bindung: Anbieter,
-  maßgebliches Projekt oder Datenobjekt, Task-Artefakt, Statusfeld und Werte, Entwurfsregel, Schreibweg,
-  aktueller Datensatz, Historienkanal, Standard-Lesepolitik, Betriebsgrenzen und die klare Aussage
-  `Lokaler Spiegel: keiner`.
+  maßgebliches Projekt oder Datenobjekt, Task-Artefakt, Statusfeld und Werte, Abschlussweg, Entwurfsregel,
+  Schreibweg, aktueller Datensatz, Historienkanal, Standard-Lesepolitik, Betriebsgrenzen und die klare
+  Aussage `Lokaler Spiegel: keiner`.
 
 Nutze für ein neues externes Binding
 [`../assets/backlog-system-external-binding.md`](../assets/backlog-system-external-binding.md) als Ausgangspunkt. Lies eine
