@@ -61,7 +61,12 @@ const DEFAULT_CONFIG = {
   format: 1,
   'session-start': { enabled: true, ruleset: true },
   notifications: { telegram: { enabled: false, connection: 'default' } },
+  protection: { enabled: true, secrets: 'block', 'personal-data': 'ask' },
 };
+
+const PROTECTION_LEVELS = ['block', 'ask', 'warn', 'allow'];
+// Schlüssel, die eine Projektkonfiguration überschreiben darf.
+const PROJECT_KEYS = new Set(['format', 'protection']);
 
 const DEFAULT_STATUSLINE = defaultStatusline();
 
@@ -122,7 +127,27 @@ function normalizeConfig(value) {
     ruleset: session.ruleset !== false,
   };
   if (!isObject(config.notifications)) config.notifications = clone(DEFAULT_CONFIG.notifications);
+  if (!isObject(config.protection)) config.protection = clone(DEFAULT_CONFIG.protection);
   return config;
+}
+
+function protectionProblems(protection, file) {
+  if (protection === undefined) return [];
+  if (!isObject(protection)) return [file + ': protection muss eine Map sein.'];
+  const problems = [];
+  for (const key of Object.keys(protection)) {
+    const value = protection[key];
+    if (key === 'enabled') {
+      if (typeof value !== 'boolean') problems.push(file + ': protection.enabled muss true oder false sein.');
+    } else if (key === 'secrets' || key === 'personal-data') {
+      if (!PROTECTION_LEVELS.includes(value)) {
+        problems.push(file + ': protection.' + key + ' muss ' + PROTECTION_LEVELS.join(', ') + ' sein.');
+      }
+    } else {
+      problems.push(file + ': unbekannter Schlüssel protection.' + key + '.');
+    }
+  }
+  return problems;
 }
 
 function normalizeStatusline(value) {
@@ -139,23 +164,34 @@ function readConfig(projectRoot = null) {
   const diagnostics = [];
   if (home.exists && !home.valid) diagnostics.push(paths.configFile + ': ' + home.error.message);
   const config = normalizeConfig(home.valid && home.value ? home.value : DEFAULT_CONFIG);
+  const homeProblems = home.valid && home.value
+    ? protectionProblems(home.value.protection, paths.configFile) : [];
+  diagnostics.push(...homeProblems);
 
+  let projectProblems = [];
   let project = { exists: false, valid: true, value: null };
   if (paths.projectConfigFile) {
     project = parseFile(paths.projectConfigFile);
     if (project.exists && !project.valid) {
       diagnostics.push(paths.projectConfigFile + ': ' + project.error.message);
     } else if (project.value) {
-      const denied = Object.keys(project.value).filter(key => key !== 'format');
+      const denied = Object.keys(project.value).filter(key => !PROJECT_KEYS.has(key));
       if (denied.length) diagnostics.push(paths.projectConfigFile
         + ': Projekt-Overrides sind noch nicht freigegeben: ' + denied.join(', '));
+      projectProblems = protectionProblems(project.value.protection, paths.projectConfigFile);
+      diagnostics.push(...projectProblems);
+      if (!projectProblems.length && isObject(project.value.protection)) {
+        config.protection = merge(config.protection, project.value.protection);
+      }
     }
   }
+  const protectionValid = home.valid && project.valid && !homeProblems.length && !projectProblems.length;
 
   return {
     ...paths,
     exists: home.exists,
-    valid: home.valid && project.valid,
+    valid: home.valid && project.valid && !homeProblems.length,
+    protectionValid,
     config,
     project,
     diagnostics,
@@ -192,6 +228,27 @@ function writeNew(file, value, mode) {
     flag: 'wx', mode,
   });
   return file;
+}
+
+// Ergänzt fehlende globale Schlüssel mit ihrem Default, ohne gesetzte Werte oder Kommentare zu ändern.
+function topUpConfig() {
+  const file = locations().configFile;
+  const document = YAML.parseDocument(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+  if (document.errors.length || !isObject(document.toJS())) return [];
+  const added = [];
+  const visit = (value, keys) => {
+    if (isObject(value)) {
+      for (const key of Object.keys(value)) visit(value[key], keys.concat(key));
+    } else if (!document.hasIn(keys)) {
+      try {
+        document.setIn(keys, value);
+        added.push(keys.join('.'));
+      } catch { /* Ein vorhandener Nicht-Map-Wert bleibt unangetastet und wird gemeldet. */ }
+    }
+  };
+  visit(DEFAULT_CONFIG, []);
+  if (added.length) fs.writeFileSync(file, document.toString({ lineWidth: 0 }), { mode: 0o600 });
+  return added;
 }
 
 function createConfig() {
@@ -241,4 +298,5 @@ module.exports = {
   readStatusline,
   stringifyYaml,
   syncManagedRuleset,
+  topUpConfig,
 };

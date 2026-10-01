@@ -2,9 +2,10 @@
 name: qatlas-core-filing
 description: >
   Dateien regelkonform anlegen, benennen, ablegen, umbenennen, verschieben, zusammenführen, promoten,
-  archivieren oder löschen, Markdown inhaltlich ändern und Verweise einfügen: bestimmt Ort, Namen, Kennung
-  und Frontmatter und hält Navigation und Verweise konsistent, auch unter .qatlas-project/. Nicht für reines
-  Lesen und nicht für Codeänderungen innerhalb bestehender Dateien.
+  archivieren oder löschen, Markdown inhaltlich ändern, Verweise einfügen und Rohmaterial aus
+  .qatlas-project/zone-import/ verarbeiten, sobald der Nutzer es ankündigt oder den Pfad nennt: bestimmt Ort,
+  Namen, Kennung und Frontmatter und hält Navigation und Verweise konsistent. Nicht für reines Lesen, für
+  Codeänderungen innerhalb bestehender Dateien oder für Konvertierungen außerhalb der Importzone.
 license: MIT
 type: skill
 edit: locked
@@ -53,5 +54,6 @@ Lies vor jeder anstehenden Operation deren Referenz vollständig:
 - Anlegen: [Ablegen](references/playbook-create.md)
 - Umbenennen, Verschieben, Zusammenführen, Promoten, Archivieren, Löschen:
   [Umstrukturieren](references/playbook-restructure.md)
+- Importieren: [Importieren](references/playbook-import.md)
 - Markdown anlegen oder inhaltlich ändern: [Frontmatter](references/frontmatter.md)
 - Schreiben unter `.qatlas-project/`: [Projektwissensraum](references/structure.md)

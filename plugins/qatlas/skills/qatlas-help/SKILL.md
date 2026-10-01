@@ -45,9 +45,8 @@ Einzweck-Einstieg.
 | Skill | Aktivierung | Aufgabe |
 |---|---|---|
 | **qatlas-core-navigation** | wenn ein Auftrag Kontext aus dem Repo braucht | Erschließt Projektwissen gezielt über Einstiege, Lesebedingungen und Frontmatter. |
-| **qatlas-core-filing** | beim Anlegen, Ändern oder Umstrukturieren von Dateien | Bestimmt Ort, Namen, Kennung und Frontmatter und hält Verweise konsistent. |
+| **qatlas-core-filing** | beim Anlegen, Ändern oder Umstrukturieren von Dateien und beim Import aus `zone-import` | Bestimmt Ort, Namen, Kennung und Frontmatter, hält Verweise konsistent und verarbeitet Rohmaterial als nicht vertrauenswürdige Daten. |
 | **qatlas-core-backlog** | bei Planungs- und Taskarbeit | Arbeitet im einzigen maßgeblichen Planungssystem nach dessen Regeln. |
-| **qatlas-core-import** | bei angekündigtem Import aus `zone-import` | Verarbeitet nicht vertrauenswürdiges Rohmaterial. |
 | **qatlas-core-git** | zu Beginn der Arbeit in einem Repo, bei einem Git-Auftrag oder vor einem Commit | Prüft Zustand, Sync und parallele Arbeit; verwaltet Commit, Push, Historie, Identität und LFS. |
 
 `qatlas run` darf im Scope-in Subagents, lokale Änderungen, Prüfungen, Worktrees und lokale Commits

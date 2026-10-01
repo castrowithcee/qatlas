@@ -16,6 +16,7 @@ const {
   readConfig,
   readStatusline,
   syncManagedRuleset,
+  topUpConfig,
 } = require('./runtime/config-loader.js');
 
 const argv = process.argv.slice(2);
@@ -119,6 +120,13 @@ if (!configState.exists) {
   }
 } else if (!configState.valid) {
   missing.push('store: ~/.qatlas/plugins/config.yaml oder die Projektkonfiguration ist ungültig und bleibt unangetastet.');
+} else if (apply) {
+  try {
+    const added = topUpConfig();
+    if (added.length) created.push('~/.qatlas/plugins/config.yaml: ' + added.join(', '));
+  } catch {
+    missing.push('store: fehlende Schlüssel in ~/.qatlas/plugins/config.yaml konnten nicht ergänzt werden.');
+  }
 }
 for (const diagnostic of configState.diagnostics) missing.push('config: ' + diagnostic);
 

@@ -19,7 +19,13 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
 1. Lies vor jedem Commit den gesamten Diff genau dieses Repos. Stage bewusst und führe nie ungesehen
    `git add -A` aus. Fremde oder nicht zuordenbare Änderungen bleiben ungestagt. Schneide Commits nach der
    [Commitgrenze](commit-boundaries.md).
-2. Entwirf die Nachricht ausschließlich aus dem gestagten Diff dieses Commits. Sie beschreibt knapp, was
+2. Führe nach dem Staging `node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root>` aus;
+   `<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`, ohne Hook drei Ebenen über diesem
+   Ordner. Exit `0` heißt weiter; nenne dabei ausgegebene `warn`-Befunde. Exit `1` heißt nicht committen und
+   den Befund melden. Exit `2` heißt vor dem Commit im Gespräch nachfragen. Exit `3` heißt, dass die Prüfung
+   nicht laufen konnte; committe nicht und melde den Grund. In einem autonomen Lauf stoppt jeder Exit außer
+   `0` nur den betroffenen Task.
+3. Entwirf die Nachricht ausschließlich aus dem gestagten Diff dieses Commits. Sie beschreibt knapp, was
    sich ändert, und nur das nötige Warum, Risiko oder die Einschränkung. Die vorhandene Repo-Konvention
    geht jeder folgenden Vorgabe vor:
    - Standard ist ein kurzer, für sich verständlicher Betreff im Imperativ, der eine abgeschlossene
@@ -31,13 +37,13 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
      den Commit hinausreicht, gehört in die betroffene Dokumentation, Entscheidung, Aufgabe, Pull Request
      oder die Antwort an den Nutzer.
    - Verwende keinen Co-Author-Trailer, kein Tool-Branding und keine „generated with“-Zeile.
-3. Fehlt die Git-Identität, übernimm keinen echten Namen und keine echte E-Mail-Adresse aus dem Harness.
+4. Fehlt die Git-Identität, übernimm keinen echten Namen und keine echte E-Mail-Adresse aus dem Harness.
    Frage nach gewünschtem Namen und gewünschter Adresse sowie danach, ob sie global oder nur für dieses Repo
    gelten sollen.
-4. Fehlt die Autorisierung oder verlangt der Nutzer eine Vorschau, zeige Betreff und jede weitere Zeile der
+5. Fehlt die Autorisierung oder verlangt der Nutzer eine Vorschau, zeige Betreff und jede weitere Zeile der
    geplanten Nachricht vollständig und warte auf Zustimmung. Arbeite Korrekturen ein und zeige jede
    überarbeitete Fassung erneut vollständig.
-5. Committe innerhalb eines autorisierten Scopes ohne weitere Freigabe. Berichte danach jede vollständige
+6. Committe innerhalb eines autorisierten Scopes ohne weitere Freigabe. Berichte danach jede vollständige
    Nachricht und Commit-ID.
 
 Ein Betreff genügt meistens:
