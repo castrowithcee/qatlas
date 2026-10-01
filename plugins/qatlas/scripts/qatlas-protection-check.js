@@ -64,20 +64,26 @@ function scan(lines, rules) {
   return found;
 }
 
-// Nutzt gitleaks, wenn installiert; null bedeutet, dass der eingebaute Mustersatz greift.
+// Nutzt gitleaks, wenn installiert: ab 8.19 `git --staged`, davor `protect --staged`.
+// null bedeutet, dass der eingebaute Mustersatz greift.
 function gitleaks() {
   const report = path.join(os.tmpdir(), 'qatlas-gitleaks-' + process.pid + '.json');
-  const result = spawnSync('gitleaks', ['git', '--staged', '--redact', '--no-banner',
-    '--report-format', 'json', '--report-path', report, target], { encoding: 'utf8' });
-  try {
-    if (result.error || (result.status !== 0 && result.status !== 1)) return null;
-    const findings = JSON.parse(fs.readFileSync(report, 'utf8') || '[]');
-    return findings.map(item => item.File + ':' + item.StartLine + ' ' + item.RuleID);
-  } catch {
-    return null;
-  } finally {
-    try { fs.unlinkSync(report); } catch { /* Kein Bericht entstanden. */ }
+  const options = ['--redact', '--no-banner', '--report-format', 'json', '--report-path', report];
+  const variants = [['git', '--staged', ...options, root], ['protect', '--staged', ...options, '--source', root]];
+  for (const args of variants) {
+    const result = spawnSync('gitleaks', args, { encoding: 'utf8' });
+    try {
+      if (result.error) return null;
+      if (result.status !== 0 && result.status !== 1) continue;
+      const findings = JSON.parse(fs.readFileSync(report, 'utf8') || '[]');
+      return findings.map(item => item.File + ':' + item.StartLine + ' ' + item.RuleID);
+    } catch {
+      return null;
+    } finally {
+      try { fs.unlinkSync(report); } catch { /* Kein Bericht entstanden. */ }
+    }
   }
+  return null;
 }
 
 let root = null;

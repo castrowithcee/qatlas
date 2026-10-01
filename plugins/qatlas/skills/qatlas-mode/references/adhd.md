@@ -4,7 +4,7 @@ description: >
   wiederholen, Abschweifungen unterdrücken, konkrete Zeitschätzungen geben und Erfolge sichtbar machen.
 attribution: github.com/ayghri/i-have-adhd
 license: MIT
-type: playbook
+type: rule
 edit: locked
 ---
 
