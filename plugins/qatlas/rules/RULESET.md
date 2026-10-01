@@ -1,6 +1,6 @@
 ---
 description: >
-  Optionale, nutzerweit schaltbare Arbeitsvereinbarung für sichere Befehle und Tests sowie Datenschutz.
+  Arbeitsvereinbarung für sichere Befehle und Tests.
 license: MIT
 type: rule
 edit: locked
@@ -10,13 +10,6 @@ edit: locked
 überschrieben. Gewünschte Regeln in die eigene globale oder projektlokale Agentendatei kopieren. -->
 
 # Qatlas-Arbeitsvereinbarung
-
-Diese Regeln gelten vollständig, solange ihre Injektion in `~/.qatlas/plugins/config.yaml` aktiviert ist.
-Der Nutzer kann sie dort gemeinsam mit dem Qatlas-Sessionstart oder einzeln abschalten. Native globale
-und projektlokale Agentenanweisungen haben Vorrang. Ist dieser Block unvollständig oder nur als Vorschau
-vorhanden, lies die im Block genannte Quelldatei vollständig, bevor du arbeitest.
-
-## Sichere Befehle und Tests
 
 - Prüfe vor Befehlen mit möglicher Lösch-, Überschreib-, Berechtigungs- oder externer Wirkung das genaue
   Ziel, den Umfang, die Autorisierung und die Wiederherstellbarkeit. Ermittle Unklares zuerst read-only.
