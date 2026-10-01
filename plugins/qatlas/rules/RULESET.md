@@ -1,7 +1,6 @@
 ---
 description: >
-  Optionale, nutzerweit schaltbare Arbeitsvereinbarung für Git-Sessionstart, parallele Agentenarbeit,
-  sichere Befehle und Tests sowie Datenschutz.
+  Optionale, nutzerweit schaltbare Arbeitsvereinbarung für sichere Befehle und Tests sowie Datenschutz.
 license: MIT
 type: rule
 edit: locked
@@ -17,39 +16,6 @@ Der Nutzer kann sie dort gemeinsam mit dem Qatlas-Sessionstart oder einzeln absc
 und projektlokale Agentenanweisungen haben Vorrang. Ist dieser Block unvollständig oder nur als Vorschau
 vorhanden, lies die im Block genannte Quelldatei vollständig, bevor du arbeitest.
 
-## Git beim Sessionstart
-
-Prüfe vor der eigentlichen Arbeit lokal das Repo, in dem die Session beginnt. Betrifft die Arbeit später
-ein eingebettetes oder benachbartes Repo, prüfe dieses vor dem ersten Eingriff ebenfalls:
-
-1. Ermittle Repo-Root, Branch und Upstream; nimm weder `origin` noch `main` pauschal an.
-2. Führe `git worktree list --porcelain` aus und verändere andere Worktrees nicht.
-3. Prüfe `git status` und die bekannte Abweichung zwischen `HEAD` und Upstream. Sie beruht auf dem
-   zuletzt geholten Remotestand; gib sie nicht als aktuellen Remotestand aus.
-4. Führe `git fetch` erst aus, wenn der aktuelle Remotestand für den Auftrag nötig ist, insbesondere für
-   einen Remotevergleich, Sync oder Push. Ein rein lokaler Merge löst keinen Fetch aus. Scheitert ein
-   nötiger Fetch, melde, dass der entfernte Stand nicht geprüft werden konnte. Ein rein lokaler Leseauftrag
-   löst keinen Netzwerkzugriff aus.
-5. Aktualisiere einen Branch nie allein wegen des Sessionstarts. Ein Fast-Forward mit `git pull --ff-only`
-   gehört nur in einen ausdrücklich autorisierten Sync- oder Arbeitsablauf.
-6. Ändere bei lokalen Änderungen, Divergenz oder drohenden Konflikten nichts automatisch. Berichte den
-   Zustand, bevor du darauf aufbaust.
-
-## Parallele Agentenarbeit
-
-Prüfe unmittelbar vor der ersten schreibenden Operation in jedem betroffenen Git-Repo und bei einer
-Übernahme erneut Worktrees, Branches und die vorhandene gemeinsame Task-Zuordnung. Ein registrierter
-Worktree beweist nicht, ob sein bisheriger Agent noch arbeitet. Kläre ungeklärtes Eigentum, bevor du einen
-vorhandenen Arbeitsstand veränderst.
-
-- Jeder gleichzeitig schreibende Agent arbeitet in einem eigenen registrierten Worktree auf einem exklusiven
-  Branch. Zwei Schreiber nutzen nie denselben Arbeitsbaum. Bestimme für einen gemeinsamen Zielbranch genau
-  einen Integrationsbesitzer.
-- Überlappen Änderungen an Dateien, Schnittstellen oder Migrationen so, dass sie nicht sicher getrennt
-  integriert werden können, führe die Arbeiten seriell oder als ausdrücklich abhängige Branches aus.
-- Trenne gemeinsam genutzte Schreibziele wie Build-Ausgaben, Caches, Dienste, Ports und Datenbanken oder
-  nutze sie nacheinander. Tests und Builds, die Dateien erzeugen, zählen als schreibende Arbeit.
-
 ## Sichere Befehle und Tests
 
 - Prüfe vor Befehlen mit möglicher Lösch-, Überschreib-, Berechtigungs- oder externer Wirkung das genaue
@@ -60,18 +26,4 @@ vorhandenen Arbeitsstand veränderst.
 - Teste einen Schutzmechanismus nie so, dass sein Versagen echte Daten beschädigt. Prüfe seine Entscheidung
   mit synthetischen Eingaben oder ausschließlich in einer frisch erzeugten, entbehrlichen Temp-Umgebung;
   der Test muss auch dann harmlos bleiben, wenn der Schutz überhaupt nicht läuft.
-- Führe destruktive Git-Befehle wie `reset --hard`, `clean -f`, `checkout --` oder ein überschreibendes
-  `restore` nur bei ausdrücklichem Auftrag für das exakt geprüfte Repo und Ziel aus. Verwende niemals
-  `git push --force`. `--force-with-lease` bleibt eine ausdrücklich beauftragte Ausnahme für einen
-  exklusiv besessenen, ungeschützten Branch nach aktuellem Fetch. Schreibe geteilte Historie nicht
-  eigenmächtig um.
 - Kannst du Wirkung oder Ziel nicht sicher begrenzen, führe den Befehl nicht aus und frage nach.
-
-## Datenschutz
-
-- Behandle jedes Repo, als wäre es öffentlich, sofern seine Agentenanweisungen nichts anderes festlegen.
-- Versioniere Planung, Wissen und Struktur, niemals personenbezogene Rohdaten.
-- Schreibe keine zuordenbaren Namen, Adressen, Telefonnummern, E-Mail-Adressen, Ausweis-, Zahlungs- oder
-  Zugangsdaten in versionierte Dateien.
-- Halte Domänenkennungen wie Kunden- oder Fallnummern lokal bei ihrem Thema.
-- Schreibe niemals Secrets oder Zugangsdaten ins Repo.
