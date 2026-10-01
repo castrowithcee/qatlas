@@ -28,8 +28,8 @@ Pfad ein. Nie fest codieren, denn der Installationspfad trägt die Version.
 ## Claude Code
 
 Claude Code führt einen externen Renderer aus und übergibt Session-JSON über stdin. Der Renderer liest die
-Nutzerwahl aus `~/.qatlas/plugins/statusline.yaml`; seine stabile Kopie ist ausgelieferte Payload, die der Nutzer
-nie bearbeitet.
+Nutzerwahl aus `~/.qatlas/plugins/statusline.yaml`; seine stabile Kopie ist ausgelieferte Payload, die der
+Nutzer nie bearbeitet.
 
 ### Einrichten
 
@@ -76,8 +76,9 @@ Farben werden in dieser Reihenfolge aufgelöst:
 `orange`, `red`, `diffgreen` und `diffred`. `bold` wirkt zusätzlich. `NO_COLOR` erzwingt reine Textausgabe.
 
 Balkenschwellen sind aufsteigende Einträge `{ from, fg }`; der zuletzt erreichte gewinnt. Balken, Prozentwert
-und Suffix bilden eine Anzeige und behalten dieselbe Schwellenfarbe, sofern das Widget keinen Teil ausdrücklich
-gestaltet. Der Kontextbalken bezieht sich auf das aktive Modellfenster, Nutzungsbalken auf ihre Limits.
+und Suffix bilden eine Anzeige und behalten dieselbe Schwellenfarbe, sofern das Widget keinen Teil
+ausdrücklich gestaltet. Der Kontextbalken bezieht sich auf das aktive Modellfenster, Nutzungsbalken auf ihre
+Limits.
 
 ### Argumente und Layout
 

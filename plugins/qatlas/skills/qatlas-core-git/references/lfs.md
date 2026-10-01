@@ -2,7 +2,7 @@
 description: >
   Über Git LFS für große oder häufig geänderte Binärdateien nach Repo-Policy entscheiden.
 license: MIT
-type: playbook
+type: rule
 edit: locked
 ---
 

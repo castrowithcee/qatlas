@@ -32,7 +32,7 @@ Aufruf: `qatlas-work <argument>`
 ## Modus wählen
 
 - **`tree [new [Auftrag]|Auswahl|aufräumen]`:** Lies vollständig
-  [Git-Worktrees verwalten](references/worktree.md) und führe nur dieses Verfahren aus.
+  [Git-Worktrees verwalten](references/playbook-worktree.md) und führe nur dieses Verfahren aus.
 
 Ist ein vorhandenes Argument nicht eindeutig, nenne die passende Möglichkeit und frage nach genau einer.
 Ist es unbekannt, zeige die kompakte Karte und nenne das unbekannte Argument in einem Satz. Deute eine

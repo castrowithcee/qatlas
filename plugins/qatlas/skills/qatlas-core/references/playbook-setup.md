@@ -21,7 +21,7 @@ ein neues Terminal. Schließe auch dann mit `Mehr: qatlas-help`.
 ## Projekt einrichten
 
 `<plugin-root>` ist der im Session-Kontext genannte `QATLAS PLUGIN ROOT`, andernfalls der Ordner drei
-Ebenen über dieser `setup.md`.
+Ebenen über dieser `playbook-setup.md`.
 
 ```text
 node <plugin-root>/scripts/qatlas-doctor.js --apply

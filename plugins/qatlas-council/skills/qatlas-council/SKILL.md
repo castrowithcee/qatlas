@@ -18,14 +18,14 @@ begründeten Empfehlung. Council trifft keine formale Nutzerentscheidung und fü
 
 ## Einstieg wählen
 
-- **Ohne `arch`:** Lies [Vorhaben beraten](references/initiative.md). Entwickle bei einer offenen Idee
-  zunächst unterschiedliche Richtungen; prüfe bei einer Entscheidungsfrage Optionen und Gegenargumente.
-- **Mit `arch`:** Lies [Architektur beraten](references/arch.md). Kläre Anforderungen, Systemstruktur und
-  Risiken, bevor ein neuer Stack empfohlen wird.
+- **Ohne `arch`:** Lies [Vorhaben beraten](references/playbook-initiative.md). Entwickle bei einer offenen
+  Idee zunächst unterschiedliche Richtungen; prüfe bei einer Entscheidungsfrage Optionen und Gegenargumente.
+- **Mit `arch`:** Lies [Architektur beraten](references/playbook-arch.md). Kläre Anforderungen, Systemstruktur
+  und Risiken, bevor ein neuer Stack empfohlen wird.
 
-Lies in beiden Fällen vollständig [das Council-Verfahren](references/protocol.md). Die Modusreferenzen
-führen nur zu den für die konkrete Frage nötigen Plattformperspektiven. Ein einzelner Subagent erhält genau
-eine ausgewählte Rolle, niemals den gesamten Rollenkatalog als Auftrag.
+Lies in beiden Fällen vollständig [das Council-Verfahren](references/playbook-protocol.md). Die
+Modusreferenzen führen nur zu den für die konkrete Frage nötigen Plattformperspektiven. Ein einzelner Subagent
+erhält genau eine ausgewählte Rolle, niemals den gesamten Rollenkatalog als Auftrag.
 
 Ein vorhandenes Qatlas-Goal-Briefing oder bestätigtes Projektwissen kann als Eingang dienen, ist aber keine
 Voraussetzung. Starte weder `qatlas goal` noch `qatlas shape` selbst. `goal` bleibt das allgemeine Gespräch;

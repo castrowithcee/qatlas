@@ -23,21 +23,22 @@ Für `goal` mit Taskbezug sowie für `shape`, `run` und `review` lies vor der er
 
 ## Modus wählen
 
-- **`goal [Idee, eindeutiger Task oder Dateipfad]`:** Lies vollständig [Zielbild klären](references/goal.md).
-  Nutze einen Task oder eine Datei nur als Grundlage für die Zielklärung im Gespräch. Ändere nichts dauerhaft;
-  ein ganzer Backlog ist kein Goal-Scope.
-- **`shape [Idee oder Dateipfad]`:** Lies vollständig [Ideen ausarbeiten](references/shape.md). Kläre die
-  Richtung, dokumentiere bestätigtes Wissen, schneide kleine, ausführungsreife Arbeitspakete und ordne
-  den nächsten Horizont. Setze nichts um.
-- **`shape <eindeutiger Task>` oder `shape backlog [Scope]`:** Lies vollständig
-  [Vorhandene Arbeit ausarbeiten](references/backlog.md). Schärfe und teile bestehende Drafts, kläre durch
-  neue Ergebnisse reif gewordene Arbeit und repariere Abhängigkeiten oder Queue. `shape backlog` ohne
-  weiteren Scope umfasst den gesamten offenen Arbeitsvorrat. Setze nichts um.
-- **`run [Task, Projekt oder Backlog]`:** Lies vollständig [Arbeit ausführen](references/run.md). Führe
-  höchstens fünf ausführbare Tasks seriell durch einen Orchestrator und seine Subagents aus. Lies vor dem
-  ersten schreibenden Git-Schritt zusätzlich vollständig [den Git-Ablauf](references/git-workflow.md).
-- **`review [Scope]`:** Lies vollständig [Übergaben klären](references/review.md). Kläre ausschließlich
-  Entscheidungen, Prüfungen und Nutzerhandlungen. Beginne danach keine Ausführung.
+- **`goal [Idee, eindeutiger Task oder Dateipfad]`:** Lies vollständig [Zielbild
+  klären](references/playbook-goal.md). Nutze einen Task oder eine Datei nur als Grundlage für die Zielklärung
+  im Gespräch. Ändere nichts dauerhaft; ein ganzer Backlog ist kein Goal-Scope.
+- **`shape [Idee oder Dateipfad]`:** Lies vollständig [Ideen ausarbeiten](references/playbook-shape.md). Kläre
+  die Richtung, dokumentiere bestätigtes Wissen, schneide kleine, ausführungsreife Arbeitspakete und ordne den
+  nächsten Horizont. Setze nichts um.
+- **`shape <eindeutiger Task>` oder `shape backlog [Scope]`:** Lies vollständig [Vorhandene Arbeit
+  ausarbeiten](references/playbook-backlog.md). Schärfe und teile bestehende Drafts, kläre durch neue
+  Ergebnisse reif gewordene Arbeit und repariere Abhängigkeiten oder Queue. `shape backlog` ohne weiteren
+  Scope umfasst den gesamten offenen Arbeitsvorrat. Setze nichts um.
+- **`run [Task, Projekt oder Backlog]`:** Lies vollständig [Arbeit ausführen](references/playbook-run.md).
+  Führe höchstens fünf ausführbare Tasks seriell durch einen Orchestrator und seine Subagents aus. Lies vor
+  dem ersten schreibenden Git-Schritt zusätzlich vollständig [den
+  Git-Ablauf](references/playbook-git-workflow.md).
+- **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Kläre
+  ausschließlich Entscheidungen, Prüfungen und Nutzerhandlungen. Beginne danach keine Ausführung.
 
 Bei Git lies für `run` vor dem ersten schreibenden Git-Schritt und für `review` vor dem Sammelcommit
 [die gemeinsame Git-Norm](../qatlas-core-git/SKILL.md) und daraus die Referenzen der anstehenden

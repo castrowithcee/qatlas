@@ -37,9 +37,9 @@ Laufs.
    aktuellen Stand eingearbeitet ist.
 5. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neuer Review beginnt sauber; eine
    Fortsetzung darf nur ihren eindeutig zugeordneten Entscheidungsdiff weiterführen.
-6. Lies vor der ersten Übergabe vollständig
-   [Entscheidungen knapp vorlegen](decision-card.md). Nenne nur die Anzahl der Aufgaben in der Schlange und
-   beginne dann mit der ersten Karte nach diesem gemeinsamen Dialog.
+6. Lies vor der ersten Übergabe vollständig [Entscheidungen knapp vorlegen](playbook-decision-card.md). Nenne
+   nur die Anzahl der Aufgaben in der Schlange und beginne dann mit der ersten Karte nach diesem gemeinsamen
+   Dialog.
 
 Der gemeinsame Dialog regelt Orientierung und Darstellung. Die folgenden Abschnitte regeln weiterhin, wie
 `review` die Antwort festhält und den Lauf vollständig beendet.

@@ -15,7 +15,8 @@ nur den Beginn des Wartens.
 
 ## Wann
 
-- Nur auf direkte Anfrage des Nutzers. Das Verdrahten eines Benachrichtigungskanals darf nie automatisch starten.
+- Nur auf direkte Anfrage des Nutzers. Das Verdrahten eines Benachrichtigungskanals darf nie automatisch
+  starten.
 - Nach der Einrichtung feuert der Ping selbstständig. Dieser Skill dient Einrichtung und manuellem Test,
   nicht dem Senden während normaler Arbeit.
 
@@ -47,7 +48,8 @@ Verwende auch keinen festen Pfad, weil der Installationspfad die Version trägt.
    ein **Bot-Token** wie `123456:ABC-DEF...`.
 3. **Chat-ID holen.** Der Nutzer sendet seinem neuen Bot eine Nachricht, öffnet danach im Browser
    `https://api.telegram.org/bot<TOKEN>/getUpdates` und liest `message.chat.id` aus dem JSON. In der URL wird
-   das echte Token eingesetzt. Nur hier erscheint es einmal in einer URL im Browser des Nutzers, nie in der Session.
+   das echte Token eingesetzt. Nur hier erscheint es einmal in einer URL im Browser des Nutzers, nie in der
+   Session.
 4. **Beide Werte eintragen.** Der Nutzer öffnet `~/.qatlas/plugins/credentials.yaml` in seinem Editor und
    füllt `token` und `chat-id` unter `connections.telegram.default`. Biete nicht an, dies für ihn zu
    schreiben; das Token soll aus dem Session-Transkript bleiben. Die Zeile `Host` in der Nachricht zeigt,
@@ -72,7 +74,8 @@ Ein dichter Header benennt die Session bereits in der Vorschau des Sperrbildschi
 
 Der Body kommt aus der Benachrichtigung des Hosts. Unter Claude ist eine Untätigkeitsmeldung allgemein,
 „Waiting for your input“. Ein abgeschlossener Lauf und eine offene Frage bedeuten deshalb beide „du wirst
-gebraucht“; der Body unterscheidet sie beim Öffnen. Das ist beabsichtigt, denn in beiden Fällen bist du am Zug.
+gebraucht“; der Body unterscheidet sie beim Öffnen. Das ist beabsichtigt, denn in beiden Fällen bist du am
+Zug.
 
 ## Ausschalten
 

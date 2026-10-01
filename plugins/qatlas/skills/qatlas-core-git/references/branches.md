@@ -3,7 +3,7 @@ description: >
   Eigentum und Isolation von Branches und Worktrees, wenn mehrere Agenten parallel in einem Repo schreiben
   oder einen vorhandenen Arbeitsstand übernehmen.
 license: MIT
-type: playbook
+type: rule
 edit: locked
 ---
 

@@ -8,7 +8,7 @@ description: >
   bei Commit-Zuschnitt, Commit-Nachrichten und Checkpoints, bei Push und Force-Push, beim Bereinigen oder
   Umschreiben von Historie und vor destruktiven Git-Befehlen wie reset, clean, checkout oder restore, bei
   fehlender Git-Identität, bei großen Dateien, Binärdateien und Git LFS sowie bei qatlas-core-git.
-argument-hint: "[status|sync|branch|commit|push|history|identity|lfs]"
+argument-hint: "[status|sync|branch|commit|push|identity|history|lfs]"
 license: MIT
 type: skill
 edit: locked
@@ -37,19 +37,17 @@ bestimmt der jeweilige Ablauf den Scope für lokale Commits und Integrationen; d
 - Führe destruktive Git-Befehle wie `reset --hard`, `clean -f`, `checkout --` oder ein überschreibendes
   `restore` nur bei ausdrücklichem Auftrag für das exakt geprüfte Repo und Ziel aus.
 - Verwende niemals `git push --force`, `-f` oder einen Refspec mit `+`. `--force-with-lease` ist nur als
-  Ausnahme nach der Push-Referenz zulässig. Schreibe geteilte Historie nicht eigenmächtig um.
+  Ausnahme nach der Historien-Referenz zulässig. Schreibe geteilte Historie nicht eigenmächtig um.
 - Stoppe bei unklarer Berechtigung, Eigentümerschaft oder fachlicher Konfliktlösung und frage, statt zu raten.
 
 ## Operation wählen
 
 Lies vor jeder anstehenden Operation deren Referenz vollständig:
 
-- `status`, `sync`: [Zustand und Synchronisierung](references/state.md)
+- `status`, `sync`: [Zustand und Synchronisierung](references/playbook-state.md)
 - `branch`: [Branches und parallele Arbeit](references/branches.md)
-- `commit`: [Commit](references/commit.md)
-- `push`: [Push](references/push.md)
+- `commit`, `push`, `identity`: [Commit und Push](references/playbook-commit.md)
 - `history`: [Historie](references/history.md)
-- `identity`: [Identität](references/identity.md)
 - `lfs`: [Git LFS](references/lfs.md)
 
 Ohne Argument und ohne erkennbare Operation gilt `status`. Ist ein Argument unbekannt, nenne die

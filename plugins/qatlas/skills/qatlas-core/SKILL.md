@@ -38,17 +38,17 @@ Aufruf: `qatlas-core <argument>`
 `<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`; ohne Hook liegt er zwei Ebenen
 über dieser `SKILL.md`. Setze in der gewählten Referenz immer diesen aufgelösten Root ein.
 
-- **`setup`:** Lies vollständig [Qatlas einrichten](references/setup.md) und führe nur dieses Verfahren aus.
-- **`doctor`:** Lies vollständig [Qatlas diagnostizieren](references/doctor.md) und führe nur dieses
+- **`setup`:** Lies vollständig [Qatlas einrichten](references/playbook-setup.md) und führe nur dieses
   Verfahren aus.
-- **`statusline [Argumente]`:** Lies vollständig
-  [Statusline konfigurieren](references/statusline.md) und führe nur dieses Verfahren mit den restlichen
+- **`doctor`:** Lies vollständig [Qatlas diagnostizieren](references/playbook-doctor.md) und führe nur dieses
+  Verfahren aus.
+- **`statusline [Argumente]`:** Lies vollständig [Statusline konfigurieren](references/playbook-statusline.md)
+  und führe nur dieses Verfahren mit den restlichen Argumenten aus.
+- **`ping`** oder **`ping telegram [Argumente]`:** Lies vollständig [Telegram-Ping
+  einrichten](references/playbook-telegram-ping.md) und führe nur dieses Verfahren mit den restlichen
   Argumenten aus.
-- **`ping`** oder **`ping telegram [Argumente]`:** Lies vollständig
-  [Telegram-Ping einrichten](references/telegram-ping.md) und führe nur dieses Verfahren mit den restlichen
-  Argumenten aus.
-- **`backlog-system [Quelle] [Ziel]`:** Lies vollständig
-  [Planungssystem wechseln](references/backlog-system.md) und führe nur dieses Verfahren mit den restlichen
+- **`backlog-system [Quelle] [Ziel]`:** Lies vollständig [Planungssystem
+  wechseln](references/playbook-backlog-system.md) und führe nur dieses Verfahren mit den restlichen
   Argumenten aus.
 
 Ist ein vorhandenes Argument nicht eindeutig, nenne die passenden Möglichkeiten jeweils in einem kurzen

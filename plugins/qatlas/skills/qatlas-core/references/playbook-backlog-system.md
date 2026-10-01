@@ -28,7 +28,7 @@ Rückweg und hole die Zustimmung des Nutzers ein. Secrets und Tokens gehören ni
    Labels, Beziehungen, Archivierung, Sichtbarkeit und verfügbare Schnittstellen. Bestimme ausdrücklich,
    welcher Datensatz den aktuellen Taskvertrag trägt, wo Historie lebt und was normale Taskarbeit davon
    standardmäßig liest.
-4. Lies immer [das neutrale Adapterverfahren](backlog-system-custom.md). Für GitHub lies zusätzlich
+4. Lies immer [das neutrale Adapterverfahren](playbook-backlog-system-custom.md). Für GitHub lies zusätzlich
    [die GitHub-Besonderheiten](backlog-system-github.md). Für einen später ergänzten bekannten Anbieter gilt
    dessen eigene Reference zusätzlich; ohne passende Reference bleibt `custom.md` der vollständige
    Fallback.
@@ -54,15 +54,15 @@ Zeige vor schreibenden Migrationsschritten kompakt:
 - Idempotenzschlüssel, Verifikation, Rückweg und den Umgang mit der bisherigen Quelle.
 
 Verwende bei einer neuen GitHub-Konfiguration
-[`../assets/backlog-system-github-config.yaml`](../assets/backlog-system-github-config.yaml) als veränderbaren Ausgangspunkt,
-nicht als blind anzuwendende Norm. Frage nur nach Entscheidungen, die sich nicht aus Repo, Quelle oder Ziel
-ableiten lassen.
+[`../assets/backlog-system-github-config.yaml`](../assets/backlog-system-github-config.yaml) als veränderbaren
+Ausgangspunkt, nicht als blind anzuwendende Norm. Frage nur nach Entscheidungen, die sich nicht aus Repo,
+Quelle oder Ziel ableiten lassen.
 
 ## 3. Sicher migrieren
 
 1. Prüfe das Ziel zuerst lesend und erzeuge bei unterstützter Schnittstelle einen kleinen, eindeutig
-   erkennbaren Testeintrag. Entferne ihn nach erfolgreicher Prüfung wieder, sofern das ohne Informationsverlust
-   möglich ist.
+   erkennbaren Testeintrag. Entferne ihn nach erfolgreicher Prüfung wieder, sofern das ohne
+   Informationsverlust möglich ist.
 2. Löse unveränderliche IDs, Felddefinitionen und Auswahlwerte einmal auf. Bündele lesende Abfragen und
    schreibende Mutationen in kontrollierten, beobachtbaren Blöcken; halte jeden Block unter den dokumentierten
    Größen-, Rate- und Inhaltsgrenzen des Werkzeugs.
@@ -95,10 +95,10 @@ Erst nach erfolgreicher Verifikation wird `.qatlas-project/backlog/BACKLOG.md` a
   Aussage `Lokaler Spiegel: keiner`.
 
 Nutze für ein neues externes Binding
-[`../assets/backlog-system-external-binding.md`](../assets/backlog-system-external-binding.md) als Ausgangspunkt. Lies eine
-vorhandene Datei vor der Änderung, übernimm geltende projektspezifische Angaben und ersetze sie nie
-pauschal. Zusätzliche Anbieterregeln gehören nur ins Binding, wenn der Agent sie bei normaler Taskarbeit
-ständig braucht; ausführliche Migrationsdetails bleiben in diesem Skill.
+[`../assets/backlog-system-external-binding.md`](../assets/backlog-system-external-binding.md) als
+Ausgangspunkt. Lies eine vorhandene Datei vor der Änderung, übernimm geltende projektspezifische Angaben und
+ersetze sie nie pauschal. Zusätzliche Anbieterregeln gehören nur ins Binding, wenn der Agent sie bei normaler
+Taskarbeit ständig braucht; ausführliche Migrationsdetails bleiben in diesem Skill.
 
 Passe widersprechende Planungshinweise in den nativen Projektanweisungen nur nach Zustimmung an. Es bleibt
 genau eine Autoritätsaussage und kein zweites Anbieterhandbuch im Repo.

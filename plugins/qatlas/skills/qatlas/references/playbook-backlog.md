@@ -46,7 +46,7 @@ Ort, statt für die Klärung einen anderen Einstieg zu verlangen.
 5. Verändere keinen `in-progress`-Task mit laufendem oder unbekanntem Worker.
 
 Braucht mindestens ein Task der Gesprächsschlange eine echte Nutzerentscheidung, lies vor ihrer ersten
-Präsentation vollständig [Entscheidungen knapp vorlegen](decision-card.md). Nenne und führe die
+Präsentation vollständig [Entscheidungen knapp vorlegen](playbook-decision-card.md). Nenne und führe die
 Entscheidungsschlange nach diesem gemeinsamen Dialog, ohne vorauszusetzen, dass der Nutzer die Tasks
 parallel liest.
 

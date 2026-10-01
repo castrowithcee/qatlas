@@ -1,43 +1,15 @@
 ---
 description: >
-  Commits zuschneiden, autorisieren, stagen, formulieren und als Checkpoints sichern, einschließlich der
-  Grenzen zwischen Task, Commit, Review und Release.
+  Ablauf für Commit und Push: autorisieren, stagen, Nachricht formulieren, Identität klären, committen und
+  nach aktuellem Fetch pushen.
 license: MIT
 type: playbook
 edit: locked
 ---
 
-# Commit
+# Commit und Push
 
-## Task, Commit, Review und Release
-
-Diese vier Grenzen sind unabhängig voneinander. Keine legt die Anzahl oder den Zuschnitt einer anderen fest.
-
-- **Task:** eine geplante Arbeitseinheit, kein Commit-Container. Sie ergibt so viele Commits, wie sachlich
-  nötig sind: bei kleinem Umfang einen, bei größerem mehrere. Es gibt weder Ein-Commit-Zwang noch Zielzahl.
-- **Commit:** ein kohärenter, prüfbarer und möglichst einzeln rückrollbarer Zustand. Auf dem
-  Integrationspfad ist jeder Commit für sich verständlich und besteht die für ihn einschlägigen Prüfungen.
-  Implementation und zugehörige Tests reisen im selben Commit. Ein eigenständiger Charakterisierungstest
-  oder ein rein mechanisches Refactoring darf als eigener vorbereitender Commit vorausgehen. Unabhängige
-  Änderungen erhalten eigene Commits.
-- **Review:** der Umfang, den ein Mensch gemeinsam beurteilt, etwa ein Branch oder Pull Request. Er darf
-  mehrere Commits umfassen und ist kein Grund, sie zusammenzufassen.
-- **Release:** der Stand, der gemeinsam versioniert und ausgeliefert wird. Er folgt dem Release-Verfahren
-  des Repos, nicht Task- oder Commitgrenzen.
-
-## Meilensteine und Checkpoints
-
-Sichere bei längerer oder riskanter Arbeit nach jedem kohärenten Meilenstein einen Commit, sofern Commits
-für diesen Scope autorisiert sind. Sichere vor Übergabe oder Pause einen wiederaufnehmbaren Stand.
-
-- Ein unfertiger Checkpoint entsteht nur auf einem exklusiven privaten Branch, und seine Nachricht weist
-  ihn als unfertig aus. Er landet nie unbereinigt auf einem gemeinsamen Branch.
-- Vor gemeinsamer Integration wird ein Checkpoint entweder nach [Historie](history.md) zu sinnvollen Commits
-  im Sinne der Commitgrenze bereinigt oder ausdrücklich als wertvolle Zwischenstufe erhalten.
-- Ohne Commit-Autorisierung bleibt ein Zwischenstand uncommittet in seinem Arbeitsbaum; berichte Branch,
-  Worktree und Zustand bei der Übergabe.
-
-## Autorisieren und committen
+## Commit
 
 Ein klar begrenzter Umsetzungsauftrag autorisiert lokale Commits eigener Änderungen in den betroffenen Repos
 und auf den für den Auftrag zulässigen Branches. Auch ein ausdrücklicher Commit-Auftrag kann einen einzelnen
@@ -46,7 +18,7 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
 
 1. Lies vor jedem Commit den gesamten Diff genau dieses Repos. Stage bewusst und führe nie ungesehen
    `git add -A` aus. Fremde oder nicht zuordenbare Änderungen bleiben ungestagt. Schneide Commits nach der
-   Commitgrenze oben.
+   [Commitgrenze](commit-boundaries.md).
 2. Entwirf die Nachricht ausschließlich aus dem gestagten Diff dieses Commits. Sie beschreibt knapp, was
    sich ändert, und nur das nötige Warum, Risiko oder die Einschränkung. Die vorhandene Repo-Konvention
    geht jeder folgenden Vorgabe vor:
@@ -55,10 +27,13 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
    - Ergänze einen Body, wenn ein nicht offensichtliches Warum, Risiko, eine Migration oder Einschränkung
      für das spätere Verständnis nötig ist. Er ist so lang wie diese Begründung und nicht länger; es gibt
      keine feste Zeilen- oder Punktgrenze, die sie abschneidet.
-   - Schreibe keine Sessionchronik, Dateitour, Testergebnisliste oder offene Folgearbeit hinein. Was über den Commit hinausreicht, gehört in die betroffene Dokumentation,
-     Entscheidung, Aufgabe, Pull Request oder die Antwort an den Nutzer.
+   - Schreibe keine Sessionchronik, Dateitour, Testergebnisliste oder offene Folgearbeit hinein. Was über
+     den Commit hinausreicht, gehört in die betroffene Dokumentation, Entscheidung, Aufgabe, Pull Request
+     oder die Antwort an den Nutzer.
    - Verwende keinen Co-Author-Trailer, kein Tool-Branding und keine „generated with“-Zeile.
-3. Fehlt die Git-Identität, folge zuerst [Identität](identity.md).
+3. Fehlt die Git-Identität, übernimm keinen echten Namen und keine echte E-Mail-Adresse aus dem Harness.
+   Frage nach gewünschtem Namen und gewünschter Adresse sowie danach, ob sie global oder nur für dieses Repo
+   gelten sollen.
 4. Fehlt die Autorisierung oder verlangt der Nutzer eine Vorschau, zeige Betreff und jede weitere Zeile der
    geplanten Nachricht vollständig und warte auf Zustimmung. Arbeite Korrekturen ein und zeige jede
    überarbeitete Fassung erneut vollständig.
@@ -86,3 +61,9 @@ autarke Nachrichten in zwei Repos, nicht eine gemeinsame Erzählung.
 
 Ist für eine fertige, uncommittete Änderung weder ein Umsetzungs- noch ein Commit-Auftrag erkennbar, biete
 den Commit an, statt ihn auszuführen.
+
+## Push
+
+Pushe nur auf ausdrücklichen Auftrag. Führe davor `git fetch` aus und prüfe, ob der Upstream seit der
+letzten Prüfung weitergelaufen ist. Integriere neue Änderungen nicht automatisch und pushe erst, wenn der
+lokale Commit sicher auf dem geprüften Upstream aufbaut.
