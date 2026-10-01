@@ -29,10 +29,9 @@ Workspace-Verwaltung und Arbeitsloop starten ausschließlich durch einen Nutzera
 | **qatlas run** | Führt höchstens fünf Tasks seriell aus; der Orchestrator schneidet Worker-Aufträge zu und prüft ihre Ergebnisse. |
 | **qatlas review** | Klärt menschliche Entscheidungen, Prüfungen und Abnahmen einzeln und beginnt keine Ausführung. |
 | **qatlas-work tree** | Zeigt gemeinsame Git-Worktrees nummeriert, legt mit `new` kontextgeleitet an und räumt sicher auf. |
-| **qatlas-core setup** | Richtet Scaffold, Projekt-Ruleset und nutzerweite Einstellungen ein. |
+| **qatlas-core setup** | Richtet Scaffold, Projektanweisungen, Nutzerbibliothek und nutzerweite Einstellungen ein. |
 | **qatlas-core doctor** | Prüft Store, Scaffold, Abhängigkeiten und den repo-lokalen Plugin-Update-Stand. |
 | **qatlas-core statusline** | Konfiguriert die Statusline des aktuellen Hosts. |
-| **qatlas-core ping** oder **qatlas-core ping telegram** | Richtet einen einseitigen Telegram-Push beim Warten ein. |
 | **qatlas-core backlog-system** | Wechselt oder migriert das maßgebliche Planungssystem. |
 | **qatlas-mode adhd** | Formt die Zusammenarbeit für den Rest der Session handlungsfreundlich für ADHD. |
 | **qatlas-help** | Zeigt diese zentrale Karte. |
@@ -74,7 +73,8 @@ Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
 - `zone-import/` und `zone-export/` sind flüchtige Puffer. Backlog und Memory sind einmaliger verwalteter
   Projektzustand; `templates/` gehört dem Nutzer. Der Update-Prüfstand liegt im technischen Namespace.
 - Der Pfad sagt, wo Inhalt liegt; Frontmatter sagt, was es ist.
-- `~/.qatlas/plugins/config.yaml` schaltet Sessionstart und verwaltete Arbeitsvereinbarung nutzerweit.
+- `~/qatlas/` ist die nutzereigene Bibliothek; `AGENTS.qatlas.md` darin trägt die globale Arbeitsvereinbarung.
+- `~/.qatlas/plugins/config.yaml` und die Projekt-Config steuern Sessionstart, Bibliothek und Schutzprüfung.
 
 Claude verwendet `/qatlas <modus>`, `/qatlas-work <modus>`, `/qatlas-core <modus>`, `/qatlas-mode <modus>`,
 `/qatlas-council [arch]` oder `/qatlas-help`; Codex verwendet die entsprechenden `$…`-Skills, insbesondere

@@ -15,7 +15,6 @@ const {
   parseYamlText,
   readConfig,
   readStatusline,
-  syncManagedRuleset,
   topUpConfig,
 } = require('./runtime/config-loader.js');
 
@@ -156,16 +155,20 @@ if (statuslineState.exists && !statuslineState.valid) {
   missing.push('statusline: ' + statuslineState.statuslineFile + ': ' + statuslineState.error.message);
 }
 
-const hadManagedRuleset = fs.existsSync(configState.rulesetFile);
-if (apply) {
-  try {
-    const synced = syncManagedRuleset(pluginRoot);
-    if (synced.created) created.push('~/.qatlas/rules/RULESET.md');
-  } catch {
-    missing.push('store: ~/.qatlas/rules/RULESET.md konnte nicht aktualisiert werden.');
+// Nutzerbibliothek: fehlende Einstiegspunkte einmalig anlegen, vorhandene Nutzerdateien nie ersetzen.
+if (readConfig().config.brains.qatlas.enabled) {
+  for (const name of ['AGENTS.qatlas.md', 'README.md']) {
+    const file = path.join(os.homedir(), 'qatlas', name);
+    if (fs.existsSync(file)) continue;
+    if (!apply) { missing.push('library: ~/qatlas/' + name + ' fehlt.'); continue; }
+    try {
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.copyFileSync(path.join(pluginRoot, 'store', 'library', name), file, fs.constants.COPYFILE_EXCL);
+      created.push('~/qatlas/' + name);
+    } catch {
+      missing.push('library: ~/qatlas/' + name + ' konnte nicht angelegt werden.');
+    }
   }
-} else if (!hadManagedRuleset) {
-  missing.push('store: ~/.qatlas/rules/RULESET.md fehlt.');
 }
 
 // Scaffold: derselbe existenzbasierte Abgleich wie im SessionStart-Hook.

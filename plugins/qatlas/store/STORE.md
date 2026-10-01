@@ -21,6 +21,7 @@ Dateien.
 | Aufgabe im lokalen Qatlas-Backlog | `backlog/task.md` | Als `.qatlas-project/backlog/task-<id>-<slug>.md` oder im betreffenden Projekt anlegen und nach der Backlog-Referenz ausfüllen. |
 | Projekt im lokalen Qatlas-Backlog | `backlog/project-readme.md` | Als `.qatlas-project/backlog/<project>/README.md` anlegen und nach der Backlog-Referenz ausfüllen. |
 | Wiederkehrende Ablage pro Kunde oder Fall | `customers/customers-framework.md` und `customers/customer-index.md` | Als `<area>-customers/FRAMEWORK.md` und pro Kunde als `<area>-customers/<id>/INDEX.md` kopieren und anpassen. |
+| Nutzerbibliothek einrichten | `library/AGENTS.qatlas.md` und `library/README.md` | Nur beim Setup einmalig nach `~/qatlas/` kopieren; vorhandene Dateien nie ersetzen. |
 | Plugin-Steuerung nachschlagen | `config/config.example.yaml` | Als versionsgebundene Feldreferenz lesen. Die wirksame `~/.qatlas/plugins/config.yaml` nie pauschal damit ersetzen. |
 | Orchestrierung für `qatlas run` konfigurieren | `config/orchestra.example.yaml` | Als kommentierte Vorlage für `~/.qatlas/plugins/orchestra.yaml` verwenden. Vor dem Anlegen alle Modellwerte konkret ausfüllen; eine vorhandene Nutzerdatei nie pauschal ersetzen. |
 | Claude-Statusline nachschlagen | `statusline/statusline.example.yaml` | Als versionsgebundene Feldreferenz lesen. Die wirksame `~/.qatlas/plugins/statusline.yaml` nie pauschal damit ersetzen. |

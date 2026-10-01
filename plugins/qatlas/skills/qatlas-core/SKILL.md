@@ -2,10 +2,10 @@
 name: qatlas-core
 description: >
   Bündelt ausdrücklich aufgerufene Qatlas-Kernverwaltung: ein Projekt einrichten, Projektzustand
-  diagnostizieren, Statusline und Telegram-Ping konfigurieren oder das maßgebliche Planungssystem wechseln.
+  diagnostizieren, Statusline konfigurieren oder das maßgebliche Planungssystem wechseln.
   Ohne Argument eine kompakte Karte der verfügbaren Modi zeigen und nichts ausführen.
 disable-model-invocation: true
-argument-hint: "[setup|doctor|statusline|ping [telegram]|backlog-system] [Argumente]"
+argument-hint: "[setup|doctor|statusline|backlog-system] [Argumente]"
 license: MIT
 type: skill
 edit: locked
@@ -28,7 +28,6 @@ Antworte ausschließlich mit der folgenden Karte als gerendertes Markdown. Lies 
 | `setup` | Richtet Qatlas und seinen Projektzustand ein. |
 | `doctor` | Prüft Qatlas, Scaffold, Abhängigkeiten und den Projektupdate-Stand ohne Reparatur. |
 | `statusline` | Richtet die Statusline des aktuellen Hosts ein oder passt sie an. |
-| `ping` oder `ping telegram` | Richtet Telegram-Benachrichtigungen beim Warten ein oder testet sie. |
 | `backlog-system` | Wechselt oder migriert das maßgebliche Planungssystem eines Projekts. |
 
 Aufruf: `qatlas-core <argument>`
@@ -44,14 +43,11 @@ Aufruf: `qatlas-core <argument>`
   Verfahren aus.
 - **`statusline [Argumente]`:** Lies vollständig [Statusline konfigurieren](references/playbook-statusline.md)
   und führe nur dieses Verfahren mit den restlichen Argumenten aus.
-- **`ping`** oder **`ping telegram [Argumente]`:** Lies vollständig [Telegram-Ping
-  einrichten](references/playbook-telegram-ping.md) und führe nur dieses Verfahren mit den restlichen
-  Argumenten aus.
 - **`backlog-system [Quelle] [Ziel]`:** Lies vollständig [Planungssystem
   wechseln](references/playbook-backlog-system.md) und führe nur dieses Verfahren mit den restlichen
   Argumenten aus.
 
 Ist ein vorhandenes Argument nicht eindeutig, nenne die passenden Möglichkeiten jeweils in einem kurzen
 Satz und frage nach genau einem. Ist es unbekannt, zeige die kompakte Karte und nenne das unbekannte
-Argument in einem Satz. Deute eine allgemeine Diagnose-, Statusline- oder Telegram-Unterhaltung nie als
+Argument in einem Satz. Deute eine allgemeine Diagnose- oder Statusline-Unterhaltung nie als
 Aufruf dieses Skills.

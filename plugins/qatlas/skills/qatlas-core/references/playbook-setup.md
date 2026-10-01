@@ -33,9 +33,9 @@ war. Das Script darf vorhandene Projektdateien nicht ersetzen.
 Hat Doctor `AGENTS.md` neu aus `scaffold/agents-template.md` angelegt, konkretisiere sie vor der Übergabe:
 
 1. Ermittle Repo-Name und Zweck aus Verzeichnis, README, Manifesten und vorhandenem Inhalt.
-2. Ersetze die beiden Platzhalter durch konkrete Aussagen. Entferne keinen sicheren Standard.
-3. Ergänze nur tatsächlich bekannte projektspezifische Grenzen. Frage nach Sichtbarkeit, Scope oder
-   Agentenrolle ausschließlich dann, wenn die Antwort eine anstehende Handlung wesentlich verändert.
+2. Ersetze die beiden Platzhalter durch konkrete Aussagen.
+3. Ergänze nur tatsächlich bekannte projektspezifische Regeln. Frage nach Scope oder Agentenrolle
+   ausschließlich dann, wenn die Antwort eine anstehende Handlung wesentlich verändert.
 4. Lass keine Platzhalter oder Einrichtungs-Kommentare zurück.
 
 Eine bereits vorhandene `AGENTS.md` gehört dem Nutzer und wird von diesem Verfahren nicht umgeschrieben.
@@ -78,8 +78,9 @@ Orientierungspunkte:
   bleiben an ihren vorhandenen maßgeblichen Orten; ein Scope erhält nur bei eigenen dauerhaften
   Besonderheiten eine optionale `FRAMEWORK.md` neben seiner README.
 - `.qatlas/plugins/` trägt technische Projektkonfiguration und den versionierten Update-Prüfstand.
-- `~/.qatlas/plugins/config.yaml` trägt die nutzerweite Plugin-Konfiguration;
-  `~/.qatlas/rules/RULESET.md` bleibt die von Qatlas verwaltete Regelkopie.
+- `~/.qatlas/plugins/config.yaml` trägt die nutzerweite Plugin-Konfiguration.
+- `~/qatlas/` ist die nutzereigene Bibliothek. `AGENTS.qatlas.md` darin enthält die globale
+  Arbeitsvereinbarung und gehört ab dem Anlegen dem Nutzer.
 - `~/.qatlas/plugins/orchestra.yaml` legt nur für `qatlas run` die Modelle und Effort-Stufen fest, wenn sie
   in diesem Setup mit dem Nutzer angelegt wurde.
 

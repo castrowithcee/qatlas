@@ -59,30 +59,23 @@ function defaultStatusline() {
 
 const DEFAULT_CONFIG = {
   format: 1,
-  'session-start': { enabled: true, ruleset: true },
-  notifications: { telegram: { enabled: false, connection: 'default' } },
+  'session-start': { enabled: true },
+  brains: { qatlas: { enabled: true } },
   protection: { enabled: true, secrets: 'block', 'personal-data': 'ask' },
 };
 
 const PROTECTION_LEVELS = ['block', 'ask', 'warn', 'allow'];
 // Schlüssel, die eine Projektkonfiguration überschreiben darf.
-const PROJECT_KEYS = new Set(['format', 'protection']);
+const PROJECT_KEYS = new Set(['format', 'brains', 'protection']);
 
 const DEFAULT_STATUSLINE = defaultStatusline();
-
-const DEFAULT_CREDENTIALS = {
-  format: 1,
-  connections: { telegram: { default: { token: '', 'chat-id': '' } } },
-};
 
 function locations(projectRoot = null) {
   const homeDir = path.join(os.homedir(), '.qatlas', 'plugins');
   return {
     homeDir,
     configFile: path.join(homeDir, 'config.yaml'),
-    credentialsFile: path.join(homeDir, 'credentials.yaml'),
     statuslineFile: path.join(homeDir, 'statusline.yaml'),
-    rulesetFile: path.join(os.homedir(), '.qatlas', 'rules', 'RULESET.md'),
     projectConfigFile: projectRoot
       ? path.join(path.resolve(projectRoot), '.qatlas', 'plugins', 'config.yaml') : null,
   };
@@ -122,13 +115,41 @@ function stringifyYaml(value) {
 function normalizeConfig(value) {
   const config = merge(DEFAULT_CONFIG, value);
   const session = isObject(config['session-start']) ? config['session-start'] : {};
-  config['session-start'] = {
-    enabled: session.enabled !== false,
-    ruleset: session.ruleset !== false,
-  };
-  if (!isObject(config.notifications)) config.notifications = clone(DEFAULT_CONFIG.notifications);
+  config['session-start'] = { enabled: session.enabled !== false };
   if (!isObject(config.protection)) config.protection = clone(DEFAULT_CONFIG.protection);
+  if (!isObject(config.brains)) config.brains = clone(DEFAULT_CONFIG.brains);
+  if (!isObject(config.brains.qatlas)) config.brains.qatlas = clone(DEFAULT_CONFIG.brains.qatlas);
+  delete config.brains.project;
   return config;
+}
+
+function brainsProblems(brains, file, isProject) {
+  if (brains === undefined) return [];
+  if (!isObject(brains)) return [file + ': brains muss eine Map sein.'];
+  const problems = [];
+  for (const key of Object.keys(brains)) {
+    const value = brains[key];
+    if (key === 'qatlas') {
+      if (!isObject(value) || Object.keys(value).some(name => name !== 'enabled')
+        || (value.enabled !== undefined && typeof value.enabled !== 'boolean')) {
+        problems.push(file + ': brains.qatlas erlaubt nur enabled mit true oder false.');
+      }
+    } else if (key === 'project') {
+      if (!isProject) {
+        problems.push(file + ': brains.project gilt ausschließlich in der Projektkonfiguration.');
+      } else if (!isObject(value)
+        || Object.keys(value).some(name => !['enabled', 'paths', 'description'].includes(name))
+        || (value.enabled !== undefined && typeof value.enabled !== 'boolean')
+        || (value.paths !== undefined && (!Array.isArray(value.paths)
+          || value.paths.some(entry => typeof entry !== 'string' || !entry)))
+        || (value.description !== undefined && typeof value.description !== 'string')) {
+        problems.push(file + ': brains.project erlaubt enabled, paths als Liste von Pfaden und description.');
+      }
+    } else {
+      problems.push(file + ': unbekannter Schlüssel brains.' + key + '.');
+    }
+  }
+  return problems;
 }
 
 function protectionProblems(protection, file) {
@@ -166,7 +187,9 @@ function readConfig(projectRoot = null) {
   const config = normalizeConfig(home.valid && home.value ? home.value : DEFAULT_CONFIG);
   const homeProblems = home.valid && home.value
     ? protectionProblems(home.value.protection, paths.configFile) : [];
-  diagnostics.push(...homeProblems);
+  const homeBrainsProblems = home.valid && home.value
+    ? brainsProblems(home.value.brains, paths.configFile, false) : [];
+  diagnostics.push(...homeProblems, ...homeBrainsProblems);
 
   let projectProblems = [];
   let project = { exists: false, valid: true, value: null };
@@ -183,6 +206,11 @@ function readConfig(projectRoot = null) {
       if (!projectProblems.length && isObject(project.value.protection)) {
         config.protection = merge(config.protection, project.value.protection);
       }
+      const brainsIssues = brainsProblems(project.value.brains, paths.projectConfigFile, true);
+      diagnostics.push(...brainsIssues);
+      if (!brainsIssues.length && isObject(project.value.brains)) {
+        config.brains = merge(config.brains, project.value.brains);
+      }
     }
   }
   const protectionValid = home.valid && project.valid && !homeProblems.length && !projectProblems.length;
@@ -190,23 +218,11 @@ function readConfig(projectRoot = null) {
   return {
     ...paths,
     exists: home.exists,
-    valid: home.valid && project.valid && !homeProblems.length,
+    valid: home.valid && project.valid && !homeProblems.length && !homeBrainsProblems.length,
     protectionValid,
     config,
     project,
     diagnostics,
-  };
-}
-
-function readCredentials() {
-  const paths = locations();
-  const state = parseFile(paths.credentialsFile);
-  return {
-    ...paths,
-    exists: state.exists,
-    valid: state.valid,
-    credentials: state.valid && state.value ? state.value : clone(DEFAULT_CREDENTIALS),
-    error: state.error,
   };
 }
 
@@ -255,48 +271,20 @@ function createConfig() {
   return writeNew(locations().configFile, DEFAULT_CONFIG, 0o600);
 }
 
-function createCredentials() {
-  return writeNew(locations().credentialsFile, DEFAULT_CREDENTIALS, 0o600);
-}
-
 function createStatusline() {
   return writeNew(locations().statuslineFile, DEFAULT_STATUSLINE, 0o600);
 }
 
-function syncManagedRuleset(pluginRoot) {
-  const paths = locations();
-  const source = path.join(pluginRoot, 'rules', 'RULESET.md');
-  const content = fs.readFileSync(source, 'utf8');
-  let previous = null;
-  try { previous = fs.readFileSync(paths.rulesetFile, 'utf8'); } catch { /* Fehlt. */ }
-  if (previous === content) return { file: paths.rulesetFile, changed: false, created: false };
-
-  fs.mkdirSync(path.dirname(paths.rulesetFile), { recursive: true });
-  const temporary = paths.rulesetFile + '.tmp-' + process.pid;
-  fs.writeFileSync(temporary, content, { mode: 0o600 });
-  try {
-    fs.renameSync(temporary, paths.rulesetFile);
-  } catch {
-    fs.copyFileSync(temporary, paths.rulesetFile);
-    fs.unlinkSync(temporary);
-  }
-  try { fs.chmodSync(paths.rulesetFile, 0o600); } catch { /* Keine POSIX-Modusunterstützung. */ }
-  return { file: paths.rulesetFile, changed: true, created: previous === null };
-}
 
 module.exports = {
   DEFAULT_CONFIG,
-  DEFAULT_CREDENTIALS,
   DEFAULT_STATUSLINE,
   createConfig,
-  createCredentials,
   createStatusline,
   locations,
   parseYamlText,
   readConfig,
-  readCredentials,
   readStatusline,
   stringifyYaml,
-  syncManagedRuleset,
   topUpConfig,
 };

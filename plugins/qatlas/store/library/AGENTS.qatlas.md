@@ -1,15 +1,17 @@
----
-description: >
-  Arbeitsvereinbarung für sichere Befehle und Tests.
-license: MIT
-type: rule
-edit: locked
----
+<!-- Qatlas legt diese Datei beim Setup einmalig als ~/qatlas/AGENTS.qatlas.md an und überschreibt sie danach
+nie. Sie gehört dir: Passe die globale Arbeitsvereinbarung an deine Arbeitsweise an. Als Agentendatei bleibt
+sie frontmatterfrei. -->
+# Globale Arbeitsvereinbarung
 
-<!-- Von Qatlas verwaltet. Änderungen werden beim nächsten Sessionstart nach einem Plugin-Update
-überschrieben. Gewünschte Regeln in die eigene globale oder projektlokale Agentendatei kopieren. -->
+Diese Vereinbarung gilt projektübergreifend. Native globale und projektlokale Agentenanweisungen haben
+Vorrang.
 
-# Qatlas-Arbeitsvereinbarung
+## Bibliothek
+
+Nutzereigene, projektübergreifende Notizen, Wissen, Referenzen und Verfahren liegen in diesem Ordner. Lies
+`README.md` hier erst, wenn eine Aufgabe dieses Wissen braucht.
+
+## Sichere Befehle und Tests
 
 - Prüfe vor Befehlen mit möglicher Lösch-, Überschreib-, Berechtigungs- oder externer Wirkung das genaue
   Ziel, den Umfang, die Autorisierung und die Wiederherstellbarkeit. Ermittle Unklares zuerst read-only.

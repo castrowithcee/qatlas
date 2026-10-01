@@ -87,24 +87,22 @@ function testCallbellHomeMigration() {
   assert.deepStrictEqual(result.blocked, []);
   assert.deepStrictEqual(result.applied, ['legacy-home-config-v1']);
   assert.ok(result.backupDir && fs.existsSync(path.join(result.backupDir, 'manifest.json')));
-  assert.deepStrictEqual(result.credentialSources, [path.join(legacy, 'telegram.json')]);
   const backupManifest = fs.readFileSync(path.join(result.backupDir, 'manifest.json'), 'utf8');
   assert.ok(!backupManifest.includes('telegram.json'));
   assert.ok(!backupManifest.includes('secret-test-token'));
 
   const config = readYaml(path.join(f.home, '.qatlas', 'plugins', 'config.yaml'));
-  assert.deepStrictEqual(config['session-start'], { enabled: false, ruleset: true });
+  assert.deepStrictEqual(config['session-start'], { enabled: false });
   assert.strictEqual(config.statusline, undefined);
-  assert.strictEqual(config.notifications.telegram.enabled, true);
+  assert.strictEqual(config.notifications, undefined);
   assert.strictEqual(config.diagnostics, undefined);
 
   const statusline = readYaml(path.join(f.home, '.qatlas', 'plugins', 'statusline.yaml'));
   assert.strictEqual(statusline.format, 1);
   assert.strictEqual(statusline.layout, 'fixed');
 
-  const credentials = readYaml(path.join(f.home, '.qatlas', 'plugins', 'credentials.yaml'));
-  assert.strictEqual(credentials.connections.telegram.default.token, 'secret-test-token');
-  assert.strictEqual(credentials.connections.telegram.default['chat-id'], 42);
+  assert.ok(!fs.existsSync(path.join(f.home, '.qatlas', 'plugins', 'credentials.yaml')));
+  assert.ok(fs.existsSync(path.join(legacy, 'telegram.json')), 'Eine Telegram-Altdatei bleibt unangetastet.');
 
   const settings = JSON.parse(fs.readFileSync(path.join(f.home, '.claude', 'settings.json'), 'utf8'));
   assert.strictEqual(settings.keep, true);
@@ -114,7 +112,7 @@ function testCallbellHomeMigration() {
 
   const again = migrate(f);
   assert.deepStrictEqual(again, {
-    applied: [], blocked: [], backupDir: null, credentialSources: [], planned: [],
+    applied: [], blocked: [], backupDir: null, planned: [],
   });
 }
 
@@ -393,6 +391,7 @@ function testProjectContext() {
   write(path.join(f.project, '.qatlas-project', 'README.md'), '---\ntype: meta\nedit: shared\n---\n# Einstieg\nFachquelle: fach/README.md\n');
   write(path.join(f.project, '.qatlas-project', 'memory', 'MEMORY.md'), '# Memory\n');
   write(path.join(f.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), '# Backlog\n');
+  hookOutput(f, 'project-root');
   assert.strictEqual(hookOutput(f, 'project-root'), hookOutput(f, 'project-root', true));
   assert.ok(hookOutput(f, 'project-root').includes('Fachquelle: fach/README.md'));
   assert.ok(hookOutput(f, 'memory').includes('# Memory'));
@@ -400,7 +399,9 @@ function testProjectContext() {
 
   const missing = fixture('context-missing');
   fs.mkdirSync(path.join(missing.project, '.qatlas-project'));
-  assert.ok(hookOutput(missing, 'project-root').includes('EINSTIEG FEHLT'));
+  const toppedUp = hookOutput(missing, 'project-root');
+  assert.ok(toppedUp.includes('SCAFFOLD ERGÄNZT') && toppedUp.includes('README.md'));
+  assert.ok(fs.existsSync(path.join(missing.project, '.qatlas-project', 'README.md')));
 
   const unreadable = fixture('context-unreadable');
   fs.mkdirSync(path.join(unreadable.project, '.qatlas-project', 'README.md'), { recursive: true });
@@ -421,11 +422,52 @@ function testProjectContext() {
   const disabled = fixture('context-disabled');
   write(path.join(disabled.project, '.qatlas-project', 'README.md'), '# Unsichtbar\n');
   write(path.join(disabled.home, '.qatlas', 'plugins', 'config.yaml'),
-    'format: 1\nsession-start:\n  enabled: false\n  ruleset: true\n');
+    'format: 1\nsession-start:\n  enabled: false\n');
   assert.strictEqual(hookOutput(disabled, 'project-root'), '');
   const disabledNotice = runNode(path.join(pluginRoot, 'scripts', 'qatlas-update.js'),
     ['notice', '--target', disabled.project], { cwd: disabled.project, home: disabled.home });
   assert.strictEqual(disabledNotice.stdout, '');
+}
+
+function testLibraryAndSubagent() {
+  const f = fixture('library');
+  initProject(f);
+  const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
+  const agentsFile = path.join(f.home, 'qatlas', 'AGENTS.qatlas.md');
+  assert.strictEqual(runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home }).status, 0);
+  assert.ok(fs.existsSync(agentsFile));
+  assert.ok(fs.existsSync(path.join(f.home, 'qatlas', 'README.md')));
+  fs.writeFileSync(agentsFile, '# Eigene Fassung\n');
+  runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(fs.readFileSync(agentsFile, 'utf8'), '# Eigene Fassung\n', 'Nutzerdatei bleibt unverändert.');
+
+  const config = readYaml(path.join(f.home, '.qatlas', 'plugins', 'config.yaml'));
+  assert.strictEqual(config.brains.qatlas.enabled, true);
+  assert.strictEqual(config.protection.secrets, 'block');
+
+  assert.ok(hookOutput(f, 'brains').includes(agentsFile.split(path.sep).join('/')));
+  assert.strictEqual(hookOutput(f, 'brains'), hookOutput(f, 'brains', true));
+  write(path.join(f.project, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\nbrains:\n  qatlas:\n    enabled: false\n'
+    + '  project:\n    enabled: true\n    paths:\n      - docs/quellen\n    description: Fachquellen\n');
+  const projectOnly = hookOutput(f, 'brains');
+  assert.ok(!projectOnly.includes('AGENTS.qatlas.md'));
+  assert.ok(projectOnly.includes('QATLAS-PROJEKTQUELLEN: Fachquellen') && projectOnly.includes('- docs/quellen'));
+
+  write(path.join(f.home, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\nbrains:\n  project:\n    enabled: true\n');
+  const { readConfig } = require('../plugins/qatlas/scripts/runtime/config-loader.js');
+  const previousHome = process.env.HOME;
+  process.env.HOME = f.home;
+  try {
+    assert.ok(readConfig(f.project).diagnostics.some(line => line.includes('ausschließlich in der Projektkonfiguration')));
+  } finally {
+    process.env.HOME = previousHome;
+  }
+
+  const script = path.join(pluginRoot, 'hooks', 'qatlas-context.js');
+  const subagent = runNode(script, ['subagent'], { cwd: f.project, home: f.home });
+  const payload = JSON.parse(subagent.stdout).hookSpecificOutput;
+  assert.strictEqual(payload.hookEventName, 'SubagentStart');
+  assert.ok(payload.additionalContext.includes('qatlas-core-navigation'));
 }
 
 function testDoctorSetupAndUpdateState() {
@@ -540,10 +582,11 @@ try {
   testProjectMigrationConflictsAndRecovery();
   testProjectContext();
   testDoctorSetupAndUpdateState();
+  testLibraryAndSubagent();
   testWritingConsumersRespectMigration();
   testSkippedUpdateVersions();
   testUpdateCommandsAcrossVersions();
-  process.stdout.write('✓ Qatlas-Migrationen: 15 Szenarien erfolgreich.\n');
+  process.stdout.write('✓ Qatlas-Migrationen: 16 Szenarien erfolgreich.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

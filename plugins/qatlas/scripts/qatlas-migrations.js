@@ -11,7 +11,6 @@ const path = require('path');
 const { isDeepStrictEqual } = require('util');
 const {
   DEFAULT_CONFIG,
-  DEFAULT_CREDENTIALS,
   DEFAULT_STATUSLINE,
   parseYamlText,
   stringifyYaml,
@@ -310,7 +309,6 @@ function migrationPaths(homeDir) {
     homeDir,
     pluginHome,
     configFile: path.join(pluginHome, 'config.yaml'),
-    credentialsFile: path.join(pluginHome, 'credentials.yaml'),
     statuslineFile: path.join(pluginHome, 'statusline.yaml'),
     stateFile: path.join(qatlas, 'state', 'migrations.json'),
     backupRoot: path.join(qatlas, 'state', 'migrations', 'backups'),
@@ -319,7 +317,7 @@ function migrationPaths(homeDir) {
     runtime: path.join(pluginHome, 'runtime'),
     legacy: ['.callbell', '.qatlas'].flatMap(directory => {
       const root = path.join(homeDir, directory);
-      return ['settings.json', 'statusline.json', 'telegram.json']
+      return ['settings.json', 'statusline.json']
         .map(name => ({ directory, name, file: path.join(root, name) }));
     }),
   };
@@ -342,21 +340,7 @@ function readMigrationState(file) {
 
 function normalizedSettings(value) {
   const session = isObject(value.sessionStart) ? value.sessionStart : {};
-  return {
-    enabled: session.enabled !== false,
-    ruleset: session.ruleset !== false,
-  };
-}
-
-function normalizedTelegram(value) {
-  return {
-    notification: { enabled: value.enabled === true, connection: 'default' },
-    credential: {
-      token: typeof value.token === 'string' ? value.token : '',
-      'chat-id': value['chat-id'] !== undefined ? value['chat-id']
-        : value.chat_id !== undefined ? value.chat_id : '',
-    },
-  };
+  return { enabled: session.enabled !== false };
 }
 
 function statuslineDocument(value) {
@@ -504,22 +488,18 @@ function migrateLegacyHome({ homeDir, pluginRoot, apply }) {
 
   const settings = collectLegacy(paths, 'settings.json', normalizedSettings, problems);
   const statusline = collectLegacy(paths, 'statusline.json', value => value, problems);
-  const telegram = collectLegacy(paths, 'telegram.json', normalizedTelegram, problems);
 
   let config;
-  let credentials;
   let statuslineConfig;
   try { config = parseYamlFile(paths.configFile, DEFAULT_CONFIG); }
   catch (error) { problems.push(paths.configFile + ': ' + error.message); }
-  try { credentials = parseYamlFile(paths.credentialsFile, DEFAULT_CREDENTIALS); }
-  catch (error) { problems.push(paths.credentialsFile + ': ' + error.message); }
   try { statuslineConfig = parseYamlFile(paths.statuslineFile, DEFAULT_STATUSLINE); }
   catch (error) { problems.push(paths.statuslineFile + ': ' + error.message); }
-  if (!config || !credentials || !statuslineConfig) {
+  if (!config || !statuslineConfig) {
     return { applied: false, blocked: problems, backupDir: null };
   }
 
-  const legacyFiles = [...settings.files, ...statusline.files, ...telegram.files];
+  const legacyFiles = [...settings.files, ...statusline.files];
   const legacyDiagnostics = isObject(config.diagnostics) && Array.isArray(config.diagnostics.mute)
     && Object.keys(config.diagnostics).every(key => key === 'mute');
   const hasCombinedStatusline = Object.prototype.hasOwnProperty.call(config, 'statusline');
@@ -537,7 +517,6 @@ function migrateLegacyHome({ homeDir, pluginRoot, apply }) {
   }
 
   let configChanged = false;
-  let credentialsChanged = false;
   configChanged = adopt(config, 'session-start', settings.value,
     DEFAULT_CONFIG['session-start'], 'session-start', problems) || configChanged;
 
@@ -555,48 +534,18 @@ function migrateLegacyHome({ homeDir, pluginRoot, apply }) {
     configChanged = true;
   }
 
-  if (telegram.value) {
-    if (!isObject(config.notifications)) config.notifications = {};
-    const currentNotification = config.notifications.telegram;
-    if (currentNotification === undefined
-      || isDeepStrictEqual(currentNotification, DEFAULT_CONFIG.notifications.telegram)) {
-      config.notifications.telegram = clone(telegram.value.notification);
-      configChanged = !isDeepStrictEqual(currentNotification, telegram.value.notification) || configChanged;
-    } else if (!isDeepStrictEqual(currentNotification, telegram.value.notification)) {
-      problems.push('Die neue und die Legacy-Konfiguration widersprechen sich bei notifications.telegram.');
-    }
-
-    if (!isObject(credentials.connections)) credentials.connections = {};
-    if (!isObject(credentials.connections.telegram)) credentials.connections.telegram = {};
-    const currentCredential = credentials.connections.telegram.default;
-    const defaultCredential = DEFAULT_CREDENTIALS.connections.telegram.default;
-    if (currentCredential === undefined || isDeepStrictEqual(currentCredential, defaultCredential)) {
-      credentials.connections.telegram.default = clone(telegram.value.credential);
-      credentialsChanged = !isDeepStrictEqual(currentCredential, telegram.value.credential);
-    } else if (!isDeepStrictEqual(currentCredential, telegram.value.credential)) {
-      problems.push('Die neuen und die Legacy-Credentials widersprechen sich bei connections.telegram.default.');
-    }
-  }
-
   if (legacyDiagnostics) {
     delete config.diagnostics;
     configChanged = true;
   }
 
   const writes = new Map();
-  // Credentialquellen bleiben bis zur ausdrücklichen Bereinigung am alten Ort und werden nicht dupliziert.
-  const credentialSources = new Set(telegram.files);
-  const backupFiles = new Set(legacyFiles.filter(file => !credentialSources.has(file)));
+  const backupFiles = new Set(legacyFiles);
   if (configChanged || (!fs.existsSync(paths.configFile) && legacyFiles.length)) {
     const content = stringifyYaml(config);
     try { parseYamlText(content); } catch (error) { problems.push('Neue config.yaml: ' + error.message); }
     writes.set(paths.configFile, { content, mode: 0o600 });
     if (fs.existsSync(paths.configFile)) backupFiles.add(paths.configFile);
-  }
-  if (credentialsChanged || (!fs.existsSync(paths.credentialsFile) && telegram.files.length)) {
-    const content = stringifyYaml(credentials);
-    try { parseYamlText(content); } catch (error) { problems.push('Neue credentials.yaml: ' + error.message); }
-    writes.set(paths.credentialsFile, { content, mode: 0o600 });
   }
   if (statuslineChanged) {
     const content = stringifyYaml(statuslineConfig);
@@ -620,7 +569,6 @@ function migrateLegacyHome({ homeDir, pluginRoot, apply }) {
   try {
     for (const [file, write] of writes) atomicWrite(file, write.content, write.mode);
     if (writes.has(paths.configFile)) parseYamlFile(paths.configFile, DEFAULT_CONFIG);
-    if (writes.has(paths.credentialsFile)) parseYamlFile(paths.credentialsFile, DEFAULT_CREDENTIALS);
     if (writes.has(paths.statuslineFile)) parseYamlFile(paths.statuslineFile, DEFAULT_STATUSLINE);
     state.plugins.qatlas.applied[HOME_MIGRATION] = new Date().toISOString();
     atomicWrite(paths.stateFile, JSON.stringify(state, null, 2) + '\n', 0o600);
@@ -628,7 +576,7 @@ function migrateLegacyHome({ homeDir, pluginRoot, apply }) {
     restore(snapshots);
     return { applied: false, blocked: ['Migration zurückgerollt: ' + error.message], backupDir };
   }
-  return { applied: true, blocked: [], backupDir, credentialSources: [...credentialSources] };
+  return { applied: true, blocked: [], backupDir };
 }
 
 function projectMigrationProblems(projectRoot) {
@@ -671,7 +619,6 @@ function runMigrations({
     blocked: [...home.blocked, ...machineMigrationProblems(homeDir),
       ...projectMigrationProblems(path.resolve(projectRoot))],
     backupDir: home.backupDir,
-    credentialSources: home.credentialSources || [],
     planned: home.planned || [],
   };
 }
@@ -738,12 +685,6 @@ if (require.main === module) {
   if (result.applied.length) {
     lines.push('QATLAS-MIGRATION: Geräteweiter Legacy-Zustand wurde automatisch und verifiziert migriert.');
     if (result.backupDir) lines.push('BACKUP: ' + result.backupDir);
-    if (result.credentialSources.length) {
-      lines.push('CREDENTIAL-QUELLEN NICHT DUPLIZIERT ODER GELÖSCHT:',
-        ...result.credentialSources.map(file => '- ' + file),
-        'Informiere den Nutzer, dass diese Quellen nach Prüfung der übernommenen Verbindung ausdrücklich '
-          + 'bereinigt werden können.');
-    }
     lines.push('Informiere den Nutzer vor der übrigen Antwort knapp über Migration und Backup.');
   }
   if (result.blocked.length) {

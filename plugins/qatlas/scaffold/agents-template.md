@@ -5,19 +5,6 @@
 
 Dieses Repository enthält <Zweck in einem konkreten Satz>.
 
-## Sichtbarkeit und Datenschutz
-
-- Behandle Inhalte wie öffentlich, bis das Projekt ausdrücklich eine andere Sichtbarkeit festlegt.
-- Versioniere keine Secrets, Zugangsdaten oder unnötigen personenbezogenen Rohdaten.
-
-## Zusammenarbeit
-
-- Lies vorhandene Projektanweisungen und den relevanten Bestand vor Änderungen.
-- Bewahre Nutzeränderungen und bleibe im ausdrücklich gewählten Scope.
-- Kläre bei paralleler Agentenarbeit vor dem ersten Schreibschritt Task-Eigentum und Integrationsbesitz.
-  Jeder gleichzeitig schreibende Agent nutzt pro betroffenem Repo einen eigenen Branch und Worktree.
-- Führe externe, irreversible oder veröffentlichende Wirkungen nur mit passender Freigabe aus.
-
 ## Projektspezifische Regeln
 
 - Keine weiteren.

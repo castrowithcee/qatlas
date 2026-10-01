@@ -1,15 +1,26 @@
-# Globale Qatlas-Plugin-Konfiguration. Projektkonfiguration wird getrennt geprüft; Overrides sind derzeit
-# nicht freigegeben.
+# Globale Qatlas-Plugin-Konfiguration unter ~/.qatlas/plugins/config.yaml. Eine Projektkonfiguration unter
+# <repo>/.qatlas/plugins/config.yaml darf brains und protection überschreiben; ein fehlender Projektwert erbt.
 format: 1
 
 session-start:
   # Nur deaktivieren, wenn kein passiver Qatlas-Kontext injiziert werden soll.
   enabled: true
-  # Aktiv lassen, um die verwaltete globale Arbeitsvereinbarung zu laden.
-  ruleset: true
 
-notifications:
-  telegram:
-    # Credentials liegen in credentials.yaml, niemals in dieser Datei.
-    enabled: false
-    connection: default
+brains:
+  qatlas:
+    # Wegweiser auf ~/qatlas/AGENTS.qatlas.md und die nutzereigene Bibliothek.
+    enabled: true
+  # Nur in der Projektkonfiguration gültig:
+  # project:
+  #   enabled: true
+  #   paths:
+  #     - "/pfad/zur/quelle"
+  #   description: >
+  #     Wofür diese Quellen stehen.
+
+protection:
+  # false schaltet beide Prüfungen ab, ohne die Einzelwerte zu verändern.
+  enabled: true
+  # block | ask | warn | allow
+  secrets: block
+  personal-data: ask
