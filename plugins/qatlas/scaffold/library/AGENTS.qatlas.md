@@ -1,6 +1,6 @@
-<!-- Qatlas legt diese Datei beim Setup einmalig als ~/qatlas/AGENTS.qatlas.md an und überschreibt sie danach
-nie. Sie gehört dir: Passe die globale Arbeitsvereinbarung an deine Arbeitsweise an. Als Agentendatei bleibt
-sie frontmatterfrei. -->
+<!-- Qatlas legt diese Datei beim Setup als ~/qatlas/AGENTS.qatlas.md an, wenn sie fehlt, und überschreibt
+sie danach nie. Sie gehört dir: Passe die globale Arbeitsvereinbarung an deine Arbeitsweise an. Als
+Agentendatei bleibt sie frontmatterfrei. -->
 # Globale Arbeitsvereinbarung
 
 Diese Vereinbarung gilt projektübergreifend. Native globale und projektlokale Agentenanweisungen haben
@@ -8,8 +8,8 @@ Vorrang.
 
 ## Bibliothek
 
-Nutzereigene, projektübergreifende Notizen, Wissen, Referenzen und Verfahren liegen in diesem Ordner. Lies
-`README.md` hier erst, wenn eine Aufgabe dieses Wissen braucht.
+Lies `README.md` in diesem Ordner, wenn eine Aufgabe projektübergreifende Konventionen, Regeln, Playbooks
+oder Wissen des Nutzers braucht.
 
 ## Sichere Befehle und Tests
 

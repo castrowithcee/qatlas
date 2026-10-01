@@ -1,7 +1,7 @@
 ---
 description: >
-  Read-only Diagnose eines Qatlas-Projekts: prüft Abhängigkeiten, Store, Scaffold, Ruleset und den
-  repo-lokalen Update-Stand, ohne selbst zu reparieren oder zu bestätigen.
+  Read-only Diagnose eines Qatlas-Projekts: prüft Abhängigkeiten, Store, Scaffold, Projektanweisungen,
+  Nutzerbibliothek und den repo-lokalen Update-Stand, ohne selbst zu reparieren oder zu bestätigen.
 license: MIT
 type: playbook
 edit: locked
@@ -24,7 +24,8 @@ node <plugin-root>/scripts/qatlas-update.js status
 
 Der erste Befehl prüft Node, Git, Git-Identität, optionale Git-LFS-Unterstützung, nutzerweiten Store,
 Syntax und Grundstruktur der optionalen `orchestra.yaml`, Projektwissensraum samt Root-README und
-Größenbudget, `.gitignore` und Ruleset. Fehlt `orchestra.yaml`, ist das ein Hinweis für `run`, kein
+Größenbudget, `.gitignore`, Projektanweisungen und das Scaffold der Nutzerbibliothek unter `~/qatlas/`.
+Fehlende Bibliotheksteile nennt er als Vorschlag für `qatlas-core setup`. Fehlt `orchestra.yaml`, ist das ein Hinweis für `run`, kein
 Setup-Blocker; Doctor legt sie auch mit `--apply` nicht ohne bestätigte Modellwerte an. Modell- und
 Effort-Verfügbarkeit prüft erst `run` im aktuellen Host. Bei einer alten oder
 parallelen Projektwurzel bleibt jeder schreibende Reparaturlauf gesperrt und nennt den Inventarbefehl. Der

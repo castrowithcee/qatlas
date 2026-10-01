@@ -434,7 +434,13 @@ function testLibraryAndSubagent() {
   initProject(f);
   const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
   const agentsFile = path.join(f.home, 'qatlas', 'AGENTS.qatlas.md');
+  write(path.join(f.home, 'qatlas', 'rules', 'eigene-regel.md'), '# Eigene Regel\n');
+  const report = runNode(doctor, ['--target', f.project], { cwd: f.project, home: f.home }).stdout;
+  assert.ok(report.includes('~/qatlas/AGENTS.qatlas.md fehlt') && report.includes('~/qatlas/knowledge/ fehlt'));
+  assert.ok(!report.includes('~/qatlas/rules/ fehlt'));
   assert.strictEqual(runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home }).status, 0);
+  assert.ok(fs.existsSync(path.join(f.home, 'qatlas', 'knowledge', '.gitkeep')));
+  assert.ok(!fs.existsSync(path.join(f.home, 'qatlas', 'rules', '.gitkeep')), 'Vorhandener Ordner bleibt ohne Platzhalter.');
   assert.ok(fs.existsSync(agentsFile));
   assert.ok(fs.existsSync(path.join(f.home, 'qatlas', 'README.md')));
   fs.writeFileSync(agentsFile, '# Eigene Fassung\n');

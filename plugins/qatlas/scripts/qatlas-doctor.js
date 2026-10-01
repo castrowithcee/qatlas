@@ -8,7 +8,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { scaffoldTopUp } = require('./qatlas-scaffold-topup.js');
+const { scaffoldTopUp, walk } = require('./qatlas-scaffold-topup.js');
 const { projectMigrationInventory } = require('./qatlas-migrations.js');
 const {
   createConfig,
@@ -155,18 +155,23 @@ if (statuslineState.exists && !statuslineState.valid) {
   missing.push('statusline: ' + statuslineState.statuslineFile + ': ' + statuslineState.error.message);
 }
 
-// Nutzerbibliothek: fehlende Einstiegspunkte einmalig anlegen, vorhandene Nutzerdateien nie ersetzen.
+// Nutzerbibliothek: fehlende Teile des Scaffolds vorschlagen oder mit --apply anlegen, nie ersetzen.
+// Ein .gitkeep entsteht nur für einen fehlenden Ordner.
 if (readConfig().config.brains.qatlas.enabled) {
-  for (const name of ['AGENTS.qatlas.md', 'README.md']) {
-    const file = path.join(os.homedir(), 'qatlas', name);
-    if (fs.existsSync(file)) continue;
-    if (!apply) { missing.push('library: ~/qatlas/' + name + ' fehlt.'); continue; }
+  const libraryBundle = path.join(bundle, 'library');
+  const library = path.join(os.homedir(), 'qatlas');
+  const absentLibrary = walk(libraryBundle).filter(rel => path.basename(rel) === '.gitkeep'
+    ? !fs.existsSync(path.join(library, path.dirname(rel)))
+    : !fs.existsSync(path.join(library, rel)));
+  for (const rel of absentLibrary) {
+    const shown = '~/qatlas/' + (path.basename(rel) === '.gitkeep' ? path.dirname(rel) + '/' : rel);
+    if (!apply) { missing.push('library: ' + shown + ' fehlt; qatlas-core setup ergänzt es.'); continue; }
     try {
-      fs.mkdirSync(path.dirname(file), { recursive: true });
-      fs.copyFileSync(path.join(pluginRoot, 'store', 'library', name), file, fs.constants.COPYFILE_EXCL);
-      created.push('~/qatlas/' + name);
+      fs.mkdirSync(path.dirname(path.join(library, rel)), { recursive: true });
+      fs.copyFileSync(path.join(libraryBundle, rel), path.join(library, rel), fs.constants.COPYFILE_EXCL);
+      created.push(shown);
     } catch {
-      missing.push('library: ~/qatlas/' + name + ' konnte nicht angelegt werden.');
+      missing.push('library: ' + shown + ' konnte nicht angelegt werden.');
     }
   }
 }
