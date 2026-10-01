@@ -1,24 +1,18 @@
 ---
 description: >
-  Vollständige, bei tatsächlicher Arbeit im lokalen Qatlas-Backlog geladene Rule-Referenz für Tasks,
-  Projekte, Status, Roster, Übergaben und Ideen.
+  Vertrag des lokalen Qatlas-Backlogs für Tasks, Projekte, Status, Roster, Übergaben und Ideen.
 license: MIT
 type: rule
 edit: locked
 ---
 
-# Vollständiger Vertrag des lokalen Backlogs
-
-Dieser Vertrag gilt nur, wenn `.qatlas-project/backlog/BACKLOG.md` den lokalen Qatlas-Backlog als
-maßgebliches Planungssystem ausweist. Bei externer Autorität gilt stattdessen deren Binding; ein lokaler
-Spiegel entsteht nicht.
+# Lokaler Backlog
 
 ## Aufgaben und Projekte
 
 - Ein Task ist eine eigenständig in einer Session leistbare Arbeitseinheit in
-  `.qatlas-project/backlog/task-<id>-<slug>.md`. Die ID ist eine mindestens vierstellige, fortlaufende
-  Dezimalzahl des Präfixes `task` über die gesamte Wissenswurzel. Archive zählen mit; vor Vergabe und
-  Integration werden Kollisionen geprüft. IDs werden nicht wiederverwendet.
+  `.qatlas-project/backlog/task-<id>-<slug>.md`. Die ID folgt den Dateikennungen des
+  [Projektwissensraums](../../qatlas-core-filing/references/structure.md).
 - Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `README.md`. Sein Slug ist
   kebab-case, beginnt nicht mit `task-` und heißt nicht `done`.
 - Die Ordnerzugehörigkeit bestimmt die Projektmitgliedschaft; es gibt kein Feld `project:`.
@@ -54,19 +48,9 @@ nicht mehr in einer Session ausführbar, schneide die verbleibende Arbeit bewuss
 bindende Entscheidung oder nötige Begründung nur für eine kleinere Datei.
 
 Lies vor einem neuen Task vollständig
-[die kanonische Taskvorlage](../../store/backlog/task.md), vor einem neuen Projektkopf zusätzlich
-[die kanonische Projektvorlage](../../store/backlog/project-readme.md). Diese Vorlagen gelten auch ohne
+[die kanonische Taskvorlage](../../../store/backlog/task.md), vor einem neuen Projektkopf zusätzlich
+[die kanonische Projektvorlage](../../../store/backlog/project-readme.md). Diese Vorlagen gelten auch ohne
 Planungsskill; Nutzervorlagen unter `.qatlas-project/templates/` ersetzen sie nicht.
-
-Ermittle die nächste Task-ID aus allen passenden Dateinamen der Wissenswurzel, einschließlich Archive:
-
-```sh
-find .qatlas-project -type f -name 'task-[0-9]*-*.md' -print
-```
-
-Wähle eins mehr als die höchste gefundene Dezimalzahl und fülle auf mindestens vier Stellen auf. Beginne
-ohne Treffer mit `0001`. Prüfe die Kennung vor der Integration erneut; bei einer parallelen Kollision
-erhält der noch nicht integrierte Task die nächste freie ID samt angepassten Verweisen.
 
 ## Status und Eigentümerschaft
 
@@ -131,14 +115,9 @@ zulässiger Reihenfolge stehen Tasks als `review`, `in-progress`, `next`, `waiti
 Projektzeilen folgen ihrer fachlichen Reihenfolge. Abgeschlossene Root-Tasks fallen heraus, Projekte dürfen
 ihre Bauhistorie behalten.
 
-Nutze Roster und Projektindizes zuerst zur Auswahl anhand von Status, Kurzstand, Reihenfolge, Abhängigkeiten
-und Eigentümerschaft. Lies danach nur die gewählten Tasks und ihre echten Blocker vollständig. Ein
-ausdrücklich gewählter einzelner Task darf direkt vollständig gelesen werden; der Roster verpflichtet nie
-dazu, vorsorglich alle offenen Task-Dateien zu laden.
-
 ## Ideen
 
-`IDEAS.md` ist das getrennte Inventar unverbindlicher Ideen und wird nicht beim Sessionstart geladen. Öffne
-es nur zum Erfassen, Sichten oder Ausarbeiten von Ideen. Es trägt keine Task-IDs, Datumsfelder oder Status.
+`IDEAS.md` ist das getrennte Inventar unverbindlicher Ideen. Es trägt keine Task-IDs, Datumsfelder oder
+Status.
 Wird eine Idee bewusst zu Arbeit, lege zuerst den vollständigen Task oder das Projekt an und entferne danach
 den übernommenen Ideenpunkt.

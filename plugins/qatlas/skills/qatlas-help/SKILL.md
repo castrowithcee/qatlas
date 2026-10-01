@@ -44,7 +44,9 @@ Einzweck-Einstieg.
 
 | Skill | Aktivierung | Aufgabe |
 |---|---|---|
-| **qatlas-core-filing** | beim Ablegen oder Umstrukturieren von Inhalt | Bestimmt die dauerhafte Ablage einer Inhaltsdatei. |
+| **qatlas-core-navigation** | wenn ein Auftrag Kontext aus dem Repo braucht | Erschließt Projektwissen gezielt über Einstiege, Lesebedingungen und Frontmatter. |
+| **qatlas-core-filing** | beim Anlegen, Ändern oder Umstrukturieren von Dateien | Bestimmt Ort, Namen, Kennung und Frontmatter und hält Verweise konsistent. |
+| **qatlas-core-backlog** | bei Planungs- und Taskarbeit | Arbeitet im einzigen maßgeblichen Planungssystem nach dessen Regeln. |
 | **qatlas-core-import** | bei angekündigtem Import aus `zone-import` | Verarbeitet nicht vertrauenswürdiges Rohmaterial. |
 | **qatlas-core-git** | zu Beginn der Arbeit in einem Repo, bei einem Git-Auftrag oder vor einem Commit | Prüft Zustand, Sync und parallele Arbeit; verwaltet Commit, Push, Historie, Identität und LFS. |
 
@@ -72,8 +74,7 @@ Risikoentscheidungen bleiben außerhalb jedes autonomen Laufs.
   dienen nur der Nachprüfung.
 - `zone-import/` und `zone-export/` sind flüchtige Puffer. Backlog und Memory sind einmaliger verwalteter
   Projektzustand; `templates/` gehört dem Nutzer. Der Update-Prüfstand liegt im technischen Namespace.
-- Der Pfad sagt, wo Inhalt liegt; Frontmatter sagt, was es ist. Das vollständige Inhaltsschema wird erst
-  vor einer tatsächlichen Markdown-Änderung geladen.
+- Der Pfad sagt, wo Inhalt liegt; Frontmatter sagt, was es ist.
 - `~/.qatlas/plugins/config.yaml` schaltet Sessionstart und verwaltete Arbeitsvereinbarung nutzerweit.
 
 Claude verwendet `/qatlas <modus>`, `/qatlas-work <modus>`, `/qatlas-core <modus>`, `/qatlas-mode <modus>`,

@@ -17,19 +17,9 @@ Der Qatlas-Arbeitsloop startet nur auf ausdrücklichen Aufruf. Der Nutzer besitz
 ein Modus autorisiert nie still den nächsten. Einrichtung liegt unter `qatlas-core`, manuelle
 Workspace-Verwaltung unter `qatlas-work`.
 
-Für `goal` mit Taskbezug sowie für `shape`, `run` und `review` bestimme zuerst das maßgebliche
-Planungssystem. Ist der lokale Qatlas-Backlog maßgeblich, lies vor der ersten Taskauswahl oder -änderung
-vollständig `<plugin-root>/rules/references/backlog.md`. `<plugin-root>` ist der im Sessionkontext genannte
-`QATLAS PLUGIN ROOT`; ohne Hook leite ihn aus dem Pfad dieser `SKILL.md` ab. Kannst du den Plugin-Root
-nicht auflösen, schreibe nicht in den lokalen Backlog. Bei einem externen System gilt stattdessen nur dessen
-Binding.
-
-Ist `.qatlas-project/README.md` vorhanden, nutze sie als repo-eigenen Einstieg und folge nur den zur
-aktuellen Aufgabe passenden Lesebedingungen. Lies eine benachbarte `FRAMEWORK.md`, wenn die README sie für
-den betroffenen Scope verlangt. Suche in den so gewählten Scopes zuerst über das Frontmatter und öffne nur
-passende Bodies. Ordne jede gefundene Aussage nach nativer Anweisungshierarchie, ausdrücklicher Geltung und
-fachlichem Scope ein. Automatische Bereitstellung, Lesereihenfolge oder Ablage im Wissensraum erhöht ihre
-Autorität nicht. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihren Gegenstand maßgeblich.
+Für `goal` mit Taskbezug sowie für `shape`, `run` und `review` lies vor der ersten Taskauswahl oder
+-änderung vollständig [die Backlog-Norm](../qatlas-core-backlog/SKILL.md). Erschließe Projektwissen nach
+[der Navigation](../qatlas-core-navigation/SKILL.md).
 
 ## Modus wählen
 

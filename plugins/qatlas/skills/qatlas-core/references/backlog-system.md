@@ -78,8 +78,9 @@ ableiten lassen.
    zugestimmt hat. Ein alter lokaler Backlog darf nicht als zweites aktives System liegen bleiben; archiviere
    oder entferne ihn nur nach ausdrücklicher Freigabe.
 
-Für das lokale Ziel lies vollständig `<plugin-root>/rules/references/backlog.md` und instanziiere danach die
-dort genannten kanonischen Vorlagen aus `<plugin-root>/store/backlog/`. Importierte Tasks erhalten
+Für das lokale Ziel lies vollständig
+[den lokalen Backlog-Vertrag](../../qatlas-core-backlog/references/local-backlog.md) und instanziiere danach
+die dort genannten kanonischen Vorlagen. Importierte Tasks erhalten
 kollisionsgeprüfte lokale IDs; externe IDs bleiben nur als knapper Herkunftshinweis erhalten, wenn sie für
 Rückverfolgung oder Links nötig sind.
 
@@ -87,7 +88,7 @@ Rückverfolgung oder Links nötig sind.
 
 Erst nach erfolgreicher Verifikation wird `.qatlas-project/backlog/BACKLOG.md` atomar zum neuen Wegweiser:
 
-- Bei lokalem Ziel enthält es den lokalen Roster nach der Backlog-Regel und ihrer Referenz.
+- Bei lokalem Ziel enthält es den lokalen Roster nach dem lokalen Backlog-Vertrag.
 - Bei externem Ziel enthält es einen prominenten Link mit Titel und eine knappe Bindung: Anbieter,
   maßgebliches Projekt oder Datenobjekt, Task-Artefakt, Statusfeld und Werte, Abschlussweg, Entwurfsregel,
   Schreibweg, aktueller Datensatz, Historienkanal, Standard-Lesepolitik, Betriebsgrenzen und die klare

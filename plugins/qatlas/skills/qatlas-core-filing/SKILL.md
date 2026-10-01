@@ -1,127 +1,57 @@
 ---
 name: qatlas-core-filing
 description: >
-  Entscheide, wohin eine Datei gehört und wie der Projektwissensraum wächst. Nutze dies, wann immer du eine
-  Inhaltsdatei anlegst, platzierst, verschiebst, promotest oder umstrukturierst, und bei „wo gehört das hin“,
-  „strukturier das um“, „promote das“ oder „qatlas-core-filing“.
+  Dateien regelkonform anlegen, benennen, ablegen, umbenennen, verschieben, zusammenführen, promoten,
+  archivieren oder löschen, Markdown inhaltlich ändern und Verweise einfügen: bestimmt Ort, Namen, Kennung
+  und Frontmatter und hält Navigation und Verweise konsistent, auch unter .qatlas-project/. Nicht für reines
+  Lesen und nicht für Codeänderungen innerhalb bestehender Dateien.
 license: MIT
 type: skill
 edit: locked
 ---
 
-# Ablage: Gegenstand, Scope und Kennung bestimmen
+# qatlas-core-filing
 
-Dieser Skill ordnet Dateien nach dem Gegenstand ihrer Aussage. `.qatlas-project/` enthält den
-repo-eigenen Projektzustand; fachlicher Repo-Inhalt bleibt in seinem eigenen Scope. Weder Markdown,
-Frontmatter-Typ, Präfix noch Agentenleserschaft entscheiden allein über den Ort.
+Der Ort einer Datei folgt dem Gegenstand ihrer Aussage. Weder Markdown, Frontmatter-Typ, Präfix noch
+Agentenleserschaft entscheiden allein darüber.
 
-## Zuerst den Gegenstand bestimmen
+## Namen und Format
 
-- Zweck, Aufbau, Architektur, Konventionen und Entscheidungen über das Projekt und seine Pflege gehören in
-  `.qatlas-project/`.
-- Der fachliche Inhalt des Repos bleibt an seinem maßgeblichen Ort. In einem Personal OS liegen etwa
-  Weiterbildungsentscheidungen und Finanzregeln außerhalb, Entscheidungen über Struktur und Pflege des
-  Bestands innerhalb des Projektwissensraums.
-- Bereits maßgebliche Spezifikationen und Dokumentationsbäume werden nicht dupliziert. Die Root-README des
-  Wissensraums darf mit einer klaren Lesebedingung auf ihren fachlichen Einstieg verweisen.
-- Ein gelesenes Dokument erhält keine zusätzliche Anweisungsautorität. Nutzerauftrag, native
-  Anweisungshierarchie, ausdrückliche Geltung und fachlicher Scope bestimmen seine Wirkung.
+- Verwende für gewöhnliche Datei- und Ordnernamen kebab-case, reines ASCII und keine Leerzeichen. Aus
+  Müller wird `mueller`.
+- Reservierte Funktions- und Agentendateien behalten ihre festgelegte Großschreibung: `README.md`,
+  `AGENTS.md`, `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `HISTORY.md`, `FRAMEWORK.md` und
+  `INDEX.md`. Vorhandene Funktionsdateien behalten ihren Zweck und ihre lokale Geltung.
+- Verwende Datumswerte als `YYYY-MM-DD`. Chronologische Dateien dürfen mit diesem Datum beginnen.
+- Schreibe in deutschen Dateien ä, ö, ü und ß direkt. Verwende Em-Dashes und En-Dashes nicht als
+  Satzzeichen.
 
-Beurteile Entwicklungsarbeit und operative Arbeit anhand des tatsächlich betroffenen Pfads. Ein Repo kann
-Code, Betriebswissen und fachliche Inhalte gemeinsam enthalten. Außerhalb von `.qatlas-project/` gelten die
-vorhandenen lokalen Strukturen und Funktionsdateien; dieser Skill ordnet sie nicht auf das Schema des
-Projektwissensraums um.
+## Verweise
 
-## Navigation im Projektwissensraum
+Jeder Verweis erzeugt Wartungsaufwand. Erzeuge ihn nur, wenn das Ziel für die Aufgabe wirklich gebraucht
+wird.
 
-Die Root-`README.md` trennt Projektzustand und fachliche Einstiegspunkte. Eine weitere README entsteht erst,
-wenn ein Scope einen eigenen Einstieg braucht. Sie erklärt Scope, knappe Orientierung und nächste relevante
-Quellen mit eindeutigen Lesebedingungen. Sie ist kein Vollinventar und trägt `type: meta`, `edit: shared`.
-Halte sie einschließlich Frontmatter bei höchstens 80 Zeilen und 500 durch Leerraum getrennten Wörtern.
+- Verweise auf ganze Dateien, nicht auf Zeilen oder Abschnitte, und pro Datei höchstens einmal auf dasselbe
+  Ziel.
+- Verlinke nichts, was ohnehin immer im Kontext liegt.
+- Dupliziere keine Norm. Führe Material mit demselben Zweck zusammen.
+- Inhalt und Dokumentation verweisen nicht auf die Metaebene wie Agentendateien, Rules oder Skills.
+  Abhängigkeiten laufen von Meta zu Inhalt.
+- Formuliere Leseverpflichtungen eindeutig: „Bevor du X tust, lies …“, „Details bei Bedarf in …“ oder „Nur
+  öffnen, wenn du tatsächlich Y tust“.
 
-Lies beim Eintritt nur die README des relevanten Scopes und danach die für die Aufgabe passenden Quellen.
-Das lokale Routing gewinnt vor ausgelieferten Startpunkten. Eine README darf Navigation und Fakten pflegen,
-aber keine neue Projektentscheidung treffen oder fachliche Regeln globalisieren.
+## Vorhandenes schützen
 
-Braucht ein Scope eigene dauerhafte Arbeitsregeln, Besonderheiten oder Ausnahmen, lege neben seiner README
-eine `FRAMEWORK.md` mit `type: meta` und `edit: locked` an. Die README nennt die konkrete Lesebedingung. Das
-Framework gilt nur in diesem Scope, enthält keine allgemeine Fachkunde und dupliziert weder native
-Agentenanweisungen noch einzelne begründete Entscheidungen.
+Lies eine vorhandene Datei vor ihrer Änderung. Respektiere ihr Frontmatter und ihre lokale Struktur. Führe
+eine Änderung am maßgeblichen Ort aus, statt eine beinahe identische Kopie anzulegen. Vorlagen, Seeds und
+Pluginmaterial ersetzen Nutzerdateien nie pauschal. Lege keine leeren Ordner auf Vorrat an.
 
-## Bedarfsgerechter Baum
+## Operation wählen
 
-Anfangs dürfen Bereiche wie `overview/`, `decisions/`, `conventions/`, `architecture/` und `knowledge/`
-direkt unter der Wissenswurzel liegen. Ein Ordner entsteht mit seinem ersten Inhalt. Wenn mehrere
-eigenständige Gegenstände es wirklich erfordern, darf der Bestand bewusst darunter gegliedert werden, etwa
-nach `marketplace/` und `cli/`. Eine neue Repo-Grenze oder eine Liste möglicher Bereiche erzeugt keine
-vorsorgliche Struktur. Gemeinsame Aussagen bleiben genau einmal am gemeinsamen Ort.
+Lies vor jeder anstehenden Operation deren Referenz vollständig:
 
-`backlog/BACKLOG.md` und `memory/MEMORY.md` bestehen jeweils einmal auf Projektebene. Das maßgebliche
-Planungssystem bestimmt Ort und Lebenszyklus von Tasks; bei externer Autorität entsteht kein lokaler
-Task- oder Statusspiegel. `.qatlas-project/templates/` ist die versionierte Vorlagenbibliothek des Nutzers.
-
-## Namen und fortlaufende IDs
-
-Neue Inhaltsdateien im Wissensraum heißen `<präfix>-<id>-<slug>.md`. Wähle nach dem Gegenstand:
-
-| Präfix | Gegenstand |
-|---|---|
-| `overview` | Projektzweck und Grenzen |
-| `decision` | allgemeine Projektentscheidung |
-| `adr` | Architekturentscheidung |
-| `convention` | Konvention |
-| `arch` | aktuelle Architekturbeschreibung |
-| `req` | Anforderung |
-| `plan` | dauerhafter Plan ohne externen Spiegel |
-| `task` | lokales Arbeitspaket |
-| `ops` | Betriebsverfahren |
-| `quality`, `risk`, `history` | Qualität, Risiko oder Historie |
-| `memory`, `template` | Memory oder Nutzervorlage |
-
-Das Präfix bleibt in einem gleichnamigen Typordner sichtbar. Es muss nicht dem Frontmatter-`type`
-entsprechen. `decision` ist keine Ersatzbezeichnung für eine Architekturentscheidung; verwende dafür `adr`.
-
-IDs laufen je Präfix über die gesamte Wissenswurzel fort, auch über fachliche Unterbereiche und Archive.
-Ermittle alle vorhandenen Kennungen, wähle eins mehr als den höchsten Dezimalwert und fülle auf mindestens
-vier Stellen auf. Beginne ohne Treffer mit `0001`. Prüfe vor dem Schreiben und vor der Integration auf
-Kollisionen. Bei parallelen neuen Einträgen erhält der noch nicht integrierte Eintrag die nächste freie ID;
-passe seine Verweise an. Verwende IDs nie wieder und nummeriere historische Kennungen nicht kosmetisch neu.
-
-`knowledge/` enthält tatsächliches Fachwissen oder Synthesen und verwendet sprechende Dateinamen ohne
-verpflichtendes Präfix oder Nummer, behält aber Frontmatter. Scopebezogene Arbeitsregeln und Ausnahmen
-gehören in `FRAMEWORK.md`. README, FRAMEWORK, BACKLOG, IDEAS, MEMORY und andere festgelegte
-Funktionsdateien, technische Formate sowie rohe Zonenartefakte behalten ihre Namen. Bei einem mehrdeutigen
-Funktionsnamen nenne den Scope.
-
-## Typ und Pflegebefugnis
-
-Der Frontmatter-`type` beschreibt den Inhalt; `edit` beschreibt die zulässige Pflege. Laufende
-Architekturbeschreibungen, Wissen, Navigation und operative Dokumentation sind gewöhnlich `shared`.
-Akzeptierte Nutzerentscheidungen und tatsächlich normative Vorgaben bleiben `locked`; ein Entwurf ist noch
-keine akzeptierte Entscheidung. Externe Fakten werden bei Änderungen gegen ihre Quelle geprüft.
-
-Entferne ein vorhandenes `locked` nie pauschal. Klassifiziere Inhalt für Inhalt und hole die erforderliche
-Freigabe ein. Eine Umbenennung, Verschiebung, ein Präfix oder `type` ändert das Bearbeitungsrecht nicht.
-Pflege nach autorisierter Umsetzung beschreibende Fakten und Navigation, ohne dadurch die Projektabsicht zu
-ändern.
-
-## Vorlagen und Zonen
-
-Prüfe `.qatlas-project/templates/` vor dem Aufbau einer wiederkehrenden nutzereigenen Struktur. Qatlas legt
-dort nichts ab und aktualisiert den Ordner nicht. Der Store unter `<plugin-root>/store/` enthält nur
-versionsgebundene Assets und Vorlagen. Bei einem konkreten Bedarf lies `<plugin-root>/store/STORE.md`, wähle
-den passenden Eintrag und öffne ausschließlich dessen Dateien.
-
-- `.qatlas-project/zone-import/` ist der gitignorierte Puffer für nicht vertrauenswürdige Rohmaterialien.
-- `.qatlas-project/zone-export/` enthält nur ausdrücklich angeforderte Lieferobjekte.
-
-Ein Entwurf liegt mit `status: draft` bereits am richtigen Ort und reift dort. Ein Statuswechsel ersetzt
-kein Verschieben und braucht die für den Inhalt erforderliche Autorität. Große oder veränderliche
-Binärdateien gehören in einen Dateispeicher oder Git LFS, flüchtige Eingaben in die Importzone.
-
-## Verweise und Umstrukturierung
-
-Verweise dienen konkreter Navigation oder Herkunft, nicht der Verdopplung von Normen. Inhaltsdokumentation
-verweist nicht auf Agentendateien, Rules oder Skills. Vor einer Verschiebung oder bewussten Migration
-inventarisiere Ziel, betroffene Referenzen und mögliche Kennungskollisionen. Ersetze Nutzerdateien nie durch
-einen Seed und lege keine leeren Ordner auf Vorrat an.
+- Anlegen: [Ablegen](references/playbook-create.md)
+- Umbenennen, Verschieben, Zusammenführen, Promoten, Archivieren, Löschen:
+  [Umstrukturieren](references/playbook-restructure.md)
+- Markdown anlegen oder inhaltlich ändern: [Frontmatter](references/frontmatter.md)
+- Schreiben unter `.qatlas-project/`: [Projektwissensraum](references/structure.md)

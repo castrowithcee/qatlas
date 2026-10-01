@@ -1,24 +1,21 @@
 ---
 description: >
-  Vollständige, vor einer Markdown-Änderung geladene Rule-Referenz für Suchtext, Inhaltstypen,
-  Bearbeitungsrechte, Pflichtfelder und Datumsfelder.
+  Frontmatter-Schema für inhaltliche Markdown-Dateien: description, Inhaltstypen, Bearbeitungsrechte,
+  Pflichtfelder und Datumsfelder.
 license: MIT
 type: rule
 edit: locked
 ---
 
-# Vollständiges Frontmatter-Schema
+# Frontmatter-Schema
 
 Jede inhaltliche Markdown-Datei beginnt mit Frontmatter. Rohzonen und ausdrücklich definierte strukturelle
-READMEs außerhalb von `.qatlas-project/` bleiben frei davon. Wende Typ, Bearbeitungsrecht und Pflichtfelder
-vor jeder Dateiänderung an; ändere einen vorhandenen `type` nur nach Rückfrage.
+READMEs außerhalb von `.qatlas-project/` bleiben frei davon.
 
-## Suche
+## Suchfelder
 
-Suche zuerst in `description`, `tags`, `type` und `status`, öffne die Bodies passender Treffer und erweitere
-erst danach auf Volltext. `description` ist ein knapper, eigenständiger Satz über Gegenstand und Zweck mit
-den unterscheidenden Suchbegriffen. Bereich und Thema stehen im Pfad. Schreibe sie als gefalteten
-Block-Skalar:
+`description` ist ein knapper, eigenständiger Satz über Gegenstand und Zweck mit den unterscheidenden
+Suchbegriffen. Bereich und Thema stehen im Pfad. Schreibe sie als gefalteten Block-Skalar:
 
 ```yaml
 description: >
@@ -36,7 +33,12 @@ Entscheidung des Nutzers gebunden. Der Agent hält keine eigene Entscheidung als
 `edit: locked` schützt akzeptierte Entscheidungen und tatsächlich normative oder instruierende Inhalte;
 ändere sie nur nach Freigabe und am vorhandenen Ort. `edit: shared` erlaubt Agent und Nutzer die Pflege im
 autorisierten Arbeitsfluss, aber keine Änderung der Projektabsicht ohne entsprechende Nutzerentscheidung.
-Eine Umbenennung oder Verschiebung ändert das Bearbeitungsrecht nicht.
+Entferne ein vorhandenes `locked` nie pauschal; klassifiziere Inhalt für Inhalt und hole die erforderliche
+Freigabe ein. Ein Entwurf ist noch keine akzeptierte Entscheidung. Beschreibende Architektur, Wissen,
+Navigation und operative Dokumentation sind gewöhnlich `shared`. Aktualisiere einen Architektur-Fakt nach
+autorisierter Umsetzung, ohne dadurch eine akzeptierte Entscheidung zu entsperren. Weder Umbenennen,
+Verschieben, `type`, Präfix, Dotfolder-Lage noch bloßes Lesen ändern Bearbeitungsrecht, Geltungsbereich
+oder Rang einer Aussage.
 
 ## Typen und Pflichtfelder
 
@@ -67,8 +69,8 @@ Schreiben die Ersetzung aller Platzhalter verlangt. Beurteile ihr Frontmatter da
 Ausnahme gilt weder für gewöhnliche Inhaltsdateien noch für nutzereigene Vorlagen.
 
 `status` ist ein Pflichtfeld oder Suchmerkmal, aber seine Werte gehören zum jeweiligen Lebenszyklus und
-nicht in dieses allgemeine Inhaltsschema. Für lokale Tasks bestimmen die Backlog-Regel und ihre bedingt
-geladene Referenz die aktuelle Zustandsmenge. Projektköpfe und andere Inhaltstypen behalten ihre eigenen
+nicht in dieses allgemeine Inhaltsschema. Für lokale Tasks bestimmt der lokale Backlog-Vertrag die
+aktuelle Zustandsmenge. Projektköpfe und andere Inhaltstypen behalten ihre eigenen
 Statusmodelle.
 
 `source` steht nur auf einem Snapshot von etwas Externem. Datumsfelder stehen nie auf `meta`, `rule` oder
