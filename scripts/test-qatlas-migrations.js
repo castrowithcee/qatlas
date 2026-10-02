@@ -469,6 +469,11 @@ function testLibraryAndSubagent() {
     process.env.HOME = previousHome;
   }
 
+  const worktree = runNode(path.join(pluginRoot, 'scripts', 'qatlas-worktree-path.js'),
+    ['task/0001-test', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.match(worktree.stdout.trim(),
+    /\/\.qatlas\/state\/worktrees\/project-[0-9a-f]{8}\/task\/0001-test$/);
+
   const script = path.join(pluginRoot, 'hooks', 'qatlas-context.js');
   const subagent = runNode(script, ['subagent'], { cwd: f.project, home: f.home });
   const payload = JSON.parse(subagent.stdout).hookSpecificOutput;

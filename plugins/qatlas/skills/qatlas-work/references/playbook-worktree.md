@@ -1,7 +1,7 @@
 ---
 description: >
-  Bedingt geladener Vertrag für die nummerierte Übersicht, kontextgeleitete Anlage und sichere Bereinigung
-  zentraler Git-Worktrees durch Qatlas Work Tree und Qatlas Run.
+  Ablauf für qatlas-work tree: nummerierte Übersicht der Git-Worktrees, kontextgeleitete Anlage und vom
+  Nutzer ausgewähltes, sicheres Aufräumen.
 type: playbook
 edit: locked
 license: MIT
@@ -9,12 +9,8 @@ license: MIT
 
 # Git-Worktrees verwalten
 
-Lies diese Referenz nur, wenn der Nutzer `qatlas-work tree` aufruft oder der Git-Ablauf eines
-`qatlas run` einen Worktree verlangt. Git registriert alle Worktrees eines Repos gemeinsam; dieses
-Register ist die maßgebliche Quelle. Der Ordner unter `~/.qatlas/` ist nur der gemeinsame Ablageort für
-alle Agenten desselben Nutzers.
-
-Liegt die Session nicht in einem Git-Repo, melde das als einzigen Befund und ändere nichts.
+Lies vor jeder Anlage oder Bereinigung vollständig den [Worktree-Vertrag](worktree-contract.md). Liegt die
+Session nicht in einem Git-Repo, melde das als einzigen Befund und ändere nichts.
 
 ## Übersicht
 
@@ -26,91 +22,23 @@ Ohne `new` oder einen erkennbaren Aufräumauftrag ändert der Aufruf nichts:
 3. Zeige eine nummerierte Liste. Jede Zeile nennt Zweck, Branch, Zustand und absoluten Pfad; markiere den
    aktuellen und den primären Arbeitsbaum.
 
-Die Nummer ist nur ein Griff für die gerade gezeigte Liste und keine dauerhafte ID. Vor einer späteren
-Änderung lies das Register erneut und prüfe, dass die genannte Nummer noch denselben Pfad und Branch
-bezeichnet. Hat sich die Zuordnung verändert, zeige die neue Liste und ändere nichts.
+Die Nummer ist nur ein Griff für die gerade gezeigte Liste. Lies das Register vor einer späteren Änderung
+erneut und prüfe, dass die Nummer noch denselben Pfad und Branch bezeichnet; sonst zeige die neue Liste und
+ändere nichts.
 
 ## Anlegen
 
 `qatlas-work tree new [Auftrag]` legt einen Worktree für die Arbeit im aktuellen Kontext an. Der optionale
-Text beschreibt die Arbeit in natürlicher Sprache; er ist niemals ein technischer Name. Ohne Text gelten
-der aktuelle Task, das Projekt und der Gesprächskontext. Frage nur nach dem Arbeitszweck, wenn daraus kein
-eindeutiger Auftrag hervorgeht. Der Agent bestimmt Branch, Zweck-Slug und Pfad vollständig selbst.
+Text beschreibt die Arbeit in natürlicher Sprache und ist nie ein technischer Name. Ohne Text gelten der
+aktuelle Task, das Projekt und der Gesprächskontext. Frage nur nach dem Arbeitszweck, wenn daraus kein
+eindeutiger Auftrag hervorgeht. Branch, Zweck-Slug und Pfad bestimmst du nach dem Vertrag selbst.
 
-Ein `qatlas run` braucht kein zusätzliches `new`: Sein ausdrücklicher Aufruf autorisiert die im Git-Ablauf
-geforderte Isolation bereits.
-
-Muss der Arbeitszweck aus Projektwissen bestimmt werden, beginne bei einer vorhandenen
-`.qatlas-project/README.md` und folge nur passenden Lesebedingungen. Das maßgebliche Planungssystem und der
-aktuelle Taskvertrag bleiben für Taskstatus und Arbeitsumfang alleinige Autorität.
-
-1. Ermittle Git-Root, primären Arbeitsbaum, gemeinsames Git-Verzeichnis, Branches, Worktrees und vollständigen
-   Status. Committe und stashe nichts. Lokale Änderungen bleiben in ihrem Arbeitsbaum und gelangen nicht in
-   den neuen.
-2. Leite einen kurzen ASCII-Zweck-Slug aus dem Task oder Auftrag ab. Folgt das Repo nachweislich einer
-   eigenen Branch-Konvention aus Projektvorgaben oder durchgängig benannten Branches, gilt sie. Sonst heißt
-   ein Task-Branch `task/<id>-<slug>`; `<id>` ist die Kennung aus dem Spine als ASCII-Slug, `<slug>` stammt
-   aus dem Task-Dateinamen oder Titel. Arbeit ohne Task erhält einen eindeutigen `work/<zweck>`-Branch. Ein
-   Unterbranch hängt an den Namen seines Task-Branches `--<rolle>` an, einen innerhalb des Tasks eindeutigen
-   ASCII-Slug seiner fachlichen Rolle oder seines Zielbereichs, etwa `task/0042-export--tests`. Was der Agent
-   selbst benennt, nennt nie Qatlas, einen Agenten, Host oder ein Modell, weil Branchnamen über
-   Merge-Nachrichten und Remote-Refs in die Historie des Repos gelangen können. Git lässt keinen Branch neben
-   einem gleichnamigen Unterpfad zu. Ein Unterbranch trennt seine Rolle deshalb mit `--` statt `/`, und
-   besteht bereits ein Branch `task` oder `work`, ersetzt `-` den Schrägstrich hinter diesem Präfix, etwa
-   `task-0042-export`. Verwende einen vorhandenen Branch oder Worktree nur weiter, wenn er nachweislich
-   derselben offenen Arbeit gehört.
-3. Bilde den Repo-Schlüssel aus den ersten acht kleingeschriebenen Hex-Zeichen eines SHA-256-Hashs über den
-   kanonischen absoluten Pfad des gemeinsamen Git-Verzeichnisses. Der Repo-Slug entsteht aus dem Namen des
-   primären Arbeitsbaums als kurzer ASCII-Slug. Verwende für neue Worktrees
-   `~/.qatlas/state/worktrees/<repo-slug>-<repo-schluessel>/<branch>/`; `<branch>` ist der vollständige
-   Branchname, jeder Schrägstrich darin eine Ordnerebene, etwa `.../task/0042-export--tests/`. Weil
-   Branchnamen eindeutig sind und keiner neben einem gleichnamigen Unterpfad besteht, liegen Worktrees dort
-   nebeneinander, nie ineinander. Bereits registrierte Worktrees am bisherigen Pfad bleiben dort; verschiebe
-   sie nicht allein wegen der neuen Namensreihenfolge.
-4. Prüfe Namens-, Branch- und Pfadkollisionen gegen das Git-Register und das Dateisystem. Überschreibe nichts.
-   Gehört eine Kollision nicht eindeutig derselben Arbeit, bilde selbst einen unterscheidbaren Zweck oder
-   stoppe bei weiterhin unklarer Zuordnung. Der Nutzer vergibt keinen technischen Namen.
-5. Löse Branch und Startpunkt vor dem Anlegen auf. Ein vorhandener lokaler Branch startet an seiner eigenen
-   Spitze und wird nie zurückgesetzt. Bei einem eindeutig gleichnamigen Remote-Branch darf ein lokaler
-   Tracking-Branch entstehen; bei mehreren passenden Remotes frage nach dem gemeinten. Für einen neuen
-   Branch gilt der aus Auftrag oder Spine folgende Startpunkt, sonst das aktuelle `HEAD`.
-6. Lege den Worktree ausschließlich mit `git worktree add` an; verwende weder `-B` noch `--force`. Prüfe den
-   Eintrag danach erneut über `git worktree list --porcelain`.
-
-Der Namensraum eines Tasks umfasst seinen Task-Branch, dessen Unterbranches und die daraus abgeleiteten
-Worktrees. Er gehört dem Orchestrator, der den Task im maßgeblichen Planungssystem beansprucht hat; der
-Namensraum eines Orchestrators ist die Summe seiner Task-Namensräume. Nur dieser Orchestrator legt darin
-Branches und Worktrees an, integriert und entfernt sie; ein anderer Orchestrator schreibt darin nichts. Ein
-Name belegt keine Eigentümerschaft; maßgeblich bleiben Beanspruchung und Git-Register. Worktrees gehören
-einer Arbeit, nie einer Agentenidentität: Lege keinen dauerhaften Worktree pro Agent, Host oder Modell an.
-Dauerhaft bleibt nur ein bewusst eingerichteter Integrations- oder echter Maintenance-Arbeitsbaum.
-
-Melde nach erfolgreicher Anlage Zweck, Branch, Startpunkt und absoluten Pfad. Weise knapp darauf hin, dass
-eine neue Agenten-Session in diesem Pfad starten muss. Kopiere keine `.env`, Secrets, Abhängigkeiten oder
-anderen ignorierten lokalen Zustand. Eine `.gitignore` des Projekts wird für den zentralen Ablageort nicht
-verändert.
+Melde nach der Anlage Zweck, Branch, Startpunkt und absoluten Pfad und weise darauf hin, dass eine neue
+Agenten-Session in diesem Pfad starten muss.
 
 ## Aufräumen
 
-Der Nutzer darf einen Worktree natürlich über die zuvor gezeigte Nummer oder seinen beschriebenen Zweck
-auswählen, etwa „Räum Nummer 4 auf“. Ein bloßes „Räum auf“ bedeutet: Prüfe den gesamten Bestand und entferne
-nur eindeutig gefahrlos aufräumbare Einträge; lege alle übrigen mit ihrem Hindernis nummeriert vor.
-
-1. Lies das Register erneut und löse die Auswahl eindeutig auf. Entferne niemals den primären oder den
-   aktuellen Arbeitsbaum.
-2. Prüfe im Ziel Status, ungetrackte Dateien, Branch, Upstream und nicht integrierte Commits. Das
-   Integrationsziel eines Unterbranches ist sein Task-Branch, das eines Task-Branches der Steuerbranch aus
-   dem Spine. Prüfe mit `git merge-base --is-ancestor <branch> <ziel>`, ob die Branch-Spitze in genau diesem
-   Ziel enthalten ist. Ist der Arbeitsbaum nicht sauber, das Integrationsziel nicht eindeutig belegt oder
-   diese Prüfung nicht erfolgreich, entferne nichts und zeige den konkreten Zustand. Eine für einen
-   laufenden oder unbekannten Worker oder Orchestrator beanspruchte Arbeit bleibt bestehen.
-3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <pfad>` und ohne
-   `--force`. Entferne danach mit `rmdir` nur dadurch leer gewordene Zwischenordner bis zum Repo-Ordner
-   im zentralen Ablageort. Der Branch bleibt zunächst erhalten.
-4. Lösche den lokalen Branch nach der Zielprüfung aus Schritt 2 nur mit `git branch -d`. Schlägt der Befehl
-   fehl, erzwinge die Löschung nicht. Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht.
-5. Zeige anschließend den verbleibenden Bestand erneut nummeriert.
-
-Will der Nutzer einen schmutzigen oder nicht integrierten Strang verwerfen, behandle das als eigene
-destruktive Aktion: Zeige den exakten Zustand und hole eine ausdrückliche Bestätigung für genau diesen
-Worktree ein. Lösche einen Worktree-Ordner nie von Hand.
+Der Nutzer wählt einen Worktree über die gezeigte Nummer oder seinen beschriebenen Zweck aus, etwa „Räum
+Nummer 4 auf“. Ein bloßes „Räum auf“ bedeutet: Prüfe den gesamten Bestand nach dem Vertrag, entferne nur
+eindeutig gefahrlos aufräumbare Einträge und lege alle übrigen mit ihrem Hindernis nummeriert vor. Zeige
+danach den verbleibenden Bestand erneut nummeriert.
