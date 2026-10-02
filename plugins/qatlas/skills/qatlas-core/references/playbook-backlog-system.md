@@ -30,8 +30,8 @@ Rückweg und hole die Zustimmung des Nutzers ein. Secrets und Tokens gehören ni
    standardmäßig liest.
 4. Lies immer [das neutrale Adapterverfahren](playbook-backlog-system-custom.md). Für GitHub lies zusätzlich
    [die GitHub-Besonderheiten](backlog-system-github.md). Für einen später ergänzten bekannten Anbieter gilt
-   dessen eigene Reference zusätzlich; ohne passende Reference bleibt `custom.md` der vollständige
-   Fallback.
+   dessen eigene Reference zusätzlich; ohne passende Reference bleibt das neutrale Adapterverfahren der
+   vollständige Fallback.
 
 Ein bestehendes Binding ist Repo-Wahrheit. Widerspricht der erreichbare externe Stand diesem Binding,
 melde den Widerspruch und ändere nichts, bis die Autorität geklärt ist.

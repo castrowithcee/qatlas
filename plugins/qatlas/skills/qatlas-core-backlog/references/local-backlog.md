@@ -27,11 +27,8 @@ Er bleibt in einem vollständigen Lesen eigenständig ausführbar:
 - Warum, Ergebnis, Scope, geltende Leitplanken, Abhängigkeiten, aktuelles Vorgehen und Abnahmekriterien
   enthalten nur weiterhin gültige Aussagen. Arbeite eine geklärte Entscheidung am fachlich passenden Ort
   ein und entferne dadurch überholte Alternativen.
-- Für Arbeit an einem vorhandenen System hält die Ausführungsgrundlage den belegten Ausgangszustand,
-  bestehende Einstiegspunkte, erwartete Änderungsflächen, konkrete Prüfpfade und die Wirkung auf maßgebliche
-  Dokumentation fest. Benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte sind ohne
-  Secrets benannt. Erwartete Flächen sind keine starre Dateifreigabe; Scope-in und Scope-out bleiben die
-  Autorität. Beurteile vorhandene Tasks nach diesem Inhalt, nicht nach einer bestimmten Überschrift.
+- Für Arbeit an einem vorhandenen System hält der Task die Ausführungsgrundlage nach der Ausführungsreife
+  der Backlog-Norm fest.
 - Der `Abschlussbericht` ist der einzige statusabhängige Übergabepunkt. Er enthält bei `review` nur die
   aktuelle menschliche Übergabe, bei `waiting` Grund, Wiederaufnahmesignal, belegten Stand und nächsten
   Schritt und bei `done` den kompakten endgültigen Bericht. Ersetze und konsolidiere seinen bisherigen
@@ -67,13 +64,8 @@ Zulässige Rück- und Übergabepfade:
 
 - `draft`: Das Arbeitspaket selbst hat eine offene Frage zu Ergebnis, Scope-in, Scope-out, Vorgehen,
   Abnahme oder zu einem ununtersuchten Ist-Stand, der diese Punkte wesentlich verändern könnte.
-- `ready`: Ohne bekannte Vertragsfrage eigenständig ausführbar und bei Arbeit an vorhandenem Bestand durch
-  eine ausreichende Ausführungsgrundlage belegt, aber nicht Teil des nächsten Ausführungshorizonts.
-  Notwendige Voraussetzungen und besondere Bearbeitungsrechte sind benannt und entweder verfügbar oder im
-  Taskvertrag beschaffbar. Eine fehlende externe Voraussetzung führt zu `waiting`, eine ungeklärte
-  Berechtigung oder Vertragsfrage zu `draft`. Eine reversible technische Detailentscheidung im
-  ausdrücklichen Entscheidungsspielraum verhindert `ready` nicht.
-- `next`: Ebenfalls vollständig ausführbar und für den kommenden Ausführungshorizont zusätzlich disponiert.
+- `ready`: Ausführungsreif nach der Backlog-Norm, aber nicht Teil des nächsten Ausführungshorizonts.
+- `next`: Ebenfalls ausführungsreif und für den kommenden Ausführungshorizont zusätzlich disponiert.
   Der Roster bestimmt Reihenfolge und Abhängigkeiten.
 - `in-progress`: Eine laufende Ausführung hat es beansprucht. Ohne sichtbaren Worker kläre zuerst die
   Eigentümerschaft und überführe den Task anhand des tatsächlichen nächsten Schritts in einen anderen Status.

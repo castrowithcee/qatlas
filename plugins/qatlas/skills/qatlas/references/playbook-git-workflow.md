@@ -43,8 +43,10 @@ Worktree braucht es, wenn
 - Nutzer- beziehungsweise Projektvorgaben ihn verlangen.
 
 Endet ein Task im leichten Pfad unfertig in `review` oder `waiting`, verschiebe seinen Stand mit
-`git switch -c <task-branch>` auf einen eigenen Branch, sichere ihn dort als Checkpoint und kehre mit
-`git switch <steuerbranch>` zurück. Der Steuerbranch bleibt so frei von unfertiger Arbeit.
+`git switch -c <task-branch>` auf einen eigenen Branch und sichere dort nur die Arbeitsdateien als
+Checkpoint. Status, Abschlussbericht und Spine bleiben ungestagt, kehren mit `git switch <steuerbranch>`
+zurück und werden dort nach „Übergeben“ committet. So bleibt der Steuerbranch frei von unfertiger Arbeit und
+der Task-Branch frei von Spine-Änderungen, die bei seiner späteren Integration kollidieren würden.
 
 Entsteht ein Task-Branch oder Worktree, lies vollständig den
 [Worktree-Vertrag](../../qatlas-work/references/worktree-contract.md). Die Laufautorisierung deckt die Anlage

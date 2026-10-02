@@ -49,8 +49,9 @@ automatisch zum Auftrag an ein stärkeres Modell.
 Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run` und
 ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Prüfe, dass Format, die Sektion des
 aktuellen Hosts, das Orchestrator-Modell und die benötigten Worker-Profile vorhanden und gültig sind. Fehlt
-die Datei oder ihre Host-Sektion, ist ein Eintrag ungültig oder erscheint ein Modell veraltet oder zweifelhaft,
-lies vollständig [Orchestrierung einrichten](playbook-orchestra.md) und beginne bis zur Klärung keinen Task.
+die Datei oder ihre Host-Sektion, ist ein Eintrag ungültig oder erscheint ein Modell veraltet oder
+zweifelhaft, lies vollständig [Orchestrierung einrichten](playbook-orchestra.md) und beginne bis zur Klärung
+keinen Task.
 
 Die Profile sind eine Allowlist: Verwende weder ein nicht eingetragenes Modell noch eine andere
 Effort-Einstellung. Setze `effort: null` nur für ein Modell, das keinen Effort unterstützt; für alle anderen
@@ -83,13 +84,10 @@ Eine größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für später
 4. Lies nur die ausgewählten Tasks und ihre echten Blocker vollständig. Öffne Kommentare oder Historie nur
    bei einem Widerspruch, fehlender entscheidungsrelevanter Begründung oder ausdrücklichem Verweis des
    aktuellen Datensatzes.
-5. Prüfe jeden Task unmittelbar vor der Beanspruchung erneut auf die Ausführungsreife des gemeinsamen
-   Vertrags. Fehlt eine Information, die Ergebnis, Scope, Vorgehen oder Abnahme wesentlich verändern
-   könnte, ist eine notwendige Berechtigung ungeklärt oder die Dokumentationswirkung offen, setze ihn auf
-   `draft`, informiere den Nutzer konkret und führe ihn nicht aus. Fehlt eine bereits
-   bekannte externe Voraussetzung, setze ihn auf `waiting`. Eine reversible technische Detailentscheidung
-   im vereinbarten Entscheidungsspielraum, eine technische Schwierigkeit oder eine zusätzliche Datei
-   innerhalb des fachlichen Scopes ist keine offene Vertragsfrage.
+5. Prüfe jeden Task unmittelbar vor der Beanspruchung erneut auf die Ausführungsreife der Backlog-Norm.
+   Ist sie verfehlt, setze ihn nach deren Regeln auf `draft` oder `waiting`, informiere den Nutzer konkret
+   und führe ihn nicht aus. Eine technische Schwierigkeit oder eine zusätzliche Datei innerhalb des
+   fachlichen Scopes ist keine offene Vertragsfrage.
 6. Verändere keinen `in-progress`-Task mit einem laufenden oder unbekannten Subagent oder Orchestrator.
    Kläre zuerst dessen Eigentümer und Arbeitsstand. Arbeitet ein weiterer Orchestrator im selben Repo oder
    Planungssystem, beanspruche nur nach [Parallele Arbeit im Run](git-parallel.md).
@@ -175,8 +173,9 @@ Sende nach dem erfolgreichen Start genau eine knappe Karte:
 
 Verwende ID und Titel aus dem Spine. Nenne pro gestarteten Subagent das gewählte Profil und die
 Modell-Effort-Kombination in kurzer Form. Meldet der Host die tatsächliche Kombination nicht zurück, nenne
-die angeforderte und kennzeichne sie mit „angefordert“; stoppe nur bei einer belegten Abweichung. Fehlen die benötigten Subagents, stoppe vor der Umsetzung und melde diese
-Voraussetzung. Der Orchestrator ersetzt sie nicht als stiller Subagent.
+die angeforderte und kennzeichne sie mit „angefordert“; stoppe nur bei einer belegten Abweichung. Fehlen die
+benötigten Subagents, stoppe vor der Umsetzung und melde diese Voraussetzung. Der Orchestrator ersetzt sie
+nicht als stiller Subagent.
 
 ### Überwachen
 

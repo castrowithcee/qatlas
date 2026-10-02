@@ -23,6 +23,24 @@ Projektvorgaben haben Vorrang.
 - Ein Wechsel oder eine Migration des maßgeblichen Systems erfolgt nur auf ausdrücklichen Aufruf von
   `qatlas-core backlog-system`. Normale Taskarbeit migriert oder spiegelt nicht nebenbei.
 
+## Ausführungsreife
+
+`ready` und `next` bezeichnen in jedem Planungssystem belegte Ausführungsreife. Der Task beschreibt Ziel,
+Scope-in, Scope-out, Vorgehen und Abnahme ohne bekannte Vertragsfrage. Bei Arbeit an einem vorhandenen
+System beruht er zusätzlich auf einer Ausführungsgrundlage, die so weit geklärt ist, dass die Ausführung den
+Scope nicht erst entdecken muss: belegter Ausgangszustand, bestehende Einstiegspunkte, erwartete
+Änderungsflächen, konkrete Prüfpfade und die Dokumentationswirkung. Benötigte Laufzeiten, Werkzeuge, Zugänge
+und besondere Bearbeitungsrechte sind ohne Secrets benannt und entweder verfügbar oder im Taskvertrag
+beschaffbar.
+
+- Erwartete Änderungsflächen sind eine Arbeitskarte, keine starre oder vollständige Dateiliste. Scope-in und
+  Scope-out bleiben die Autorität.
+- Die Dokumentationswirkung lautet `Ändern`, `Prüfen` oder `Keine` mit Begründung. `Ungeklärt` mit der
+  fehlenden Information hält den Task in `draft`.
+- Eine fehlende externe Voraussetzung führt zu `waiting`, eine ungeklärte Berechtigung oder Vertragsfrage zu
+  `draft`. Reversible technische Details im ausdrücklichen Entscheidungsspielraum verhindern die Reife nicht.
+- Beurteile Reife nach dem tatsächlichen Inhalt, nie nach einer bestimmten Überschrift oder Vorlage.
+
 ## Lokaler Backlog
 
 Lies vor jeder Arbeit im lokalen Backlog vollständig den

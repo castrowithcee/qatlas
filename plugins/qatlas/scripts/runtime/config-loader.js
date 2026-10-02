@@ -275,7 +275,6 @@ function createStatusline() {
   return writeNew(locations().statuslineFile, DEFAULT_STATUSLINE, 0o600);
 }
 
-
 module.exports = {
   DEFAULT_CONFIG,
   DEFAULT_STATUSLINE,

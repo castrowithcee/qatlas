@@ -60,33 +60,23 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
 
 1. **Drafts einzeln reifen.** Öffne den ersten Task der Gesprächsschlange und benenne seine konkrete offene
    Vertragsfrage zu Ergebnis, Scope-in, Scope-out, Vorgehen, Abnahme oder Ausführungsgrundlage. Ermittle eine
-   belegbare Antwort selbst aus dem aktuellen Projektstand. Bei Arbeit an einem vorhandenen System umfasst
-   die Ausführungsgrundlage Ausgangszustand, bestehende Einstiegspunkte, erwartete Änderungsflächen,
-   konkrete Prüfpfade, benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte sowie die
-   Wirkung auf maßgebliche Dokumentation. Arbeite die für den Task geltenden Entscheidungen,
-   Konventionen und Anforderungen konkret in Ziel, Vorgehen und überprüfbare Abnahme ein; eine Quellenliste
-   allein reicht nicht. Halte keine Secrets im Task fest. Braucht es eine
-   Nutzerentscheidung, stelle genau die nächste Entscheidung nach dem gemeinsamen Dialog vor und warte auf
-   die Antwort. Arbeite jede geklärte Antwort sofort am fachlich passenden Ort in den aktuellen
-   Taskvertrag ein und entferne überholte Varianten. Ist ein manuell angelegter oder gewachsener Task für
-   ein kleineres Worker-Modell im Regelfall nicht als abgegrenzter Auftrag tragfähig oder enthält er
-   eigenständig abnehmbare Ergebnisse, teile ihn in kleinere Tasks
-   mit je eigenem Ziel, Prüfpfad und sinnvoller Abhängigkeit. Übernimm die geltenden Entscheidungen und
-   Sicherheitsgrenzen konkret in jeden betroffenen Vertrag. Bewahre bestätigtes Ziel und Abnahme der
-   ursprünglichen Arbeit vollständig; lass keinen leeren Resttask zurück. Fahre
-   danach mit der nächsten offenen Frage oder dem nächsten Draft fort.
+   belegbare Antwort selbst aus dem aktuellen Projektstand. Arbeite die für den Task geltenden
+   Entscheidungen, Konventionen und Anforderungen konkret in Ziel, Vorgehen und überprüfbare Abnahme ein;
+   eine Quellenliste allein reicht nicht. Braucht es eine Nutzerentscheidung, stelle genau die nächste
+   Entscheidung nach dem gemeinsamen Dialog vor und warte auf die Antwort. Arbeite jede geklärte Antwort
+   sofort am fachlich passenden Ort in den aktuellen Taskvertrag ein und entferne überholte Varianten. Ist
+   ein manuell angelegter oder gewachsener Task für ein kleineres Worker-Modell im Regelfall nicht als
+   abgegrenzter Auftrag tragfähig oder enthält er eigenständig abnehmbare Ergebnisse, teile ihn in kleinere
+   Tasks mit je eigenem Ziel, Prüfpfad und sinnvoller Abhängigkeit. Übernimm die geltenden Entscheidungen
+   und Sicherheitsgrenzen konkret in jeden betroffenen Vertrag. Bewahre bestätigtes Ziel und Abnahme der
+   ursprünglichen Arbeit vollständig; lass keinen leeren Resttask zurück. Fahre danach mit der nächsten
+   offenen Frage oder dem nächsten Draft fort.
 2. **Reife belegen.** Setze einen Task nach dem Statusmodell des maßgeblichen Planungssystems auf `ready`,
-   sobald keine bekannte Vertragsfrage bleibt und die nötige Ausführungsgrundlage belegt ist. Die
-   Dokumentationswirkung lautet `Ändern`, `Prüfen`, `Keine` mit Begründung oder bleibt als `Ungeklärt`
-   sichtbar; nur die ersten drei Formen erlauben `ready`. Erwartete Änderungsflächen sind keine starre
-   Dateifreigabe. Notwendige Voraussetzungen und besondere Bearbeitungsrechte sind benannt und entweder
-   verfügbar oder im Taskvertrag beschaffbar; eine fehlende externe Voraussetzung führt zu `waiting`, eine
-   ungeklärte Berechtigung zu `draft`. Reversible technische Details im Entscheidungsspielraum verhindern
-   die Reife nicht. Beurteile bestehende oder externe Tasks nach ihrem Inhalt, nicht nach einer bestimmten
-   Überschrift. Ist eine Frage erst durch ein noch nicht vorhandenes Arbeitsergebnis beantwortbar, belasse
-   den Task als `draft` und halte die genaue fehlende Information fest. Eine Reihenfolge oder Abhängigkeit
-   allein belegt diese Unreife nicht. Beende den Lauf nicht nach der Bestandsaufnahme: Jeder anfangs
-   gewählte Draft wird besprochen oder vom Nutzer ausdrücklich zurückgestellt.
+   sobald er die Ausführungsreife der Backlog-Norm erreicht. Ist eine Frage erst durch ein noch nicht
+   vorhandenes Arbeitsergebnis beantwortbar, belasse den Task als `draft` und halte die genaue fehlende
+   Information fest. Eine Reihenfolge oder Abhängigkeit allein belegt diese Unreife nicht. Beende den Lauf
+   nicht nach der Bestandsaufnahme: Jeder anfangs gewählte Draft wird besprochen oder vom Nutzer
+   ausdrücklich zurückgestellt.
 3. **Menschliche Gates sichtbar machen.** Kläre echte `review`-Übergaben in diesem Modus nur, wenn der Nutzer
    das ausdrücklich in denselben Aufruf einbezieht.
 4. **Ruhende Arbeit prüfen.** Hebe `waiting` nur auf, wenn das Wiederaufnahmesignal belegt eingetreten ist.

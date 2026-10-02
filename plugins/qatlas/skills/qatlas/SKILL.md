@@ -35,14 +35,13 @@ geladene Einstieg und der Taskvertrag nicht, erschließe weiteres Projektwissen 
   Ergebnisse reif gewordene Arbeit und repariere Abhängigkeiten oder Queue. `shape backlog` ohne weiteren
   Scope umfasst den gesamten offenen Arbeitsvorrat. Setze nichts um.
 - **`run [Task, Projekt oder Backlog]`:** Lies vollständig [Arbeit ausführen](references/playbook-run.md).
-  Führe höchstens fünf ausführbare Tasks seriell durch einen Orchestrator und seine Subagents aus. Lies vor
-  dem ersten schreibenden Git-Schritt zusätzlich vollständig [den
-  Git-Ablauf](references/playbook-git-workflow.md).
+  Führe höchstens fünf ausführbare Tasks seriell durch einen Orchestrator und seine Subagents aus.
 - **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Kläre
   ausschließlich Entscheidungen, Prüfungen und Nutzerhandlungen. Beginne danach keine Ausführung.
 
-Bei Git lies für `run` vor dem ersten schreibenden Git-Schritt und für `shape` und `review` vor dem
-Sammelcommit [die gemeinsame Git-Norm](../qatlas-core-git/SKILL.md) und daraus die Referenzen der
+Bei Git lies für `run` vor dem ersten schreibenden Git-Schritt vollständig [den
+Git-Ablauf](references/playbook-git-workflow.md) und [die gemeinsame Git-Norm](../qatlas-core-git/SKILL.md),
+für `shape` und `review` vor dem Sammelcommit nur die Git-Norm; lies daraus jeweils die Referenzen der
 anstehenden Operationen. Der jeweilige Modus bestimmt, welche lokalen Commits und Integrationen autorisiert
 sind. `shape` endet in beiden Formen mit genau einem lokalen Sammelcommit pro betroffenem Repo über die in
 diesem Lauf geänderten Dateien, damit ein folgender `run` auf einem sauberen Stand beginnt. Der ausdrückliche
@@ -85,15 +84,8 @@ eine echte Nutzerentscheidung voraus, hole ihn knapp und ohne vorausgesetzte Tas
 nur durch die aktuelle Aufgabe und gib eine ausdrückliche begründete Empfehlung. Das jeweilige
 Modusverfahren lädt dafür den gemeinsamen Entscheidungsdialog.
 
-`ready` und `next` bezeichnen belegte Ausführungsreife: Der Task beschreibt nicht nur Ziel, Scope und
-Abnahme, sondern beruht bei Arbeit an einem vorhandenen System auf einer ausreichenden Untersuchung des
-Ist-Stands. Bestehende Einstiegspunkte, erwartete Änderungsflächen, konkrete Prüfpfade und die Wirkung auf
-maßgebliche Dokumentation müssen so weit geklärt sein, dass `run` den Scope nicht erst entdecken muss.
-Benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte sind benannt und entweder belegt
-verfügbar, innerhalb des Taskvertrags beschaffbar oder als konkrete offene Voraussetzung sichtbar. Halte
-dabei keine Secrets im Task fest. Eine vollständige oder unveränderliche Dateiliste ist nicht nötig;
-reversible technische Details dürfen im Entscheidungsspielraum bleiben. Beurteile diese Reife nach dem
-tatsächlichen Inhalt, nie nach dem bloßen Vorhandensein einer bestimmten Überschrift oder Vorlage.
+`ready` und `next` setzen die Ausführungsreife der Backlog-Norm voraus. `shape` stellt sie her, `run`
+prüft sie vor jeder Beanspruchung erneut.
 
 Nutze installierte Fach-Packs, wenn ihre Methode zum Gegenstand passt. Der gewählte Qatlas-Modus behält
 Eigentum an Gespräch und Übergabe. `goal` hält seinen Stand ausschließlich im Gespräch; die übrigen

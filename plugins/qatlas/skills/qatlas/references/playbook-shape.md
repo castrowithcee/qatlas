@@ -131,35 +131,22 @@ Jedes Paket braucht einen eigenen beobachtbaren Abschluss und einen konkreten Pr
 Integration und fachliche Reihenfolge zwischen abhängigen Paketen mit.
 
 Bilde zuerst einen vorläufigen Paketschnitt und belege dann für jedes Paket, das an einem vorhandenen System
-arbeitet, seine Ausführungsgrundlage. Verfolge den tatsächlichen bestehenden Ablauf weit genug, um
-festzuhalten:
-
-- den beobachteten Ausgangszustand und die tragenden Einstiegspunkte,
-- die erwarteten Änderungsflächen in Implementierung, Konfiguration, Tests und Dokumentation mit Pfad oder
-  System und Grund,
-- vorhandene konkrete Prüfpfade sowie fehlende Prüfmöglichkeiten,
-- benötigte Laufzeiten, Werkzeuge, Zugänge und besondere Bearbeitungsrechte, insbesondere eine nötige
-  Freigabe für `edit: locked`, die der Run-Aufruf nicht abdeckt, ohne Secrets im Task festzuhalten,
-- die Dokumentationswirkung als `Ändern`, `Prüfen`, `Keine` mit Begründung oder `Ungeklärt` mit der
-  fehlenden Information.
-
-Erwartete Änderungsflächen sind eine belegte Arbeitskarte, keine unveränderliche Dateiliste. Scope-in und
-Scope-out bleiben die Autorität. Weitere Dateien innerhalb dieses fachlichen Scopes darf die Ausführung
-selbstständig einbeziehen; eine notwendige Wirkung außerhalb davon ist eine Vertragsfrage. Bei einem Paket
-ohne vorhandenen Bestand kennzeichne nicht anwendbare Punkte mit Begründung, statt eine künstliche
-Bestandsanalyse zu erfinden.
+arbeitet, seine Ausführungsgrundlage nach der Backlog-Norm. Verfolge dafür den tatsächlichen bestehenden
+Ablauf weit genug. Nenne Änderungsflächen in Implementierung, Konfiguration, Tests und Dokumentation mit Pfad
+oder System und Grund, fehlende Prüfmöglichkeiten ausdrücklich und eine nötige Freigabe für `edit: locked`,
+die der Run-Aufruf nicht abdeckt, als besonderes Bearbeitungsrecht. Weitere Dateien innerhalb des fachlichen
+Scopes darf die Ausführung selbstständig einbeziehen; eine notwendige Wirkung außerhalb davon ist eine
+Vertragsfrage. Bei einem Paket ohne vorhandenen Bestand kennzeichne nicht anwendbare Punkte mit Begründung,
+statt eine künstliche Bestandsanalyse zu erfinden.
 
 - Verhindert eine offene Frage schon den sinnvollen Zuschnitt, kläre sie vor der Anlage.
 - Steht der Zuschnitt, aber Ergebnis, Scope, Vorgehen oder Abnahme bleiben konkret offen, lege `draft` an
   und halte die Frage im fachlich passenden Abschnitt fest. Erzeuge keinen allgemeinen Fragenfriedhof.
-- Arbeite geklärte Antworten am fachlichen Ort ein und entferne überholte Alternativen. Setze erst auf
-  `ready`, wenn der Task ohne bekannte Vertragsfrage eigenständig ausführbar und seine nötige
-  Ausführungsgrundlage belegt ist. `Ungeklärt` bei der Dokumentationswirkung oder ein ununtersuchter
-  Ist-Stand, der Ergebnis, Scope, Vorgehen oder Abnahme wesentlich verändern könnte, bleibt `draft`. Eine
-  fehlende externe Voraussetzung führt nach dem Statusmodell zu `waiting`; eine ungeklärte Berechtigung
-  bleibt `draft`.
-- Lasse reversible technische Details im ausdrücklichen Entscheidungsspielraum. Sie sind kein Grund für
-  eine Rückfrage oder einen künstlich unreifen Task.
+- Arbeite geklärte Antworten am fachlichen Ort ein, entferne überholte Alternativen und setze erst bei
+  erreichter Ausführungsreife auf `ready`. Ein ununtersuchter Ist-Stand, der Ergebnis, Scope, Vorgehen oder
+  Abnahme wesentlich verändern könnte, bleibt `draft`.
+- Lasse reversible technische Details im ausdrücklichen Entscheidungsspielraum; sie sind kein Grund für eine
+  Rückfrage.
 - Arbeite die für diesen Gegenstand geltenden Entscheidungen, Konventionen und Anforderungen als konkrete
   Anweisungen und Abnahmekriterien in den Task ein. Nenne stabile Quellen knapp zur Nachprüfung. Ein Link
   allein ersetzt keine bindende Aussage; eine vollständige Wiederholung der Projektdokumentation ist ebenso
@@ -174,10 +161,9 @@ Bestandsanalyse zu erfinden.
 Kläre Ziel, Zuschnitt, Abnahme und Ausführungsgrundlage der Pakete im nächsten Horizont durch eigene
 Untersuchung und gezielte Nutzerentscheidungen möglichst bis `ready`. Beende die Ausarbeitung nicht mit
 vermeidbaren Drafts. Eine tatsächlich offene Vertragsfrage, fehlende Berechtigung oder noch nicht
-vorliegende Grundlage bleibt nach dem Statusmodell sichtbar; erfinde keine Gewissheit. `ready` verlangt
-keine Vorentscheidung jedes reversiblen technischen Details. Überblicke spätere Horizonte in
-Projektdokumentation und Meilensteinen, materialisiere aber nur hinreichend verstandene Pakete. Es gilt
-keine harte Taskzahl, sondern ausführbare Reife.
+vorliegende Grundlage bleibt nach dem Statusmodell sichtbar; erfinde keine Gewissheit. Überblicke spätere
+Horizonte in Projektdokumentation und Meilensteinen, materialisiere aber nur hinreichend verstandene Pakete.
+Es gilt keine harte Taskzahl, sondern ausführbare Reife.
 
 Gruppiere nur zusammengehörige oder abhängige Pakete in einem Projekt. Pflege den maßgeblichen Roster und
 die fachlich ausführbare Reihenfolge mit. Setze in diesem Modus niemals `in-progress`.

@@ -25,9 +25,9 @@ node <plugin-root>/scripts/qatlas-update.js status
 Der erste Befehl prüft Node, Git, Git-Identität, optionale Git-LFS-Unterstützung, nutzerweiten Store,
 Syntax und Grundstruktur der optionalen `orchestra.yaml`, Projektwissensraum samt Root-README und
 Größenbudget, `.gitignore`, Projektanweisungen und das Scaffold der Nutzerbibliothek unter `~/qatlas/`.
-Fehlende Bibliotheksteile nennt er als Vorschlag für `qatlas-core setup`. Fehlt `orchestra.yaml`, ist das ein Hinweis für `run`, kein
-Setup-Blocker; Doctor legt sie auch mit `--apply` nicht ohne bestätigte Modellwerte an. Modell- und
-Effort-Verfügbarkeit prüft erst `run` im aktuellen Host. Bei einer alten oder
+Fehlende Bibliotheksteile nennt er als Vorschlag für `qatlas-core setup`. Fehlt `orchestra.yaml`, ist das ein
+Hinweis für `run`, kein Setup-Blocker; Doctor legt sie auch mit `--apply` nicht ohne bestätigte Modellwerte
+an. Modell- und Effort-Verfügbarkeit prüft erst `run` im aktuellen Host. Bei einer alten oder
 parallelen Projektwurzel bleibt jeder schreibende Reparaturlauf gesperrt und nennt den Inventarbefehl. Der
 zweite Befehl vergleicht den unter `.qatlas/plugins/updates/state.json` für dieses Repo gespeicherten
 Qatlas-Prüfstand mit der installierten Qatlas-Version. Die optionalen Packs prüfen ihre eigene Version

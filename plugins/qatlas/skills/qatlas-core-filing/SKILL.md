@@ -50,8 +50,9 @@ Pluginmaterial ersetzen Nutzerdateien nie pauschal. Lege keine leeren Ordner auf
 ## Operation wählen
 
 Folgt das Anlegen, Ändern oder Verschieben einer Datei einer kanonischen Vorlage oder einem Fachvertrag,
-etwa ein Task samt Abschluss nach `done/` dem lokalen Backlog-Vertrag, genügen Vorlage und Vertrag. Lies die Referenzen unten dann nur für das, was beide offen
-lassen. Sonst lies vor der Operation deren Referenz vollständig:
+etwa ein Task samt Abschluss nach `done/` dem lokalen Backlog-Vertrag, genügen Vorlage und Vertrag. Lies die
+Referenzen unten dann nur für das, was beide offen lassen. Sonst lies vor der Operation deren Referenz
+vollständig:
 
 - Anlegen ohne passende Vorlage: [Ablegen](references/playbook-create.md)
 - Umbenennen, Verschieben, Zusammenführen, Promoten, Archivieren, Löschen:
