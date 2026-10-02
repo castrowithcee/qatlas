@@ -110,7 +110,9 @@ Branchverwaltung, erstellt Commits oder startet eigene Subagents.
 
 Der Orchestrator gibt jedem Subagent genau einen abgegrenzten Auftrag mit Task-ID und Titel, Arbeitsort,
 erlaubten Zielen, Scope-out, Abnahmekriterien, Prüfungen und Rückgabeformat. Er implementiert die fachliche
-Lösung nicht selbst. Kleine Status-, Integrations- und Verifikationsschritte bleiben bei ihm.
+Lösung nicht selbst. Kleine Status-, Integrations- und Verifikationsschritte bleiben bei ihm. Ausnahme: Ist
+das gesamte Ergebnis eines Tasks eine kleine, risikoarme Änderung an wenigen Dateien, die er ohnehin
+vollständig prüfen muss, setzt er sie selbst um; die Karte nennt dann `Subagents: keine`.
 
 Beurteile vor jedem Spawn den tatsächlichen Auftrag und seinen Prüfaufwand: Welche Ergebnisse sind
 eigenständig abnehmbar, welche Schritte hängen voneinander ab, welche Sicherheits- und Zielgrenzen gelten,
@@ -171,9 +173,9 @@ Sende nach dem erfolgreichen Start genau eine knappe Karte:
 >
 > **Subagents:** light: sonnet (low)
 
-Verwende ID und Titel aus dem Spine. Nenne pro gestarteten Subagent das gewählte Profil und die tatsächlich
-verwendete Modell-Effort-Kombination in kurzer Form; bei unbekannter oder abweichender Kombination stoppe
-den betreffenden Auftrag. Fehlen die benötigten Subagents, stoppe vor der Umsetzung und melde diese
+Verwende ID und Titel aus dem Spine. Nenne pro gestarteten Subagent das gewählte Profil und die
+Modell-Effort-Kombination in kurzer Form. Meldet der Host die tatsächliche Kombination nicht zurück, nenne
+die angeforderte und kennzeichne sie mit „angefordert“; stoppe nur bei einer belegten Abweichung. Fehlen die benötigten Subagents, stoppe vor der Umsetzung und melde diese
 Voraussetzung. Der Orchestrator ersetzt sie nicht als stiller Subagent.
 
 ### Überwachen
@@ -184,7 +186,8 @@ ohne Fortschritt festhängt oder eine ausgeschlossene Wirkung vorbereitet. Begre
 Auftrag, statt durch weitere unspezifische Prompts Token zu verbrauchen.
 
 Eine Erfolgsmeldung des Subagents ist kein Abschlussbeleg. Der Orchestrator prüft Ergebnis, Diff und
-Beweise selbst. Gleiche jede Abnahme und jede übergreifende Sicherheitsgrenze mit dem tatsächlichen
+Beweise selbst und neben den Kriterien auch, ob das Ergebnis das Ziel des Tasks inhaltlich vollständig
+erfüllt. Gleiche jede Abnahme und jede übergreifende Sicherheitsgrenze mit dem tatsächlichen
 Verhalten ab; grüne Standardtests ersetzen weder ausdrücklich vereinbarte Randfälle noch einen
 Referenzvergleich. Prüfe übergreifende Invarianten spätestens bei der Integration aller Meilensteine
 erneut. Klassifiziere jeden Fehlschlag:

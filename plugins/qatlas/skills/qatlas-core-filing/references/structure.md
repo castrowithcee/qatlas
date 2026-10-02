@@ -87,7 +87,7 @@ Die ID ist je Präfix eine fortlaufende Dezimalzahl über die gesamte Wissenswur
 Unterbereiche und Archive. Ermittle alle vorhandenen Kennungen des Präfixes, etwa für Tasks:
 
 ```sh
-find .qatlas-project -type f -name 'task-[0-9]*-*.md' -print
+find .qatlas-project -type f -name 'task-*.md' | grep -E '/task-[0-9]{4,}-[^/]*$'
 ```
 
 Wähle eins mehr als den höchsten Wert und fülle auf mindestens vier Stellen auf; ohne Treffer beginnt sie bei

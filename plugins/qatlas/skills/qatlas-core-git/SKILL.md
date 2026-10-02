@@ -1,8 +1,8 @@
 ---
 name: qatlas-core-git
 description: >
-  Git-Arbeit sicher und bewusst ausführen. Verwenden zu Beginn der Arbeit in einem Git-Repo einer Session
-  und vor dem ersten Eingriff in ein eingebettetes oder benachbartes Repo, bei Status-, Diff-, Fetch- und
+  Git-Arbeit sicher und bewusst ausführen. Verwenden vor dem ersten schreibenden Eingriff in ein Git-Repo
+  einer Session, auch in ein eingebettetes oder benachbartes Repo, bei Status-, Diff-, Fetch- und
   Sync-Aufträgen, vor der ersten schreibenden Operation, wenn mehrere Agenten parallel in ein Repo schreiben
   oder einen Arbeitsstand übernehmen, und immer, wenn der Agent eine fertige Änderung committen will. Ebenso
   bei Commit-Zuschnitt, Commit-Nachrichten und Checkpoints, bei Push und Force-Push, beim Bereinigen oder

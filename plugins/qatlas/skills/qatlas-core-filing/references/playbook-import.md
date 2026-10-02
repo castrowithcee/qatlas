@@ -40,7 +40,8 @@ melde das fehlende Scaffold und verweise auf `qatlas-core setup`.
    betroffenen Inhalt nicht, `ask` fragt vor dem Schreiben im Gespräch nach, `warn` schreibt und nennt den
    Befund, `allow` und `enabled: false` prüfen nicht. Scheitert der Aufruf, melde den Grund und schreibe
    keinen Inhalt, den du für sensibel hältst.
-5. **Ablegen.** Lege nach [Ablegen](playbook-create.md) ab. Überschreibe keine vorhandene Datei. Aktualisiere
+5. **Ablegen.** Lege nach [Ablegen](playbook-create.md) ab, soweit keine Vorlage und kein Fachvertrag das
+   Ablegen regeln. Überschreibe keine vorhandene Datei. Aktualisiere
    sie nur, wenn der Nutzer genau diese Datei genannt hat oder Inhalt und stabile Kennung eindeutig denselben
    Zweck belegen. Ein gleicher Dateiname allein genügt nie; sonst behandle den Fall als Kollision und frage
    nach. Erzeuge keine automatische Herkunftsmarkierung aus dem Dateiformat.
@@ -48,7 +49,8 @@ melde das fehlende Scaffold und verweise auf `qatlas-core setup`.
    und gültiges Frontmatter trägt.
 7. **Archivieren.** Verschiebe erst nach bestandener Prüfung genau dieses Original nach
    `processed/<yyyy-mm>/`. Überschreibe dort keinen gleichnamigen Bestand; bei einer Kollision stoppe und
-   melde sie.
+   melde sie. Enthält das Original ein Secret, frage vorher, ob es im Original geschwärzt oder das Original
+   gelöscht werden soll, und empfiehl, das Secret zu widerrufen.
 
 Berichte pro Datei Ergebnis und Ziel, gemeldete sensible Befunde sowie Fehler und den unveränderten
 Eingangspfad.

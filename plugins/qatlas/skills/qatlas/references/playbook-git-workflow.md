@@ -30,9 +30,12 @@ arbeiten weitere Orchestratoren im selben Repo oder Planungssystem, lies zusätz
 
 ## Isolation entscheiden
 
-Committe die Beanspruchung zuerst auf dem sauberen Steuerbranch. Arbeitet danach genau ein Subagent zur Zeit
-und ist der Arbeitsbaum sauber, gilt der **leichte Pfad**: Der Subagent arbeitet direkt im Arbeitsbaum des
-Steuerbranches, und der Orchestrator committet dort nach seiner Rückgabe. Einen eigenen Task-Branch mit
+Arbeitet genau ein Schreiber zur Zeit und ist der Arbeitsbaum sauber, gilt der **leichte Pfad**: Der
+Subagent oder bei einem Kleinsttask der Orchestrator arbeitet direkt im Arbeitsbaum des Steuerbranches, und
+der Orchestrator committet dort nach der Prüfung. Die Beanspruchung erhält dabei keinen eigenen Commit; der
+Ergebnis- oder Checkpointcommit nimmt den Status mit. Arbeiten weitere Orchestratoren im selben Repo oder
+Planungssystem oder entsteht ein Task-Branch, committe die Beanspruchung zuerst auf dem sauberen
+Steuerbranch. Einen eigenen Task-Branch mit
 Worktree braucht es, wenn
 
 - mehrere Schreiber gleichzeitig arbeiten,

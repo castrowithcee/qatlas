@@ -1,6 +1,6 @@
 ---
 description: >
-  Git-Zustand prüfen und synchronisieren: beim Sessionstart, vor dem ersten Eingriff in ein weiteres Repo
+  Git-Zustand prüfen und synchronisieren: vor dem ersten schreibenden Eingriff in ein Repo
   und bei Status-, Diff-, Fetch- und Sync-Aufträgen.
 license: MIT
 type: playbook
@@ -20,6 +20,6 @@ edit: locked
    einen Remotevergleich, Sync oder Push, und nur für die betroffenen Remotes. Ein rein lokaler Merge löst
    keinen Fetch aus. Scheitert ein nötiger Fetch, melde, dass der entfernte Stand nicht geprüft werden
    konnte.
-6. Aktualisiere einen Branch nie allein wegen des Sessionstarts oder einer Zustandsprüfung. Einen sauberen,
+6. Aktualisiere einen Branch nie allein wegen einer Zustandsprüfung. Einen sauberen,
    nur zurückliegenden Branch aktualisierst du ausschließlich in einem ausdrücklich autorisierten Sync- oder
    Arbeitsablauf und ausschließlich per Fast-Forward, bevorzugt mit `git pull --ff-only`.
