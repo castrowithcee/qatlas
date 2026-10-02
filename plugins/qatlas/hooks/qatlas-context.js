@@ -57,9 +57,8 @@ if (block === 'brains') {
   const agentsFile = path.join(require('os').homedir(), 'qatlas', 'AGENTS.qatlas.md');
   if (brains.qatlas && brains.qatlas.enabled && fs.existsSync(agentsFile)) {
     lines.push('QATLAS-BIBLIOTHEK: ' + portable(agentsFile),
-      'Globale Arbeitsvereinbarung und Einstieg in die nutzereigene Bibliothek. Lies sie vollständig, bevor du '
-        + 'Befehle mit möglicher Lösch-, Überschreib-, Berechtigungs- oder externer Wirkung ausführst oder '
-        + 'projektübergreifendes Wissen des Nutzers brauchst, und folge ihren Lesebedingungen.');
+      'Globale Arbeitsvereinbarung des Nutzers und Einstieg in seine Bibliothek. Lies sie in jeder Session '
+        + 'vollständig vor deiner ersten Antwort oder Handlung, wende sie an und folge ihren Lesebedingungen.');
   }
   const project = brains.project;
   if (project && project.enabled && Array.isArray(project.paths) && project.paths.length) {

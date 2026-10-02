@@ -3,8 +3,8 @@ sie danach nie. Sie gehört dir: Passe die globale Arbeitsvereinbarung an deine 
 Agentendatei bleibt sie frontmatterfrei. -->
 # Globale Arbeitsvereinbarung
 
-Diese Vereinbarung gilt projektübergreifend. Native globale und projektlokale Agentenanweisungen haben
-Vorrang.
+Diese Vereinbarung gilt projektübergreifend und wird in jeder Session gelesen. Halte hier fest, was für alle
+deine Projekte gelten soll. Native globale und projektlokale Agentenanweisungen haben Vorrang.
 
 ## Bibliothek
 
