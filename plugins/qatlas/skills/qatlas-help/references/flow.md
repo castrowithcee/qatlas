@@ -1,0 +1,35 @@
+---
+description: >
+  Arbeitsablauf mit Qatlas von der Einrichtung über Goal, Shape, Run und Review bis zur Pflege.
+type: meta
+edit: locked
+license: MIT
+---
+
+# Arbeitsablauf
+
+1. **Einrichten:** `qatlas-core setup` legt Projektzustand, Projektanweisungen, Nutzerbibliothek und
+   globale Einstellungen an, ohne Vorhandenes zu ersetzen. `qatlas-core doctor` prüft später den Stand.
+2. **Ziel klären:** `qatlas goal <Idee>` schärft im Gespräch, was erreicht werden soll. Dabei entsteht nichts
+   Dauerhaftes.
+3. **Ausarbeiten:** `qatlas shape <Idee oder Datei>` hält bestätigtes Wissen fest und schneidet kleine,
+   ausführungsreife Tasks. `qatlas shape backlog` ordnet vorhandene Arbeit neu.
+4. **Ausführen:** `qatlas run` arbeitet höchstens fünf Tasks nacheinander ab. Ein Orchestrator vergibt
+   Aufträge an Subagents, prüft deren Ergebnisse und committet lokal. Push, Publish, Deployment und
+   irreversible Schritte autorisiert ein Run nie.
+5. **Abnehmen:** `qatlas review` führt einzeln durch Entscheidungen, Prüfungen und Abnahmen, die nur der
+   Nutzer treffen kann.
+
+Jeder Schritt braucht einen eigenen Aufruf; keiner startet den nächsten von selbst. `goal` ist optional,
+ein direkter Einstieg mit `shape` ist gültig.
+
+## Ohne Loop
+
+Auch ohne diese Schleife arbeitet der Agent mit Qatlas: Er findet Wissen über die Navigation, legt Dateien
+regelkonform ab, arbeitet im maßgeblichen Planungssystem und prüft Git vor Eingriffen. Zur Beratung startet
+`qatlas-council` unabhängige Perspektiven, ohne etwas umzusetzen.
+
+## Pflege
+
+Rohmaterial legt der Nutzer in `.qatlas-project/zone-import/` ab und kündigt es an. Plugin-Updates können
+projektbezogene Hinweise mitbringen, die der Sessionstart meldet und `qatlas-core doctor` anzeigt.

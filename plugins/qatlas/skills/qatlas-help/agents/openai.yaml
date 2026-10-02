@@ -1,7 +1,7 @@
 interface:
   display_name: "Qatlas Help"
-  short_description: "Zentrale Karte aller Qatlas-Plugins zeigen"
-  default_prompt: "Nutze $qatlas-help, um die zentrale Karte aller Qatlas-Plugins und Aufrufe zu zeigen."
+  short_description: "Qatlas wie ein Handbuch im Gespräch erklären"
+  default_prompt: "Nutze $qatlas-help, um mir Qatlas zu erklären."
 
 policy:
   allow_implicit_invocation: false

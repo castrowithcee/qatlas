@@ -35,6 +35,9 @@ Lade den passenden Skill, sobald sein Anlass eintritt, und arbeite nicht aus dem
 - **`qatlas-core-git`:** prüft den Repo-Zustand vor jedem Eingriff und hält Commits, Push und Historie
   sicher.
 
+Fragt der Nutzer, was Qatlas ist oder wie es funktioniert, lies `<plugin-root>/skills/qatlas-help/SKILL.md`
+und begleite ihn danach.
+
 ## Interaktion
 
 Chat und sichtbares Reasoning folgen der Sprache der ersten Nutzernachricht. Eine dauerhafte Sprachvorgabe
