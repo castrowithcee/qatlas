@@ -18,10 +18,11 @@ function write(file, content) {
 }
 
 // Jeder Fall erhält ein eigenes Home und Repo; PATH ohne gitleaks prüft den eingebauten Mustersatz.
-function run(name, { home = '', project = null, staged = {}, git = true }) {
+function run(name, { home = '', project = null, staged = {}, git = true, bin = null }) {
   const base = path.join(root, name);
   const repo = path.join(base, 'repo');
-  const env = { ...process.env, HOME: path.join(base, 'home'), PATH: gitDir + ':' + path.dirname(process.execPath) };
+  const env = { ...process.env, HOME: path.join(base, 'home'),
+    PATH: [bin, gitDir, path.dirname(process.execPath)].filter(Boolean).join(':') };
   fs.mkdirSync(repo, { recursive: true });
   if (home) write(path.join(env.HOME, '.qatlas', 'plugins', 'config.yaml'), home);
   if (project) write(path.join(repo, '.qatlas', 'plugins', 'config.yaml'), project);
@@ -73,6 +74,20 @@ try {
   result = run('no-git', { git: false, staged: secret });
   assert.strictEqual(result.status, 0);
 
+  // Ein gitleaks vor 8.19 kennt `git` nicht und wird über `protect --staged` genutzt.
+  const bin = path.join(root, 'old-gitleaks-bin');
+  write(path.join(bin, 'gitleaks'), [
+    '#!/bin/sh',
+    '[ "$1" = protect ] || exit 1',
+    'while [ $# -gt 0 ]; do [ "$1" = --report-path ] && report="$2"; shift; done',
+    'echo \'[{"File":"a.txt","StartLine":1,"RuleID":"old-gitleaks"}]\' > "$report"',
+    'exit 1',
+  ].join('\n') + '\n');
+  fs.chmodSync(path.join(bin, 'gitleaks'), 0o755);
+  result = run('old-gitleaks', { bin, staged: { 'a.txt': 'hallo\n' } });
+  assert.strictEqual(result.status, 1);
+  assert.match(result.stdout, /a\.txt:1 old-gitleaks/);
+
   // Top-up ergänzt fehlende Schlüssel und erhält gesetzte Werte samt Kommentar.
   const home = path.join(root, 'topup');
   write(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\n# eigener Kommentar\nprotection:\n  secrets: warn\n');
@@ -84,7 +99,7 @@ try {
   assert.match(text, /# eigener Kommentar/);
   assert.match(text, /secrets: warn/);
 
-  process.stdout.write('✓ Qatlas-Protection: 10 Szenarien erfolgreich.\n');
+  process.stdout.write('✓ Qatlas-Protection: 11 Szenarien erfolgreich.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

@@ -78,7 +78,8 @@ function gitleaks() {
       const findings = JSON.parse(fs.readFileSync(report, 'utf8') || '[]');
       return findings.map(item => item.File + ':' + item.StartLine + ' ' + item.RuleID);
     } catch {
-      return null;
+      // Ohne lesbaren Bericht kennt diese Version den Aufruf nicht; die ältere Variante folgt.
+      continue;
     } finally {
       try { fs.unlinkSync(report); } catch { /* Kein Bericht entstanden. */ }
     }
