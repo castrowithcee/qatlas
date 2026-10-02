@@ -94,6 +94,7 @@ Wähle eins mehr als den höchsten Wert und fülle auf mindestens vier Stellen a
 `0001`. Prüfe vor dem Schreiben und vor der Integration erneut auf Kollisionen. Bei parallelen neuen
 Einträgen erhält der noch nicht integrierte Eintrag die nächste freie ID samt angepassten Verweisen. IDs
 werden nicht wiederverwendet; Präfix und ID bleiben stabil und werden nicht kosmetisch neu nummeriert.
+Ältere Kennungen anderer Form zählen für die Vergabe nicht mit und bleiben unverändert.
 
 `knowledge/` enthält tatsächliches Fachwissen oder Synthesen mit sprechenden Namen ohne verpflichtendes
 Präfix oder Nummer. Funktionsdateien, technische Formate und rohe Zonenartefakte folgen ihren festen Namen

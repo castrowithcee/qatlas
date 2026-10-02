@@ -17,7 +17,8 @@ Commit oder alle sachlich passenden Commits eines klar begrenzten Arbeitslaufs a
 Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
 
 1. Lies vor jedem Commit den gesamten Diff genau dieses Repos. Stage bewusst und führe nie ungesehen
-   `git add -A` aus. Fremde oder nicht zuordenbare Änderungen bleiben ungestagt. Schneide Commits nach der
+   `git add -A` aus. Fremde oder nicht zuordenbare Änderungen bleiben ungestagt. Schneide jeden Commit als
+   kohärenten, prüfbaren Zustand; bei Zweifel über den Zuschnitt oder bei Checkpoints gilt die
    [Commitgrenze](commit-boundaries.md).
 2. Führe nach dem Staging `node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root>` aus;
    `<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`, ohne Hook drei Ebenen über diesem

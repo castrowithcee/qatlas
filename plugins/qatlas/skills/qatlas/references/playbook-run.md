@@ -35,14 +35,8 @@ Bestimme vor der ersten Änderung:
 5. **Beweise:** Welche Tests, Zustände oder Artefakte belegen den Abschluss?
 6. **Grenzen:** Welche Handlung braucht zwingend den Nutzer?
 
-Ist `.qatlas-project/README.md` vorhanden, beginne dort und folge nur den für den Laufvertrag relevanten
-Lesebedingungen. Prüfe fachliche Quellen auch außerhalb des Wissensraums an ihrem maßgeblichen Ort. Native
-Anweisungshierarchie, ausdrückliche Geltung und fachlicher Scope bestimmen den Rang; automatische
-Bereitstellung oder bloßes Lesen nicht.
-
-Nutzer- und Projektvorgaben bestimmen das Planungssystem. Nur ohne andere Vorgabe gilt der lokale
-Qatlas-Backlog. Ist ein vorgeschriebenes externes System nicht erreichbar, spiegle es nicht in lokale
-Dateien; stoppe vor schreibender Arbeit mit dem konkreten Hindernis.
+Ist ein vorgeschriebenes externes Planungssystem nicht erreichbar, stoppe vor schreibender Arbeit mit dem
+konkreten Hindernis.
 
 Der Laufvertrag konkretisiert den gewählten Scope, ersetzt aber nicht dessen Ausarbeitung. `run` prüft die
 Ausführungsgrundlage auf Aktualität, Umgebungs- und Git-Voraussetzungen; er soll den fachlichen Scope nicht
@@ -53,29 +47,14 @@ automatisch zum Auftrag an ein stärkeres Modell.
 ## Orchestrierung konfigurieren
 
 Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run` und
-ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Die kommentierte Vorlage ist [die
-Orchestra-Vorlage](../../../store/config/orchestra.example.yaml); `null` bei einem Modellwert markiert dort
-einen Platzhalter, `effort: null` dagegen ein Modell ohne Effort-Unterstützung. Die Claude-Code-Vorlage
-schlägt Haiku, Sonnet und Opus für `light`, `standard` und `demanding` vor. Fehlt die Nutzerdatei, lies die
-Vorlage und ermittle die für den aktuellen Host verfügbaren Modell-IDs beziehungsweise nativen Aliase und
-Effort-Stufen. Zeige eine konkret ausgefüllte Fassung mit nur diesem Host und frage, ob du sie dort anlegen
-sollst. Schreibe keine Platzhalter; sind Werte nicht prüfbar, frage nach ihnen. Lege die Datei erst nach
-Zustimmung an. Ohne Datei und ohne Zustimmung beginne keinen Task; die Modellgrenzen wären nicht belegt.
+ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Prüfe, dass Format, die Sektion des
+aktuellen Hosts, das Orchestrator-Modell und die benötigten Worker-Profile vorhanden und gültig sind. Fehlt
+die Datei oder ihre Host-Sektion, ist ein Eintrag ungültig oder erscheint ein Modell veraltet oder zweifelhaft,
+lies vollständig [Orchestrierung einrichten](playbook-orchestra.md) und beginne bis zur Klärung keinen Task.
 
-Prüfe bei einer vorhandenen Datei Format, Host, die drei beschriebenen Profile, Orchestrator-Modell und
-alle gewählten Worker-Profile. Akzeptiere als Modellwerte nur vom Host unterstützte IDs oder native Aliase;
-deute bloße Familiennamen nicht selbst als Aliase. Fehlt die Sektion des aktuellen Hosts, schlage ihre
-konkret ausgefüllte Ergänzung vor und ändere die Nutzerdatei erst nach Zustimmung; beginne bis dahin keinen
-Task.
 Die Profile sind eine Allowlist: Verwende weder ein nicht eingetragenes Modell noch eine andere
 Effort-Einstellung. Setze `effort: null` nur für ein Modell, das keinen Effort unterstützt; für alle anderen
-Worker wird Effort ausdrücklich gesetzt und nicht vom Orchestrator geerbt. Prüfe die eingetragenen Modelle
-und Effort-Stufen gegen die aktuell im Host verfügbare Auswahl; verifiziere zweifelhafte oder neue Modelle
-anhand aktueller offizieller Host-Angaben. Ist ein Eintrag veraltet oder ist ein neues Modell für ein Profil
-plausibel besser, schlage die konkrete Änderung mit Grund vor. Ändere die nutzereigene Datei nur nach
-Zustimmung. Ein neues Modell ersetzt einen gültigen Eintrag nicht still. Ein ungültiges Orchestrator-Modell
-oder ein für den nötigen Auftrag nicht nutzbares Profil stoppt vor der Task-Beanspruchung; andere gültige
-Profile bleiben nutzbar. Behaupte keine Prüfung der Modellverfügbarkeit, die der Host nicht erlaubt.
+Worker wird Effort ausdrücklich gesetzt und nicht vom Orchestrator geerbt.
 
 Codex setzt beim Spawn Modell und Reasoning-Effort ausdrücklich. Claude Code verwendet für die Effort-Stufen
 `low`, `medium`, `high`, `xhigh` und `max` jeweils den Plugin-Subagent `qatlas:run-low`,
@@ -104,19 +83,16 @@ Eine größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für später
 4. Lies nur die ausgewählten Tasks und ihre echten Blocker vollständig. Öffne Kommentare oder Historie nur
    bei einem Widerspruch, fehlender entscheidungsrelevanter Begründung oder ausdrücklichem Verweis des
    aktuellen Datensatzes.
-5. Prüfe jeden Task unmittelbar vor der Beanspruchung erneut. Beurteile nach seinem Inhalt, nicht nach dem
-   Vorhandensein einer bestimmten Überschrift, ob Ergebnis, Scope, Vorgehen, Abnahme und bei Arbeit an
-   vorhandenem Bestand die Ausführungsgrundlage und die konkret eingearbeiteten geltenden Entscheidungen,
-   Konventionen und Anforderungen weiterhin tragen. Eine Quellenliste ohne diese Aussagen ist kein
-   ausführbarer Vertrag. Fehlt eine Information, die diese Punkte
-   wesentlich verändern könnte, ist eine notwendige Berechtigung ungeklärt oder die Dokumentationswirkung
-   offen, setze ihn auf `draft`, informiere den Nutzer konkret und führe ihn nicht aus. Fehlt eine bereits
+5. Prüfe jeden Task unmittelbar vor der Beanspruchung erneut auf die Ausführungsreife des gemeinsamen
+   Vertrags. Fehlt eine Information, die Ergebnis, Scope, Vorgehen oder Abnahme wesentlich verändern
+   könnte, ist eine notwendige Berechtigung ungeklärt oder die Dokumentationswirkung offen, setze ihn auf
+   `draft`, informiere den Nutzer konkret und führe ihn nicht aus. Fehlt eine bereits
    bekannte externe Voraussetzung, setze ihn auf `waiting`. Eine reversible technische Detailentscheidung
    im vereinbarten Entscheidungsspielraum, eine technische Schwierigkeit oder eine zusätzliche Datei
    innerhalb des fachlichen Scopes ist keine offene Vertragsfrage.
 6. Verändere keinen `in-progress`-Task mit einem laufenden oder unbekannten Subagent oder Orchestrator.
    Kläre zuerst dessen Eigentümer und Arbeitsstand. Arbeitet ein weiterer Orchestrator im selben Repo oder
-   Planungssystem, beanspruche nur nach den Regeln für mehrere Orchestratoren im Git-Ablauf.
+   Planungssystem, beanspruche nur nach [Parallele Arbeit im Run](git-parallel.md).
 7. Prüfe bei Git Root, Branch, Upstream, Worktrees und vollständigen Status. Schreibende Arbeit beginnt nur
    auf einem sauberen, seit dem Preflight unveränderten Steuerbranch. Wende vor dem ersten schreibenden
    Git-Schritt den vom Einstieg genannten Git-Ablauf an.
@@ -193,7 +169,7 @@ Sende nach dem erfolgreichen Start genau eine knappe Karte:
 
 > **Aufgabe:** #84 - Dateizugriff auf SQL umstellen
 >
-> **Subagents:** light: Luna (high)
+> **Subagents:** light: sonnet (low)
 
 Verwende ID und Titel aus dem Spine. Nenne pro gestarteten Subagent das gewählte Profil und die tatsächlich
 verwendete Modell-Effort-Kombination in kurzer Form; bei unbekannter oder abweichender Kombination stoppe
@@ -256,9 +232,6 @@ Ausführungsgrundlage ab:
   fest, vorrangig bei den betroffenen Entscheidungen, Anforderungen oder dem Fachwissen in
   `.qatlas-project/`. Sie gilt damit als geänderte maßgebliche Grundlage; ein Abschlussbericht allein reicht
   dafür nicht.
-- Ändert die Umsetzung autorisiert eine maßgebliche Grundlage, ermittle deren betroffene offene Tasks und
-  gleiche ihre konkreten Vorgaben gezielt ab. Ändere Ziel oder Abnahmekriterien nur mit der dafür nötigen
-  Entscheidung.
 - Widerspricht eine maßgebliche fachliche Dokumentation dem beabsichtigten Ergebnis und könnte sie eine
   Nutzerentscheidung ausdrücken, setze den Task auf `review`, statt eine Seite still zu überschreiben.
 - Ändere sachlich unabhängige fehlerhafte Dokumentation nicht opportunistisch und melde sie konkret. Erfasse

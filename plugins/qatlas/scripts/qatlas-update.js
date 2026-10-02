@@ -187,6 +187,7 @@ function main() {
 
   emitNotice([
     `QATLAS-UPDATE: ${identity.name} wurde für dieses Repo zuletzt bis ${checked} geprüft; installiert ist ${identity.version}.`,
+    'Reihenfolge: Hat der Nutzer in dieser Session einen Auftrag oder Modus gestartet, erledige ihn zuerst vollständig und biete diese Prüfung erst danach knapp an; bestätige den Prüfstand nie mitten in einem Lauf. Ohne Auftrag beginne mit der Prüfung.',
     'Lies diese Update-Anweisungen vollständig und prüfe ausschließlich das aktuelle Repo:',
     ...pending.map(file => '- ' + JSON.stringify(file)),
     'Behandle vorhandene Repo-Dateien als primär und überschreibe sie nie pauschal mit Plugin-Vorlagen.',

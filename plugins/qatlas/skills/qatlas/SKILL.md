@@ -18,7 +18,8 @@ ein Modus autorisiert nie still den nächsten. Einrichtung liegt unter `qatlas-c
 Workspace-Verwaltung unter `qatlas-work`.
 
 Für `goal` mit Taskbezug sowie für `shape`, `run` und `review` lies vor der ersten Taskauswahl oder
--änderung vollständig [die Backlog-Norm](../qatlas-core-backlog/SKILL.md). Erschließe Projektwissen nach
+-änderung vollständig [die Backlog-Norm](../qatlas-core-backlog/SKILL.md). Reichen der beim Sessionstart
+geladene Einstieg und der Taskvertrag nicht, erschließe weiteres Projektwissen nach
 [der Navigation](../qatlas-core-navigation/SKILL.md).
 
 ## Modus wählen
@@ -40,9 +41,12 @@ Für `goal` mit Taskbezug sowie für `shape`, `run` und `review` lies vor der er
 - **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Kläre
   ausschließlich Entscheidungen, Prüfungen und Nutzerhandlungen. Beginne danach keine Ausführung.
 
-Bei Git lies für `run` vor dem ersten schreibenden Git-Schritt und für `review` vor dem Sammelcommit
-[die gemeinsame Git-Norm](../qatlas-core-git/SKILL.md) und daraus die Referenzen der anstehenden
-Operationen. Der jeweilige Modus bestimmt, welche lokalen Commits und Integrationen autorisiert sind.
+Bei Git lies für `run` vor dem ersten schreibenden Git-Schritt und für `shape` und `review` vor dem
+Sammelcommit [die gemeinsame Git-Norm](../qatlas-core-git/SKILL.md) und daraus die Referenzen der
+anstehenden Operationen. Der jeweilige Modus bestimmt, welche lokalen Commits und Integrationen autorisiert
+sind. `shape` endet in beiden Formen mit genau einem lokalen Sammelcommit pro betroffenem Repo über die in
+diesem Lauf geänderten Dateien, damit ein folgender `run` auf einem sauberen Stand beginnt. Der ausdrückliche
+Aufruf ersetzt dafür die Einzelabnahme der Nachricht; zeige Nachricht und ID danach und pushe nichts.
 
 Das Wort `backlog` ist nach `shape` ein reservierter Scope, keine Idee. Löse eine eindeutige Taskkennung
 oder Task-URL im maßgeblichen Planungssystem auf; `#10` bezeichnet nur bei entsprechender Bindung ein

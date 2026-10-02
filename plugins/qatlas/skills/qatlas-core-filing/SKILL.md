@@ -49,11 +49,13 @@ Pluginmaterial ersetzen Nutzerdateien nie pauschal. Lege keine leeren Ordner auf
 
 ## Operation wählen
 
-Lies vor jeder anstehenden Operation deren Referenz vollständig:
+Folgt eine Datei einer kanonischen Vorlage oder einem Fachvertrag, etwa ein Task dem lokalen
+Backlog-Vertrag, genügen Vorlage und Vertrag. Lies die Referenzen unten dann nur für das, was beide offen
+lassen. Sonst lies vor der Operation deren Referenz vollständig:
 
-- Anlegen: [Ablegen](references/playbook-create.md)
+- Anlegen ohne passende Vorlage: [Ablegen](references/playbook-create.md)
 - Umbenennen, Verschieben, Zusammenführen, Promoten, Archivieren, Löschen:
   [Umstrukturieren](references/playbook-restructure.md)
 - Importieren: [Importieren](references/playbook-import.md)
-- Markdown anlegen oder inhaltlich ändern: [Frontmatter](references/frontmatter.md)
-- Schreiben unter `.qatlas-project/`: [Projektwissensraum](references/structure.md)
+- Frontmatter setzen oder ändern: [Frontmatter](references/frontmatter.md)
+- Ort, Präfix oder Kennung im Wissensraum bestimmen: [Projektwissensraum](references/structure.md)
