@@ -15,7 +15,7 @@ license: MIT
 | **qatlas shape <Task>** | Schärft einen eindeutig bezeichneten bestehenden Task. |
 | **qatlas shape backlog [Scope]** | Schärft Drafts, klärt Voraussetzungen und repariert die Queue. |
 | **qatlas run** | Führt höchstens fünf Tasks seriell mit Orchestrator und Subagents aus. |
-| **qatlas review** | Klärt menschliche Entscheidungen, Prüfungen und Abnahmen einzeln. |
+| **qatlas review** | Führt Schritt für Schritt durch konkrete Prüfungen und klärt Entscheidungen einzeln. |
 | **qatlas-work tree** | Zeigt Git-Worktrees, legt mit `new` einen an oder räumt sicher auf. |
 | **qatlas-core setup** | Richtet Projektzustand, Projektanweisungen, Bibliothek und Einstellungen ein. |
 | **qatlas-core doctor** | Prüft Abhängigkeiten, Scaffold, Bibliothek und Update-Stand ohne Reparatur. |

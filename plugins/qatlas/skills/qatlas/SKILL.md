@@ -36,8 +36,9 @@ geladene Einstieg und der Taskvertrag nicht, erschließe weiteres Projektwissen 
   Scope umfasst den gesamten offenen Arbeitsvorrat. Setze nichts um.
 - **`run [Task, Projekt oder Backlog]`:** Lies vollständig [Arbeit ausführen](references/playbook-run.md).
   Führe höchstens fünf ausführbare Tasks seriell durch einen Orchestrator und seine Subagents aus.
-- **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Kläre
-  ausschließlich Entscheidungen, Prüfungen und Nutzerhandlungen. Beginne danach keine Ausführung.
+- **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Führe den
+  Nutzer zügig durch konkrete Prüfungen und kläre Entscheidungen und Nutzerhandlungen. Beginne danach keine
+  Ausführung.
 
 Bei Git lies für `run` vor dem ersten schreibenden Git-Schritt vollständig [den
 Git-Ablauf](references/playbook-git-workflow.md) und [die gemeinsame Git-Norm](../qatlas-core-git/SKILL.md),

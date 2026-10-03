@@ -17,8 +17,8 @@ license: MIT
 4. **Ausführen:** `qatlas run` arbeitet höchstens fünf Tasks nacheinander ab. Ein Orchestrator vergibt
    Aufträge an Subagents, prüft deren Ergebnisse und committet lokal. Push, Publish, Deployment und
    irreversible Schritte autorisiert ein Run nie.
-5. **Abnehmen:** `qatlas review` führt einzeln durch Entscheidungen, Prüfungen und Abnahmen, die nur der
-   Nutzer treffen kann.
+5. **Abnehmen:** `qatlas review` führt Schritt für Schritt mit Ort und erwartetem Ergebnis durch konkrete
+   Prüfungen und klärt einzeln Entscheidungen und Handlungen, die nur der Nutzer treffen kann.
 
 Jeder Schritt braucht einen eigenen Aufruf; keiner startet den nächsten von selbst. `goal` ist optional,
 ein direkter Einstieg mit `shape` ist gültig.
