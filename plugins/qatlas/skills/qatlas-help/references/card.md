@@ -10,7 +10,7 @@ license: MIT
 
 | Aufruf | Aufgabe |
 |---|---|
-| **qatlas goal [Idee, Task oder Datei]** | Klärt Zielbild und kleinsten tragfähigen Umfang ausschließlich im Gespräch. |
+| **qatlas goal [Idee, Task oder Datei]** | Klärt im Gespräch einen Plan mit beantworteten Fragen als Grundlage für Shape. |
 | **qatlas shape [Idee oder Datei]** | Hält bestätigtes Wissen fest und schneidet kleine, ausführungsreife Tasks. |
 | **qatlas shape <Task>** | Schärft einen eindeutig bezeichneten bestehenden Task. |
 | **qatlas shape backlog [Scope]** | Schärft Drafts, klärt Voraussetzungen und repariert die Queue. |

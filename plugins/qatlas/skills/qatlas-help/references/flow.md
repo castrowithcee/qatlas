@@ -10,8 +10,8 @@ license: MIT
 
 1. **Einrichten:** `qatlas-core setup` legt Projektzustand, Projektanweisungen, Nutzerbibliothek und
    globale Einstellungen an, ohne Vorhandenes zu ersetzen. `qatlas-core doctor` prüft später den Stand.
-2. **Ziel klären:** `qatlas goal <Idee>` schärft im Gespräch, was erreicht werden soll. Dabei entsteht nichts
-   Dauerhaftes.
+2. **Plan klären:** `qatlas goal <Idee>` macht im Gespräch aus einer Idee einen Plan mit beantworteten
+   Fragen, den `shape` in Tasks zerlegt. Dabei entsteht nichts Dauerhaftes.
 3. **Ausarbeiten:** `qatlas shape <Idee oder Datei>` hält bestätigtes Wissen fest und schneidet kleine,
    ausführungsreife Tasks. `qatlas shape backlog` ordnet vorhandene Arbeit neu.
 4. **Ausführen:** `qatlas run` arbeitet höchstens fünf Tasks nacheinander ab. Ein Orchestrator vergibt

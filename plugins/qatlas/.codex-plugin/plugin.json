@@ -19,7 +19,7 @@
     "defaultPrompt": [
       "Richte dieses Projekt mit qatlas-core setup ein.",
       "Prüfe dieses Projekt mit qatlas-core doctor.",
-      "Klär mit qatlas goal das Zielbild und den kleinsten tragfähigen Umfang dieser Idee.",
+      "Klär mit qatlas goal den Plan und die offenen Fragen dieser Idee.",
       "Arbeite diese Idee mit qatlas shape aus.",
       "Disponiere mit qatlas shape backlog die nächste Arbeitsqueue.",
       "Führe mit qatlas run bis zu fünf Aufgaben dieses Projekts seriell aus.",

@@ -23,9 +23,13 @@ erreichbar, darf die Ausarbeitung im Gespräch fortfahren; melde Arbeitspakete a
 Nur ohne andere Vorgabe gilt der lokale Qatlas-Backlog. Fehlt dafür das Scaffold, verweise auf
 `qatlas-core setup`, bevor du unter `.qatlas-project/` schreibst.
 
-Der Nutzer hat `shape` bewusst gestartet. Damit steht die Ausarbeitungsabsicht fest, nicht schon die
-inhaltliche Richtung. Stelle nur Fragen, deren Antwort Ergebnis, Scope, dauerhafte Dokumentation,
-Paketschnitt oder Abnahme wesentlich verändert.
+Der Nutzer hat `shape` bewusst gestartet. Damit steht die Ausarbeitungsabsicht fest. Liegt im Gespräch ein
+bestätigtes Goal-Briefing vor, ist sein Plan die Grundlage: Frage Ziel, Umfang, Grenzen und die darin
+getroffenen Entscheidungen nicht erneut ab, sondern prüfe sie gegen den Bestand. Widerspricht der Bestand
+dem Plan, lege den Widerspruch als Entscheidung vor, statt den Plan still anzupassen. Ohne ein solches
+Briefing steht die inhaltliche Richtung noch nicht fest und wird hier geklärt. Stelle nur Fragen, deren
+Antwort Ergebnis, Scope, dauerhafte Dokumentation, Paketschnitt oder Abnahme wesentlich verändert. Fragen,
+die erst die Tiefe des Zuschnitts aufwirft, sind normal.
 
 Bleibt nach der eigenen Untersuchung eine echte Nutzerentscheidung zu einer vorhandenen oder werdenden Aufgabe
 offen, lies vor ihrer ersten Präsentation vollständig [Entscheidungen knapp
@@ -75,7 +79,8 @@ Lesebedingungen. Lies eine benachbarte `FRAMEWORK.md`, wenn die README sie für 
 verlangt. Untersuche außerdem vorhandene native Anweisungen, fachliche Dokumentation,
 Implementierung und relevante externe Quellen, bevor du eine grüne Wiese planst. Bewerte Aussagen nach
 nativer Hierarchie, ausdrücklicher Geltung und fachlichem Scope; ihr Fundort oder ihre automatische
-Bereitstellung verleiht ihnen keinen zusätzlichen Rang. Kläre mindestens:
+Bereitstellung verleiht ihnen keinen zusätzlichen Rang. Übernimm, was ein bestätigter Goal-Plan bereits
+beantwortet, und kläre mindestens:
 
 - **Ergebnis:** Was existiert danach, das heute fehlt?
 - **Warum:** Welches Problem löst es und für wen?
