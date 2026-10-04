@@ -1,7 +1,7 @@
 ---
 description: >
   Frontmatter-Schema für inhaltliche Markdown-Dateien: description, Inhaltstypen, Bearbeitungsrechte,
-  Pflichtfelder und Datumsfelder.
+  Pflichtfelder, Datumsfelder sowie Versionierung und Ablösung wichtiger Dokumente.
 license: MIT
 type: rule
 edit: locked
@@ -47,13 +47,13 @@ einen echten Zweck erfüllen. Die zusätzlichen Felder dieser Tabelle sind absch
 
 | `type` | Bedeutung und zusätzliche Felder | Übliche Pflege |
 |---|---|---|
-| `meta` | Dauerhafte Steuerung, Rahmen oder Navigation; keine Datumsfelder. | Normativer Rahmen `locked`, Navigation und beschreibende Projektpflege `shared`. |
-| `rule` | Dauerhafte Verhaltensnorm; optional `paths`, keine Datumsfelder. | `locked` |
+| `meta` | Dauerhafte Steuerung, Rahmen oder Navigation; keine Datumsfelder, nur eine `FRAMEWORK.md` trägt `version` und `updated`. | Normativer Rahmen `locked`, Navigation und beschreibende Projektpflege `shared`. |
+| `rule` | Dauerhafte Verhaltensnorm; `version`, `updated`, optional `paths`. | `locked` |
 | `skill` | Aktiv ausgelöstes Verfahren; `name`, optional `argument-hint` und `disable-model-invocation`, keine Datumsfelder. | `locked` |
-| `fact` | Extern gebundene Wahrheit; optional `source`, Pflichtfeld `updated`. | `shared`, wenn sie im Arbeitsfluss gegen die Quelle gepflegt werden soll; sonst begründet `locked`. |
-| `knowledge` | Veränderliches Fachwissen und Synthese; `created`, `updated`. | `shared` |
-| `playbook` | Wiederholbares neutrales Verfahren; grundsätzlich keine Datumsfelder. | Beschreibendes Verfahren `shared`, tatsächlich normative Vorgabe `locked`. |
-| `decision` | Entscheidung des Nutzers; `created`. | Akzeptierte Entscheidung `locked`, noch nicht akzeptierter Entwurf `shared`. |
+| `fact` | Extern gebundene Wahrheit; optional `source`, Pflichtfelder `version` und `updated`. | `shared`, wenn sie im Arbeitsfluss gegen die Quelle gepflegt werden soll; sonst begründet `locked`. |
+| `knowledge` | Veränderliches Fachwissen und Synthese; `version`, `created`, `updated`. | `shared` |
+| `playbook` | Wiederholbares neutrales Verfahren; `version`, `updated`. | Beschreibendes Verfahren `shared`, tatsächlich normative Vorgabe `locked`. |
+| `decision` | Entscheidung oder bestätigter Plan des Nutzers; `created`, `status`, bei Ablösung `supersedes` oder `superseded_by`. | Akzeptierte Entscheidung `locked`, noch nicht akzeptierter Entwurf `shared`. |
 | `history` | Nur ergänztes Protokoll, wenn die Chronologie ausgewertet wird; `created`, `updated`. | `shared` |
 | `task` | Lokales Arbeitspaket; `status`, `created`, `updated`. | `shared` |
 | `memory` | Datei im festen Memory-Subsystem; keine weiteren Pflichtfelder. | `shared` |
@@ -73,8 +73,33 @@ nicht in dieses allgemeine Inhaltsschema. Für lokale Tasks bestimmt der lokale 
 aktuelle Zustandsmenge. Projektköpfe und andere Inhaltstypen behalten ihre eigenen
 Statusmodelle.
 
-`source` steht nur auf einem Snapshot von etwas Externem. Datumsfelder stehen nie auf `meta`, `rule` oder
-`skill`; ein bewusst datiertes Playbook ist die einzige Ausnahme.
+`source` steht nur auf einem Snapshot von etwas Externem. Datumsfelder stehen nie auf `skill` und auf
+`meta` nur in einer `FRAMEWORK.md`.
+
+## Versionierung und Ablösung
+
+Ob und wann sich ein wichtiges Dokument geändert hat, steht in der Datei selbst; Git beantwortet, was sich
+geändert hat. Es gibt genau eine gültige Datei je Gegenstand, nie eine Kopie mit Versionssuffix im Namen.
+
+- **Fortgeschrieben:** `knowledge`, `fact`, `rule`, `playbook` und `FRAMEWORK.md` werden am Ort geändert.
+  `version` ist eine ganze Zahl ab `1`. Jede inhaltliche Änderung erhöht sie um eins und setzt `updated`
+  auf das Änderungsdatum. Reine Form-, Tippfehler- oder Verweiskorrekturen ändern keines der beiden
+  Felder.
+- **Festgeschrieben:** Eine `decision` hält mit `status` ihren Zustand: `draft`, `accepted` oder
+  `superseded`. Eine angenommene Entscheidung bleibt bis auf Formkorrekturen unverändert. Ihre inhaltliche
+  Änderung braucht eine neue Nutzerentscheidung und entsteht als neues Dokument mit neuer Kennung, das das
+  alte vollständig ersetzt und `supersedes: <alte Kennung>` trägt. Das alte erhält nur `status:
+  superseded` und `superseded_by: <neue Kennung>`. Ziehe Verweise in Navigation und offenen Tasks auf das
+  neue Dokument nach. Die Kennung ist der Dateiname ohne `.md`.
+- **Ohne Version:** `task`, `history`, `memory`, `skill`, übriges `meta` und Vorlagen folgen ihrem eigenen
+  Lebenszyklus. Ausgelieferter Plugin-Text wird über die Plugin-Version versioniert und trägt kein
+  `version`.
+
+Fehlen einem bestehenden Dokument diese Felder, ergänze sie still, sobald du die Datei schreibst, auch bei
+`edit: locked`; sie ändern keine Aussage. Der vorgefundene Stand wird `version: 1` mit `updated` aus dem
+Datum des letzten Commits der Datei, ohne Git-Historie aus dem heutigen Datum. Ändert derselbe Schreibvorgang
+den Inhalt, folgt darauf `version: 2` mit heutigem Datum. Eine Entscheidung erhält bei `edit: locked`
+`status: accepted`, sonst `status: draft`.
 
 ## Invarianten
 
@@ -83,8 +108,8 @@ Statusmodelle.
 2. Mische Rahmen (`meta`, `rule`, `skill`) und Inhaltstypen nicht in derselben Datei.
 3. Eine Datei hat ein `edit`, bestimmt vom strengsten Material. Markiere keine Abschnitte einzeln.
 4. Teile eine Datei nicht künstlich nur für ihr Frontmatter auf.
-5. Ändere `fact` nur mit seiner Quelle und eine akzeptierte `decision` nur mit einer neuen
-   Nutzerentscheidung.
+5. Ändere `fact` nur mit seiner Quelle. Löse eine akzeptierte `decision` nur auf eine neue
+   Nutzerentscheidung durch ein neues Dokument ab.
 
 Minimale Form für `knowledge`:
 
@@ -94,6 +119,7 @@ description: >
   Gegenstand und Zweck der Datei als ein Satz mit den entscheidenden Suchbegriffen.
 type: knowledge
 edit: shared
+version: 1
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---

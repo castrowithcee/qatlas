@@ -74,7 +74,7 @@ Neue Inhaltsdateien heißen `<präfix>-<id>-<slug>.md`. Wähle das Präfix nach 
 | `convention` | Konvention |
 | `arch` | aktuelle Architekturbeschreibung |
 | `req` | Anforderung |
-| `plan` | dauerhafter Plan ohne externen Spiegel |
+| `plan` | bestätigter Plan eines Vorhabens |
 | `task` | lokales Arbeitspaket |
 | `ops` | Betriebsverfahren |
 | `quality`, `risk`, `history` | Qualität, Risiko oder Historie |

@@ -91,9 +91,10 @@ Modusverfahren lädt dafür den gemeinsamen Entscheidungsdialog.
 prüft sie vor jeder Beanspruchung erneut.
 
 Nutze installierte Fach-Packs, wenn ihre Methode zum Gegenstand passt. Der gewählte Qatlas-Modus behält
-Eigentum an Gespräch und Übergabe. `goal` hält seinen Stand ausschließlich im Gespräch; die übrigen
-Arbeitsmodi pflegen dauerhaftes Projektwissen, Spine und Status nur im Rahmen ihres jeweiligen Vertrags.
-Ein Fach-Pack liefert Methode und Prüfperspektive, keinen konkurrierenden Workflow.
+Eigentum an Gespräch und Übergabe. `goal` hält seinen Stand im Gespräch und exportiert ihn nur auf
+ausdrücklichen Wunsch nach `zone-export/`; die übrigen Arbeitsmodi pflegen dauerhaftes Projektwissen,
+Spine und Status nur im Rahmen ihres jeweiligen Vertrags. Ein Fach-Pack liefert Methode und
+Prüfperspektive, keinen konkurrierenden Workflow.
 
 Jede Schleife endet mit ihrem eigenen Ergebnis:
 

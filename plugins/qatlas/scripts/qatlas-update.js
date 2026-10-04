@@ -194,6 +194,7 @@ function main() {
     'Sind keine Änderungen anwendbar, aktualisiere den Prüfstand ohne Rückfrage.',
     'Andernfalls nenne für jeden anwendbaren Punkt knapp den konkreten Befund im Repo, die vorgeschlagene Änderung und ihre praktische Folge oder ihren Grund. Eine bloße Liste aus Dateinamen, Mengen oder Schlagwörtern reicht nicht; nenne bei Sammelbefunden ein repräsentatives Beispiel.',
     'Frage erst danach, was vollständig, teilweise oder nicht übernommen werden soll.',
+    'Ausnahme: Einen Punkt, den die Anweisung ausdrücklich als rein ergänzend ohne Rückfrage kennzeichnet, führe ohne Rückfrage aus und nenne danach Ergebnis und ein Beispiel.',
     'Halte abgelehnte Änderungen nicht im Repo fest, außer der Nutzer verlangt dies ausdrücklich.',
     'Aktualisiere nach der Prüfung oder Nutzerentscheidung in jedem Fall den Prüfstand, indem du das folgende Script mit den Argumenten ack --target <PROJEKT-ROOT> ausführst:',
     'UPDATE-SCRIPT: ' + JSON.stringify(path.join(pluginRoot, 'scripts', 'qatlas-update.js')),

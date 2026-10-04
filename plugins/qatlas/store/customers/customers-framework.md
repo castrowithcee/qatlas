@@ -4,11 +4,14 @@ description: >
   Datenschutzleitplanken. Ein Overlay für den Bereich, gilt und wird gelesen, wenn dort gearbeitet wird.
 type: meta
 edit: locked
+version: 1
+updated: YYYY-MM-DD
 ---
 
 # Framework: Kunden
 
-<!-- Nach <area>-customers/FRAMEWORK.md kopieren und anpassen. -->
+<!-- Nach <area>-customers/FRAMEWORK.md kopieren, anpassen und vor dem Schreiben alle Platzhalter
+ersetzen. -->
 
 ## Identifikation
 - Ein Kunde wird über **<ID-Schema> + Kurzname** identifiziert (zum Beispiel eine Fall- oder Kundennummer plus einen

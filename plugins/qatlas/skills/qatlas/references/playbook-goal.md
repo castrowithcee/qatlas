@@ -37,7 +37,10 @@ auch keinen Entwurf oder Gesprächsmitschnitt ab. Beginne keine Umsetzung und be
 verdeckte Änderungen vor.
 
 Halte das Ergebnis vollständig im Gespräch. Zustimmung zum Plan autorisiert weder dauerhafte
-Dokumentation noch Planung oder Umsetzung. Starte keinen weiteren Modus selbst.
+Dokumentation noch Planung oder Umsetzung. Starte keinen weiteren Modus selbst. Einzige Ausnahme: Verlangt
+der Nutzer ausdrücklich eine Übergabe an eine andere Session, schreibe das bestätigte Goal-Briefing nach
+`.qatlas-project/zone-export/goal-<slug>.md`. Diese Zone ist unversioniert; dauerhaft hält erst `shape` den
+Plan fest.
 
 ## Eingang verstehen
 

@@ -24,12 +24,13 @@ Nur ohne andere Vorgabe gilt der lokale Qatlas-Backlog. Fehlt dafür das Scaffol
 `qatlas-core setup`, bevor du unter `.qatlas-project/` schreibst.
 
 Der Nutzer hat `shape` bewusst gestartet. Damit steht die Ausarbeitungsabsicht fest. Liegt im Gespräch ein
-bestätigtes Goal-Briefing vor, ist sein Plan die Grundlage: Frage Ziel, Umfang, Grenzen und die darin
-getroffenen Entscheidungen nicht erneut ab, sondern prüfe sie gegen den Bestand. Widerspricht der Bestand
-dem Plan, lege den Widerspruch als Entscheidung vor, statt den Plan still anzupassen. Ohne ein solches
-Briefing steht die inhaltliche Richtung noch nicht fest und wird hier geklärt. Stelle nur Fragen, deren
-Antwort Ergebnis, Scope, dauerhafte Dokumentation, Paketschnitt oder Abnahme wesentlich verändert. Fragen,
-die erst die Tiefe des Zuschnitts aufwirft, sind normal.
+bestätigtes Goal-Briefing vor oder übergibt der Nutzer dessen Export aus `zone-export/`, ist sein Plan die
+Grundlage: Frage Ziel, Umfang, Grenzen und die darin getroffenen Entscheidungen nicht erneut ab, sondern
+prüfe sie gegen den Bestand. Widerspricht der Bestand dem Plan, lege den Widerspruch als Entscheidung vor,
+statt den Plan still anzupassen. Ohne ein solches Briefing steht die inhaltliche Richtung noch nicht fest
+und wird hier geklärt. Stelle nur Fragen, deren Antwort Ergebnis, Scope, dauerhafte Dokumentation,
+Paketschnitt oder Abnahme wesentlich verändert. Fragen, die erst die Tiefe des Zuschnitts aufwirft, sind
+normal.
 
 Bleibt nach der eigenen Untersuchung eine echte Nutzerentscheidung zu einer vorhandenen oder werdenden Aufgabe
 offen, lies vor ihrer ersten Präsentation vollständig [Entscheidungen knapp
@@ -107,9 +108,17 @@ Entscheidungen bleiben getrennt an ihrem passenden Ort. Umfangreiche beschreiben
 Frontmatter-Norm, dupliziere keine vorhandene Spezifikation und erzeuge keinen konkurrierenden
 Dokumentationsbaum.
 
-Dokumentiere kompakt:
+Halte den bestätigten Plan eines Vorhabens, aus einem Goal-Briefing übernommen oder in diesem Lauf
+geklärt, als festgeschriebenes Dokument `plan-<id>-<slug>.md` mit `type: decision`, `edit: locked` und
+`status: accepted` am maßgeblichen Ort fest, im Wissensraum unter `decisions/`. Er enthält den Plan in einem
+Satz, Problem und Nutzen, kleinsten tragfähigen Zielzustand mit Abgrenzung, Fähigkeiten, getroffene
+Entscheidungen, spätere Fähigkeiten mit Einführungssignal sowie Annahmen und akzeptierte Risiken. Ändert
+sich der Plan inhaltlich, löst ihn ein neuer Plan nach der Frontmatter-Norm ab. Ein einzelnes kleines Paket
+ohne eigenen Zielzustand braucht keinen Plan. Tasks nennen ihren Plan als Quelle.
 
-- bestätigte Ziele, Grenzen und Nicht-Ziele,
+Dokumentiere darüber hinaus kompakt, ohne den Plan zu wiederholen:
+
+- bestätigte Ziele, Grenzen und Nicht-Ziele des Projekts,
 - weiterhin gültige Entscheidungen und deren notwendige Begründung,
 - relevante Produkt-, Daten-, Architektur-, Betriebs- und Qualitätsgrenzen,
 - bewusst zurückgestellte Fähigkeiten mit einem beobachtbaren Einführungstrigger,
