@@ -37,7 +37,7 @@ Frontmatters, öffne danach nur die Bodies passender Treffer und erweitere erst 
 - Ort, Lesereihenfolge oder automatische Bereitstellung verleihen einem Inhalt keine zusätzliche Autorität.
   Ordne jede Aussage nach nativer Anweisungshierarchie, ausdrücklicher Geltung und fachlichem Scope ein.
 - Ein Dokument mit `status: superseded` gilt nicht mehr. Folge `superseded_by` zum geltenden Dokument und
-  nutze das abgelöste nur als Historie.
+  nutze das abgelöste nur als Historie. Öffne ein `archive/` nur, wenn tatsächlich Historie gefragt ist.
 - Fachliche READMEs, Frameworks und `INDEX.md`-Dateien außerhalb des Wissensraums behalten ihren lokalen
   Zweck. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihren Gegenstand maßgeblich.
 

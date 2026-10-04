@@ -89,8 +89,10 @@ geändert hat. Es gibt genau eine gültige Datei je Gegenstand, nie eine Kopie m
   `superseded`. Eine angenommene Entscheidung bleibt bis auf Formkorrekturen unverändert. Ihre inhaltliche
   Änderung braucht eine neue Nutzerentscheidung und entsteht als neues Dokument mit neuer Kennung, das das
   alte vollständig ersetzt und `supersedes: <alte Kennung>` trägt. Das alte erhält nur `status:
-  superseded` und `superseded_by: <neue Kennung>`. Ziehe Verweise in Navigation und offenen Tasks auf das
-  neue Dokument nach. Die Kennung ist der Dateiname ohne `.md`.
+  superseded` und `superseded_by: <neue Kennung>` und wandert im selben Schritt nach `archive/` in dem
+  Ordner, in dem es lag; die Nutzerentscheidung zur Ablösung deckt diesen Umzug auch bei `edit: locked`.
+  Verweise in Navigation und offenen Tasks zeigen danach auf das neue Dokument, historische Verweise auf
+  den Archivpfad. Die Kennung ist der Dateiname ohne `.md` und bleibt beim Umzug gleich.
 - **Ohne Version:** `task`, `history`, `memory`, `skill`, übriges `meta` und Vorlagen folgen ihrem eigenen
   Lebenszyklus. Ausgelieferter Plugin-Text wird über die Plugin-Version versioniert und trägt kein
   `version`.
