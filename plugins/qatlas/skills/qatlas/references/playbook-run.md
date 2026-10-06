@@ -152,7 +152,8 @@ Reihenfolge:
   erfüllt, bei einer größeren Umsetzung der vereinbarte Meilenstein erreicht, oder eine Vertrags-,
   Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
 - **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, aktualisierte oder bestätigte
-  Dokumentation, Abweichungen von den erwarteten Änderungsflächen und ungelöste Risiken.
+  Dokumentation, Abweichungen von den erwarteten Änderungsflächen, ungelöste Risiken und Nebenbefunde mit
+  Fundstelle und Beleg.
 
 Einen kleinen Task setzt normalerweise ein Subagent um. Braucht derselbe Task legitim mehrere getrennte
 Rollen oder Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
@@ -163,7 +164,9 @@ erst, wenn der aktive Task abgeschlossen oder gesichert übergeben ist.
 Der Subagent darf eine nicht vorhergesagte Datei selbstständig einbeziehen, wenn sie nachweislich innerhalb
 des fachlichen Scopes liegt, und nennt die Abweichung in seiner Rückgabe. Wäre eine Wirkung außerhalb des
 Scopes nötig oder widerspricht der aktuelle Bestand einer bindenden fachlichen Quelle, stoppt er vor dieser
-Wirkung und gibt den Befund an den Orchestrator zurück. Er erweitert den Vertrag nicht selbst.
+Wirkung und gibt den Befund an den Orchestrator zurück. Er erweitert den Vertrag nicht selbst. Einen Fehler,
+ein Sicherheitsrisiko oder nachweislich falsche Dokumentation außerhalb des Scopes behebt er nicht, sondern
+meldet ihn als Nebenbefund.
 
 Sende nach dem erfolgreichen Start genau eine knappe Karte:
 
@@ -236,10 +239,7 @@ Ausführungsgrundlage ab:
   dafür nicht.
 - Widerspricht eine maßgebliche fachliche Dokumentation dem beabsichtigten Ergebnis und könnte sie eine
   Nutzerentscheidung ausdrücken, setze den Task auf `review`, statt eine Seite still zu überschreiben.
-- Ändere sachlich unabhängige fehlerhafte Dokumentation nicht opportunistisch und melde sie konkret. Erfasse
-  sie nur dann als eigenen Task, wenn der gewählte Run-Scope oder Taskvertrag das Anlegen weiterer Arbeit im
-  maßgeblichen Planungssystem ausdrücklich einschließt; andernfalls bleibt sie eine benannte Folgearbeit für
-  `shape`.
+- Ändere sachlich unabhängige fehlerhafte Dokumentation nicht opportunistisch; sie ist ein Nebenbefund.
 - Eine deklarierte Dokumentationswirkung `Ändern` oder `Prüfen` ist ein Abnahmekriterium. `Keine` bleibt nur
   gültig, wenn der tatsächliche Diff keine zugehörige Aussage entwertet.
 
@@ -247,6 +247,31 @@ Muss der Nutzer entscheiden, prüfen oder handeln, setze den Task auf `review`. 
 Voraussetzung, Ressource oder Umgebung die Fortsetzung, setze ihn nach dem maßgeblichen Statusmodell auf
 `waiting`. Eine unerfüllte interne Task-Abhängigkeit verändert den Status nicht; die Reihenfolge im Spine
 genügt.
+
+### Nebenbefunde erfassen
+
+Was der Lauf außerhalb des aktiven Taskvertrags bemerkt, behebt er nicht. Erfasse jeden der folgenden
+Befunde vor dem nächsten Task als `draft` im Spine, auch wenn der Run-Scope das Anlegen weiterer Arbeit
+nicht einschließt:
+
+- ein belegter Fehler im bestehenden Verhalten,
+- ein mögliches oder bestätigtes Sicherheitsrisiko,
+- nachweislich falsche Dokumentation.
+
+Der Draft nennt Befund, Fundstelle, Beleg und den Task, bei dem er gefunden wurde; unterstützt das
+Planungssystem Labels, trägt er `run-fund`. Ausarbeitung, Zuschnitt und Reife bleiben bei `shape`. Deckt ein
+bestehender Task den Befund bereits ab, lege nichts an und nenne diesen Task. Dasselbe Muster an mehreren
+Stellen ergibt einen Draft. Verbesserungsideen, Refactoring, Stilfragen und mögliche Erweiterungen sind keine
+Nebenbefunde und werden nicht erfasst.
+
+Ein nicht behobenes Sicherheitsrisiko gelangt nie an einen öffentlich einsehbaren Ort, weder in Spine, Task,
+Abschlussbericht, Commit-Nachricht, Branchnamen, Pull Request noch Kommentar. Maßgeblich ist die
+Sichtbarkeit des Ortes, an dem der Eintrag tatsächlich liegt: Ein Issue in einem öffentlichen Repo ist
+öffentlich, auch wenn das Board, das es führt, privat ist, und ein lokaler Backlog teilt die Sichtbarkeit
+seines Repos und dessen Remotes. Erfasse es als Draft nur, wenn dieser Ort belegt nicht öffentlich ist, etwa
+über die geprüfte Sichtbarkeit des Repos. Ist er öffentlich oder seine Sichtbarkeit nicht belegbar, erfasse
+nichts und melde das Risiko ausschließlich im Abschluss unter **Sicherheit**. Auch an einem nicht
+öffentlichen Ort enthält der Eintrag keine Secrets.
 
 Beginne erst danach mit dem nächsten ausgewählten Task. Wiederhole Auswahl, Umsetzung und Integration, bis
 fünf Tasks bearbeitet sind oder eine Stopbedingung eintritt.
@@ -264,9 +289,41 @@ Beende den Lauf, sobald eine dieser Bedingungen gilt:
 - Beanspruchung, Eigentümerschaft oder Integrationsbesitz eines benötigten Tasks ist nicht eindeutig belegt.
 - Der Steuerbranch wurde seit dem Preflight fremd verändert.
 
-Sichere vor dem Ende Spine, Abschlussberichte und erlaubte lokale Commits. Berichte Ergebnis, maßgebliche
-Beweise und konkrete menschliche Übergaben knapp. Nenne pro bearbeitetem Task geänderte Dateien,
-ausgeführte Prüfungen, Dokumentationswirkung, Abweichungen von der erwarteten Arbeitskarte und ungelöste
-Risiken sowie die eingesetzten Worker-Profile mit Modell und Effort; Rohlogs bleiben draußen. Bleiben
-vorhandene Drafts als nächste Arbeit, nenne `shape <eindeutiger Task>` für einen oder `shape backlog`
-für mehrere. Eine neue Idee geht an `shape` ohne Task-Scope. Starte den Modus nicht selbst. Pushe nichts.
+Sichere vor dem Ende Spine, Abschlussberichte, Nebenbefunde und erlaubte lokale Commits. Der Nutzer setzt
+einen Lauf meist in einer neuen Session fort. Jede Übergabe steht deshalb mit ihrer Task-ID im Spine, und
+der Abschluss ist ohne den Laufverlauf verständlich. Berichte Ergebnis und maßgebliche Beweise knapp. Nenne
+pro bearbeitetem Task geänderte Dateien, ausgeführte Prüfungen, Dokumentationswirkung, Abweichungen von der
+erwarteten Arbeitskarte und ungelöste Risiken sowie die eingesetzten Worker-Profile mit Modell und Effort;
+Rohlogs bleiben draußen.
+
+Beende den Abschluss mit genau diesem Block. Jeder Punkt steht in einer Zeile mit seiner Task-ID und nur
+hier, nicht zusätzlich im Fließtext. Leere Kategorien entfallen:
+
+```markdown
+## Für dich
+
+**Handeln**
+- #<ID>: <konkrete Handlung des Nutzers>
+
+**Prüfen**
+- #<ID>: <was, wann und woran Erfolg erkennbar ist>
+
+**Entscheiden**
+- #<ID>: <offene Entscheidung>
+
+**Neu erfasst**
+- #<ID> <Titel des Nebenbefunds>
+
+**Sicherheit**
+- <nicht erfasstes Sicherheitsrisiko mit Fundstelle>, nur hier gemeldet
+
+**Nicht gepusht**
+- <Repo>: <Commit-IDs>
+
+Weiter in neuer Session: <Modi>
+```
+
+Nenne in der letzten Zeile nur Modi mit tatsächlicher Arbeit: `review` für Tasks in `review`,
+`shape <eindeutiger Task>` für einen Draft oder `shape backlog` für mehrere. Bleibt nichts für den Nutzer,
+lautet der Block nur `## Für dich: nichts offen`. Eine neue Idee geht an `shape` ohne Task-Scope. Starte den
+Modus nicht selbst. Pushe nichts.
