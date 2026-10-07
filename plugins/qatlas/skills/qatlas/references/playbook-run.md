@@ -112,6 +112,11 @@ Lösung nicht selbst. Kleine Status-, Integrations- und Verifikationsschritte bl
 das gesamte Ergebnis eines Tasks eine kleine, risikoarme Änderung an wenigen Dateien, die er ohnehin
 vollständig prüfen muss, setzt er sie selbst um; die Karte nennt dann `Subagents: keine`.
 
+Bei einem Umsetzungstask zieht der Subagent dauerhafte Projektdokumentation nicht selbst nach. Er meldet
+bestehende Aussagen, die seine Änderung entwertet, sowie belegte neue Pflichten oder Kopplungen für künftige
+Arbeit mit Fundstelle und Beleg; ohne Befund begründet er `Keine`. Ist Dokumentation selbst ein ausdrückliches
+Taskergebnis, darf er sie bearbeiten. Der Orchestrator verantwortet das Nachziehen nach der Integration.
+
 Beurteile vor jedem Spawn den tatsächlichen Auftrag und seinen Prüfaufwand: Welche Ergebnisse sind
 eigenständig abnehmbar, welche Schritte hängen voneinander ab, welche Sicherheits- und Zielgrenzen gelten,
 und welche Abnahmen kann der Orchestrator nach der Rückgabe selbst belegen? Mehrere unabhängige Tool- oder
@@ -148,12 +153,12 @@ Reihenfolge:
 - **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
 - **Worker-Profil:** gewähltes Profil mit Modell, Effort oder dessen fehlender Unterstützung und bei
   `standard` oder `demanding` dem Grund.
-- **Stopbedingung:** alle Abnahmekriterien, vereinbarten Prüfungen und die Dokumentationswirkung sind
+- **Stopbedingung:** alle dem Subagent zugewiesenen Abnahmekriterien und vereinbarten Prüfungen sind
   erfüllt, bei einer größeren Umsetzung der vereinbarte Meilenstein erreicht, oder eine Vertrags-,
   Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
-- **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, aktualisierte oder bestätigte
-  Dokumentation, Abweichungen von den erwarteten Änderungsflächen, ungelöste Risiken und Nebenbefunde mit
-  Fundstelle und Beleg.
+- **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, Dokumentationsbefunde mit Fundstelle
+  und Beleg oder begründetes `Keine`, Abweichungen von den erwarteten Änderungsflächen, ungelöste Risiken
+  und Nebenbefunde mit Fundstelle und Beleg.
 
 Einen kleinen Task setzt normalerweise ein Subagent um. Braucht derselbe Task legitim mehrere getrennte
 Rollen oder Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
@@ -228,15 +233,20 @@ weiterlaufen.
 Integriere die Arbeit des aktiven Tasks, führe seine gemeinsamen Prüfungen aus und pflege Task,
 Abschlussbericht und Spine nach dem maßgeblichen Vertrag. Setze ihn erst auf `done`, wenn alle Kriterien auf
 dem Steuerbranch belegt sind. Gleiche dabei den tatsächlichen Diff und das entstandene Verhalten gegen die
-Ausführungsgrundlage ab:
+Ausführungsgrundlage ab. Der Orchestrator entscheidet über die Dokumentationswirkung und zieht nötige
+Änderungen vor dem Taskabschluss nach:
 
-- Lasse direkt betroffene Dokumentation, die durch die Umsetzung falsch geworden ist, innerhalb desselben
-  Tasks korrigieren und erneut prüfen.
+- Dokumentiere nur Aussagen, die ein künftiger Bearbeiter kennen muss, um eine Anforderung einzuhalten oder
+  eine Fehlentscheidung zu vermeiden. Beschreibe keine Details, die Code und Tests bereits ohne relevante
+  Fehlentscheidung erkennen lassen, und wiederhole weder Taskverlauf, Abschlussbericht noch bestehende
+  Regeln. Ohne eine solche Aussage ziehe keine Projektdokumentation nach.
+- Korrigiere direkt betroffene Dokumentation, die durch die Umsetzung falsch geworden ist, am bestehenden
+  maßgeblichen Ort mit der kleinsten nötigen Änderung und prüfe sie erneut.
 - Führt die Umsetzung eine übergreifende Pflicht für künftige Arbeit im Scope ein oder legt sie eine
   verdeckte Kopplung offen, die solche Arbeit binden muss, halte sie in der vorhandenen Projektdokumentation
-  fest, vorrangig bei den betroffenen Entscheidungen, Anforderungen oder dem Fachwissen in
-  `.qatlas-project/`. Sie gilt damit als geänderte maßgebliche Grundlage; ein Abschlussbericht allein reicht
-  dafür nicht.
+  mit der kleinsten nötigen Aussage fest, vorrangig bei den betroffenen Entscheidungen, Anforderungen oder
+  dem Fachwissen in `.qatlas-project/`. Sie gilt damit als geänderte maßgebliche Grundlage; ein
+  Abschlussbericht allein reicht dafür nicht.
 - Widerspricht eine maßgebliche fachliche Dokumentation dem beabsichtigten Ergebnis und könnte sie eine
   Nutzerentscheidung ausdrücken, setze den Task auf `review`, statt eine Seite still zu überschreiben.
 - Ändere sachlich unabhängige fehlerhafte Dokumentation nicht opportunistisch; sie ist ein Nebenbefund.
