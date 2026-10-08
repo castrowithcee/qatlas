@@ -107,10 +107,17 @@ als Übergabe nach „Übergeben“, ohne Push.
   und ist keine fremde Veränderung. Warte auf die CI mit `ci-wait` desselben Skripts.
 - **Merge Queue:** Ist im Ziel-Repo eine GitHub Merge Queue aktiv, integriere den Pull Request über sie,
   statt die Basis selbst nachzuziehen.
+- **Zuschnitt bei Squash-Merge:** Ein Task ergibt so viele Pull Requests, wie die Commitgrenze der Git-Norm
+  für ein gesquashtes Review verlangt; ein Pull Request bündelt nie unabhängige Meilensteine. Jeder
+  Pull Request erhält einen eigenen Task-Branch desselben Tasks mit eigenem Slug. Ein vorbereitender
+  Pull Request, etwa ein mechanisches Refactoring, wird vor der darauf aufbauenden Änderung integriert.
+  Prüfe vor dem Öffnen den gesamten Diff des Pull Requests gegen die Commitgrenze und teile ihn, bevor du
+  pushst.
 - **Abschluss:** Der Merge des Pull Requests ersetzt die lokale Integration. Der Task ist erst `done`, wenn
-  der Pull Request gemergt und die Abnahme auf dem neuen `origin/<steuerbranch>` belegt ist.
-- **Abhängige Tasks:** Ein Squash-Merge schließt gestapelte Branches aus. Ein abhängiger Task startet dann
-  erst ab dem integrierten `origin/<steuerbranch>`, nie auf einem nicht integrierten Vorgänger-Branch.
+  alle seine Pull Requests gemergt sind und die Abnahme auf dem neuen `origin/<steuerbranch>` belegt ist.
+- **Abhängige Arbeit:** Ein Squash-Merge schließt gestapelte Branches aus. Ein abhängiger Task oder
+  Pull Request startet dann erst ab dem integrierten `origin/<steuerbranch>`, nie auf einem nicht
+  integrierten Vorgänger-Branch.
 
 ## Tasks über mehrere Repos
 

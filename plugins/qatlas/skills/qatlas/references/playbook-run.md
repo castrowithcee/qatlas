@@ -163,9 +163,12 @@ viele Implementierungs- und Prüfschritte bindet, verlangen einen kleineren Zusc
 Liegt die gesamte Abnahme bereits in einem tragfähigen Taskvertrag, teile ihn bei Bedarf in geordnete
 Worker-Aufträge A, B und weitere mit je eigenem überprüfbarem Meilenstein. Daraus entstehen keine neuen
 Backlog-Tasks. Prüfe und sichere jeden Meilenstein vor dem nächsten Auftrag; spätere Aufträge übernehmen
-den bestätigten Stand. Enthält der Task dagegen eigenständige Ergebnisse, deren Grenzen, Reihenfolge oder
-Abnahme der Vertrag noch nicht klärt, setze ihn nach der Reifeprüfung auf `draft` und übergib den Zuschnitt
-an `shape <eindeutiger Task>` zur Klärung am bestehenden Ort. Erfinde die fehlende Planung nicht im Run.
+den bestätigten Stand. Ein unabhängiger Meilenstein oder ein vorbereitendes mechanisches Refactoring ergibt
+mindestens einen eigenen Commit nach der Commitgrenze der Git-Norm, bei Integration über Pull Requests mit
+Squash-Merge einen eigenen Pull Request nach dem Git-Ablauf. Enthält der Task dagegen eigenständige
+Ergebnisse, deren Grenzen, Reihenfolge oder Abnahme der Vertrag noch nicht klärt, setze ihn nach der
+Reifeprüfung auf `draft` und übergib den Zuschnitt an `shape <eindeutiger Task>` zur Klärung am bestehenden
+Ort. Erfinde die fehlende Planung nicht im Run.
 
 Wähle für jeden abgegrenzten Auftrag zuerst `light`. Nutze `standard`, wenn dessen beschriebene technische
 Abwägungen nötig sind, und `demanding` bei belegter schwieriger Diagnose oder eng gekoppelter Umsetzung,

@@ -95,11 +95,14 @@ den Nutzer fragst, entscheidet dein eigenes `--fly`. Die Laufvorgabe lautet sinn
 > committest.
 >
 > Übergib jeden geprüften Task mit `node <skript> handover --repo <repo-root> --package <Paket> --task <id>
-> --report <bericht>`. Der Bericht folgt dem Rückgabeformat von „Arbeit ausführen“ und nennt zusätzlich
-> Branches und Commits, PR-Titel und PR-Body. Die Antwort lautet `integrated <sha>` oder `rework <grund>`;
-> ohne Antwort rufe denselben Befehl mit unverändertem Bericht erneut auf. Bis zur Antwort gehören Task,
-> Branches und Worktree dem Sentinel; fasse sie nicht an. `rework` gibt sie dir zurück: Bearbeite den Grund
-> und übergib erneut.
+> --report <bericht>`. Bei Integration über Pull Requests mit Squash-Merge übergibst du jeden Pull Request
+> eines Tasks nach dem Git-Ablauf einzeln und startest den nächsten erst ab dem danach integrierten
+> `<basis>`. Der Bericht folgt dem Rückgabeformat von „Arbeit ausführen“ und nennt zusätzlich Branches und
+> Commits, PR-Titel und PR-Body sowie, ob diese Übergabe die letzte des Tasks ist. Die Antwort lautet
+> `integrated <sha>` oder `rework <grund>`; ohne Antwort rufe denselben Befehl mit unverändertem Bericht
+> erneut auf. Bis zur Antwort gehören Task, Branches und Worktree dem Sentinel; fasse sie nicht an.
+> `rework` gibt sie dir zurück: Bearbeite den Grund und übergib erneut. `integrated` auf eine nicht letzte
+> Übergabe gibt dir den Task zur Fortsetzung zurück.
 >
 > Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn ab dem neuen `<basis>`.
 > Einen nachweislich unabhängigen Task dieses Pakets darfst du während des Wartens ab dem aktuellen `<basis>`
@@ -141,13 +144,16 @@ Hintergrund ausführen, tue das, damit du für den Nutzer ansprechbar bleibst. B
 
 ## Integrieren
 
-Mit der Übergabe gehören Task und Namensraum bis zu einem `rework` dir. Integriere übergebene Tasks einzeln
-und protokolliere jeden Integrationsschritt mit `log --repo <repo-root> --type <typ> --package <Paket> --task
-<id> --text <text>`, mit den Typen `push`, `pr`, `merge`, `rerun`, `conflict` und `close`.
+Mit der Übergabe gehören Task und Namensraum bis zu einem `rework` dir, bei einer nicht letzten Übergabe
+bis zu deinem `integrated`. Integriere Übergaben einzeln und protokolliere jeden Integrationsschritt mit
+`log --repo <repo-root> --type <typ> --package <Paket> --task <id> --text <text>`, mit den Typen `push`,
+`pr`, `merge`, `rerun`, `conflict` und `close`.
 
 1. Prüfe Diff, Beweise und Abnahme selbst nach [Arbeit ausführen](playbook-run.md). Inhaltlicher
    Korrekturbedarf geht als `answer … --answer "rework <grund>"` zurück und zählt als Korrekturversuch nach
-   „Höchstens zwei Korrekturen“.
+   „Höchstens zwei Korrekturen“. Bündelt eine Übergabe bei Squash-Merge mehrere Commits im Sinn der
+   Commitgrenze, gib sie als `rework <schnitt>` mit dem verlangten Schnitt zurück; das zählt nicht als
+   Korrekturversuch.
 2. Probe Konflikte mit `probe --branch <task-branch> --base <basis>`. Einen Konflikt, auch einen beim späteren
    Nachziehen der Basis, gibst du als `rework <grund mit Dateien>` zurück; er zählt nicht als
    Korrekturversuch. Löse Konflikte nie selbst. Nur wenn der Orchestrator nicht mehr verfügbar ist, sicherst
@@ -157,8 +163,9 @@ und protokolliere jeden Integrationsschritt mit `log --repo <repo-root> --type <
    nur gezielt die betroffenen Bereiche über `slot` und überlasse der CI die volle Breite. Einen bekannten
    Flake behandelst du nach dessen Regel in [Arbeit ausführen](playbook-run.md). Ohne Pull Requests führst
    du die gemeinsamen Prüfungen selbst aus. Tasks über mehrere Repos integrierst du nach dem Git-Ablauf.
-4. Schließe den Task danach im Planungssystem, setze ihn auf `done` und antworte mit `answer … --answer
-   "integrated <sha>"`, wobei `<sha>` der Integrationscommit auf dem Steuerbranch ist.
+4. Ist es die letzte Übergabe des Tasks, schließe ihn danach im Planungssystem und setze ihn auf `done`.
+   Antworte mit `answer … --answer "integrated <sha>"`, wobei `<sha>` der Integrationscommit auf dem
+   Steuerbranch ist.
 
 ## Beenden
 

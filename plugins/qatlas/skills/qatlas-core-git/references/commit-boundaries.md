@@ -15,10 +15,15 @@ Diese vier Grenzen sind unabhängig voneinander. Keine legt die Anzahl oder den 
 - **Commit:** ein kohärenter, prüfbarer und möglichst einzeln rückrollbarer Zustand. Auf dem
   Integrationspfad ist jeder Commit für sich verständlich und besteht die für ihn einschlägigen Prüfungen.
   Implementation und zugehörige Tests reisen im selben Commit. Ein eigenständiger Charakterisierungstest
-  oder ein rein mechanisches Refactoring darf als eigener vorbereitender Commit vorausgehen. Unabhängige
-  Änderungen erhalten eigene Commits.
+  darf als eigener vorbereitender Commit vorausgehen. Ein rein mechanisches Refactoring, etwa ein
+  Umbenennen oder das Nachziehen vieler Aufrufer, geht einer Verhaltensänderung als eigener Commit voraus,
+  statt in ihr zu stecken. Unabhängige Änderungen erhalten eigene Commits. Braucht der Betreff mehrere
+  voneinander unabhängige Ergebnisse, etwa getrennte Tool-, Endpunkt- oder Fachgruppen, ist der Commit zu
+  teilen.
 - **Review:** der Umfang, den ein Mensch gemeinsam beurteilt, etwa ein Branch oder Pull Request. Er darf
-  mehrere Commits umfassen und ist kein Grund, sie zusammenzufassen.
+  mehrere Commits umfassen und ist kein Grund, sie zusammenzufassen. Fasst die Integration ein Review zu
+  einem Commit zusammen, etwa per Squash-Merge, gilt die Commitgrenze für das Review selbst: Es umfasst
+  dann genau einen Commit im Sinn dieser Grenze, und mehrere solche Commits werden mehrere Reviews.
 - **Release:** der Stand, der gemeinsam versioniert und ausgeliefert wird. Er folgt dem Release-Verfahren
   des Repos, nicht Task- oder Commitgrenzen.
 

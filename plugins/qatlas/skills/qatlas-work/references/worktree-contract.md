@@ -42,7 +42,7 @@ primären Arbeitsbaum, solange dort kein anderer Schreiber arbeitet.
 
 ## Eigentum
 
-Der Namensraum eines Tasks umfasst seinen Task-Branch, dessen Unterbranches und die daraus abgeleiteten
+Der Namensraum eines Tasks umfasst seine Task-Branches, deren Unterbranches und die daraus abgeleiteten
 Worktrees. Er gehört dem Orchestrator, der den Task beansprucht hat; nur dieser legt darin Branches und
 Worktrees an, integriert und entfernt sie. Ein Name belegt keine Eigentümerschaft; maßgeblich bleiben
 Beanspruchung und Git-Register. Worktrees gehören einer Arbeit, nie einer Agentenidentität. Übergibt ein
