@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// Prüft Qatlas und berichtet standardmäßig; ergänzt mit --apply Fehlendes ohne Überschreiben.
-// Aufruf: node qatlas-doctor.js [--apply] [--target <ordner>]
+// Checks Qatlas and reports by default; --apply adds what is missing without overwriting.
+// Usage: node qatlas-doctor.js [--apply] [--target <dir>]
 
 const fs = require('fs');
 const os = require('os');
@@ -29,9 +29,9 @@ const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT
   || path.resolve(__dirname, '..');
 const bundle = path.join(pluginRoot, 'scaffold');
 
-const missing = [];   // Blockiert oder beeinträchtigt die Arbeit.
-const notes = [];     // Einmal erwähnenswert, aber kein Grund zum Blockieren.
-const created = [];   // Tatsächlich durch --apply geschriebene Dateien.
+const missing = [];   // blocks or impairs work
+const notes = [];     // worth mentioning once, not blocking
+const created = [];   // files actually written by --apply
 
 if (migration.unresolved) {
   missing.push('migration: Der Projektzustand muss vor schreibender Qatlas-Arbeit inventarisiert und '
@@ -57,7 +57,6 @@ function has(cmd, args) {
   catch { return false; }
 }
 
-// Umgebung
 
 if (!has('git', ['--version'])) {
   missing.push('git: nicht in PATH. Ohne Git gibt es weder Versionskontrolle noch Commit-Skill.');
@@ -82,11 +81,10 @@ if (!has('git', ['lfs', 'version'])) {
     + 'Optional, kein Defekt.');
 }
 
-// Claude-Einstellungen nur lesen und unerwünschte Commit-Attribution melden.
 const hostSettings = path.join(os.homedir(), '.claude', 'settings.json');
 if (fs.existsSync(path.dirname(hostSettings))) {
   let host = {};
-  try { host = JSON.parse(fs.readFileSync(hostSettings, 'utf8')); } catch { /* Fehlt oder ist ungültig. */ }
+  try { host = JSON.parse(fs.readFileSync(hostSettings, 'utf8')); } catch { /* missing or invalid */ }
   const want = [];
   const attributionOff = host.attribution
     && host.attribution.commit === ''
@@ -103,7 +101,6 @@ if (fs.existsSync(path.dirname(hostSettings))) {
   }
 }
 
-// Nutzerweite, pfadunabhängige Entscheidungen.
 const configState = readConfig(target);
 
 if (!configState.exists) {
@@ -129,7 +126,7 @@ if (!configState.exists) {
 }
 for (const diagnostic of configState.diagnostics) missing.push('config: ' + diagnostic);
 
-// Die optionale Run-Konfiguration gehört dem Nutzer und wird nie mit --apply erzeugt.
+// User-owned: never created by --apply.
 const orchestraFile = path.join(os.homedir(), '.qatlas', 'plugins', 'orchestra.yaml');
 if (!fs.existsSync(orchestraFile)) {
   notes.push('orchestra: ~/.qatlas/plugins/orchestra.yaml fehlt. Für qatlas run im Setup mit '
@@ -155,8 +152,7 @@ if (statuslineState.exists && !statuslineState.valid) {
   missing.push('statusline: ' + statuslineState.statuslineFile + ': ' + statuslineState.error.message);
 }
 
-// Nutzerbibliothek: fehlende Teile des Scaffolds vorschlagen oder mit --apply anlegen, nie ersetzen.
-// Ein .gitkeep entsteht nur für einen fehlenden Ordner.
+// .gitkeep only for a missing folder.
 if (readConfig().config.brains.qatlas.enabled) {
   const libraryBundle = path.join(bundle, 'library');
   const library = path.join(os.homedir(), 'qatlas');
@@ -176,7 +172,7 @@ if (readConfig().config.brains.qatlas.enabled) {
   }
 }
 
-// Scaffold: derselbe existenzbasierte Abgleich wie im SessionStart-Hook.
+// Same existence-based comparison as the SessionStart hook.
 const hadScaffold = fs.existsSync(path.join(target, '.qatlas-project'));
 const { absent, created: scaffoldCreated } = scaffoldTopUp(target, bundle, { apply });
 
@@ -202,11 +198,11 @@ if (!apply) {
         }, null, 2) + '\n', { flag: 'wx', mode: 0o644 });
         created.push('.qatlas/plugins/updates/state.json');
       }
-    } catch { /* Eine defekte Zustandsdatei darf die sichere Scaffold-Anlage nicht verhindern. */ }
+    } catch { /* a broken state file must not block safe scaffolding */ }
   }
 }
 
-// Projektlokale Plugin-Konfiguration entsteht nur beim ausdrücklich gestarteten Setup.
+// Project-local config is created only by an explicit setup.
 const projectConfig = path.join(target, '.qatlas', 'plugins', 'config.yaml');
 if (apply && !fs.existsSync(projectConfig)) {
   try {
@@ -218,10 +214,9 @@ if (apply && !fs.existsSync(projectConfig)) {
   }
 }
 
-// .gitignore: nur fehlende Qatlas-Regeln anhängen und Nutzerinhalt nie ersetzen.
 const gitignore = path.join(target, '.gitignore');
 let ignoreText = '';
-try { ignoreText = fs.readFileSync(gitignore, 'utf8'); } catch { /* Noch keine Datei vorhanden. */ }
+try { ignoreText = fs.readFileSync(gitignore, 'utf8'); } catch { /* no file yet */ }
 const zones = ['zone-import', 'zone-export'];
 const missingZones = zones.filter(zone =>
   !new RegExp('^/\\.qatlas-project/' + zone + '/\\*\\s*$', 'm').test(ignoreText));
@@ -260,7 +255,7 @@ if (fs.existsSync(path.join(target, '.qatlas-project'))) {
   }
 }
 
-// Neue Repos erhalten AGENTS.md plus CLAUDE.md als @AGENTS.md-Schalter. Vorhandene Rulesets nur melden.
+// Existing rulesets are only reported, never touched.
 const rulesets = ['AGENTS.md', 'CLAUDE.md'].filter(f => fs.existsSync(path.join(target, f)));
 if (!rulesets.length) {
   if (!apply) {

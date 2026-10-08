@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// Gibt den zentralen Worktree-Pfad für einen Branch des Repos im aktuellen oder angegebenen Ordner aus.
-// Aufruf: node qatlas-worktree-path.js <branch> [--target <ordner>]
+// Prints the central worktree path for a branch of the repo in the current or given dir.
+// Usage: node qatlas-worktree-path.js <branch> [--target <dir>]
 
 const crypto = require('crypto');
 const os = require('os');

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
-// Aufruf: node scripts/qatlas-publish.js [plugin] [major|minor|patch] [version]
+// Usage: node scripts/qatlas-publish.js [plugin] [major|minor|patch] [version]
 //   (--project-update | --no-project-update)
-// Positionsargumente sind optional und positionsunabhängig. Standard ist `qatlas patch`.
+// Positional arguments are optional and order-independent. Default is `qatlas patch`.
 
 const { execFileSync } = require('child_process');
 const fs = require('fs');
@@ -91,7 +91,7 @@ const releaseNumbers = releaseTags.map(tag => tag.match(new RegExp(`^v${year}\\.
 const lastRelease = releaseNumbers.reduce((highest, number) => Math.max(highest, number), 0);
 const marketplaceTag = `v${year}.${lastRelease + 1}.0`;
 
-// VERSION ist die Quelle für beide Host-Manifeste. Erst berechnen, noch nichts schreiben.
+// VERSION is the source for both host manifests. Compute first, write nothing yet.
 function resolveVersion() {
   const cur = fs.readFileSync(path.join(ROOT, VERSION_FILE), 'utf8').trim();
   const m = cur.match(/^(\d+)\.(\d+)\.(\d+)$/);

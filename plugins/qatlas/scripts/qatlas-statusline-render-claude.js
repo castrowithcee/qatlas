@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
-// Rendert Claudes Session-JSON mit ~/.qatlas/plugins/statusline.yaml nach stdout.
-// Das Setup kopiert Renderer und Runtime nach ~/.qatlas/plugins/.
+// Renders Claude session JSON with ~/.qatlas/plugins/statusline.yaml to stdout.
+// Setup copies renderer and runtime to ~/.qatlas/plugins/.
 
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -11,16 +11,14 @@ const { readStatusline } = require('./runtime/config-loader.js');
 
 const DEFAULT_WIDGETS = ['model', 'thinking', 'dir', 'branch', 'diff', 'out', 'context', 'cost', 'session', 'session-reset', 'weekly', 'weekly-reset', 'method'];
 
-// Eingabe
 let data = {};
 try { data = JSON.parse(fs.readFileSync(0, 'utf8')); } catch { }
 
 const noColor = !!process.env.NO_COLOR;
 const cols = parseInt(process.env.COLUMNS, 10) || 999;
 
-// Farben
 const SGR = (p) => `\x1b[${p}m`;
-// ANSI-Namen folgen dem Terminal-Theme. Orange, Rot und das Diff-Paar verwenden feste Indizes.
+// ANSI names follow the terminal theme; orange, red and the diff pair use fixed indices.
 const NAMED = {
     dim: ['2', ''], cyan: ['36', '46'], green: ['32', '42'], yellow: ['33', '43'],
     blue: ['34', '44'], magenta: ['35', '45'],
@@ -30,7 +28,6 @@ const NAMED = {
 const C = { reset: SGR(0), bold: SGR(1) };
 for (const n of Object.keys(NAMED)) C[n] = SGR(NAMED[n][0]);
 
-// Akzeptiert Palettennamen, #rgb, #rrggbb und rgb(r,g,b); ungültige Werte fallen durch die Stilkaskade.
 function ansi(spec, isBg) {
     if (typeof spec !== 'string') return '';
     const s = spec.trim().toLowerCase().replace(/\s+/g, '');
@@ -48,10 +45,9 @@ function ansi(spec, isBg) {
     return SGR(`${isBg ? 48 : 38};2;${rgb.join(';')}`);
 }
 
-// Öffnet nach inneren Resets den äußeren Stil erneut.
+// Reopens the outer style after inner resets.
 const paint = (text, pre) => (pre && text) ? pre + text.split(C.reset).join(C.reset + pre) + C.reset : text;
 
-// Konfiguration: Widgets akzeptieren Objekt, Boolean, Farbstring oder Namensliste.
 function normWidget(v) {
     if (v === true) return { on: true };
     if (typeof v === 'string') return v.trim() ? { on: true, value: { fg: v } } : { on: true };
@@ -89,12 +85,12 @@ function loadConfig() {
 
 const cfg = loadConfig();
 
-// Stilkaskade: Widget, globaler Label-/Wert-Standard, eingebauter Standard. Fettdruck ist additiv.
+// Style cascade: widget, global label/value default, built-in default. Bold is additive.
 function styleFor(name, p) {
     const w = cfg.widgets[name] || {};
     const own = (w[p.part] && typeof w[p.part] === 'object') ? w[p.part] : {};
     const glob = cfg.defaults[p.part === 'label' ? 'label' : 'value'];
-    // fixedFg schützt semantische Schwellenfarben vor der globalen Wertfarbe.
+    // fixedFg keeps semantic threshold colors from the global value color.
     const fg = ansi(own.fg, false) || (p.fixedFg ? '' : ansi(glob.fg, false)) || p.def || '';
     return fg + (ansi(own.bg, true) || ansi(glob.bg, true)) + (own.bold === true || glob.bold === true ? C.bold : '');
 }
@@ -111,10 +107,9 @@ const lv = (name, label, value, defLabel, defValue) => build(name, [
     { text: String(value), part: 'value', def: defValue }
 ]);
 
-// Leisten
 const DEFAULT_BAR = [{ from: 0, fg: 'green' }, { from: 35, fg: 'yellow' }, { from: 45, fg: 'orange' }, { from: 70, fg: 'red' }];
 
-// Die zuletzt erreichte gültige Schwelle gewinnt; ungültige eigene Schwellen fallen auf die Standards zurück.
+// The last reached valid threshold wins; invalid custom thresholds fall back to defaults.
 function barColor(name, pct) {
     const bar = (cfg.widgets[name] || {}).bar;
     const own = (bar && Array.isArray(bar.thresholds))
@@ -125,7 +120,6 @@ function barColor(name, pct) {
     return fg;
 }
 
-// Leiste, Prozentwert und Suffix teilen standardmäßig dieselbe Schwellenfarbe.
 function barSeg(name, label, pct, suffix) {
     const col = barColor(name, pct);
     const w = 10, f = Math.max(0, Math.min(w, Math.round(pct * w / 100)));
@@ -146,7 +140,7 @@ function hms(epochSec, withDays) {
     return withDays ? `${d}T ${h}Std ${m}Min` : `${Math.floor(s / 3600)}Std ${m}Min`;
 }
 
-// Git-Informationen pro Session fünf Sekunden zwischenspeichern.
+// Cache git info per session for five seconds.
 function run(cwd, cmd) {
     try { return execSync(cmd, { cwd, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); }
     catch { return null; }
@@ -189,7 +183,6 @@ function gitInfo(d) {
     return info;
 }
 
-// Widgets: Labels sind gedimmt und Werte nutzen die Terminalfarbe. Nur Diffs und Schwellen tragen semantische Farben.
 const WIDGETS = {
     model: (d) => {
         const m = d.model && (d.model.display_name || d.model.id);
@@ -248,7 +241,6 @@ const WIDGETS = {
     method: (d) => lv('method', 'Methode', d.rate_limits ? 'Abo' : 'API', C.dim, '')
 };
 
-// Ausgabe zusammensetzen.
 const git = gitInfo(data);
 const render = (type) => (WIDGETS[type] ? WIDGETS[type](data, git) : null);
 const SEP = cfg.separator.text;

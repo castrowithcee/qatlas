@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// Richtet Claudes Statusline idempotent ein und schützt die nutzerverwaltete YAML-Konfiguration.
+// Sets up the Claude statusline idempotently and protects the user-managed YAML config.
 
 const fs = require('fs');
 const os = require('os');

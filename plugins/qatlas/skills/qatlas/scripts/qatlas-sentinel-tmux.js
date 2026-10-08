@@ -1,30 +1,30 @@
 #!/usr/bin/env node
 'use strict';
 
-// Steuert das Orchestrator-Fenster eines Qatlas-Sentinels in tmux. Ein Fenster gehört genau einem Repo und
-// wird über dessen Root markiert; das Skript fasst nur so markierte Fenster an. Läuft der Sentinel in tmux,
-// legt add im Server des Nutzers eine eigene Session `sentinel--<repo>` an (Mouse dort aus, keine
-// serverweiten Optionen); sonst dient der Rückfallserver `-L qatlas-sentinel` mit eigenem Fenster. Ein Pane
-// wird über Repo und Paket adressiert, weil Hosts wie Codex Befehle nicht zuverlässig mit der Umgebung des
-// Panes ausführen.
-// Ereignisse stehen als JSON-Lines in <repo>/.qatlas/local/sentinel/events.jsonl. Die Sequenznummer `seq`
-// ist der Zeilenindex ab 0 und wird beim Lesen abgeleitet, nicht gespeichert. Weckend sind question,
-// handover, done und exited; start, answer, picked und alle über log geschriebenen Typen wecken nicht.
-// `wait --since <seq>` liefert alle weckenden Ereignisse ab seq und den neuen `cursor` (Zahl aller
-// Ereignisse); den Cursor übergibst du beim nächsten Aufruf als --since, dann geht nichts verloren. Legt add
-// das Fenster neu an, wird ein vorhandenes Protokoll zu events-<zeitstempel>.jsonl umbenannt.
-// Aufruf:
-//   qatlas-sentinel-tmux.js add --repo <root> --package <paket> --label <fenstername> --title <titel> --cwd <ordner> -- <befehl> [argumente...]
+// Controls the orchestrator window of a Qatlas sentinel in tmux. A window belongs to exactly one repo and
+// is marked via its root; the script touches only windows so marked. If the sentinel runs in tmux,
+// add creates its own session `sentinel--<repo>` on the user server (mouse off there, no
+// server-wide options); otherwise the fallback server `-L qatlas-sentinel` with its own window is used. A pane
+// is addressed via repo and package because hosts like Codex do not reliably run commands with the pane
+// environment.
+// Events are JSON lines in <repo>/.qatlas/local/sentinel/events.jsonl. `seq` is the
+// 0-based line index, derived on read, not stored. Waking types: question,
+// handover, done, exited; start, answer, picked and all types written via log do not wake.
+// `wait --since <seq>` returns all waking events from seq on and the new `cursor` (count of all
+// events); pass it as --since on the next call and nothing is lost. If add recreates
+// the window, an existing log is renamed to events-<timestamp>.jsonl.
+// Usage:
+//   qatlas-sentinel-tmux.js add --repo <root> --package <package> --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-sentinel-tmux.js list --repo <root>
-//   qatlas-sentinel-tmux.js wait --repo <root> [--since <seq>] [--timeout <sekunden>]
-//   qatlas-sentinel-tmux.js title --repo <root> --package <paket> --title <titel>
-//   qatlas-sentinel-tmux.js ask --repo <root> --package <paket> --question <frage> [--timeout <sekunden>]
-//   qatlas-sentinel-tmux.js handover --repo <root> --package <paket> --task <id> --report <text|datei> [--timeout <sekunden>]
-//   qatlas-sentinel-tmux.js answer --repo <root> --package <paket> --answer <antwort>   (Übergabe: "integrated <sha>" oder "rework <grund>")
-//   qatlas-sentinel-tmux.js log --repo <root> --type <typ> [--package <paket>] [--task <id>] [--text <text>]
+//   qatlas-sentinel-tmux.js wait --repo <root> [--since <seq>] [--timeout <seconds>]
+//   qatlas-sentinel-tmux.js title --repo <root> --package <package> --title <title>
+//   qatlas-sentinel-tmux.js ask --repo <root> --package <package> --question <question> [--timeout <seconds>]
+//   qatlas-sentinel-tmux.js handover --repo <root> --package <package> --task <id> --report <text|file> [--timeout <seconds>]
+//   qatlas-sentinel-tmux.js answer --repo <root> --package <package> --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
+//   qatlas-sentinel-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
 //   qatlas-sentinel-tmux.js report --repo <root>
-//   qatlas-sentinel-tmux.js capture --repo <root> --package <paket>   (Scrollback nach <root>/.qatlas/local/sentinel/<paket>.log)
-//   qatlas-sentinel-tmux.js close --repo <root> --package <paket>
+//   qatlas-sentinel-tmux.js capture --repo <root> --package <package>   (scrollback to <root>/.qatlas/local/sentinel/<package>.log)
+//   qatlas-sentinel-tmux.js close --repo <root> --package <package>
 
 const fs = require('fs');
 const path = require('path');
@@ -56,7 +56,7 @@ const repoKey = () => fs.realpathSync(path.resolve(need('--repo')[0]));
 const eventsDir = repo => path.join(repo, '.qatlas', 'local', 'sentinel');
 const eventsFile = repo => path.join(eventsDir(repo), 'events.jsonl');
 
-// Hängt genau eine Zeile an. O_APPEND macht das auch bei mehreren Schreibern zeilenweise atomar.
+// O_APPEND keeps single-line appends atomic even with several writers.
 function record(repo, type, fields = {}) {
   fs.mkdirSync(eventsDir(repo), { recursive: true });
   const entry = { at: new Date().toISOString(), type };
@@ -114,7 +114,7 @@ function setTitle(pane, title) {
   tmux(['select-pane', '-t', pane, '-T', title]);
 }
 
-// Sessionname im Nutzer-Server; tmux erlaubt `.` und `:` in Namen nicht.
+// tmux does not allow `.` and `:` in session names.
 const sessionName = repo => 'sentinel--' + path.basename(repo).replace(/[.:]/g, '_');
 
 function newWindow(repo, label, cwd) {
@@ -177,7 +177,7 @@ function list() {
   out({ window: win, panes: win ? panes(win) : [], cursor: events(repo).length });
 }
 
-// Schreibt für jedes erstmals tot erkannte Pane des markierten Fensters genau ein exited.
+// Writes exactly one exited per newly detected dead pane.
 function recordExits(repo) {
   const win = markedWindow(repo);
   if (!win) return;
@@ -203,9 +203,8 @@ async function wait() {
   out({ events: [], cursor: events(repo).length, timeout: true });
 }
 
-// Setzt eine Frage oder Übergabe und wartet auf die Antwort des Sentinels. Ein erneuter Aufruf mit
-// demselben Signal wartet weiter, ohne eine inzwischen eingetroffene Antwort zu verwerfen. Pro Pane ist
-// höchstens ein offenes Signal erlaubt; ein offenes Signal der anderen Art ist ein Fehler.
+// A repeated call with the same signal keeps waiting without discarding an answer that has arrived
+// meanwhile. At most one open signal per pane; an open signal of the other kind is an error.
 async function raise(kind, text, task) {
   const repo = repoKey();
   const pane = target();
@@ -240,7 +239,7 @@ function reportText() {
   const [value] = need('--report');
   try {
     if (fs.statSync(value, { throwIfNoEntry: false })?.isFile()) return fs.readFileSync(value, 'utf8').trim();
-  } catch { /* kein lesbarer Pfad: als Text behandeln */ }
+  } catch { /* not a readable path: treat as text */ }
   return value;
 }
 
@@ -268,9 +267,9 @@ function logEvent() {
   out({ logged: type, cursor: events(repo).length });
 }
 
-// Fasst das aktuelle Protokoll zusammen. Zeiten in Sekunden. Durchlaufzeit je Task: vom start des Pakets
-// bzw. der letzten Integration im Paket bis zur ersten Übergabe des Tasks. Wartezeit: letzte Übergabe vor
-// der Integration bis zum answer integrated.
+// Times in seconds. Cycle time per task: from package start or last integration in the package
+// to the first handover of the task. Wait time: last handover before the integration
+// to answer integrated.
 function report() {
   const list = events(repoKey());
   const time = e => Date.parse(e.at);
@@ -307,7 +306,7 @@ function report() {
   });
 }
 
-// Sichert den vollständigen Scrollback eines Panes; eine vorhandene Datei wird nie überschrieben.
+// Never overwrites an existing file.
 function capture() {
   const repo = repoKey();
   const pane = target();

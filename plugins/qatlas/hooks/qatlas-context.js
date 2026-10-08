@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 'use strict';
 
-// Injiziert genau einen unabhängigen Qatlas-Regel- oder Projektblock pro Hook-Aufruf.
+// Injects exactly one independent Qatlas rule or project block per hook call.
 
 const fs = require('fs');
 const path = require('path');
 
 let scaffoldTopUp = null;
 try { ({ scaffoldTopUp } = require('../scripts/qatlas-scaffold-topup.js')); }
-catch { /* Fehlendes Top-up darf die Kontext-Injektion nicht verhindern. */ }
+catch { /* missing top-up must not block injection */ }
 
 let projectMigrationInventory = () => ({ unresolved: false });
 try { ({ projectMigrationInventory } = require('../scripts/qatlas-migrations.js')); }
-catch { /* Fehlende Migrationshilfe darf die allgemeinen Regeln nicht verhindern. */ }
+catch { /* missing migration helper must not block the rules */ }
 
 let readConfig = () => ({ config: { 'session-start': { enabled: true }, brains: { qatlas: { enabled: true } } } });
 try { ({ readConfig } = require('../scripts/runtime/config-loader.js')); }
-catch { /* Fehlende Config-Hilfe darf die übrigen Regeln nicht verhindern. */ }
+catch { /* missing config helper must not block the rules */ }
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT || '';
 const isCodex = Boolean(process.env.PLUGIN_ROOT);
@@ -28,7 +28,7 @@ function resolveRoot() {
       const raw = fs.readFileSync(0, 'utf8').replace(/^﻿/, '');
       const payload = raw ? JSON.parse(raw) : null;
       if (payload && typeof payload.cwd === 'string' && payload.cwd) return payload.cwd;
-    } catch { /* Auf cwd zurückfallen. */ }
+    } catch { /* fall back to cwd */ }
   }
   return process.cwd();
 }
@@ -39,7 +39,7 @@ const qatlasConfig = readConfig(root).config;
 const sessionStart = qatlasConfig['session-start'];
 
 function emit(context, eventName = 'SessionStart') {
-  // SubagentStart verlangt auf beiden Hosts die JSON-Form; SessionStart nur auf Codex.
+  // SubagentStart requires the JSON form on both hosts; SessionStart only on Codex.
   if (isCodex || eventName !== 'SessionStart') {
     process.stdout.write(JSON.stringify({
       hookSpecificOutput: { hookEventName: eventName, additionalContext: context + '\n' },
@@ -50,7 +50,7 @@ function emit(context, eventName = 'SessionStart') {
   process.exit(0);
 }
 
-// Die Bibliothek ist ein eigenständiger Wegweiser und unabhängig von session-start.enabled.
+// The library pointer is independent of session-start.enabled.
 function brainsLines() {
   const brains = qatlasConfig.brains || {};
   const lines = [];
@@ -130,7 +130,7 @@ if (topUpSelection[block] && scaffoldTopUp) {
       apply: true, ...topUpSelection[block],
     }).created;
   }
-  catch { /* Ein Top-up-Fehler darf den Regelblock nicht verhindern. */ }
+  catch { /* a top-up failure must not block the rule block */ }
 }
 
 let body;

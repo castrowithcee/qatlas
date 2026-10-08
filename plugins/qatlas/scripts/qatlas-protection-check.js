@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 'use strict';
 
-// Prüft den gestagten Diff nach der wirksamen protection-Konfiguration auf Secrets und personenbezogene Daten.
-// Aufruf: node qatlas-protection-check.js [--target <repo>] [--print-config] [--allow <kennung>]
-// Exit: 0 weiter (Ausgabe nur bei warn-Befunden), 1 block, 2 ask, 3 Prüfung nicht möglich.
+// Scans the staged diff for secrets and personal data per the effective protection config.
+// Usage: node qatlas-protection-check.js [--target <repo>] [--print-config] [--allow <id>]
+// Exit: 0 proceed (output only for warn findings), 1 block, 2 ask, 3 check not possible.
 //
-// Freigaben: Ein bestätigter Fehlalarm der Kategorie personal-data steht in
-// <repo>/.qatlas/plugins/protection-allow.yaml (format: 1, Liste allow mit file, rule und hash); die Prüfung
-// liest ihren gestagten Stand. hash sind die ersten 16 Hex-Zeichen von SHA-256 über file, rule und Text der
-// hinzugefügten Zeile, jeweils durch NUL getrennt; die Zeilennummer zählt nicht, der Klartext steht nicht in
-// der Datei. Jeder personal-data-Befund
-// nennt seine Kennung (hash) in eckigen Klammern. Freigaben wirken nur bei personal-data mit ask oder warn;
-// secrets und personal-data mit block lassen sich nie freigeben. --allow <kennung> trägt den gestagten Befund
-// mit dieser Kennung ein (Exit 2, wenn er nicht freigebbar ist) und staged nichts. Eine ungültige
-// Freigabedatei ergibt Exit 3.
+// Allowlist: a confirmed personal-data false positive lives in
+// <repo>/.qatlas/plugins/protection-allow.yaml (format: 1, list `allow` with file, rule, hash); the check
+// reads the staged version. hash = first 16 hex chars of SHA-256 over file NUL rule NUL text of the
+// added line; the line number does not count and the plain text is not stored in the file.
+// Every personal-data finding prints its id (hash) in square brackets. Only personal-data with ask or warn
+// can be allowed; secrets and personal-data with block never can. --allow <id> records the staged finding
+// with that id (exit 2 if not allowable) and stages nothing. An invalid allowlist file yields exit 3.
 
 const fs = require('fs');
 const os = require('os');
@@ -50,7 +48,6 @@ function git(args) {
   return execFileSync('git', ['-C', target, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 }
 
-// Liefert hinzugefügte Zeilen des gestagten Diffs als { file, line, text }.
 function stagedLines() {
   const diff = git(['diff', '--cached', '--no-color', '--no-ext-diff', '--unified=0']);
   const lines = [];
@@ -65,7 +62,6 @@ function stagedLines() {
   return lines;
 }
 
-// Liefert Treffer als { item, file, rule, hash }; hash ist die Kennung für Freigaben.
 function scan(lines, rules) {
   const found = [];
   for (const entry of lines) {
@@ -79,8 +75,7 @@ function scan(lines, rules) {
   return found;
 }
 
-// Liest die Freigabedatei aus dem Index (staged) oder für --allow aus dem Arbeitsbaum; fehlende Datei heißt
-// keine Freigaben. Die Prüfung nutzt nur den gestagten Stand, damit eine ungestagte Änderung nichts unterdrückt.
+// Staged copy only, so an unstaged edit cannot suppress a finding; --allow reads the working tree.
 function readAllow(file, staged) {
   let source;
   if (staged) {
@@ -111,8 +106,8 @@ function readAllow(file, staged) {
   return { entries, problems: [] };
 }
 
-// Nutzt gitleaks, wenn installiert: ab 8.19 `git --staged`, davor `protect --staged`.
-// null bedeutet, dass der eingebaute Mustersatz greift.
+// gitleaks if installed: `git --staged` from 8.19, `protect --staged` before.
+// null: built-in pattern set applies.
 function gitleaks() {
   const report = path.join(os.tmpdir(), 'qatlas-gitleaks-' + process.pid + '.json');
   const options = ['--redact', '--no-banner', '--report-format', 'json', '--report-path', report];
@@ -125,17 +120,17 @@ function gitleaks() {
       const findings = JSON.parse(fs.readFileSync(report, 'utf8') || '[]');
       return findings.map(item => ({ item: item.File + ':' + item.StartLine + ' ' + item.RuleID }));
     } catch {
-      // Ohne lesbaren Bericht kennt diese Version den Aufruf nicht; die ältere Variante folgt.
+      // No readable report: this version does not know the call; try the older one.
       continue;
     } finally {
-      try { fs.unlinkSync(report); } catch { /* Kein Bericht entstanden. */ }
+      try { fs.unlinkSync(report); } catch { /* no report written */ }
     }
   }
   return null;
 }
 
 let root = null;
-try { root = git(['rev-parse', '--show-toplevel']).trim(); } catch { /* Kein Git-Repo. */ }
+try { root = git(['rev-parse', '--show-toplevel']).trim(); } catch { /* not a git repo */ }
 
 const state = readConfig(root || target);
 if (!state.protectionValid) {
@@ -167,7 +162,6 @@ if (allow.problems.length) {
     + allow.problems.map(line => '- ' + line).join('\n') + '\n');
   process.exit(3);
 }
-// Freigaben wirken ausschließlich auf personal-data mit ask oder warn.
 const allowable = ['ask', 'warn'].includes(protection['personal-data']);
 
 const allowHash = flag('--allow');

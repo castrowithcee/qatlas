@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// Richtet die native Codex-Statusline ein und erhält übrige Konfigurationswerte sowie Kommentare.
+// Sets up the native Codex statusline and preserves other config values and comments.
 
 const fs = require('fs');
 const os = require('os');
@@ -21,7 +21,7 @@ const DEFAULT_ITEMS = [
     'context-window-size'
 ];
 
-// Strikte Picker-Allowlist: unbekannte Werte können Statusfelder still entfernen.
+// Strict picker allowlist: unknown values can silently drop status fields.
 const KNOWN_ITEMS = new Set([
     'model', 'model-with-reasoning', 'reasoning', 'current-dir', 'project-name', 'git-branch',
     'pull-request-number', 'branch-changes', 'status', 'run-state', 'approval', 'permissions',

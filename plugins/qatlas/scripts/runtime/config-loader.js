@@ -65,7 +65,7 @@ const DEFAULT_CONFIG = {
 };
 
 const PROTECTION_LEVELS = ['block', 'ask', 'warn', 'allow'];
-// Schlüssel, die eine Projektkonfiguration überschreiben darf.
+// Keys a project config may override.
 const PROJECT_KEYS = new Set(['format', 'brains', 'protection']);
 
 const DEFAULT_STATUSLINE = defaultStatusline();
@@ -248,7 +248,7 @@ function writeNew(file, value, mode) {
   return file;
 }
 
-// Ergänzt fehlende globale Schlüssel mit ihrem Default, ohne gesetzte Werte oder Kommentare zu ändern.
+// Adds missing global keys with their default; set values and comments stay as they are.
 function topUpConfig() {
   const file = locations().configFile;
   const document = YAML.parseDocument(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
@@ -261,7 +261,7 @@ function topUpConfig() {
       try {
         document.setIn(keys, value);
         added.push(keys.join('.'));
-      } catch { /* Ein vorhandener Nicht-Map-Wert bleibt unangetastet und wird gemeldet. */ }
+      } catch { /* an existing non-map value stays untouched and is reported */ }
     }
   };
   visit(DEFAULT_CONFIG, []);

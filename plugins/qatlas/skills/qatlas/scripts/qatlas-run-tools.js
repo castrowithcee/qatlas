@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 'use strict';
 
-// Mechanische Hilfsbefehle für qatlas run und qatlas sentinel mit eindeutiger Ausgabe. Alle Befehle arbeiten
-// im Git-Repo von --repo (Standard: aktuelles Verzeichnis).
-// Aufruf:
-//   qatlas-run-tools.js probe --branch <branch> [--base <ref>] [--repo <pfad>]
-//     Prüft per Trockenmerge, ob <branch> konfliktfrei in <base> aufgeht (Standard: origin/HEAD).
-//     Ausgabe: {"result":"clean","base","branch","tree"} oder {"result":"conflict",...,"files":[...]}.
-//     Exit: 0 sauber, 1 Konflikt, 2 Aufruffehler, 3 Prüfung nicht möglich.
-//   qatlas-run-tools.js ci-wait --pr <nummer> [--timeout <sekunden>] [--interval <sekunden>] [--repo <pfad>]
-//     Wartet über gh, bis kein Check der Pull Request mehr läuft (Standard: Timeout 3600, Intervall 20).
-//     Transiente gh-Fehler werden wiederholt, höchstens 5 aufeinanderfolgende.
-//     Ausgabe: {"pr","result":"pass"|"fail"|"timeout","checks":[{name,bucket,link}],"retries"}.
-//     Exit: 0 pass, 1 fail, 4 timeout, 2 Aufruffehler, 3 gh fehlt, nicht angemeldet oder dauerhaft fehlerhaft.
-//   qatlas-run-tools.js slot [--slots <anzahl>] [--repo <pfad>] -- <befehl> [argumente...]
-//     Führt den Befehl erst aus, wenn einer der Testslots frei ist, und gibt den Slot danach frei. Die
-//     Slot-Anzahl kommt aus --slots, sonst aus test-slots in ~/.qatlas/plugins/orchestra.yaml, sonst 2.
-//     Die Sperren liegen im primären Arbeitsbaum, sodass auch Worktrees sie sehen. Keine JSON-Ausgabe;
-//     der Exit-Code des Befehls wird durchgereicht (Signal: 128 plus Signalnummer).
+// Mechanical helper commands for qatlas run and qatlas sentinel. All commands work
+// in the git repo of --repo (default: current directory).
+// Usage:
+//   qatlas-run-tools.js probe --branch <branch> [--base <ref>] [--repo <path>]
+//     Dry-run merge: does <branch> merge into <base> cleanly (default: origin/HEAD).
+//     Output: {"result":"clean","base","branch","tree"} or {"result":"conflict",...,"files":[...]}.
+//     Exit: 0 clean, 1 conflict, 2 usage error, 3 check not possible.
+//   qatlas-run-tools.js ci-wait --pr <number> [--timeout <seconds>] [--interval <seconds>] [--repo <path>]
+//     Waits via gh until no check of the pull request is running (default: timeout 3600, interval 20).
+//     Transient gh errors are retried, at most 5 in a row.
+//     Output: {"pr","result":"pass"|"fail"|"timeout","checks":[{name,bucket,link}],"retries"}.
+//     Exit: 0 pass, 1 fail, 4 timeout, 2 usage error, 3 gh missing, not logged in or persistently failing.
+//   qatlas-run-tools.js slot [--slots <count>] [--repo <path>] -- <command> [args...]
+//     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
+//     --slots, else test-slots in ~/.qatlas/plugins/orchestra.yaml, else 2.
+//     Locks live in the primary working tree so worktrees see them. No JSON output;
+//     the command exit code is passed through (signal: 128 plus signal number).
 
 const fs = require('fs');
 const os = require('os');
@@ -145,7 +145,7 @@ function slot() {
   const orphaned = lock => {
     let pid;
     try { pid = Number(fs.readFileSync(owner(lock), 'utf8').split('\n')[0]); } catch {
-      // Ordner ohne Eigentümerdatei: nur verwaist, wenn er älter als wenige Sekunden ist.
+      // Folder without owner file: orphaned only if older than a few seconds.
       try { return Date.now() - fs.statSync(lock).mtimeMs > 10000; } catch { return false; }
     }
     return !Number.isInteger(pid) || pid <= 0 || !alive(pid);

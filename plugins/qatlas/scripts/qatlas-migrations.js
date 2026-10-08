@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// Migriert nötigen gerätelokalen Legacy-Zustand vor der normalen Plugin-Nutzung und meldet
-// projektspezifische Konflikte, ohne ein Nutzer-Repository still zu verändern.
+// Migrates required device-local legacy state before normal plugin use and reports
+// project-specific conflicts without silently changing a user repository.
 
 const crypto = require('crypto');
 const fs = require('fs');
@@ -54,7 +54,7 @@ function atomicWrite(file, content, mode = 0o600) {
     fs.copyFileSync(temporary, file);
     fs.unlinkSync(temporary);
   }
-  try { fs.chmodSync(file, mode); } catch { /* Keine POSIX-Modusunterstützung. */ }
+  try { fs.chmodSync(file, mode); } catch { /* no POSIX mode support */ }
 }
 
 function isDirectory(directory) {
@@ -442,7 +442,7 @@ function createBackup(paths, files) {
     fs.copyFileSync(file, target);
     const content = fs.readFileSync(file);
     const mode = fs.statSync(file).mode & 0o777;
-    try { fs.chmodSync(target, mode); } catch { /* Keine POSIX-Modusunterstützung. */ }
+    try { fs.chmodSync(target, mode); } catch { /* no POSIX mode support */ }
     records.push({
       source: file,
       backup: path.relative(backupDir, target).split(path.sep).join('/'),
@@ -602,7 +602,7 @@ function machineMigrationProblems(homeDir) {
         problems.push(root + ' enthält Legacy-Worktrees. Prüfe das Git-Register und verschiebe registrierte '
           + 'Worktrees ausschließlich mit git worktree move nach ~/.qatlas/state/worktrees/.');
       }
-    } catch { /* Fehlend oder unlesbar bedeutet: kein automatisch behandelter Zustand. */ }
+    } catch { /* missing or unreadable: nothing to handle automatically */ }
   }
   return problems;
 }
@@ -632,7 +632,7 @@ function resolveRoot() {
       const raw = fs.readFileSync(0, 'utf8').replace(/^﻿/, '');
       const payload = raw ? JSON.parse(raw) : null;
       if (payload && typeof payload.cwd === 'string' && payload.cwd) return path.resolve(payload.cwd);
-    } catch { /* Auf cwd zurückfallen. */ }
+    } catch { /* fall back to cwd */ }
   }
   return process.cwd();
 }

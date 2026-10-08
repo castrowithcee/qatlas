@@ -17,7 +17,7 @@ function write(file, content) {
   fs.writeFileSync(file, content);
 }
 
-// Jeder Fall erhält ein eigenes Home und Repo; PATH ohne gitleaks prüft den eingebauten Mustersatz.
+// Own home and repo per case; PATH without gitleaks exercises the built-in pattern set.
 function run(name, { home = '', project = null, staged = {}, git = true, bin = null }) {
   const base = path.join(root, name);
   const repo = path.join(base, 'repo');
@@ -74,7 +74,7 @@ try {
   result = run('no-git', { git: false, staged: secret });
   assert.strictEqual(result.status, 0);
 
-  // Ein gitleaks vor 8.19 kennt `git` nicht und wird über `protect --staged` genutzt.
+  // gitleaks before 8.19 lacks `git`; used via `protect --staged`.
   const bin = path.join(root, 'old-gitleaks-bin');
   write(path.join(bin, 'gitleaks'), [
     '#!/bin/sh',
@@ -88,7 +88,7 @@ try {
   assert.strictEqual(result.status, 1);
   assert.match(result.stdout, /a\.txt:1 old-gitleaks/);
 
-  // Top-up ergänzt fehlende Schlüssel und erhält gesetzte Werte samt Kommentar.
+  // Top-up adds missing keys and keeps set values with their comment.
   const home = path.join(root, 'topup');
   write(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\n# eigener Kommentar\nprotection:\n  secrets: warn\n');
   const added = execFileSync(process.execPath, ['-e',

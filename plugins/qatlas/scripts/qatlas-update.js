@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// Erkennt repo-spezifische Plugin-Updates und bestätigt sie nach der Nutzerentscheidung.
+// Detects repo-specific plugin updates and confirms them after the user decides.
 
 const fs = require('fs');
 const path = require('path');
@@ -9,7 +9,7 @@ const { projectMigrationInventory } = require('./qatlas-migrations.js');
 
 let readConfig = () => ({ config: { 'session-start': { enabled: true } } });
 try { ({ readConfig } = require('./runtime/config-loader.js')); }
-catch { /* Fehlende Config-Helfer dürfen ausdrückliche Update-Befehle nicht verhindern. */ }
+catch { /* missing config helper must not block explicit update commands */ }
 
 const pluginRoot = path.resolve(__dirname, '..');
 const isCodex = Boolean(process.env.PLUGIN_ROOT);
@@ -29,7 +29,7 @@ function resolveRoot() {
       const raw = fs.readFileSync(0, 'utf8').replace(/^﻿/, '');
       const payload = raw ? JSON.parse(raw) : null;
       if (payload && typeof payload.cwd === 'string' && payload.cwd) return path.resolve(payload.cwd);
-    } catch { /* Auf cwd zurückfallen. */ }
+    } catch { /* fall back to cwd */ }
   }
   return process.cwd();
 }
@@ -39,7 +39,7 @@ function pluginIdentity() {
     const manifest = JSON.parse(fs.readFileSync(path.join(pluginRoot, '.claude-plugin', 'plugin.json'), 'utf8'));
     const version = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
     if (manifest.name && /^\d+\.\d+\.\d+$/.test(version)) return { name: manifest.name, version };
-  } catch { /* Ein ungültiges Plugin erzeugt keinen Update-Hinweis. */ }
+  } catch { /* an invalid plugin yields no update notice */ }
   return null;
 }
 
@@ -99,7 +99,7 @@ function pendingUpdates(root, identity, sourceRoot = pluginRoot) {
   const stored = readState(root).plugins[identity.name];
   const checked = semver(stored) ? stored : '0.0.0';
   let names = [];
-  try { names = fs.readdirSync(path.join(sourceRoot, 'updates')); } catch { /* Keine Updates. */ }
+  try { names = fs.readdirSync(path.join(sourceRoot, 'updates')); } catch { /* no updates */ }
   const pending = names
     .filter(name => /^\d+\.\d+\.\d+\.md$/.test(name))
     .map(name => ({ name, version: name.slice(0, -3) }))

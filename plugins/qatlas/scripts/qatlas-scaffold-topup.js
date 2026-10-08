@@ -1,6 +1,6 @@
 'use strict';
 
-// Gemeinsamer Scaffold-Abgleich für Doctor und Session-Hook. Kopiert nur fehlende Dateien.
+// Shared scaffold comparison for doctor and session hook. Copies only missing files.
 
 const fs = require('fs');
 const path = require('path');
@@ -34,7 +34,7 @@ function copyMissing(from, to) {
   }
 }
 
-// apply=false berichtet, apply=true ergänzt. Vorhandene Dateien bleiben unangetastet.
+// apply=false reports, apply=true fills in. Existing files stay untouched.
 function scaffoldTopUp(target, bundle, { apply = false, only = null, exclude = [] } = {}) {
   const base = path.join(bundle, '.qatlas-project');
   const project = path.join(target, '.qatlas-project');

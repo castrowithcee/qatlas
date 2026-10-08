@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// Ein ausdrücklich gesetzter Dev-Modus gilt nur in der Session, die ihn gesetzt hat.
+// An explicitly set dev mode applies only to the session that set it.
 
 const crypto = require('crypto');
 const fs = require('fs');
@@ -48,13 +48,13 @@ function setLevel(sessionId, level) {
   try {
     fs.mkdirSync(stateDir(), { recursive: true });
     fs.writeFileSync(target, level);
-  } catch { /* Der Modus darf keinen Prompt blockieren. */ }
+  } catch { /* never block a prompt */ }
 }
 
 function clearLevel(sessionId) {
   const target = statePath(sessionId);
   if (!target) return;
-  try { fs.unlinkSync(target); } catch { /* bereits aus */ }
+  try { fs.unlinkSync(target); } catch { /* already off */ }
 }
 
 function filterSkillBodyForLevel(body, level) {
@@ -130,7 +130,7 @@ function finish() {
 
   let payload = {};
   try { payload = JSON.parse(input.replace(/^﻿/, '')); }
-  catch { /* Ohne gültigen Hook-Payload gibt es keinen sicheren Session-Scope. */ }
+  catch { /* no valid payload, no safe session scope */ }
 
   const sessionId = payload.session_id;
   if (!sessionId) return;
@@ -192,7 +192,7 @@ function finish() {
       emit('UserPromptSubmit', level,
         'QATLAS-DEV AKTIV, Stufe: ' + level + '. Nur auf tatsächliche Codearbeit anwenden.');
     }
-  } catch { /* Best Effort: nie den Prompt oder das Session-Ende blockieren. */ }
+  } catch { /* best effort: never block prompt or session end */ }
 }
 
 process.stdin.on('data', chunk => { input += chunk; });
