@@ -1,4 +1,4 @@
-# Nur qatlas run liest die nutzereigene Kopie unter ~/.qatlas/plugins/orchestra.yaml.
+# Nur qatlas run und qatlas sentinel lesen die nutzereigene Kopie unter ~/.qatlas/plugins/orchestra.yaml.
 # Diese Datei ändert keine Host-Einstellungen und steuert keine anderen Subagent-Aufrufe.
 format: 1
 

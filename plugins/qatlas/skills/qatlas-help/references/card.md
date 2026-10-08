@@ -15,6 +15,7 @@ license: MIT
 | **qatlas shape <Task>** | Schärft einen eindeutig bezeichneten bestehenden Task. |
 | **qatlas shape backlog [Scope]** | Schärft Drafts, klärt Voraussetzungen und repariert die Queue. |
 | **qatlas run [--limit <n\|all>] [--fly]** | Führt standardmäßig höchstens fünf Tasks seriell mit Orchestrator und Subagents aus; `--fly` arbeitet ohne Rückfragen. |
+| **qatlas sentinel [--limit <n\|all>] [--fly]** | Verteilt unabhängige Tasks auf bis zu vier gleichzeitige Orchestratoren in tmux. |
 | **qatlas review** | Führt Schritt für Schritt durch konkrete Prüfungen und klärt Entscheidungen einzeln. |
 | **qatlas-work tree** | Zeigt Git-Worktrees, legt mit `new` einen an oder räumt sicher auf. |
 | **qatlas-core setup** | Richtet Projektzustand, Projektanweisungen, Bibliothek und Einstellungen ein. |

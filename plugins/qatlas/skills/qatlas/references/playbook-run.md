@@ -79,12 +79,28 @@ Der Nutzer ist während des Laufs nicht erreichbar; kein Schritt wartet auf sein
 
 `--fly` erweitert keine Autorisierung. Korrekturbudget, Stopbedingungen und Modusgrenzen gelten unverändert.
 
+### `--sentinel <Ordner>`
+
+Ein Sentinel hat diese Session gestartet und ist Integrationsbesitzer. Abweichend von diesem Verfahren gilt:
+
+- Bearbeite genau den genannten Task im Worktree, in dem du gestartet wurdest, und wähle nichts nach.
+  Committe nur auf dessen Task-Branch.
+- Schreibe weder Spine noch Steuerbranch. Beanspruchung, Status, Nebenbefund-Drafts und Integration
+  übernimmt der Sentinel.
+- Halte `<Ordner>/<Task-ID>.status` aktuell: Die erste Zeile lautet genau `arbeitet`, `wartet: <Grund>`,
+  `nutzer`, `fertig` oder `übergeben`, danach folgen höchstens drei Zeilen Kurzstand. Schreibe sie beim
+  Start, vor jeder Frage an den Nutzer und am Ende.
+- Lege vor `fertig` oder `übergeben` deinen Abschluss nach diesem Verfahren in `<Ordner>/<Task-ID>.md` ab,
+  einschließlich Nebenbefunden, Annahmen und dem Block „Für dich“. `fertig` heißt integrationsreif auf dem
+  Task-Branch, `übergeben` heißt, dass der Nutzer entscheiden, prüfen oder handeln muss.
+- Schreibt der Nutzer dir direkt, folge ihm und setze `nutzer`, bis er dich an den Sentinel zurückgibt.
+
 ## Orchestrierung konfigurieren
 
 Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run` und
-ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Prüfe, dass Format, die Sektion des
-aktuellen Hosts, das Orchestrator-Modell und die benötigten Worker-Profile vorhanden und gültig sind. Fehlt
-die Datei oder ihre Host-Sektion, ist ein Eintrag ungültig oder erscheint ein Modell veraltet oder
+`sentinel` und ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Prüfe, dass Format, die
+Sektion des aktuellen Hosts, das Orchestrator-Modell und die benötigten Worker-Profile vorhanden und gültig
+sind. Fehlt die Datei oder ihre Host-Sektion, ist ein Eintrag ungültig oder erscheint ein Modell veraltet oder
 zweifelhaft, lies vollständig [Orchestrierung einrichten](playbook-orchestra.md) und beginne bis zur Klärung
 keinen Task.
 
