@@ -14,7 +14,8 @@ license: MIT
    Fragen, den `shape` in Tasks zerlegt. Dabei entsteht nichts Dauerhaftes.
 3. **Ausarbeiten:** `qatlas shape <Idee oder Datei>` hält bestätigtes Wissen fest und schneidet kleine,
    ausführungsreife Tasks. `qatlas shape backlog` ordnet vorhandene Arbeit neu.
-4. **Ausführen:** `qatlas run` arbeitet höchstens fünf Tasks nacheinander ab. Ein Orchestrator vergibt
+4. **Ausführen:** `qatlas run` arbeitet standardmäßig höchstens fünf Tasks nacheinander ab; `--limit` ändert
+   die Zahl, `--fly` lässt den Lauf ohne erreichbaren Nutzer arbeiten. Ein Orchestrator vergibt
    Aufträge an Subagents, prüft deren Ergebnisse und committet lokal. Push, Publish, Deployment und
    irreversible Schritte autorisiert ein Run nie.
 5. **Abnehmen:** `qatlas review` führt Schritt für Schritt mit Ort und erwartetem Ergebnis durch konkrete

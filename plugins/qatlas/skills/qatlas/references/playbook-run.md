@@ -1,8 +1,9 @@
 ---
 description: >
-  Serieller autonomer Arbeitslauf für höchstens fünf ausführbare Tasks: Ein Orchestrator disponiert,
-  überwacht und integriert genau einen aktiven Task zur Zeit, den Subagents mit je einem abgegrenzten
-  Auftrag umsetzen, und übergibt ihn nach spätestens zwei erfolglosen Korrekturen gesichert an den Nutzer.
+  Serieller autonomer Arbeitslauf für standardmäßig höchstens fünf ausführbare Tasks: Ein Orchestrator
+  disponiert, überwacht und integriert genau einen aktiven Task zur Zeit, den Subagents mit je einem
+  abgegrenzten Auftrag umsetzen, und übergibt ihn nach spätestens zwei erfolglosen Korrekturen gesichert an
+  den Nutzer.
 type: playbook
 edit: locked
 license: MIT
@@ -44,6 +45,40 @@ erst durch eine neue Erstanalyse entdecken. Ein seit `shape` veränderter Bestan
 ein normaler Befund und wird nach den folgenden Reiferegeln behandelt. Ein bloß großer Task wird nicht
 automatisch zum Auftrag an ein stärkeres Modell.
 
+## Laufoptionen
+
+Nach dem Scope darf der Aufruf `--limit <n|all>`, `--fly` und eine freie Laufvorgabe tragen. Eine
+gleichbedeutende ausdrückliche Nutzervorgabe vor dem Aufruf in derselben Session gilt wie die Option. Eine
+Laufvorgabe wie „priorisiere Aufgaben zu X“ steuert Auswahl und Reihenfolge innerhalb des Scopes; sie
+erweitert weder Scope noch Autorisierung und hebt keine Grenze dieses Verfahrens auf. Nenne eine unbekannte
+Option vor dem ersten Task und starte bis zur Klärung nicht.
+
+### `--limit <n|all>`
+
+Setzt die Taskgrenze auf `n` oder bei `all` auf alle ausführbaren Tasks des Scopes. Liegt sie über fünf,
+prüfe nach jedem abgeschlossenen oder gesichert übergebenen Task, ob dein Kontext einen weiteren
+vollständigen Task samt Integration und Abschlussbericht noch sicher trägt. Ist er bereits verdichtet worden
+oder reicht er absehbar nicht, beende den Lauf regulär an dieser Taskgrenze.
+
+### `--fly`
+
+Der Nutzer ist während des Laufs nicht erreichbar; kein Schritt wartet auf seine Antwort.
+
+1. **Vorab klären:** Prüfe vor dem ersten Task alles, was den Lauf später anhalten würde: Orchestrierung,
+   Erreichbarkeit und Schreibrecht des Spine, benötigte Werkzeuge, Authentifizierungen und Subagents sowie
+   absehbare Berechtigungsabfragen des Hosts. Bündle offene Punkte in einer einzigen Rückfrage und starte
+   erst nach deren Klärung. Ohne offene Punkte starte direkt.
+2. **Aus Projektwissen entscheiden:** Belegen Taskvertrag, Entscheidungen, Anforderungen, Konventionen oder
+   anderes maßgebliches Projektwissen die Antwort auf eine Frage, die sonst den Nutzer bräuchte, entscheide
+   danach und halte Entscheidung und Quelle im Task fest. Eine fehlende Ausführungsreife schließt du nur so.
+3. **Annehmen:** Ist die Antwort nicht belegt, die Entscheidung aber reversibel, lokal und ohne Änderung von
+   Ziel, Scope oder Abnahme, wähle die begründet beste Option und halte sie im Task als Annahme fest.
+4. **Übergeben:** Alles andere, insbesondere Sicherheits-, Berechtigungs- und Außenwirkungsgrenzen,
+   irreversible Wirkung oder eine mögliche Nutzerentscheidung, übergibst du nach diesem Verfahren an `review`
+   und setzt den Lauf mit dem nächsten unabhängigen Task fort.
+
+`--fly` erweitert keine Autorisierung. Korrekturbudget, Stopbedingungen und Modusgrenzen gelten unverändert.
+
 ## Orchestrierung konfigurieren
 
 Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run` und
@@ -69,16 +104,18 @@ diesem Profil nicht. Weiche nicht auf eine andere Effort-Stufe aus.
 
 ## Tasks auswählen
 
-Ein Lauf bearbeitet höchstens fünf Tasks. Die Grenze begrenzt den Laufhorizont; sie ist keine Commitzahl,
-keine Subagentzahl und keine Aussage über parallele Tasks. Die Zahl der `next`-Tasks verändert sie nicht.
-Eine größere `next`-Menge bleibt in ihrer bestehenden Reihenfolge für spätere Läufe erhalten.
+Ein Lauf bearbeitet höchstens so viele Tasks, wie seine Taskgrenze zulässt, standardmäßig fünf. Die Grenze
+begrenzt den Laufhorizont; sie ist keine Commitzahl, keine Subagentzahl und keine Aussage über parallele
+Tasks. Die Zahl der `next`-Tasks verändert sie nicht. Eine größere `next`-Menge bleibt in ihrer bestehenden
+Reihenfolge für spätere Läufe erhalten.
 
 1. Lies zuerst nur Roster beziehungsweise externe Metadaten des gewählten Scopes. Ermittle Status,
    Kurzstand, Reihenfolge, Abhängigkeiten und Besitzsignale. Bei einem ausdrücklich gewählten einzelnen
    Task lies dessen aktuellen Datensatz direkt.
-2. Nimm zuerst ausführbare `next`-Tasks in der Reihenfolge des Spine. Sind weniger als fünf vorhanden,
-   ergänze den Lauf selbstständig mit fachlich passenden `ready`-Tasks desselben Scopes. Wähle nach
-   erfüllbaren Abhängigkeiten, fachlichem Nutzen, früher Risikoklärung und sinnvoller Integration.
+2. Nimm zuerst ausführbare `next`-Tasks in der Reihenfolge des Spine. Sind weniger vorhanden, als die
+   Taskgrenze zulässt, ergänze den Lauf selbstständig mit fachlich passenden `ready`-Tasks desselben
+   Scopes. Wähle nach erfüllbaren Abhängigkeiten, fachlichem Nutzen, früher Risikoklärung und sinnvoller
+   Integration.
 3. Ein ausgewählter `ready`-Task wechselt vor seiner Beanspruchung über `next`. `ready` und `next` sind
    exklusive Status; `next` setzt vollständige Ausführungsreife voraus.
 4. Lies nur die ausgewählten Tasks und ihre echten Blocker vollständig. Öffne Kommentare oder Historie nur
@@ -100,7 +137,7 @@ Task bewertet der Orchestrator Auswahl, Reihenfolge, Abhängigkeiten und verblei
 
 ## Genau einen Task ausführen
 
-Pro Lauf ist immer höchstens ein Task `in-progress`; die bis zu fünf Tasks laufen nacheinander. Beanspruche
+Pro Lauf ist immer höchstens ein Task `in-progress`; die ausgewählten Tasks laufen nacheinander. Beanspruche
 ihn unmittelbar vor der ersten schreibenden Ausführung im Spine. Kein Subagent verändert Spine oder
 Branchverwaltung, erstellt Commits oder startet eigene Subagents.
 
@@ -225,7 +262,7 @@ Ist das Kriterium nach der zweiten Korrektur weiterhin nicht erfüllt:
 4. Starte keinen Checker oder Ersatz-Subagent als verdeckte dritte Korrekturrunde.
 
 Hängen verbleibende Tasks von diesem Ergebnis ab, stoppe den gesamten Lauf und übergib dem Nutzer die
-Entscheidung. Nur nachweislich unabhängige Tasks dürfen innerhalb der verbleibenden Fünfergrenze seriell
+Entscheidung. Nur nachweislich unabhängige Tasks dürfen innerhalb der verbleibenden Taskgrenze seriell
 weiterlaufen.
 
 ## Integrieren und abschließen
@@ -284,13 +321,14 @@ nichts und melde das Risiko ausschließlich im Abschluss unter **Sicherheit**. A
 öffentlichen Ort enthält der Eintrag keine Secrets.
 
 Beginne erst danach mit dem nächsten ausgewählten Task. Wiederhole Auswahl, Umsetzung und Integration, bis
-fünf Tasks bearbeitet sind oder eine Stopbedingung eintritt.
+die Taskgrenze erreicht ist oder eine Stopbedingung eintritt.
 
 ## Stopbedingungen
 
 Beende den Lauf, sobald eine dieser Bedingungen gilt:
 
-- Fünf Tasks wurden abgeschlossen oder gesichert übergeben.
+- Die Taskgrenze ist erreicht: So viele Tasks wurden abgeschlossen oder gesichert übergeben.
+- Bei erhöhter Taskgrenze trägt der Kontext des Orchestrators keinen weiteren vollständigen Task.
 - Der gewählte Scope ist vollständig und belegt abgeschlossen.
 - Es gibt im Scope weder ausführbares `next` noch ausführbares `ready`.
 - Ein fehlgeschlagener Task blockiert die verbleibende Arbeit.
@@ -320,6 +358,9 @@ hier, nicht zusätzlich im Fließtext. Leere Kategorien entfallen:
 
 **Entscheiden**
 - #<ID>: <offene Entscheidung>
+
+**Angenommen**
+- #<ID>: <unter `--fly` getroffene Annahme mit Grund; bestätigen oder zurücknehmen>
 
 **Neu erfasst**
 - #<ID> <Titel des Nebenbefunds>

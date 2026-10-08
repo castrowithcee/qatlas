@@ -55,7 +55,7 @@ sicher, übergib den Task mit Befund an den Nutzer.
 
 ## Commits und Checkpoints
 
-- Ein Task erhält so viele Commits, wie die Commitgrenze verlangt. Die Fünfergrenze des Runs zählt Tasks,
+- Ein Task erhält so viele Commits, wie die Commitgrenze verlangt. Die Taskgrenze des Runs zählt Tasks,
   keine Commits.
 - Der Subagent erstellt keine Commits. Der Orchestrator committet in einem Worktree nur, solange dort kein
   Subagent arbeitet, also nach dessen Rückgabe oder Stopp. Lass eine größere Umsetzung an kohärenten

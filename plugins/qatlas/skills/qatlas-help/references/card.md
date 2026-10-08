@@ -14,7 +14,7 @@ license: MIT
 | **qatlas shape [Idee oder Datei]** | Hält bestätigtes Wissen fest und schneidet kleine, ausführungsreife Tasks. |
 | **qatlas shape <Task>** | Schärft einen eindeutig bezeichneten bestehenden Task. |
 | **qatlas shape backlog [Scope]** | Schärft Drafts, klärt Voraussetzungen und repariert die Queue. |
-| **qatlas run** | Führt höchstens fünf Tasks seriell mit Orchestrator und Subagents aus. |
+| **qatlas run [--limit <n\|all>] [--fly]** | Führt standardmäßig höchstens fünf Tasks seriell mit Orchestrator und Subagents aus; `--fly` arbeitet ohne Rückfragen. |
 | **qatlas review** | Führt Schritt für Schritt durch konkrete Prüfungen und klärt Entscheidungen einzeln. |
 | **qatlas-work tree** | Zeigt Git-Worktrees, legt mit `new` einen an oder räumt sicher auf. |
 | **qatlas-core setup** | Richtet Projektzustand, Projektanweisungen, Bibliothek und Einstellungen ein. |
