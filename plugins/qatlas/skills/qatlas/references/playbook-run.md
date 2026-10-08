@@ -200,8 +200,10 @@ Reihenfolge:
 Einen kleinen Task setzt normalerweise ein Subagent um. Braucht derselbe Task legitim mehrere getrennte
 Rollen oder Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
 nachweislich ergänzen, dürfen keine konkurrierenden Lösungen bauen und bleiben gemeinsam im Fehlerbudget
-dieses einen Tasks. Gleichzeitig schreibende Subagents isoliert der Git-Ablauf. Ein weiterer Task beginnt
-erst, wenn der aktive Task abgeschlossen oder gesichert übergeben ist.
+dieses einen Tasks. Gleichzeitig schreibende Subagents isoliert der Git-Ablauf. Volltests gleichzeitiger
+Schreiber laufen über `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot -- <testbefehl>`,
+das sie repo-weit begrenzt. Ein weiterer Task beginnt erst, wenn der aktive Task abgeschlossen oder gesichert
+übergeben ist.
 
 Der Subagent darf eine nicht vorhergesagte Datei selbstständig einbeziehen, wenn sie nachweislich innerhalb
 des fachlichen Scopes liegt, und nennt die Abweichung in seiner Rückgabe. Wäre eine Wirkung außerhalb des

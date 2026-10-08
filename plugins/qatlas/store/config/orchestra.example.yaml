@@ -2,6 +2,9 @@
 # Diese Datei ändert keine Host-Einstellungen und steuert keine anderen Subagent-Aufrufe.
 format: 1
 
+# Optional: Anzahl gleichzeitiger Volltests je Repo für qatlas-run-tools.js slot (Standard 2).
+# test-slots: 2
+
 # Die Beschreibungen bestimmen den Zuschnitt, nicht die Größe eines Backlog-Tasks.
 profiles:
   light: "Enger Auftrag mit eindeutigem Vorgehen und direkter Prüfung."
