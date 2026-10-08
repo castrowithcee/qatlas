@@ -2,15 +2,16 @@
 'use strict';
 
 // Steuert das Orchestrator-Fenster eines Qatlas-Sentinels in tmux. Ein Fenster gehört genau einem Repo und
-// wird über dessen Root markiert; das Skript fasst nur so markierte Fenster an.
+// wird über dessen Root markiert; das Skript fasst nur so markierte Fenster an. Ein Pane wird über Repo und
+// Paket adressiert, weil Hosts wie Codex Befehle nicht zuverlässig mit der Umgebung des Panes ausführen.
 // Aufruf:
-//   qatlas-sentinel-tmux.js add --repo <root> --label <fenstername> --title <titel> --cwd <ordner> -- <befehl> [argumente...]
+//   qatlas-sentinel-tmux.js add --repo <root> --package <paket> --label <fenstername> --title <titel> --cwd <ordner> -- <befehl> [argumente...]
 //   qatlas-sentinel-tmux.js list --repo <root>
-//   qatlas-sentinel-tmux.js title --pane <pane-id> --title <titel>
 //   qatlas-sentinel-tmux.js wait --repo <root> [--timeout <sekunden>]
-//   qatlas-sentinel-tmux.js ask --pane <pane-id> --question <frage> [--timeout <sekunden>]
-//   qatlas-sentinel-tmux.js answer --pane <pane-id> --answer <antwort>
-//   qatlas-sentinel-tmux.js close --pane <pane-id>
+//   qatlas-sentinel-tmux.js title --repo <root> --package <paket> --title <titel>
+//   qatlas-sentinel-tmux.js ask --repo <root> --package <paket> --question <frage> [--timeout <sekunden>]
+//   qatlas-sentinel-tmux.js answer --repo <root> --package <paket> --answer <antwort>
+//   qatlas-sentinel-tmux.js close --repo <root> --package <paket>
 
 const fs = require('fs');
 const path = require('path');
@@ -48,17 +49,21 @@ function panes(win) {
     .split('\n').filter(Boolean).map(line => {
       const [pane, title, dead] = line.split('\t');
       const question = option(pane, '@qatlas-question');
-      return { pane, title, dead: dead === '1', ...(question ? { question } : {}) };
+      return { pane, package: option(pane, '@qatlas-package'), title, dead: dead === '1',
+        ...(question ? { question } : {}) };
     });
 }
 
 const option = (pane, name) => tmux(['display', '-p', '-t', pane, `#{${name}}`]);
 const setOption = (pane, name, value) => tmux(['set', '-p', '-t', pane, name, value]);
 
-function owned(pane) {
-  let mark;
-  try { mark = tmux(['display', '-p', '-t', pane, `#{${MARK}}`]); } catch { fail('Unbekanntes Pane: ' + pane); }
-  if (!mark) fail('Pane gehört zu keinem Sentinel-Fenster: ' + pane);
+function target() {
+  const repo = repoKey();
+  const [name] = need('--package');
+  const win = markedWindow(repo);
+  const hit = win && panes(win).find(p => p.package === name);
+  if (!hit) fail(`Kein Pane für Paket ${name} im Sentinel-Fenster von ${repo}`);
+  return hit.pane;
 }
 
 function layout(win) {
@@ -94,17 +99,19 @@ function newWindow(repo, label, cwd) {
 
 function add() {
   const repo = repoKey();
-  const [label, title, cwd] = need('--label', '--title', '--cwd');
+  const [name, label, title, cwd] = need('--package', '--label', '--title', '--cwd');
   if (!rest.length) fail('Fehlt: Befehl nach --', 2);
   if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Kein Ordner: ' + cwd);
   let win = markedWindow(repo);
   let pane;
+  if (win && panes(win).some(p => p.package === name)) fail('Paket hat bereits ein Pane: ' + name);
   if (win) {
     if (panes(win).length >= MAX_PANES) fail(`Höchstens ${MAX_PANES} Orchestratoren pro Sentinel.`);
     pane = tmux(['split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, '-c', cwd, ...rest]);
   } else {
     [win, pane] = newWindow(repo, label, cwd);
   }
+  setOption(pane, '@qatlas-package', name);
   setOption(pane, '@qatlas-title', title);
   setTitle(pane, title);
   layout(win);
@@ -136,8 +143,8 @@ async function wait() {
 // Stellt dem Sentinel eine Frage und wartet auf seine Antwort. Ein erneuter Aufruf mit derselben Frage
 // wartet weiter, ohne eine inzwischen eingetroffene Antwort zu verwerfen.
 async function ask() {
-  const [pane, question] = need('--pane', '--question');
-  owned(pane);
+  const pane = target();
+  const [question] = need('--question');
   const timeout = Number(flag('--timeout') || 100) * 1000;
   const title = option(pane, '@qatlas-title') || option(pane, 'pane_title');
   if (option(pane, '@qatlas-question') !== question) {
@@ -159,16 +166,15 @@ async function ask() {
 }
 
 function answer() {
-  const [pane, text] = need('--pane', '--answer');
-  owned(pane);
+  const pane = target();
+  const [text] = need('--answer');
   if (!option(pane, '@qatlas-question')) fail('Keine offene Frage in ' + pane);
   setOption(pane, '@qatlas-answer', text);
   out({ pane, answered: true });
 }
 
 function close() {
-  const [pane] = need('--pane');
-  owned(pane);
+  const pane = target();
   const win = tmux(['display', '-p', '-t', pane, '#{window_id}']);
   const last = panes(win).length === 1;
   tmux(['kill-pane', '-t', pane]);
@@ -179,7 +185,7 @@ function close() {
 try {
   if (command === 'add') add();
   else if (command === 'list') list();
-  else if (command === 'title') { const [pane, title] = need('--pane', '--title'); owned(pane); setTitle(pane, title); out({ pane, title }); }
+  else if (command === 'title') { const pane = target(); const [title] = need('--title'); setTitle(pane, title); out({ pane, title }); }
   else if (command === 'wait') wait().catch(error => fail(error.message));
   else if (command === 'ask') ask().catch(error => fail(error.message));
   else if (command === 'answer') answer();

@@ -22,7 +22,8 @@ Orchestratoren“.
 
 Das Steuerskript ist `node <plugin-root>/skills/qatlas/scripts/qatlas-sentinel-tmux.js`; `<plugin-root>`
 ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`. Fasse Orchestrator-Panes nur über dieses Skript
-an und sende nie Tastatureingaben in eine Orchestrator-Session.
+an und sende nie Tastatureingaben in eine Orchestrator-Session. `wait` und `ask` blockieren bis zu ihrem
+`--timeout`; setze das Befehls-Timeout des Hosts darüber.
 
 ## Vorbereiten
 
@@ -55,7 +56,7 @@ Nenne dem Nutzer die Pakete mit Tasks und Grund des Schnitts in wenigen Zeilen u
 Starte jedes Paket im Repo-Root:
 
 ```text
-add --repo <repo-root> --label "<Projekt>·orchester" --title "<Projekt>·<Paket> · <host>" --cwd <repo-root> -- <cli>
+add --repo <repo-root> --package <Paket> --label "<Projekt>·orchester" --title "<Projekt>·<Paket> · <host>" --cwd <repo-root> -- <cli>
 ```
 
 - Claude Code: `claude --model <orchestrator> '/qatlas run <Tasks> [--limit <n>] <Laufvorgabe>'`
@@ -68,10 +69,13 @@ den Nutzer fragst, entscheidet dein eigenes `--fly`. Die Laufvorgabe lautet sinn
 > Paket <Paket> eines Sentinels. Weitere Orchestratoren arbeiten parallel im selben Repo; Integrationsbesitzer
 > ist der Sentinel. Arbeite nach „Mehrere Orchestratoren“, beanspruche nur Tasks dieses Pakets und übergib
 > jeden geprüften Task-Branch mit Bericht. Der Sentinel vertritt den Nutzer: Was du sonst den Nutzer fragen
-> würdest, fragst du ausschließlich mit `node <skript> ask --pane "$TMUX_PANE" --question "<Frage mit
-> Kontext, Optionen und Empfehlung>"`; die Ausgabe ist seine Antwort. Ohne Antwort rufe denselben Befehl
-> erneut auf. Setze nach deinem Abschlussblock mit `node <skript> title --pane "$TMUX_PANE" --title
-> "FERTIG · <Titel>"` den Pane-Titel.
+> würdest, fragst du ausschließlich mit `node <skript> ask --repo <repo-root> --package <Paket> --question
+> "<Frage mit Kontext, Optionen und Empfehlung>"`; die Ausgabe ist seine Antwort. Ohne Antwort rufe denselben
+> Befehl erneut auf. Setze nach deinem Abschlussblock mit `node <skript> title --repo <repo-root> --package
+> <Paket> --title "FERTIG · <Titel>"` den Pane-Titel.
+
+Setze `<skript>`, `<repo-root>` und `<Paket>` als feste Werte ein; verlasse dich nicht auf Umgebungsvariablen
+des Panes, weil nicht jeder Host Befehle mit ihnen ausführt.
 
 Ergänze den Teil der Laufvorgabe des Nutzers, der dieses Paket betrifft. Füge keine Option hinzu, die
 Berechtigungen, Sandbox oder Freigaben des Hosts lockert.
@@ -86,12 +90,12 @@ ansprechbar bleibst. Prüfe danach das Spine.
   ausführen](playbook-run.md), integriere ihn einzeln nach dem Git-Ablauf, führe die gemeinsamen Prüfungen
   aus und setze den Task erst dann auf `done`. Löse einen Konflikt nicht automatisch; sichere den Task dann
   als Übergabe auf `review`.
-- **`FRAGE`:** `list` zeigt die Frage des Panes. Belegt das Projektwissen die Antwort, antworte mit
-  `answer --pane <id> --answer "<Antwort mit Quelle>"`. Sonst frage ohne `--fly` den Nutzer knapp mit Paket,
-  Frage und Empfehlung und gib seine Antwort weiter. Mit `--fly` entscheide nach dessen Regeln in
-  [Arbeit ausführen](playbook-run.md): Eine Annahme gibst du als Antwort weiter und nennst sie im Abschluss
-  unter **Angenommen**; was übergeben werden muss, beantwortest du mit der Anweisung, den Task an `review`
-  zu übergeben und fortzufahren.
+- **`FRAGE`:** `list` zeigt die Frage des Pakets. Belegt das Projektwissen die Antwort, antworte mit
+  `answer --repo <repo-root> --package <Paket> --answer "<Antwort mit Quelle>"`. Sonst frage ohne `--fly`
+  den Nutzer knapp mit Paket, Frage und Empfehlung und gib seine Antwort weiter. Mit `--fly` entscheide nach
+  dessen Regeln in [Arbeit ausführen](playbook-run.md): Eine Annahme gibst du als Antwort weiter und nennst
+  sie im Abschluss unter **Angenommen**; was übergeben werden muss, beantwortest du mit der Anweisung, den
+  Task an `review` zu übergeben und fortzufahren.
 - **Beendetes Pane ohne `FERTIG`:** Sichere die offenen Tasks des Pakets nach dem Git-Ablauf als Übergabe auf
   `review`.
 - Schreibt der Nutzer selbst in ein Pane, gehört ihm diese Session; fasse sie nicht an. Hängt ein
