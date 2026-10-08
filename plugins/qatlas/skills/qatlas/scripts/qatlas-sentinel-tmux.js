@@ -4,13 +4,22 @@
 // Steuert das Orchestrator-Fenster eines Qatlas-Sentinels in tmux. Ein Fenster gehört genau einem Repo und
 // wird über dessen Root markiert; das Skript fasst nur so markierte Fenster an. Ein Pane wird über Repo und
 // Paket adressiert, weil Hosts wie Codex Befehle nicht zuverlässig mit der Umgebung des Panes ausführen.
+// Ereignisse stehen als JSON-Lines in <repo>/.qatlas/local/sentinel/events.jsonl. Die Sequenznummer `seq`
+// ist der Zeilenindex ab 0 und wird beim Lesen abgeleitet, nicht gespeichert. Weckend sind question,
+// handover, done und exited; start, answer, picked und alle über log geschriebenen Typen wecken nicht.
+// `wait --since <seq>` liefert alle weckenden Ereignisse ab seq und den neuen `cursor` (Zahl aller
+// Ereignisse); den Cursor übergibst du beim nächsten Aufruf als --since, dann geht nichts verloren. Legt add
+// das Fenster neu an, wird ein vorhandenes Protokoll zu events-<zeitstempel>.jsonl umbenannt.
 // Aufruf:
 //   qatlas-sentinel-tmux.js add --repo <root> --package <paket> --label <fenstername> --title <titel> --cwd <ordner> -- <befehl> [argumente...]
 //   qatlas-sentinel-tmux.js list --repo <root>
-//   qatlas-sentinel-tmux.js wait --repo <root> [--timeout <sekunden>]
+//   qatlas-sentinel-tmux.js wait --repo <root> [--since <seq>] [--timeout <sekunden>]
 //   qatlas-sentinel-tmux.js title --repo <root> --package <paket> --title <titel>
 //   qatlas-sentinel-tmux.js ask --repo <root> --package <paket> --question <frage> [--timeout <sekunden>]
-//   qatlas-sentinel-tmux.js answer --repo <root> --package <paket> --answer <antwort>
+//   qatlas-sentinel-tmux.js handover --repo <root> --package <paket> --task <id> --report <text|datei> [--timeout <sekunden>]
+//   qatlas-sentinel-tmux.js answer --repo <root> --package <paket> --answer <antwort>   (Übergabe: "integrated <sha>" oder "rework <grund>")
+//   qatlas-sentinel-tmux.js log --repo <root> --type <typ> [--package <paket>] [--task <id>] [--text <text>]
+//   qatlas-sentinel-tmux.js report --repo <root>
 //   qatlas-sentinel-tmux.js close --repo <root> --package <paket>
 
 const fs = require('fs');
@@ -21,6 +30,9 @@ const MAX_PANES = 4;
 const NARROW = 80;
 const MARK = '@qatlas-sentinel';
 const SOCKET = 'qatlas-sentinel';
+const WAKING = new Set(['question', 'handover', 'done', 'exited']);
+const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked']);
+const PREFIX = { question: 'FRAGE · ', handover: 'ÜBERGABE · ' };
 
 const argv = process.argv.slice(2);
 const command = argv[0];
@@ -37,6 +49,25 @@ const fail = (message, code = 1) => { process.stderr.write(message + '\n'); proc
 const need = (...names) => names.map(name => flag(name) || fail('Fehlt: ' + name, 2));
 const repoKey = () => fs.realpathSync(path.resolve(need('--repo')[0]));
 
+const eventsDir = repo => path.join(repo, '.qatlas', 'local', 'sentinel');
+const eventsFile = repo => path.join(eventsDir(repo), 'events.jsonl');
+
+// Hängt genau eine Zeile an. O_APPEND macht das auch bei mehreren Schreibern zeilenweise atomar.
+function record(repo, type, fields = {}) {
+  fs.mkdirSync(eventsDir(repo), { recursive: true });
+  const entry = { at: new Date().toISOString(), type };
+  for (const key of ['package', 'task', 'pane', 'text']) if (fields[key]) entry[key] = fields[key];
+  fs.appendFileSync(eventsFile(repo), JSON.stringify(entry) + '\n');
+}
+
+function events(repo) {
+  let raw;
+  try { raw = fs.readFileSync(eventsFile(repo), 'utf8'); } catch { return []; }
+  return raw.split('\n').filter(Boolean).map((line, seq) => {
+    try { return Object.assign({ seq }, JSON.parse(line), { seq }); } catch { return { seq, type: 'unlesbar' }; }
+  });
+}
+
 function markedWindow(repo) {
   let lines;
   try { lines = tmux(['list-windows', '-a', '-F', `#{window_id}\t#{${MARK}}`]).split('\n'); } catch { return null; }
@@ -48,9 +79,12 @@ function panes(win) {
   return tmux(['list-panes', '-t', win, '-F', '#{pane_id}\t#{pane_title}\t#{pane_dead}'])
     .split('\n').filter(Boolean).map(line => {
       const [pane, title, dead] = line.split('\t');
-      const question = option(pane, '@qatlas-question');
+      const kind = option(pane, '@qatlas-kind');
+      const text = option(pane, '@qatlas-text');
+      const task = option(pane, '@qatlas-task');
       return { pane, package: option(pane, '@qatlas-package'), title, dead: dead === '1',
-        ...(question ? { question } : {}) };
+        ...(kind ? { kind } : {}), ...(kind && task ? { task } : {}),
+        ...(kind && text ? { [kind === 'handover' ? 'report' : 'question']: text } : {}) };
     });
 }
 
@@ -110,67 +144,152 @@ function add() {
     pane = tmux(['split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, '-c', cwd, ...rest]);
   } else {
     [win, pane] = newWindow(repo, label, cwd);
+    if (fs.existsSync(eventsFile(repo))) {
+      fs.renameSync(eventsFile(repo), path.join(eventsDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
+    }
   }
   setOption(pane, '@qatlas-package', name);
   setOption(pane, '@qatlas-title', title);
   setTitle(pane, title);
   layout(win);
+  record(repo, 'start', { package: name, pane });
   out({ window: win, pane, attach: inTmux ? null : `tmux -L ${SOCKET} attach` });
 }
 
 function list() {
-  const win = markedWindow(repoKey());
-  out({ window: win, panes: win ? panes(win) : [] });
+  const repo = repoKey();
+  const win = markedWindow(repo);
+  out({ window: win, panes: win ? panes(win) : [], cursor: events(repo).length });
+}
+
+// Schreibt für jedes erstmals tot erkannte Pane des markierten Fensters genau ein exited.
+function recordExits(repo) {
+  const win = markedWindow(repo);
+  if (!win) return;
+  const seen = new Set(events(repo).filter(e => e.type === 'exited').map(e => e.pane));
+  for (const p of panes(win)) {
+    if (p.dead && !seen.has(p.pane)) record(repo, 'exited', { package: p.package, pane: p.pane });
+  }
 }
 
 async function wait() {
   const repo = repoKey();
-  const timeout = Number(flag('--timeout') || 600) * 1000;
-  const state = () => { const win = markedWindow(repo); return win ? panes(win) : []; };
-  const before = new Map(state().map(p => [p.pane, p]));
-  const end = Date.now() + timeout;
-  while (Date.now() < end) {
+  const since = Number(flag('--since') || 0);
+  if (!Number.isInteger(since) || since < 0) fail('--since muss eine ganze Zahl ab 0 sein', 2);
+  const end = Date.now() + Number(flag('--timeout') || 600) * 1000;
+  const waking = () => events(repo).filter(e => e.seq >= since && WAKING.has(e.type));
+  for (;;) {
+    recordExits(repo);
+    const hits = waking();
+    if (hits.length) return out({ events: hits, cursor: events(repo).length, timeout: false });
+    if (Date.now() >= end) break;
     await new Promise(resolve => setTimeout(resolve, 2000));
-    const changed = state().filter(p => {
-      const old = before.get(p.pane);
-      return !old || old.title !== p.title || old.dead !== p.dead;
-    });
-    if (changed.length) return out({ changed, timeout: false });
   }
-  out({ changed: [], timeout: true });
+  out({ events: [], cursor: events(repo).length, timeout: true });
 }
 
-// Stellt dem Sentinel eine Frage und wartet auf seine Antwort. Ein erneuter Aufruf mit derselben Frage
-// wartet weiter, ohne eine inzwischen eingetroffene Antwort zu verwerfen.
-async function ask() {
+// Setzt eine Frage oder Übergabe und wartet auf die Antwort des Sentinels. Ein erneuter Aufruf mit
+// demselben Signal wartet weiter, ohne eine inzwischen eingetroffene Antwort zu verwerfen. Pro Pane ist
+// höchstens ein offenes Signal erlaubt; ein offenes Signal der anderen Art ist ein Fehler.
+async function raise(kind, text, task) {
+  const repo = repoKey();
   const pane = target();
-  const [question] = need('--question');
   const timeout = Number(flag('--timeout') || 100) * 1000;
   const title = option(pane, '@qatlas-title') || option(pane, 'pane_title');
-  if (option(pane, '@qatlas-question') !== question) {
+  const open = option(pane, '@qatlas-kind');
+  if (open && open !== kind) fail(`Pane ${pane} hat bereits ein offenes Signal (${open}).`);
+  const same = open === kind && option(pane, '@qatlas-text') === text && option(pane, '@qatlas-task') === (task || '');
+  if (!same) {
     setOption(pane, '@qatlas-answer', '');
-    setOption(pane, '@qatlas-question', question);
-    setTitle(pane, 'FRAGE · ' + title);
+    setOption(pane, '@qatlas-kind', kind);
+    setOption(pane, '@qatlas-text', text);
+    if (task) setOption(pane, '@qatlas-task', task); else tmux(['set', '-p', '-u', '-t', pane, '@qatlas-task']);
+    setTitle(pane, PREFIX[kind] + title);
+    record(repo, kind, { package: flag('--package'), pane, task, text });
   }
   const end = Date.now() + timeout;
   while (Date.now() < end) {
     const answer = option(pane, '@qatlas-answer');
     if (answer) {
-      for (const name of ['@qatlas-question', '@qatlas-answer']) tmux(['set', '-p', '-u', '-t', pane, name]);
+      for (const name of ['@qatlas-kind', '@qatlas-text', '@qatlas-task', '@qatlas-answer']) tmux(['set', '-p', '-u', '-t', pane, name]);
       setTitle(pane, title);
+      record(repo, 'picked', { package: flag('--package'), pane, task });
       return out({ answer });
     }
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  out({ answer: null, hint: 'Noch keine Antwort. Rufe ask mit derselben Frage erneut auf.' });
+  out({ answer: null, hint: `Noch keine Antwort. Rufe ${kind === 'handover' ? 'handover' : 'ask'} mit demselben Signal erneut auf.` });
+}
+
+function reportText() {
+  const [value] = need('--report');
+  try {
+    if (fs.statSync(value, { throwIfNoEntry: false })?.isFile()) return fs.readFileSync(value, 'utf8').trim();
+  } catch { /* kein lesbarer Pfad: als Text behandeln */ }
+  return value;
 }
 
 function answer() {
+  const repo = repoKey();
   const pane = target();
   const [text] = need('--answer');
-  if (!option(pane, '@qatlas-question')) fail('Keine offene Frage in ' + pane);
+  const kind = option(pane, '@qatlas-kind');
+  if (!kind) fail('Keine offene Frage oder Übergabe in ' + pane);
+  if (kind === 'handover' && !/^(integrated \S+|rework \S[\s\S]*)$/.test(text)) {
+    fail('Auf eine Übergabe ist nur "integrated <sha>" oder "rework <grund>" zulässig.', 2);
+  }
+  const task = kind === 'handover' ? option(pane, '@qatlas-task') : '';
   setOption(pane, '@qatlas-answer', text);
+  record(repo, 'answer', { package: flag('--package'), pane, task, text });
   out({ pane, answered: true });
+}
+
+function logEvent() {
+  const repo = repoKey();
+  const [type] = need('--type');
+  if (!/^[a-z][a-z0-9-]*$/.test(type)) fail('--type muss [a-z][a-z0-9-]* entsprechen', 2);
+  if (RESERVED.has(type)) fail('Reservierter Ereignistyp: ' + type, 2);
+  record(repo, type, { package: flag('--package'), task: flag('--task'), text: flag('--text') });
+  out({ logged: type, cursor: events(repo).length });
+}
+
+// Fasst das aktuelle Protokoll zusammen. Zeiten in Sekunden. Durchlaufzeit je Task: vom start des Pakets
+// bzw. der letzten Integration im Paket bis zur ersten Übergabe des Tasks. Wartezeit: letzte Übergabe vor
+// der Integration bis zum answer integrated.
+function report() {
+  const list = events(repoKey());
+  const time = e => Date.parse(e.at);
+  const secs = ms => Math.round(ms) / 1000;
+  const packages = {};
+  const tasks = {};
+  const log = { rerun: 0, conflict: 0 };
+  const lastIntegrated = {};
+  for (const e of list) {
+    const pkg = e.package && (packages[e.package] ||= { rueckfragen: 0, start: null });
+    if (e.type === 'start' && pkg) pkg.start = time(e);
+    if (e.type === 'question' && pkg) pkg.rueckfragen++;
+    if (Object.hasOwn(log, e.type)) log[e.type]++;
+    if (!e.task) continue;
+    const t = tasks[e.task] ||= { package: e.package || null, durchlaufzeit: null, wartezeit: null, rework: 0, handovers: 0 };
+    if (e.type === 'handover') {
+      if (!t.handovers++) {
+        const from = Math.max(pkg?.start ?? -Infinity, lastIntegrated[e.package] ?? -Infinity);
+        if (Number.isFinite(from)) t.durchlaufzeit = secs(time(e) - from);
+      }
+      t.lastHandover = time(e);
+    } else if (e.type === 'answer' && /^integrated\b/.test(e.text || '')) {
+      if (t.lastHandover !== undefined) t.wartezeit = secs(time(e) - t.lastHandover);
+      lastIntegrated[e.package] = time(e);
+    } else if (e.type === 'answer' && /^rework\b/.test(e.text || '')) {
+      t.rework++;
+    }
+  }
+  for (const t of Object.values(tasks)) delete t.lastHandover;
+  for (const p of Object.values(packages)) delete p.start;
+  out({
+    laufdauer: list.length ? secs(time(list[list.length - 1]) - time(list[0])) : null,
+    tasks, packages, log, events: list.length,
+  });
 }
 
 function close() {
@@ -185,12 +304,23 @@ function close() {
 try {
   if (command === 'add') add();
   else if (command === 'list') list();
-  else if (command === 'title') { const pane = target(); const [title] = need('--title'); setTitle(pane, title); out({ pane, title }); }
+  else if (command === 'title') {
+    const repo = repoKey();
+    const pane = target();
+    const [title] = need('--title');
+    const was = option(pane, 'pane_title');
+    setTitle(pane, title);
+    if (title.startsWith('FERTIG') && !was.startsWith('FERTIG')) record(repo, 'done', { package: flag('--package'), pane, text: title });
+    out({ pane, title });
+  }
   else if (command === 'wait') wait().catch(error => fail(error.message));
-  else if (command === 'ask') ask().catch(error => fail(error.message));
+  else if (command === 'ask') raise('question', need('--question')[0]).catch(error => fail(error.message));
+  else if (command === 'handover') { const [task] = need('--task'); raise('handover', reportText(), task).catch(error => fail(error.message)); }
   else if (command === 'answer') answer();
+  else if (command === 'log') logEvent();
+  else if (command === 'report') report();
   else if (command === 'close') close();
-  else fail('Befehle: add, list, title, wait, ask, answer, close', 2);
+  else fail('Befehle: add, list, title, wait, ask, handover, answer, log, report, close', 2);
 } catch (error) {
   fail((error.stderr ? String(error.stderr).trim() : '') || error.message);
 }
