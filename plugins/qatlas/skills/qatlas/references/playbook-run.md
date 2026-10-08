@@ -269,6 +269,9 @@ weiterlaufen.
 
 ## Integrieren und abschließen
 
+Verlangen Nutzer- oder Projektvorgaben Pull Requests, gilt [Git-Ablauf](playbook-git-workflow.md),
+Abschnitt „Integration über Pull Requests“.
+
 Integriere die Arbeit des aktiven Tasks, führe seine gemeinsamen Prüfungen aus und pflege Task,
 Abschlussbericht und Spine nach dem maßgeblichen Vertrag. Setze ihn erst auf `done`, wenn alle Kriterien auf
 dem Steuerbranch belegt sind. Gleiche dabei den tatsächlichen Diff und das entstandene Verhalten gegen die
@@ -379,4 +382,5 @@ Weiter in neuer Session: <Modi>
 Nenne in der letzten Zeile nur Modi mit tatsächlicher Arbeit: `review` für Tasks in `review`,
 `shape <eindeutiger Task>` für einen Draft oder `shape backlog` für mehrere. Bleibt nichts für den Nutzer,
 lautet der Block nur `## Für dich: nichts offen`. Eine neue Idee geht an `shape` ohne Task-Scope. Starte den
-Modus nicht selbst. Pushe nichts.
+Modus nicht selbst. Pushe nur nach „Integration über Pull Requests“ im
+[Git-Ablauf](playbook-git-workflow.md).

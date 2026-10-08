@@ -88,8 +88,37 @@ sicher, übergib den Task mit Befund an den Nutzer.
 - Entferne nach dem Worktree-Vertrag nur vom aktuellen Lauf erzeugte, saubere und
   vollständig integrierte Worktrees und Branches.
 
+## Integration über Pull Requests
+
+Der Abschnitt greift nur, wenn Nutzer- oder Projektvorgaben eine Integration über Pull Requests verlangen,
+etwa bei einem geschützten Steuerbranch; erkenne das an diesen Vorgaben, nicht durch Raten. Er ändert keine
+Autorisierung: Der Aufruf von `run` autorisiert weder Push noch Pull Request noch Merge, das tun nur Nutzer-
+oder Projektvorgaben. Fehlt sie, endet der Task mit einem integrationsreifen, lokal gesicherten Task-Branch
+als Übergabe nach „Übergeben“, ohne Push.
+
+- **Arbeitsbasis:** Arbeite im Task-Worktree ab frisch geholtem `origin/<steuerbranch>`. Der primäre
+  Arbeitsbaum bleibt unberührt: kein Pull, Switch oder Commit dort durch den Lauf.
+- **Vor dem Öffnen oder Aktualisieren eines Pull Requests:** Führe `git fetch` aus, probe Konflikte mit
+  `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js probe`, merge den aktuellen
+  `origin/<steuerbranch>` in den Task-Branch, löse Konflikte nach den Konfliktregeln oben, prüfe erneut und
+  pushe erst dann. Rebase einen bereits gepushten Branch nie. Dieser Merge-Commit schreibt keine Historie um
+  und ist keine fremde Veränderung. Warte auf die CI mit `ci-wait` desselben Skripts.
+- **Merge Queue:** Ist im Ziel-Repo eine GitHub Merge Queue aktiv, integriere den Pull Request über sie,
+  statt die Basis selbst nachzuziehen.
+- **Abschluss:** Der Merge des Pull Requests ersetzt die lokale Integration. Der Task ist erst `done`, wenn
+  der Pull Request gemergt und die Abnahme auf dem neuen `origin/<steuerbranch>` belegt ist.
+- **Abhängige Tasks:** Ein Squash-Merge schließt gestapelte Branches aus. Ein abhängiger Task startet dann
+  erst ab dem integrierten `origin/<steuerbranch>`, nie auf einem nicht integrierten Vorgänger-Branch.
+
+## Tasks über mehrere Repos
+
+Integriere zuerst das Repo mit Pull-Request-Pflicht, danach den Anteil desselben Tasks im anderen Repo, per
+Fast-Forward, sonst per Merge-Commit; rebase keine fremden Branches. Nicht gepushte Commits erscheinen
+gebündelt unter „Nicht gepusht“ im Abschlussblock des [Run-Playbooks](playbook-run.md).
+
 ## Scope-out
 
 Erstelle lokale Commits nur aus vollständig gelesenen Diffs und berichte Nachrichten und IDs nach dem Lauf.
-Kein Push, Force-Push, automatischer Stash oder fremdes Staging. Eine Beanspruchung ohne Hostsignal beweist
-nicht, dass ein früherer Subagent beendet ist.
+Ohne Autorisierung kein Push; mit ihr nur nach „Integration über Pull Requests“; nie Force-Push. Kein
+automatischer Stash oder fremdes Staging. Eine Beanspruchung ohne Hostsignal beweist nicht, dass ein
+früherer Subagent beendet ist.
