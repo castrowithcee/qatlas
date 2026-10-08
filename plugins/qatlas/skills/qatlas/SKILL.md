@@ -5,7 +5,7 @@ description: >
   disponieren, Aufgaben autonom ausführen und menschliche Übergaben klären. Ohne Modus nur den nächsten
   sinnvollen Einstieg empfehlen. Niemals automatisch starten.
 disable-model-invocation: true
-argument-hint: "[goal|shape|run|sentinel|review] [Idee|Task|Datei|backlog] [--limit <n|all>] [--fly]"
+argument-hint: "[goal|shape|run|sentinel|review] [Idee|Task|Datei|backlog] [--limit <n|all|0>] [--fly]"
 license: MIT
 type: skill
 edit: locked
@@ -40,7 +40,7 @@ Navigation](../qatlas-core-navigation/SKILL.md).
   ausführen](references/playbook-run.md). Führe standardmäßig höchstens fünf ausführbare Tasks seriell durch
   einen Orchestrator und seine Subagents aus. `--limit` ändert diese Taskgrenze, `--fly` führt den Lauf ohne
   erreichbaren Nutzer.
-- **`sentinel [Tasks] [--limit <n|all>] [--fly] [Laufvorgabe]`:** Lies vollständig
+- **`sentinel [Tasks] [--limit <n|0>] [--fly] [Laufvorgabe]`:** Lies vollständig
   [Sentinel](references/playbook-sentinel.md). Schneide bis zu vier unabhängige Pakete, lass jedes von einem
   eigenen Orchestrator als Run in tmux abarbeiten, integriere die Ergebnisse und bleibe ansprechbar.
 - **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Führe den

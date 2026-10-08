@@ -43,10 +43,10 @@ fachlich zusammenhängender Strang; Abhängigkeiten liegen nur innerhalb eines P
 Dateien, Invarianten, Migrationen oder Laufzeitressourcen nach [Parallele Arbeit im Run](git-parallel.md).
 Lässt sich das nicht belegen, lege die Tasks in dasselbe Paket.
 
-Die Größe jedes Pakets bestimmst du danach, was ein Orchestrator in einem Lauf tragen kann: Umfang und
-Kopplung der Tasks und ihr absehbarer Kontextbedarf. Die Fünfergrenze eines Runs bindet dich dabei nicht.
-Ein `--limit` des Nutzers begrenzt nur die Gesamtzahl der Tasks über alle Pakete; ohne ihn bestimmst du den
-Umfang selbst. Was in keinem Paket Platz findet, bleibt in seiner Reihenfolge für spätere Läufe.
+Ein Paket umfasst höchstens fünf Tasks, mit `--limit <n>` höchstens `n`. Bei `--limit 0` bestimmst du die
+Größe jedes Pakets selbst danach, was ein Orchestrator in einem Lauf tragen kann: Umfang und Kopplung der
+Tasks und ihr absehbarer Kontextbedarf. Was in keinem Paket Platz findet, bleibt in seiner Reihenfolge für
+spätere Läufe.
 
 Nenne dem Nutzer die Pakete mit Tasks und Grund des Schnitts in wenigen Zeilen und starte direkt.
 
