@@ -45,7 +45,9 @@ primären Arbeitsbaum, solange dort kein anderer Schreiber arbeitet.
 Der Namensraum eines Tasks umfasst seinen Task-Branch, dessen Unterbranches und die daraus abgeleiteten
 Worktrees. Er gehört dem Orchestrator, der den Task beansprucht hat; nur dieser legt darin Branches und
 Worktrees an, integriert und entfernt sie. Ein Name belegt keine Eigentümerschaft; maßgeblich bleiben
-Beanspruchung und Git-Register. Worktrees gehören einer Arbeit, nie einer Agentenidentität.
+Beanspruchung und Git-Register. Worktrees gehören einer Arbeit, nie einer Agentenidentität. Übergibt ein
+Orchestrator einen Task an einen anderen Integrationsbesitzer, geht der Namensraum mit über: Nur dieser
+integriert und räumt danach auf; der Übergebende fasst die übergebenen Branches und Worktrees nicht mehr an.
 
 ## Aufräumen
 
@@ -53,15 +55,20 @@ Beanspruchung und Git-Register. Worktrees gehören einer Arbeit, nie einer Agent
    aktuellen Arbeitsbaum.
 2. Prüfe im Ziel Status, ungetrackte Dateien, Branch, Upstream und nicht integrierte Commits. Das
    Integrationsziel eines Unterbranches ist sein Task-Branch, das eines Task-Branches der Steuerbranch.
-   Prüfe mit `git merge-base --is-ancestor <branch> <ziel>`, ob die Branch-Spitze darin enthalten ist. Ist
-   der Arbeitsbaum nicht sauber, das Ziel nicht eindeutig belegt oder die Prüfung nicht erfolgreich,
-   entferne nichts und zeige den konkreten Zustand. Beanspruchte Arbeit eines laufenden oder unbekannten
-   Workers bleibt bestehen.
+   Prüfe mit `git merge-base --is-ancestor <branch> <ziel>`, ob die Branch-Spitze darin enthalten ist. Nach
+   einem Squash-Merge schlägt diese Prüfung immer fehl; als Integration gilt dann der Squash-Nachweis: Der
+   Pull Request des Branches ist gemergt, sein Merge-Commit liegt auf dem Steuerbranch, und
+   `git rev-parse <merge-commit>^{tree}` gleicht `git rev-parse <branch>^{tree}` der zuletzt geprüften,
+   unveränderten Branch-Spitze. Ist der Arbeitsbaum nicht sauber, das Ziel nicht eindeutig belegt oder
+   keiner der beiden Nachweise erbracht, entferne nichts und zeige den konkreten Zustand. Beanspruchte
+   Arbeit eines laufenden oder unbekannten Workers bleibt bestehen.
 3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <pfad>` ohne
    `--force`. Entferne danach mit `rmdir` die dadurch leer gewordenen Zwischenordner einschließlich des
    Repo-Ordners; `~/.qatlas/state/worktrees/` selbst bleibt.
 4. Lösche den lokalen Branch nach der Zielprüfung nur mit `git branch -d`. Schlägt der Befehl fehl, erzwinge
-   die Löschung nicht. Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht.
+   die Löschung nicht; einzige Ausnahme ist ein Branch mit erbrachtem Squash-Nachweis, den `git branch -D`
+   entfernen darf. Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht; nenne verbliebene
+   gesammelt im Abschluss.
 
 Einen schmutzigen oder nicht integrierten Strang zu verwerfen, ist eine eigene destruktive Aktion: Zeige den
 exakten Zustand und hole eine ausdrückliche Bestätigung für genau diesen Worktree ein. Lösche einen
