@@ -78,6 +78,8 @@ function locations(projectRoot = null) {
     statuslineFile: path.join(homeDir, 'statusline.yaml'),
     projectConfigFile: projectRoot
       ? path.join(path.resolve(projectRoot), '.qatlas', 'plugins', 'config.yaml') : null,
+    allowFile: projectRoot
+      ? path.join(path.resolve(projectRoot), '.qatlas', 'plugins', 'protection-allow.yaml') : null,
   };
 }
 

@@ -27,6 +27,10 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
    nicht laufen konnte; committe nicht und melde den Grund. In einem autonomen Lauf stoppt jeder Exit außer
    `0` nur den betroffenen Task. Führe die Prüfung als eigenen Befehl aus und werte ihren Exit-Code aus,
    bevor du committest; verkette sie nie in einem Befehl mit `git commit`.
+   Bestätigt der Nutzer bei Exit `2` einen `personal-data`-Befund ausdrücklich als Fehlalarm, trage ihn mit
+   `--allow <kennung>` ein (die Kennung steht in eckigen Klammern im Befund), stage die Freigabedatei mit und
+   prüfe erneut. Trage nur nach dieser ausdrücklichen Bestätigung ein, in einem autonomen Lauf ohne
+   erreichbaren Nutzer nie.
 3. Entwirf die Nachricht ausschließlich aus dem gestagten Diff dieses Commits. Sie beschreibt knapp, was
    sich ändert, und nur das nötige Warum, Risiko oder die Einschränkung. Die vorhandene Repo-Konvention
    geht jeder folgenden Vorgabe vor:

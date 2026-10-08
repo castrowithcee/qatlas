@@ -30,5 +30,15 @@ Standard ist `secrets: block` und `personal-data: ask`. `block` verhindert den S
 nach, `warn` meldet nur, `allow` prüft nicht. Ein bestandener Check bleibt still. Ob ein Repo öffentlich
 oder privat ist, leitet Qatlas nicht ab; diese Absicht drückt die Projektkonfiguration aus.
 
+## Freigaben der Schutzprüfung
+
+Ein vom Nutzer bestätigter Fehlalarm bei `personal-data` lässt sich dauerhaft freigeben, damit ihn spätere
+Commits nicht erneut melden. Die Freigaben liegen versioniert und nur projektlokal in
+`<repo>/.qatlas/plugins/protection-allow.yaml`; sie sind kein Schlüssel der `config.yaml`. Sie wirken nur
+bei `personal-data` mit `ask` oder `warn`; Secrets und `block` lassen sich nie freigeben, geänderter Inhalt
+wird wieder gemeldet. Die Datei enthält nur Kennungen, keinen Klartext. Einen Eintrag legt
+`node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <kennung>` an, die
+Kennung nennt der Befund in eckigen Klammern. Das Format steht im Kopf des Skripts.
+
 Zugangsdaten gehören nie in eine `config.yaml`. Eine kommentierte Vorlage liegt im Plugin unter
 `store/config/config.example.yaml`.

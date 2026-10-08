@@ -2,14 +2,25 @@
 'use strict';
 
 // Prüft den gestagten Diff nach der wirksamen protection-Konfiguration auf Secrets und personenbezogene Daten.
-// Aufruf: node qatlas-protection-check.js [--target <repo>] [--print-config]
+// Aufruf: node qatlas-protection-check.js [--target <repo>] [--print-config] [--allow <kennung>]
 // Exit: 0 weiter (Ausgabe nur bei warn-Befunden), 1 block, 2 ask, 3 Prüfung nicht möglich.
+//
+// Freigaben: Ein bestätigter Fehlalarm der Kategorie personal-data steht in
+// <repo>/.qatlas/plugins/protection-allow.yaml (format: 1, Liste allow mit file, rule und hash); die Prüfung
+// liest ihren gestagten Stand. hash sind die ersten 16 Hex-Zeichen von SHA-256 über file, rule und Text der
+// hinzugefügten Zeile, jeweils durch NUL getrennt; die Zeilennummer zählt nicht, der Klartext steht nicht in
+// der Datei. Jeder personal-data-Befund
+// nennt seine Kennung (hash) in eckigen Klammern. Freigaben wirken nur bei personal-data mit ask oder warn;
+// secrets und personal-data mit block lassen sich nie freigeben. --allow <kennung> trägt den gestagten Befund
+// mit dieser Kennung ein (Exit 2, wenn er nicht freigebbar ist) und staged nichts. Eine ungültige
+// Freigabedatei ergibt Exit 3.
 
 const fs = require('fs');
 const os = require('os');
+const crypto = require('crypto');
 const path = require('path');
 const { execFileSync, spawnSync } = require('child_process');
-const { readConfig } = require('./runtime/config-loader.js');
+const { readConfig, locations, parseYamlText, stringifyYaml } = require('./runtime/config-loader.js');
 
 const argv = process.argv.slice(2);
 const flag = (name) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : null; };
@@ -54,14 +65,50 @@ function stagedLines() {
   return lines;
 }
 
+// Liefert Treffer als { item, file, rule, hash }; hash ist die Kennung für Freigaben.
 function scan(lines, rules) {
   const found = [];
   for (const entry of lines) {
     for (const [rule, pattern] of rules) {
-      if (pattern.test(entry.text)) found.push(entry.file + ':' + entry.line + ' ' + rule);
+      if (!pattern.test(entry.text)) continue;
+      const hash = crypto.createHash('sha256').update(entry.file + '\0' + rule + '\0' + entry.text)
+        .digest('hex').slice(0, 16);
+      found.push({ item: entry.file + ':' + entry.line + ' ' + rule, file: entry.file, rule, hash });
     }
   }
   return found;
+}
+
+// Liest die Freigabedatei aus dem Index (staged) oder für --allow aus dem Arbeitsbaum; fehlende Datei heißt
+// keine Freigaben. Die Prüfung nutzt nur den gestagten Stand, damit eine ungestagte Änderung nichts unterdrückt.
+function readAllow(file, staged) {
+  let source;
+  if (staged) {
+    try { source = git(['show', ':' + path.relative(root, file).split(path.sep).join('/')]); }
+    catch { return { entries: [], problems: [] }; }
+  } else {
+    try { source = fs.readFileSync(file, 'utf8'); }
+    catch (error) {
+      if (error && error.code === 'ENOENT') return { entries: [], problems: [] };
+      return { entries: [], problems: [file + ': ' + error.message] };
+    }
+  }
+  const bad = (text) => ({ entries: [], problems: [file + ': ' + text] });
+  let value;
+  try { value = parseYamlText(source); } catch (error) { return bad(error.message); }
+  const unknown = Object.keys(value).filter(key => key !== 'format' && key !== 'allow');
+  if (unknown.length) return bad('unbekannte Schlüssel: ' + unknown.join(', '));
+  const list = value.allow === undefined || value.allow === null ? [] : value.allow;
+  if (!Array.isArray(list)) return bad('allow muss eine Liste sein.');
+  const entries = [];
+  for (const entry of list) {
+    const valid = entry && typeof entry === 'object' && !Array.isArray(entry)
+      && Object.keys(entry).length === 3
+      && ['file', 'rule', 'hash'].every(key => typeof entry[key] === 'string' && entry[key]);
+    if (!valid) return bad('jeder Eintrag in allow braucht genau die Strings file, rule und hash.');
+    entries.push({ file: entry.file, rule: entry.rule, hash: entry.hash });
+  }
+  return { entries, problems: [] };
 }
 
 // Nutzt gitleaks, wenn installiert: ab 8.19 `git --staged`, davor `protect --staged`.
@@ -76,7 +123,7 @@ function gitleaks() {
       if (result.error) return null;
       if (result.status !== 0 && result.status !== 1) continue;
       const findings = JSON.parse(fs.readFileSync(report, 'utf8') || '[]');
-      return findings.map(item => item.File + ':' + item.StartLine + ' ' + item.RuleID);
+      return findings.map(item => ({ item: item.File + ':' + item.StartLine + ' ' + item.RuleID }));
     } catch {
       // Ohne lesbaren Bericht kennt diese Version den Aufruf nicht; die ältere Variante folgt.
       continue;
@@ -113,19 +160,52 @@ try {
   process.exit(3);
 }
 
+const allowFile = locations(root).allowFile;
+const allow = readAllow(allowFile, !argv.includes('--allow'));
+if (allow.problems.length) {
+  process.stdout.write('protection: Prüfung nicht möglich, Freigabedatei ungültig.\n'
+    + allow.problems.map(line => '- ' + line).join('\n') + '\n');
+  process.exit(3);
+}
+// Freigaben wirken ausschließlich auf personal-data mit ask oder warn.
+const allowable = ['ask', 'warn'].includes(protection['personal-data']);
+
+const allowHash = flag('--allow');
+if (argv.includes('--allow')) {
+  const hit = allowHash && allowable
+    ? scan(lines, PERSONAL_RULES).find(entry => entry.hash === allowHash) : null;
+  if (!hit) {
+    process.stdout.write('protection: Kennung ' + (allowHash || '(fehlt)') + ' ist im gestagten Diff kein '
+      + 'freigebbarer personal-data-Befund (nur ask oder warn); nichts eingetragen.\n');
+    process.exit(2);
+  }
+  const known = allow.entries.some(e => e.file === hit.file && e.rule === hit.rule && e.hash === hit.hash);
+  if (!known) {
+    const entries = allow.entries.concat([{ file: hit.file, rule: hit.rule, hash: hit.hash }]);
+    fs.mkdirSync(path.dirname(allowFile), { recursive: true });
+    fs.writeFileSync(allowFile, stringifyYaml({ format: 1, allow: entries }));
+  }
+  process.stdout.write(allowFile + '\n');
+  process.exit(0);
+}
+
 const results = [];
 if (protection.secrets !== 'allow') {
   results.push(['secrets', protection.secrets, gitleaks() || scan(lines, SECRET_RULES)]);
 }
 if (protection['personal-data'] !== 'allow') {
-  results.push(['personal-data', protection['personal-data'], scan(lines, PERSONAL_RULES)]);
+  const found = scan(lines, PERSONAL_RULES)
+    .filter(hit => !(allowable
+      && allow.entries.some(e => e.file === hit.file && e.rule === hit.rule && e.hash === hit.hash)))
+    .map(hit => ({ item: hit.item + ' [' + hit.hash + ']' }));
+  results.push(['personal-data', protection['personal-data'], found]);
 }
 
 const hits = results.filter(([, , found]) => found.length);
 if (!hits.length) process.exit(0);
 
 for (const [category, level, found] of hits) {
-  process.stdout.write(category + ' (' + level + '):\n' + found.map(item => '- ' + item).join('\n') + '\n');
+  process.stdout.write(category + ' (' + level + '):\n' + found.map(hit => '- ' + hit.item).join('\n') + '\n');
 }
 const levels = hits.map(([, level]) => level);
 process.exit(levels.includes('block') ? 1 : levels.includes('ask') ? 2 : 0);
