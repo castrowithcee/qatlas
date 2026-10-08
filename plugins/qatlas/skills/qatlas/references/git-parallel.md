@@ -25,6 +25,11 @@ license: MIT
   integriert werden können, laufen sie seriell oder als ausdrücklich abhängige, gestapelte Branches. Ein
   gestapelter Branch startet an der Spitze seines Vorgängers. Mehr verfügbare Agenten sind kein Grund für
   künstliche Parallelität.
+- Abweichend davon dürfen parallele Stränge mechanisch gemeinsame Dateien wie Zähl-, Index- oder
+  Registry-Listen teilen, solange ihre Integration seriell bleibt: Der Eigentümer des später integrierten
+  Strangs löst den Konflikt gegen den aktuellen Stand und prüft erneut. Ein so zurückgegebener Konflikt zählt
+  nicht als Korrekturversuch. Gemeinsame Invarianten, Migrationen und Laufzeitressourcen sind dagegen echte
+  Kopplung und bleiben unter der Regel oben.
 
 ## Übernehmen und wiederaufnehmen
 

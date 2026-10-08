@@ -245,6 +245,11 @@ erneut. Klassifiziere jeden Fehlschlag:
   keinen Ersatzansatz. Sichere den Task unmittelbar für `review` oder `waiting`.
 - **Lösungsfehler:** Der Ansatz wurde ausgeführt, erfüllt aber ein Abnahmekriterium nicht. Leite aus Diagnose
   oder neuer Evidenz eine konkrete Korrektur ab.
+- **Bekannter Flake:** Ein CI-Fehlschlag zählt nur dann nicht als Lösungsfehler, wenn der fehlschlagende Test
+  außerhalb des Diffs liegt und als bekannter Flake mit Task-ID im Planungssystem erfasst ist. Starte den
+  fehlgeschlagenen Job dann höchstens einmal pro Pull Request neu und nenne den Rerun mit dieser Task-ID im
+  Abschluss. Ordne eine neue Fundstelle dem bestehenden Task zu, statt sie neu zu erfassen. Jeder andere
+  CI-Fehlschlag bleibt ein Lösungsfehler.
 
 ### Höchstens zwei Korrekturen
 

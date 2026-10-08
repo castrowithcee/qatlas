@@ -63,6 +63,8 @@ sicher, übergib den Task mit Befund an den Nutzer.
   weitergeht.
 - Unfertige Arbeit sichert der Orchestrator vor Pause, `review` oder Laufende als ausgewiesenen Checkpoint
   auf dem privaten Branch, auf dem sie entstand. Ein Checkpoint ist nicht integrationsreif.
+- Jeder Commit, auch ein Checkpoint, folgt dem Commit-Ablauf der Git-Norm einschließlich ihrer
+  Schutzprüfung.
 - Vor jeder Integration in den Steuerbranch gilt für jeden Checkpoint die Bereinigung der Git-Norm.
 
 ## Integrieren

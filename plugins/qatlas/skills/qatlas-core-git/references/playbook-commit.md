@@ -25,7 +25,8 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
    Ordner. Exit `0` heißt weiter; nenne dabei ausgegebene `warn`-Befunde. Exit `1` heißt nicht committen und
    den Befund melden. Exit `2` heißt vor dem Commit im Gespräch nachfragen. Exit `3` heißt, dass die Prüfung
    nicht laufen konnte; committe nicht und melde den Grund. In einem autonomen Lauf stoppt jeder Exit außer
-   `0` nur den betroffenen Task.
+   `0` nur den betroffenen Task. Führe die Prüfung als eigenen Befehl aus und werte ihren Exit-Code aus,
+   bevor du committest; verkette sie nie in einem Befehl mit `git commit`.
 3. Entwirf die Nachricht ausschließlich aus dem gestagten Diff dieses Commits. Sie beschreibt knapp, was
    sich ändert, und nur das nötige Warum, Risiko oder die Einschränkung. Die vorhandene Repo-Konvention
    geht jeder folgenden Vorgabe vor:
