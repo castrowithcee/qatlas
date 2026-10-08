@@ -41,8 +41,8 @@ Navigation](../qatlas-core-navigation/SKILL.md).
   einen Orchestrator und seine Subagents aus. `--limit` ändert diese Taskgrenze, `--fly` führt den Lauf ohne
   erreichbaren Nutzer.
 - **`sentinel [Tasks] [--limit <n|all>] [--fly] [Laufvorgabe]`:** Lies vollständig
-  [Sentinel](references/playbook-sentinel.md). Verteile unabhängige Tasks auf bis zu vier gleichzeitige
-  Orchestrator-Sessions in tmux, integriere ihre Ergebnisse und bleibe für den Nutzer ansprechbar.
+  [Sentinel](references/playbook-sentinel.md). Schneide bis zu vier unabhängige Pakete, lass jedes von einem
+  eigenen Orchestrator als Run in tmux abarbeiten, integriere die Ergebnisse und bleibe ansprechbar.
 - **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Führe den
   Nutzer zügig durch konkrete Prüfungen und kläre Entscheidungen und Nutzerhandlungen. Beginne danach keine
   Ausführung.
@@ -111,7 +111,7 @@ Jede Schleife endet mit ihrem eigenen Ergebnis:
   und einer konsistenten Queue.
 - `run` endet an seiner Taskgrenze, standardmäßig nach fünf seriell bearbeiteten Tasks, oder an einer
   definierten Stopbedingung.
-- `sentinel` endet nach denselben Grenzen, sobald kein Orchestrator mehr läuft.
+- `sentinel` endet, wenn jedes Paket abgeschlossen und sein Ergebnis integriert oder übergeben ist.
 - `review` endet nach den gewählten menschlichen Übergaben.
 
 `goal` ist eine optionale Vorstufe: Es klärt den Plan, `shape` zerlegt ihn in Tasks und klärt nur, was erst
