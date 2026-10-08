@@ -58,18 +58,20 @@ Starte jedes Paket im Repo-Root:
 add --repo <repo-root> --label "<Projekt>·orchester" --title "<Projekt>·<Paket> · <host>" --cwd <repo-root> -- <cli>
 ```
 
-- Claude Code: `claude --model <orchestrator> '/qatlas run <Tasks> [--limit <n>] [--fly] <Laufvorgabe>'`
-- Codex: `codex -m <orchestrator> '$qatlas run <Tasks> [--limit <n>] [--fly] <Laufvorgabe>'`
+- Claude Code: `claude --model <orchestrator> '/qatlas run <Tasks> [--limit <n>] <Laufvorgabe>'`
+- Codex: `codex -m <orchestrator> '$qatlas run <Tasks> [--limit <n>] <Laufvorgabe>'`
 
 Quote den Prompt in der Shell einfach, damit `$qatlas` nicht expandiert. Setze `--limit` auf die
-Paketgröße, wenn sie fünf übersteigt, und gib `--fly` weiter, wenn der Sentinel damit läuft. Die Laufvorgabe
-lautet sinngemäß:
+Paketgröße, wenn sie fünf übersteigt. Gib `--fly` nie weiter: Ein Orchestrator fragt immer dich, und ob du
+den Nutzer fragst, entscheidet dein eigenes `--fly`. Die Laufvorgabe lautet sinngemäß:
 
 > Paket <Paket> eines Sentinels. Weitere Orchestratoren arbeiten parallel im selben Repo; Integrationsbesitzer
 > ist der Sentinel. Arbeite nach „Mehrere Orchestratoren“, beanspruche nur Tasks dieses Pakets und übergib
-> jeden geprüften Task-Branch mit Bericht. Setze vor jeder Frage an den Nutzer den Pane-Titel mit
-> `node <skript> title --pane "$TMUX_PANE" --title "WARTET · <Titel>"` und danach wieder `<Titel>`; setze
-> nach deinem Abschlussblock `FERTIG · <Titel>`.
+> jeden geprüften Task-Branch mit Bericht. Der Sentinel vertritt den Nutzer: Was du sonst den Nutzer fragen
+> würdest, fragst du ausschließlich mit `node <skript> ask --pane "$TMUX_PANE" --question "<Frage mit
+> Kontext, Optionen und Empfehlung>"`; die Ausgabe ist seine Antwort. Ohne Antwort rufe denselben Befehl
+> erneut auf. Setze nach deinem Abschlussblock mit `node <skript> title --pane "$TMUX_PANE" --title
+> "FERTIG · <Titel>"` den Pane-Titel.
 
 Ergänze den Teil der Laufvorgabe des Nutzers, der dieses Paket betrifft. Füge keine Option hinzu, die
 Berechtigungen, Sandbox oder Freigaben des Hosts lockert.
@@ -84,7 +86,12 @@ ansprechbar bleibst. Prüfe danach das Spine.
   ausführen](playbook-run.md), integriere ihn einzeln nach dem Git-Ablauf, führe die gemeinsamen Prüfungen
   aus und setze den Task erst dann auf `done`. Löse einen Konflikt nicht automatisch; sichere den Task dann
   als Übergabe auf `review`.
-- **`WARTET`:** Nenne dem Nutzer in einem Satz Paket und Pane.
+- **`FRAGE`:** `list` zeigt die Frage des Panes. Belegt das Projektwissen die Antwort, antworte mit
+  `answer --pane <id> --answer "<Antwort mit Quelle>"`. Sonst frage ohne `--fly` den Nutzer knapp mit Paket,
+  Frage und Empfehlung und gib seine Antwort weiter. Mit `--fly` entscheide nach dessen Regeln in
+  [Arbeit ausführen](playbook-run.md): Eine Annahme gibst du als Antwort weiter und nennst sie im Abschluss
+  unter **Angenommen**; was übergeben werden muss, beantwortest du mit der Anweisung, den Task an `review`
+  zu übergeben und fortzufahren.
 - **Beendetes Pane ohne `FERTIG`:** Sichere die offenen Tasks des Pakets nach dem Git-Ablauf als Übergabe auf
   `review`.
 - Schreibt der Nutzer selbst in ein Pane, gehört ihm diese Session; fasse sie nicht an. Hängt ein

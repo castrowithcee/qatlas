@@ -8,6 +8,8 @@
 //   qatlas-sentinel-tmux.js list --repo <root>
 //   qatlas-sentinel-tmux.js title --pane <pane-id> --title <titel>
 //   qatlas-sentinel-tmux.js wait --repo <root> [--timeout <sekunden>]
+//   qatlas-sentinel-tmux.js ask --pane <pane-id> --question <frage> [--timeout <sekunden>]
+//   qatlas-sentinel-tmux.js answer --pane <pane-id> --answer <antwort>
 //   qatlas-sentinel-tmux.js close --pane <pane-id>
 
 const fs = require('fs');
@@ -45,9 +47,13 @@ function panes(win) {
   return tmux(['list-panes', '-t', win, '-F', '#{pane_id}\t#{pane_title}\t#{pane_dead}'])
     .split('\n').filter(Boolean).map(line => {
       const [pane, title, dead] = line.split('\t');
-      return { pane, title, dead: dead === '1' };
+      const question = option(pane, '@qatlas-question');
+      return { pane, title, dead: dead === '1', ...(question ? { question } : {}) };
     });
 }
+
+const option = (pane, name) => tmux(['display', '-p', '-t', pane, `#{${name}}`]);
+const setOption = (pane, name, value) => tmux(['set', '-p', '-t', pane, name, value]);
 
 function owned(pane) {
   let mark;
@@ -61,7 +67,7 @@ function layout(win) {
 }
 
 function setTitle(pane, title) {
-  tmux(['set', '-p', '-t', pane, 'allow-set-title', 'off']);
+  setOption(pane, 'allow-set-title', 'off');
   tmux(['select-pane', '-t', pane, '-T', title]);
 }
 
@@ -99,6 +105,7 @@ function add() {
   } else {
     [win, pane] = newWindow(repo, label, cwd);
   }
+  setOption(pane, '@qatlas-title', title);
   setTitle(pane, title);
   layout(win);
   out({ window: win, pane, attach: inTmux ? null : `tmux -L ${SOCKET} attach` });
@@ -126,6 +133,39 @@ async function wait() {
   out({ changed: [], timeout: true });
 }
 
+// Stellt dem Sentinel eine Frage und wartet auf seine Antwort. Ein erneuter Aufruf mit derselben Frage
+// wartet weiter, ohne eine inzwischen eingetroffene Antwort zu verwerfen.
+async function ask() {
+  const [pane, question] = need('--pane', '--question');
+  owned(pane);
+  const timeout = Number(flag('--timeout') || 100) * 1000;
+  const title = option(pane, '@qatlas-title') || option(pane, 'pane_title');
+  if (option(pane, '@qatlas-question') !== question) {
+    setOption(pane, '@qatlas-answer', '');
+    setOption(pane, '@qatlas-question', question);
+    setTitle(pane, 'FRAGE · ' + title);
+  }
+  const end = Date.now() + timeout;
+  while (Date.now() < end) {
+    const answer = option(pane, '@qatlas-answer');
+    if (answer) {
+      for (const name of ['@qatlas-question', '@qatlas-answer']) tmux(['set', '-p', '-u', '-t', pane, name]);
+      setTitle(pane, title);
+      return out({ answer });
+    }
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+  out({ answer: null, hint: 'Noch keine Antwort. Rufe ask mit derselben Frage erneut auf.' });
+}
+
+function answer() {
+  const [pane, text] = need('--pane', '--answer');
+  owned(pane);
+  if (!option(pane, '@qatlas-question')) fail('Keine offene Frage in ' + pane);
+  setOption(pane, '@qatlas-answer', text);
+  out({ pane, answered: true });
+}
+
 function close() {
   const [pane] = need('--pane');
   owned(pane);
@@ -141,8 +181,10 @@ try {
   else if (command === 'list') list();
   else if (command === 'title') { const [pane, title] = need('--pane', '--title'); owned(pane); setTitle(pane, title); out({ pane, title }); }
   else if (command === 'wait') wait().catch(error => fail(error.message));
+  else if (command === 'ask') ask().catch(error => fail(error.message));
+  else if (command === 'answer') answer();
   else if (command === 'close') close();
-  else fail('Befehle: add, list, title, wait, close', 2);
+  else fail('Befehle: add, list, title, wait, ask, answer, close', 2);
 } catch (error) {
   fail((error.stderr ? String(error.stderr).trim() : '') || error.message);
 }
