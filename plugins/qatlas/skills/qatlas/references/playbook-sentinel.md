@@ -41,12 +41,14 @@ Wähle aus dem genannten Scope oder ohne Scope aus dem Backlog die ausführbaren
 von [Arbeit ausführen](playbook-run.md) und schneide daraus höchstens vier Pakete. Ein Paket ist ein
 fachlich zusammenhängender Strang; Abhängigkeiten liegen nur innerhalb eines Pakets. Pakete teilen keine
 Dateien, Invarianten, Migrationen oder Laufzeitressourcen nach [Parallele Arbeit im Run](git-parallel.md).
-Lässt sich das nicht belegen, lege die Tasks in dasselbe Paket. Ein Paket umfasst höchstens die Taskgrenze
-eines Runs, also fünf oder den Wert von `--limit`. Was nicht in ein Paket passt, bleibt für spätere Läufe
-in seiner Reihenfolge.
+Lässt sich das nicht belegen, lege die Tasks in dasselbe Paket.
 
-Nenne dem Nutzer die Pakete mit Tasks und Grund des Schnitts in wenigen Zeilen. Ohne `--fly` warte auf seine
-Bestätigung; mit `--fly` starte direkt.
+Die Größe jedes Pakets bestimmst du danach, was ein Orchestrator in einem Lauf tragen kann: Umfang und
+Kopplung der Tasks und ihr absehbarer Kontextbedarf. Die Fünfergrenze eines Runs bindet dich dabei nicht.
+Ein `--limit` des Nutzers begrenzt nur die Gesamtzahl der Tasks über alle Pakete; ohne ihn bestimmst du den
+Umfang selbst. Was in keinem Paket Platz findet, bleibt in seiner Reihenfolge für spätere Läufe.
+
+Nenne dem Nutzer die Pakete mit Tasks und Grund des Schnitts in wenigen Zeilen und starte direkt.
 
 ## Orchestratoren starten
 
@@ -59,8 +61,9 @@ add --repo <repo-root> --label "<Projekt>·orchester" --title "<Projekt>·<Paket
 - Claude Code: `claude --model <orchestrator> '/qatlas run <Tasks> [--limit <n>] [--fly] <Laufvorgabe>'`
 - Codex: `codex -m <orchestrator> '$qatlas run <Tasks> [--limit <n>] [--fly] <Laufvorgabe>'`
 
-Quote den Prompt in der Shell einfach, damit `$qatlas` nicht expandiert. Gib `--limit` und `--fly` weiter,
-wenn der Sentinel damit läuft. Die Laufvorgabe lautet sinngemäß:
+Quote den Prompt in der Shell einfach, damit `$qatlas` nicht expandiert. Setze `--limit` auf die
+Paketgröße, wenn sie fünf übersteigt, und gib `--fly` weiter, wenn der Sentinel damit läuft. Die Laufvorgabe
+lautet sinngemäß:
 
 > Paket <Paket> eines Sentinels. Weitere Orchestratoren arbeiten parallel im selben Repo; Integrationsbesitzer
 > ist der Sentinel. Arbeite nach „Mehrere Orchestratoren“, beanspruche nur Tasks dieses Pakets und übergib
