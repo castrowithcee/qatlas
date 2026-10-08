@@ -2,8 +2,11 @@
 'use strict';
 
 // Steuert das Orchestrator-Fenster eines Qatlas-Sentinels in tmux. Ein Fenster gehört genau einem Repo und
-// wird über dessen Root markiert; das Skript fasst nur so markierte Fenster an. Ein Pane wird über Repo und
-// Paket adressiert, weil Hosts wie Codex Befehle nicht zuverlässig mit der Umgebung des Panes ausführen.
+// wird über dessen Root markiert; das Skript fasst nur so markierte Fenster an. Läuft der Sentinel in tmux,
+// legt add im Server des Nutzers eine eigene Session `sentinel--<repo>` an (Mouse dort aus, keine
+// serverweiten Optionen); sonst dient der Rückfallserver `-L qatlas-sentinel` mit eigenem Fenster. Ein Pane
+// wird über Repo und Paket adressiert, weil Hosts wie Codex Befehle nicht zuverlässig mit der Umgebung des
+// Panes ausführen.
 // Ereignisse stehen als JSON-Lines in <repo>/.qatlas/local/sentinel/events.jsonl. Die Sequenznummer `seq`
 // ist der Zeilenindex ab 0 und wird beim Lesen abgeleitet, nicht gespeichert. Weckend sind question,
 // handover, done und exited; start, answer, picked und alle über log geschriebenen Typen wecken nicht.
@@ -20,6 +23,7 @@
 //   qatlas-sentinel-tmux.js answer --repo <root> --package <paket> --answer <antwort>   (Übergabe: "integrated <sha>" oder "rework <grund>")
 //   qatlas-sentinel-tmux.js log --repo <root> --type <typ> [--package <paket>] [--task <id>] [--text <text>]
 //   qatlas-sentinel-tmux.js report --repo <root>
+//   qatlas-sentinel-tmux.js capture --repo <root> --package <paket>   (Scrollback nach <root>/.qatlas/local/sentinel/<paket>.log)
 //   qatlas-sentinel-tmux.js close --repo <root> --package <paket>
 
 const fs = require('fs');
@@ -31,7 +35,7 @@ const NARROW = 80;
 const MARK = '@qatlas-sentinel';
 const SOCKET = 'qatlas-sentinel';
 const WAKING = new Set(['question', 'handover', 'done', 'exited']);
-const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked']);
+const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed']);
 const PREFIX = { question: 'FRAGE · ', handover: 'ÜBERGABE · ' };
 
 const argv = process.argv.slice(2);
@@ -110,16 +114,24 @@ function setTitle(pane, title) {
   tmux(['select-pane', '-t', pane, '-T', title]);
 }
 
+// Sessionname im Nutzer-Server; tmux erlaubt `.` und `:` in Namen nicht.
+const sessionName = repo => 'sentinel--' + path.basename(repo).replace(/[.:]/g, '_');
+
 function newWindow(repo, label, cwd) {
-  const spawn = ['-d', '-P', '-F', '#{window_id}\t#{pane_id}', '-n', label, '-c', cwd, ...rest];
   let line;
-  if (inTmux && process.env.TMUX_PANE) {
-    const here = tmux(['display', '-p', '-t', process.env.TMUX_PANE, '#{session_id}:#{window_index}']);
-    line = tmux(['new-window', '-a', '-t', here, ...spawn]);
+  let session = SOCKET;
+  if (inTmux) {
+    session = sessionName(repo);
+    let exists = true;
+    try { tmux(['has-session', '-t', '=' + session]); } catch { exists = false; }
+    if (exists) fail(`Session ${session} existiert bereits, gehört aber nicht zu ${repo}. Nichts geändert.`);
+    line = tmux(['new-session', '-d', '-s', session, '-n', label, '-c', cwd, '-P', '-F', '#{window_id}\t#{pane_id}\t#{session_id}', '--', ...rest]);
+    tmux(['set', '-t', line.split('\t')[2], 'mouse', 'off']);
   } else {
-    let session = true;
-    try { tmux(['has-session', '-t', SOCKET]); } catch { session = false; }
-    line = session ? tmux(['new-window', '-t', SOCKET + ':', ...spawn]) : tmux(['new-session', '-s', SOCKET, ...spawn]);
+    const spawn = ['-d', '-P', '-F', '#{window_id}\t#{pane_id}', '-n', label, '-c', cwd, ...rest];
+    let has = true;
+    try { tmux(['has-session', '-t', SOCKET]); } catch { has = false; }
+    line = has ? tmux(['new-window', '-t', SOCKET + ':', ...spawn]) : tmux(['new-session', '-s', SOCKET, ...spawn]);
   }
   const [win, pane] = line.split('\t');
   for (const [name, value] of [[MARK, repo], ['pane-border-status', 'top'], ['pane-border-format', ' #{pane_title} '],
@@ -128,7 +140,7 @@ function newWindow(repo, label, cwd) {
   }
   tmux(['set-hook', '-w', '-t', win, 'window-resized',
     `if-shell -F "#{e|<:#{window_width},${NARROW}}" "select-layout -t ${win} even-vertical" "select-layout -t ${win} tiled"`]);
-  return [win, pane];
+  return [win, pane, session];
 }
 
 function add() {
@@ -138,12 +150,14 @@ function add() {
   if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Kein Ordner: ' + cwd);
   let win = markedWindow(repo);
   let pane;
+  let session;
   if (win && panes(win).some(p => p.package === name)) fail('Paket hat bereits ein Pane: ' + name);
   if (win) {
     if (panes(win).length >= MAX_PANES) fail(`Höchstens ${MAX_PANES} Orchestratoren pro Sentinel.`);
+    session = tmux(['display', '-p', '-t', win, '#{session_name}']);
     pane = tmux(['split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, '-c', cwd, ...rest]);
   } else {
-    [win, pane] = newWindow(repo, label, cwd);
+    [win, pane, session] = newWindow(repo, label, cwd);
     if (fs.existsSync(eventsFile(repo))) {
       fs.renameSync(eventsFile(repo), path.join(eventsDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
     }
@@ -153,7 +167,8 @@ function add() {
   setTitle(pane, title);
   layout(win);
   record(repo, 'start', { package: name, pane });
-  out({ window: win, pane, attach: inTmux ? null : `tmux -L ${SOCKET} attach` });
+  out({ window: win, pane, session,
+    ...(inTmux ? { switch: 'Ctrl+B s (Session-Liste) oder Ctrl+B ( / Ctrl+B )' } : { attach: `tmux -L ${SOCKET} attach` }) });
 }
 
 function list() {
@@ -292,13 +307,34 @@ function report() {
   });
 }
 
+// Sichert den vollständigen Scrollback eines Panes; eine vorhandene Datei wird nie überschrieben.
+function capture() {
+  const repo = repoKey();
+  const pane = target();
+  const base = flag('--package').replace(/[^A-Za-z0-9._-]/g, '_');
+  fs.mkdirSync(eventsDir(repo), { recursive: true });
+  const content = tmux(['capture-pane', '-p', '-J', '-S', '-', '-t', pane]) + '\n';
+  let file;
+  for (let n = 1; !file; n++) {
+    const candidate = path.join(eventsDir(repo), n === 1 ? `${base}.log` : `${base}-${n}.log`);
+    try { fs.writeFileSync(candidate, content, { flag: 'wx' }); file = candidate; } catch (error) { if (error.code !== 'EEXIST') throw error; }
+  }
+  record(repo, 'captured', { package: flag('--package'), pane, text: file });
+  out({ pane, file });
+}
+
 function close() {
+  const repo = repoKey();
   const pane = target();
   const win = tmux(['display', '-p', '-t', pane, '#{window_id}']);
+  const session = tmux(['display', '-p', '-t', pane, '#{session_id}']);
   const last = panes(win).length === 1;
   tmux(['kill-pane', '-t', pane]);
   if (!last) layout(win);
-  out({ closed: pane, windowClosed: last });
+  let sessionClosed = false;
+  try { tmux(['has-session', '-t', session]); } catch { sessionClosed = true; }
+  record(repo, 'closed', { package: flag('--package'), pane });
+  out({ closed: pane, windowClosed: last, sessionClosed });
 }
 
 try {
@@ -319,8 +355,9 @@ try {
   else if (command === 'answer') answer();
   else if (command === 'log') logEvent();
   else if (command === 'report') report();
+  else if (command === 'capture') capture();
   else if (command === 'close') close();
-  else fail('Befehle: add, list, title, wait, ask, handover, answer, log, report, close', 2);
+  else fail('Befehle: add, list, title, wait, ask, handover, answer, log, report, capture, close', 2);
 } catch (error) {
   fail((error.stderr ? String(error.stderr).trim() : '') || error.message);
 }
