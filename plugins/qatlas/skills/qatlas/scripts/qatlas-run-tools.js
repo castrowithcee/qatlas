@@ -13,9 +13,10 @@
 //     Transient gh errors are retried, at most 5 in a row.
 //     Output: {"pr","result":"pass"|"fail"|"timeout","checks":[{name,bucket,link}],"retries"}.
 //     Exit: 0 pass, 1 fail, 4 timeout, 2 usage error, 3 gh missing, not logged in or persistently failing.
-//   qatlas-run-tools.js slot [--slots <count>] [--repo <path>] -- <command> [args...]
+//   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
-//     --slots, else test-slots in ~/.qatlas/plugins/orchestra.yaml, else 2.
+//     --slots, else test-slots in ~/.qatlas/plugins/orchestra.yaml, else 2. Waiting callers are
+//     served in arrival order; --priority queues ahead of every caller without it.
 //     Locks live in the primary working tree so worktrees see them. No JSON output;
 //     the command exit code is passed through (signal: 128 plus signal number).
 
@@ -168,11 +169,24 @@ function slot() {
     return null;
   };
 
-  let lock = take();
+  // Ticket names sort by priority, then arrival; only the oldest live ticket may take a slot.
+  const queue = path.join(dir, 'queue');
+  fs.mkdirSync(queue, { recursive: true });
+  const name = `${opts.includes('--priority') ? 0 : 1}-${String(Date.now()).padStart(15, '0')}-${process.pid}`;
+  const ticket = path.join(queue, name);
+  fs.writeFileSync(ticket, '', { flag: 'wx' });
+  const first = () => fs.readdirSync(queue).sort().find(entry => {
+    if (alive(Number(entry.split('-')[2]))) return true;
+    fs.rmSync(path.join(queue, entry), { force: true });
+    return false;
+  }) === name;
+
+  let lock = first() && take();
   if (!lock) {
     process.stderr.write(`Warte auf einen freien Testslot (${slots} Slots)\n`);
-    while (!(lock = take())) sleep(2000);
+    while (!(lock = first() && take())) sleep(2000);
   }
+  fs.rmSync(ticket, { force: true });
 
   let released = false;
   const release = () => { if (!released) { released = true; fs.rmSync(lock, { recursive: true, force: true }); } };
