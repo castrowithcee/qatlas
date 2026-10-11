@@ -67,8 +67,8 @@ integriert und räumt danach auf; der Übergebende fasst die übergebenen Branch
    Repo-Ordners; `~/.qatlas/state/worktrees/` selbst bleibt.
 4. Lösche den lokalen Branch nach der Zielprüfung nur mit `git branch -d`. Schlägt der Befehl fehl, erzwinge
    die Löschung nicht; einzige Ausnahme ist ein Branch mit erbrachtem Squash-Nachweis, den `git branch -D`
-   entfernen darf. Remote-Branches werden nur auf ausdrücklichen Wunsch gelöscht; nenne verbliebene
-   gesammelt im Abschluss.
+   entfernen darf. Remote-Branches werden nur auf ausdrücklichen Wunsch oder nach einer Regel des laufenden
+   Verfahrens gelöscht; nenne verbliebene gesammelt im Abschluss.
 
 Einen schmutzigen oder nicht integrierten Strang zu verwerfen, ist eine eigene destruktive Aktion: Zeige den
 exakten Zustand und hole eine ausdrückliche Bestätigung für genau diesen Worktree ein. Lösche einen

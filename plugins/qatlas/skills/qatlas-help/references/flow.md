@@ -18,7 +18,8 @@ license: MIT
    die Zahl, `--fly` lässt den Lauf ohne erreichbaren Nutzer arbeiten. Ein Orchestrator vergibt
    Aufträge an Subagents, prüft deren Ergebnisse und committet lokal. Push, Publish, Deployment und
    irreversible Schritte autorisiert ein Run nie. `qatlas sentinel` schneidet bis zu vier
-   unabhängige Pakete und lässt jedes von einem eigenen Orchestrator parallel in tmux abarbeiten.
+   unabhängige Pakete, mit `--orchestras <n>` bis zu `n`, und lässt jedes von einem eigenen Orchestrator
+   parallel in tmux abarbeiten.
 5. **Abnehmen:** `qatlas review` führt Schritt für Schritt mit Ort und erwartetem Ergebnis durch konkrete
    Prüfungen und klärt einzeln Entscheidungen und Handlungen, die nur der Nutzer treffen kann.
 

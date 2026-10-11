@@ -34,7 +34,8 @@ das Steuerskript an und sende nie Tastatureingaben in eine Orchestrator-Session.
 1. Prüfe `tmux`, Git-Root und einen sauberen Steuerbranch nach dem Git-Ablauf. Läuft der Sentinel in tmux,
    legt das Skript im Server des Nutzers eine eigene Session `sentinel--<repo>` an; nenne dem Nutzer den
    ausgegebenen Wechselweg. Außerhalb von tmux legt es einen eigenen Server an; nenne dann den ausgegebenen
-   Befehl zum Anhängen.
+   Befehl zum Anhängen. Ein Fenster fasst vier Orchestratoren; weitere öffnet das Skript in zusätzlichen
+   Fenstern derselben Session.
 2. Zeigt `list --repo <repo-root>` bereits ein Fenster, läuft für dieses Repo ein Sentinel oder ist ein
    früheres Fenster noch offen. Starte nicht und kläre es mit dem Nutzer.
 3. Prüfe für jeden vorgesehenen Host seine Sektion in `orchestra.yaml` mit gültigem Orchestrator-Modell und
@@ -42,8 +43,9 @@ das Steuerskript an und sende nie Tastatureingaben in eine Orchestrator-Session.
    Laufvorgabe darf Pakete einem anderen Host zuweisen.
 4. Erkenne an Nutzer- und Projektvorgaben, ob sie Integration über Pull Requests verlangen; dann gilt der
    Abschnitt „Integration über Pull Requests“ des Git-Ablaufs. Prüfe in diesem Fall, ob im Ziel-Repo eine
-   Merge Queue aktiv ist und ob `gh` verfügbar und angemeldet ist. Fehlt `gh`, seine Anmeldung oder die
-   Autorisierung für Push, Pull Request und Merge, starte nicht und kläre es mit dem Nutzer.
+   Merge Queue aktiv ist, ob der Branchschutz einen aktuellen Stand vor dem Merge verlangt und ob `gh`
+   verfügbar und angemeldet ist. Fehlt `gh`, seine Anmeldung oder die Autorisierung für Push, Pull Request
+   und Merge, starte nicht und kläre es mit dem Nutzer.
 
 Die Integrationsbasis `<basis>` ist bei Integration über Pull Requests `origin/<steuerbranch>`, sonst der
 lokale `<steuerbranch>`.
@@ -51,11 +53,16 @@ lokale `<steuerbranch>`.
 ## Pakete schneiden
 
 Wähle aus dem genannten Scope oder ohne Scope aus dem Backlog die ausführbaren Tasks nach der Taskauswahl
-von [Arbeit ausführen](playbook-run.md) und schneide daraus höchstens vier Pakete. Ein Paket bündelt
-zusammengehörige Tasks; Abhängigkeiten liegen nur innerhalb eines Pakets. Echte Kopplung durch gemeinsame
-Invarianten, Migrationen oder Laufzeitressourcen bleibt in einem Paket; lässt sie sich nicht ausschließen,
-lege die Tasks zusammen. Mechanisch gemeinsame Dateien dürfen Pakete nach [Parallele Arbeit im
-Run](git-parallel.md) teilen.
+von [Arbeit ausführen](playbook-run.md) und schneide daraus höchstens vier Pakete, mit `--orchestras <n>`
+höchstens `n`. Ein Paket bündelt zusammengehörige Tasks; Abhängigkeiten liegen nur innerhalb eines Pakets.
+Echte Kopplung durch gemeinsame Invarianten, Migrationen oder Laufzeitressourcen bleibt in einem Paket;
+lässt sie sich nicht ausschließen, lege die Tasks zusammen. Mechanisch gemeinsame Dateien dürfen Pakete nach
+[Parallele Arbeit im Run](git-parallel.md) teilen.
+
+Schätze vor dem Schnitt je Task aus Taskvertrag und Code die Dateien ab, die er berührt. Ändern mehrere Tasks
+dieselbe zentrale Datei, etwa eine Registry, eine gemeinsame Testdatei oder dieselbe Dokumentation, lege sie
+in ein Paket, statt sie über Pakete zu verteilen: Jede Integration an dieser Stelle zwingt jedes andere Paket,
+das sie berührt, zum Nachziehen der Basis.
 
 Der Sentinel integriert seriell. Ergänze ein Paket, das nur aus einer Abhängigkeitskette besteht, um
 unabhängige Tasks, damit sein Orchestrator während des Wartens auf eine Integration weiterarbeiten kann.
@@ -70,7 +77,7 @@ Nenne dem Nutzer die Pakete mit Tasks und Grund des Schnitts in wenigen Zeilen u
 
 ## Orchestratoren starten
 
-Starte jedes Paket im Repo-Root:
+Starte jedes Paket im Repo-Root; das Skript verteilt die Panes zu je vier auf Fenster:
 
 ```text
 add --repo <repo-root> --package <Paket> --label "<Projekt>·orchester" --title "<Projekt>·<Paket> · <host>" --cwd <repo-root> -- <cli>
@@ -91,13 +98,15 @@ den Nutzer fragst, entscheidet dein eigenes `--fly`. Die Laufvorgabe lautet sinn
 > Ist `<basis>` ein `origin/…`-Ref, hole ihn vor jeder Verwendung frisch mit `git fetch`. Lege je Task einen
 > eigenen Worktree ab `<basis>` an. Merge vor jeder Übergabe den aktuellen `<basis>` in den Task-Branch, löse
 > Konflikte selbst und prüfe danach vollständig; Volltests laufen über `node <tools> slot -- <testbefehl>`.
+> Starte jeden Worker mit einem Profil aus `orchestra.yaml` und ausdrücklich gesetztem Modell und Effort.
 > Führe vor jedem Commit die Schutzprüfung als eigenen Befehl aus und werte ihren Exit-Code aus, bevor du
 > committest.
 >
 > Übergib jeden geprüften Task mit `node <skript> handover --repo <repo-root> --package <Paket> --task <id>
-> --report <bericht>`. Bei Integration über Pull Requests mit Squash-Merge übergibst du jeden Pull Request
-> eines Tasks nach dem Git-Ablauf einzeln und startest den nächsten erst ab dem danach integrierten
-> `<basis>`. Der Bericht folgt dem Rückgabeformat von „Arbeit ausführen“ und nennt zusätzlich Branches und
+> --report <datei>`; die Berichtsdatei liegt außerhalb jedes Worktrees. Bei Integration über Pull Requests
+> mit Squash-Merge übergibst du jeden Pull Request eines Tasks nach dem Git-Ablauf einzeln und startest den
+> nächsten erst ab dem danach integrierten `<basis>`. Der Bericht folgt dem Rückgabeformat von „Arbeit
+> ausführen“ einschließlich der Worker-Profile mit Modell und Effort und nennt zusätzlich Branches und
 > Commits, PR-Titel und PR-Body sowie, ob diese Übergabe die letzte des Tasks ist. Die Antwort lautet
 > `integrated <sha>` oder `rework <grund>`; ohne Antwort rufe denselben Befehl mit unverändertem Bericht
 > erneut auf. Bis zur Antwort gehören Task, Branches und Worktree dem Sentinel; fasse sie nicht an.
@@ -129,7 +138,17 @@ Berechtigungen, Sandbox oder Freigaben des Hosts lockert.
 Warte mit `wait --repo <repo-root> --since <cursor>`. Beginne mit `--since 0` und übergib danach jeweils
 den `cursor` der letzten Ausgabe, damit kein Ereignis verloren geht. Es kehrt bei einem der Ereignisse
 `question`, `handover`, `done` oder `exited` oder nach Zeitablauf zurück. Kann der Host Befehle im
-Hintergrund ausführen, tue das, damit du für den Nutzer ansprechbar bleibst. Bearbeite jedes Ereignis:
+Hintergrund ausführen, tue das, damit du für den Nutzer ansprechbar bleibst. Ein `handover` nennt nur den
+Pfad seines Berichts; lies ihn erst bei der Integration.
+
+Halte deinen Kontext schlank: Lies Diffs zuerst als `--stat` und danach nur die betroffenen Stellen. Was du
+in den Abschluss übernimmst, protokollierst du sofort mit `log` statt es im Gedächtnis zu tragen: Annahmen
+als `annahme`, Abweichungen vom Verfahren als `abweichung`, nicht öffentlich erfasste Risiken als `risiko`,
+neu erfasste Tasks als `erfasst` und offene Nutzerentscheidungen als `entscheiden`, je mit Paket und Task.
+Nach einer Verdichtung deines Kontexts oder einem Neustart rekonstruierst du den Stand aus `list`, `report`
+und dem Planungssystem, nicht aus der Erinnerung.
+
+Bearbeite jedes Ereignis:
 
 - **`question`:** Belegt das Projektwissen die Antwort, antworte mit `answer --repo <repo-root> --package
   <Paket> --answer "<Antwort mit Quelle>"`. Sonst frage ohne `--fly` den Nutzer knapp mit Paket, Frage und
@@ -153,19 +172,36 @@ bis zu deinem `integrated`. Integriere Übergaben einzeln und protokolliere jede
    Korrekturbedarf geht als `answer … --answer "rework <grund>"` zurück und zählt als Korrekturversuch nach
    „Höchstens zwei Korrekturen“. Bündelt eine Übergabe bei Squash-Merge mehrere Commits im Sinn der
    Commitgrenze, gib sie als `rework <schnitt>` mit dem verlangten Schnitt zurück; das zählt nicht als
-   Korrekturversuch.
+   Korrekturversuch. Lief ein Worker ohne Profil aus `orchestra.yaml` oder mit geerbtem statt ausdrücklich
+   gesetztem Effort, protokolliere das als `abweichung`; es ist kein Korrekturgrund.
 2. Probe Konflikte mit `probe --branch <task-branch> --base <basis>`. Einen Konflikt, auch einen beim späteren
    Nachziehen der Basis, gibst du als `rework <grund mit Dateien>` zurück; er zählt nicht als
    Korrekturversuch. Löse Konflikte nie selbst. Nur wenn der Orchestrator nicht mehr verfügbar ist, sicherst
    du den Task nach dem Git-Ablauf als Übergabe auf `review`.
 3. Integriere ohne Konflikt nach dem Git-Ablauf, bei Integration über Pull Requests nach dessen Abschnitt
    „Integration über Pull Requests“ mit PR-Titel und PR-Body aus dem Bericht und `ci-wait`. Prüfe dabei lokal
-   nur gezielt die betroffenen Bereiche über `slot` und überlasse der CI die volle Breite. Einen bekannten
-   Flake behandelst du nach dessen Regel in [Arbeit ausführen](playbook-run.md). Ohne Pull Requests führst
-   du die gemeinsamen Prüfungen selbst aus. Tasks über mehrere Repos integrierst du nach dem Git-Ablauf.
+   nur gezielt die betroffenen Bereiche über `slot --priority` und überlasse der CI die volle Breite. Einen
+   bekannten Flake behandelst du nach dessen Regel in [Arbeit ausführen](playbook-run.md). Ohne Pull Requests
+   führst du die gemeinsamen Prüfungen selbst aus. Tasks über mehrere Repos integrierst du nach dem
+   Git-Ablauf.
 4. Ist es die letzte Übergabe des Tasks, schließe ihn danach im Planungssystem und setze ihn auf `done`.
    Antworte mit `answer … --answer "integrated <sha>"`, wobei `<sha>` der Integrationscommit auf dem
    Steuerbranch ist.
+
+Integrierst du über Pull Requests, warte nicht Übergabe für Übergabe auf die CI. Öffne jeden geprüften,
+konfliktfreien Pull Request sofort, damit seine CI neben den übrigen läuft, und bearbeite währenddessen
+weitere Ereignisse. Ist eine Merge Queue aktiv, reihe ihn sofort ein; sie verwaltet Basis und Reihenfolge.
+Ohne Merge Queue mergst du einzeln, sobald seine CI grün ist. Hat sich die Basis seit dem CI-Lauf geändert
+und verlangt der Branchschutz einen aktuellen Stand, ziehe die Basis konfliktfrei selbst nach, etwa über die
+Branch-Aktualisierung von GitHub, und warte erneut auf die CI; einen Konflikt gibst du nach Schritt 2
+zurück. In diesem Fall bleibt die Integration seriell an die CI-Dauer gebunden; nenne das im Bericht als
+Engpass.
+
+Lösche nach einem Squash-Merge mit erbrachtem Squash-Nachweis nach dem
+[Worktree-Vertrag](../../qatlas-work/references/worktree-contract.md) den Remote-Branch des Pull Requests;
+die Autorisierung für Push und Merge deckt das. Nutze dafür den Qatlas-MCP-Broker, wenn er eine passende
+Operation anbietet, sonst `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` oder
+`git push origin --delete <branch>`.
 
 ## Beenden
 
@@ -181,5 +217,6 @@ bis zu deinem `integrated`. Integriere Übergaben einzeln und protokolliere jede
 
 Der Lauf endet, wenn jedes Pane `FERTIG` zeigt oder beendet ist und alle übergebenen Tasks integriert oder
 als Übergabe gesichert sind. Nenne im Bericht die Kennzahlen aus `report --repo <repo-root>` knapp und die
-verbliebenen Remote-Branches gesammelt. Schließe mit genau einem Block „Für dich“ über alle Pakete nach
-[Arbeit ausführen](playbook-run.md); nicht gepushte Commits stehen dort unter **Nicht gepusht**.
+verbliebenen Remote-Branches dieses Laufs gesammelt. Schließe mit genau einem Block „Für dich“ über alle
+Pakete nach [Arbeit ausführen](playbook-run.md); seine Einträge entnimmst du den `notes` aus `report`, nicht
+gepushte Commits stehen dort unter **Nicht gepusht**.

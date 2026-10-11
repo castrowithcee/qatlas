@@ -1,18 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 
-// Controls the orchestrator window of a Qatlas sentinel in tmux. A window belongs to exactly one repo and
-// is marked via its root; the script touches only windows so marked. If the sentinel runs in tmux,
+// Controls the orchestrator windows of a Qatlas sentinel in tmux. Windows belong to exactly one repo and
+// are marked via its root; the script touches only windows so marked. Each window holds at most four
+// panes; further packages open another window in the same session. If the sentinel runs in tmux,
 // add creates its own session `sentinel--<repo>` on the user server (mouse off there, no
-// server-wide options); otherwise the fallback server `-L qatlas-sentinel` with its own window is used. A pane
+// server-wide options); otherwise the fallback server `-L qatlas-sentinel` is used. A pane
 // is addressed via repo and package because hosts like Codex do not reliably run commands with the pane
 // environment.
-// Events are JSON lines in <repo>/.qatlas/local/sentinel/events.jsonl. `seq` is the
-// 0-based line index, derived on read, not stored. Waking types: question,
+// Events are JSON lines in <repo>/.qatlas/local/sentinel/events.jsonl and the single source of truth for
+// answers. `seq` is the 0-based line index, derived on read, not stored. Waking types: question,
 // handover, done, exited; start, answer, picked and all types written via log do not wake.
 // `wait --since <seq>` returns all waking events from seq on and the new `cursor` (count of all
-// events); pass it as --since on the next call and nothing is lost. If add recreates
-// the window, an existing log is renamed to events-<timestamp>.jsonl.
+// events); pass it as --since on the next call and nothing is lost. Handover reports are stored as
+// files under reports/ and events carry only their path. If add finds no marked window, an existing
+// log is renamed to events-<timestamp>.jsonl.
 // Usage:
 //   qatlas-sentinel-tmux.js add --repo <root> --package <package> --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-sentinel-tmux.js list --repo <root>
@@ -35,7 +37,9 @@ const NARROW = 80;
 const MARK = '@qatlas-sentinel';
 const SOCKET = 'qatlas-sentinel';
 const WAKING = new Set(['question', 'handover', 'done', 'exited']);
+const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
 const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed']);
+const INTEGRATION = new Set(['push', 'pr', 'merge', 'rerun', 'conflict', 'close']);
 const PREFIX = { question: 'FRAGE · ', handover: 'ÜBERGABE · ' };
 
 const argv = process.argv.slice(2);
@@ -60,7 +64,7 @@ const eventsFile = repo => path.join(eventsDir(repo), 'events.jsonl');
 function record(repo, type, fields = {}) {
   fs.mkdirSync(eventsDir(repo), { recursive: true });
   const entry = { at: new Date().toISOString(), type };
-  for (const key of ['package', 'task', 'pane', 'text']) if (fields[key]) entry[key] = fields[key];
+  for (const key of ['package', 'task', 'pane', 'text', 'report']) if (fields[key]) entry[key] = fields[key];
   fs.appendFileSync(eventsFile(repo), JSON.stringify(entry) + '\n');
 }
 
@@ -72,12 +76,19 @@ function events(repo) {
   });
 }
 
-function markedWindow(repo) {
-  let lines;
-  try { lines = tmux(['list-windows', '-a', '-F', `#{window_id}\t#{${MARK}}`]).split('\n'); } catch { return null; }
-  const hit = lines.map(line => line.split('\t')).find(([, mark]) => mark === repo);
-  return hit ? hit[0] : null;
+// Answer of the open signal of a pane: an answer event after its last signal and before picked.
+function pendingAnswer(repo, pane) {
+  const last = events(repo).filter(e => e.pane === pane && SIGNAL.has(e.type)).pop();
+  return last && last.type === 'answer' ? last.text : null;
 }
+
+function markedWindows(repo) {
+  let lines;
+  try { lines = tmux(['list-windows', '-a', '-F', `#{window_id}\t#{${MARK}}`]).split('\n'); } catch { return []; }
+  return lines.map(line => line.split('\t')).filter(([, mark]) => mark === repo).map(([win]) => win);
+}
+
+const allPanes = repo => markedWindows(repo).flatMap(win => panes(win));
 
 function panes(win) {
   return tmux(['list-panes', '-t', win, '-F', '#{pane_id}\t#{pane_title}\t#{pane_dead}'])
@@ -86,9 +97,9 @@ function panes(win) {
       const kind = option(pane, '@qatlas-kind');
       const text = option(pane, '@qatlas-text');
       const task = option(pane, '@qatlas-task');
+      const detail = kind === 'handover' ? { report: option(pane, '@qatlas-report') } : kind && text ? { question: text } : {};
       return { pane, package: option(pane, '@qatlas-package'), title, dead: dead === '1',
-        ...(kind ? { kind } : {}), ...(kind && task ? { task } : {}),
-        ...(kind && text ? { [kind === 'handover' ? 'report' : 'question']: text } : {}) };
+        ...(kind ? { kind } : {}), ...(kind && task ? { task } : {}), ...detail };
     });
 }
 
@@ -98,9 +109,8 @@ const setOption = (pane, name, value) => tmux(['set', '-p', '-t', pane, name, va
 function target() {
   const repo = repoKey();
   const [name] = need('--package');
-  const win = markedWindow(repo);
-  const hit = win && panes(win).find(p => p.package === name);
-  if (!hit) fail(`Kein Pane für Paket ${name} im Sentinel-Fenster von ${repo}`);
+  const hit = allPanes(repo).find(p => p.package === name);
+  if (!hit) fail(`Kein Pane für Paket ${name} in den Sentinel-Fenstern von ${repo}`);
   return hit.pane;
 }
 
@@ -134,12 +144,24 @@ function newWindow(repo, label, cwd) {
     line = has ? tmux(['new-window', '-t', SOCKET + ':', ...spawn]) : tmux(['new-session', '-s', SOCKET, ...spawn]);
   }
   const [win, pane] = line.split('\t');
+  markWindow(win, repo);
+  return [win, pane, session];
+}
+
+function markWindow(win, repo) {
   for (const [name, value] of [[MARK, repo], ['pane-border-status', 'top'], ['pane-border-format', ' #{pane_title} '],
     ['remain-on-exit', 'on'], ['automatic-rename', 'off'], ['allow-rename', 'off']]) {
     tmux(['set', '-w', '-t', win, name, value]);
   }
   tmux(['set-hook', '-w', '-t', win, 'window-resized',
     `if-shell -F "#{e|<:#{window_width},${NARROW}}" "select-layout -t ${win} even-vertical" "select-layout -t ${win} tiled"`]);
+}
+
+function extraWindow(repo, first, label, cwd) {
+  const session = tmux(['display', '-p', '-t', first, '#{session_name}']);
+  const line = tmux(['new-window', '-d', '-t', '=' + session + ':', '-n', label, '-c', cwd, '-P', '-F', '#{window_id}\t#{pane_id}', '--', ...rest]);
+  const [win, pane] = line.split('\t');
+  markWindow(win, repo);
   return [win, pane, session];
 }
 
@@ -148,14 +170,16 @@ function add() {
   const [name, label, title, cwd] = need('--package', '--label', '--title', '--cwd');
   if (!rest.length) fail('Fehlt: Befehl nach --', 2);
   if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Kein Ordner: ' + cwd);
-  let win = markedWindow(repo);
+  const wins = markedWindows(repo);
+  let win = wins.find(w => panes(w).length < MAX_PANES);
   let pane;
   let session;
-  if (win && panes(win).some(p => p.package === name)) fail('Paket hat bereits ein Pane: ' + name);
+  if (allPanes(repo).some(p => p.package === name)) fail('Paket hat bereits ein Pane: ' + name);
   if (win) {
-    if (panes(win).length >= MAX_PANES) fail(`Höchstens ${MAX_PANES} Orchestratoren pro Sentinel.`);
     session = tmux(['display', '-p', '-t', win, '#{session_name}']);
     pane = tmux(['split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, '-c', cwd, ...rest]);
+  } else if (wins.length) {
+    [win, pane, session] = extraWindow(repo, wins[0], label, cwd);
   } else {
     [win, pane, session] = newWindow(repo, label, cwd);
     if (fs.existsSync(eventsFile(repo))) {
@@ -173,16 +197,13 @@ function add() {
 
 function list() {
   const repo = repoKey();
-  const win = markedWindow(repo);
-  out({ window: win, panes: win ? panes(win) : [], cursor: events(repo).length });
+  out({ windows: markedWindows(repo), panes: allPanes(repo), cursor: events(repo).length });
 }
 
 // Writes exactly one exited per newly detected dead pane.
 function recordExits(repo) {
-  const win = markedWindow(repo);
-  if (!win) return;
   const seen = new Set(events(repo).filter(e => e.type === 'exited').map(e => e.pane));
-  for (const p of panes(win)) {
+  for (const p of allPanes(repo)) {
     if (p.dead && !seen.has(p.pane)) record(repo, 'exited', { package: p.package, pane: p.pane });
   }
 }
@@ -203,8 +224,10 @@ async function wait() {
   out({ events: [], cursor: events(repo).length, timeout: true });
 }
 
-// A repeated call with the same signal keeps waiting without discarding an answer that has arrived
-// meanwhile. At most one open signal per pane; an open signal of the other kind is an error.
+// A repeated call with the same signal keeps waiting and never discards an answer that has arrived
+// meanwhile. Same signal: a question with the same text, a handover of the same task. A changed report
+// replaces the open one only while no answer exists. At most one open signal per pane; an open signal of
+// the other kind is an error.
 async function raise(kind, text, task) {
   const repo = repoKey();
   const pane = target();
@@ -212,20 +235,27 @@ async function raise(kind, text, task) {
   const title = option(pane, '@qatlas-title') || option(pane, 'pane_title');
   const open = option(pane, '@qatlas-kind');
   if (open && open !== kind) fail(`Pane ${pane} hat bereits ein offenes Signal (${open}).`);
-  const same = open === kind && option(pane, '@qatlas-text') === text && option(pane, '@qatlas-task') === (task || '');
-  if (!same) {
-    setOption(pane, '@qatlas-answer', '');
+  const same = open === kind && (kind === 'handover' ? option(pane, '@qatlas-task') === task : option(pane, '@qatlas-text') === text);
+  const changed = !same || (option(pane, '@qatlas-text') !== text && pendingAnswer(repo, pane) === null);
+  if (changed) {
     setOption(pane, '@qatlas-kind', kind);
     setOption(pane, '@qatlas-text', text);
-    if (task) setOption(pane, '@qatlas-task', task); else tmux(['set', '-p', '-u', '-t', pane, '@qatlas-task']);
+    let report;
+    if (kind === 'handover') {
+      report = storeReport(repo, flag('--package'), task, text);
+      setOption(pane, '@qatlas-report', report);
+      setOption(pane, '@qatlas-task', task);
+    } else {
+      for (const name of ['@qatlas-task', '@qatlas-report']) tmux(['set', '-p', '-u', '-t', pane, name]);
+    }
     setTitle(pane, PREFIX[kind] + title);
-    record(repo, kind, { package: flag('--package'), pane, task, text });
+    record(repo, kind, { package: flag('--package'), pane, task, ...(report ? { report } : { text }) });
   }
   const end = Date.now() + timeout;
   while (Date.now() < end) {
-    const answer = option(pane, '@qatlas-answer');
-    if (answer) {
-      for (const name of ['@qatlas-kind', '@qatlas-text', '@qatlas-task', '@qatlas-answer']) tmux(['set', '-p', '-u', '-t', pane, name]);
+    const answer = pendingAnswer(repo, pane);
+    if (answer !== null) {
+      for (const name of ['@qatlas-kind', '@qatlas-text', '@qatlas-task', '@qatlas-report']) tmux(['set', '-p', '-u', '-t', pane, name]);
       setTitle(pane, title);
       record(repo, 'picked', { package: flag('--package'), pane, task });
       return out({ answer });
@@ -234,6 +264,18 @@ async function raise(kind, text, task) {
   }
   out({ answer: null, hint: `Noch keine Antwort. Rufe ${kind === 'handover' ? 'handover' : 'ask'} mit demselben Signal erneut auf.` });
 }
+
+// Never overwrites an existing file.
+function writeUnique(dir, base, ext, content) {
+  fs.mkdirSync(dir, { recursive: true });
+  for (let n = 1; ; n++) {
+    const candidate = path.join(dir, n === 1 ? `${base}${ext}` : `${base}-${n}${ext}`);
+    try { fs.writeFileSync(candidate, content, { flag: 'wx' }); return candidate; } catch (error) { if (error.code !== 'EEXIST') throw error; }
+  }
+}
+
+const safe = value => String(value).replace(/[^A-Za-z0-9._-]/g, '_');
+const storeReport = (repo, name, task, text) => writeUnique(path.join(eventsDir(repo), 'reports'), `${safe(name)}-${safe(task)}`, '.md', text + '\n');
 
 function reportText() {
   const [value] = need('--report');
@@ -253,7 +295,6 @@ function answer() {
     fail('Auf eine Übergabe ist nur "integrated <sha>" oder "rework <grund>" zulässig.', 2);
   }
   const task = kind === 'handover' ? option(pane, '@qatlas-task') : '';
-  setOption(pane, '@qatlas-answer', text);
   record(repo, 'answer', { package: flag('--package'), pane, task, text });
   out({ pane, answered: true });
 }
@@ -269,7 +310,7 @@ function logEvent() {
 
 // Times in seconds. Cycle time per task: from package start or last integration in the package
 // to the first handover of the task. Wait time: last handover before the integration
-// to answer integrated.
+// to answer integrated. Notes: all logged types outside INTEGRATION, grouped by type.
 function report() {
   const list = events(repoKey());
   const time = e => Date.parse(e.at);
@@ -277,8 +318,12 @@ function report() {
   const packages = {};
   const tasks = {};
   const log = { rerun: 0, conflict: 0 };
+  const notes = {};
   const lastIntegrated = {};
   for (const e of list) {
+    if (!RESERVED.has(e.type) && !INTEGRATION.has(e.type) && e.type !== 'unlesbar') {
+      (notes[e.type] ||= []).push(Object.fromEntries(['package', 'task', 'text'].filter(k => e[k]).map(k => [k, e[k]])));
+    }
     const pkg = e.package && (packages[e.package] ||= { rueckfragen: 0, start: null });
     if (e.type === 'start' && pkg) pkg.start = time(e);
     if (e.type === 'question' && pkg) pkg.rueckfragen++;
@@ -302,22 +347,15 @@ function report() {
   for (const p of Object.values(packages)) delete p.start;
   out({
     laufdauer: list.length ? secs(time(list[list.length - 1]) - time(list[0])) : null,
-    tasks, packages, log, events: list.length,
+    tasks, packages, log, notes, events: list.length,
   });
 }
 
-// Never overwrites an existing file.
 function capture() {
   const repo = repoKey();
   const pane = target();
-  const base = flag('--package').replace(/[^A-Za-z0-9._-]/g, '_');
-  fs.mkdirSync(eventsDir(repo), { recursive: true });
   const content = tmux(['capture-pane', '-p', '-J', '-S', '-', '-t', pane]) + '\n';
-  let file;
-  for (let n = 1; !file; n++) {
-    const candidate = path.join(eventsDir(repo), n === 1 ? `${base}.log` : `${base}-${n}.log`);
-    try { fs.writeFileSync(candidate, content, { flag: 'wx' }); file = candidate; } catch (error) { if (error.code !== 'EEXIST') throw error; }
-  }
+  const file = writeUnique(eventsDir(repo), safe(flag('--package')), '.log', content);
   record(repo, 'captured', { package: flag('--package'), pane, text: file });
   out({ pane, file });
 }

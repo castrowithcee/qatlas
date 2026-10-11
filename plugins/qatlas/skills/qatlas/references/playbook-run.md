@@ -95,7 +95,8 @@ Worker wird Effort ausdrücklich gesetzt und nicht vom Orchestrator geerbt.
 Codex setzt beim Spawn Modell und Reasoning-Effort ausdrücklich. Claude Code verwendet für die Effort-Stufen
 `low`, `medium`, `high`, `xhigh` und `max` jeweils den Plugin-Subagent `qatlas:run-low`,
 `qatlas:run-medium`, `qatlas:run-high`, `qatlas:run-xhigh` beziehungsweise `qatlas:run-max` und übergibt
-das Modell ausdrücklich beim Aufruf. Wähle nur eine vom jeweiligen Host und Modell unterstützte Stufe;
+das Modell ausdrücklich beim Aufruf. Jeder andere Subagent-Typ erbt Effort und gegebenenfalls Modell des
+Orchestrators und ist für Worker unzulässig. Wähle nur eine vom jeweiligen Host und Modell unterstützte Stufe;
 `ultra` ist keine Claude-Code-Effort-Stufe. Für `effort: null` verwende ausschließlich bei einem Modell ohne
 Effort-Unterstützung `qatlas:run-no-effort` ohne Effort-Frontmatter. Dessen Extended Thinking folgt der
 Claude-Code-Session und wird von `orchestra.yaml` nicht gesteuert. Ist der passende Subagent nicht
