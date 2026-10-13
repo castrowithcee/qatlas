@@ -1,7 +1,7 @@
 ---
 description: >
-  Shape-Verfahren für einen eindeutigen vorhandenen Task oder den Backlog-Scope: Drafts schärfen und
-  teilen, Voraussetzungen klären sowie Abhängigkeiten, Reihenfolge und nächsten Horizont reparieren.
+  Shape-Variante für einen bestehenden Task oder einen Backlog-Ausschnitt: Bestand bilden, Drafts einzeln
+  reifen, ruhende Arbeit prüfen und den nächsten Horizont disponieren.
 type: playbook
 edit: locked
 license: MIT
@@ -21,10 +21,6 @@ jeden geklärten Task auf `ready` zu setzen. Ein angegebener Backlog-Scope begre
 einen Task, ein Projekt oder eine andere im Planungssystem eindeutig bestimmbare Teilmenge. Frage nicht
 nach einem Scope, nur weil der Nutzer `shape backlog` ohne weiteren Scope aufgerufen hat.
 
-`shape backlog [Scope]` erteilt keine Freigabe zum Ändern gesperrter Projektdokumentation. Ein gezieltes
-`shape <Task>` folgt dagegen der Shape-Freigabe des gemeinsamen Vertrags. Erfordert eine Aufgabe im
-Backlog-Scope eine Änderung an `edit: locked`, hole die dafür nötige ausdrückliche Freigabe ein.
-
 Verwende diesen Zweig außerdem, wenn ruhende Arbeit geprüft, mehrere Scopes gegeneinander priorisiert oder
 eine bestehende `next`-Menge bewusst geändert werden soll. Ein vorhandener Draft kann eine erneute
 Untersuchung und denselben fachlichen Zuschnitt wie bei `shape` brauchen; bearbeite ihn hier am bestehenden
@@ -32,8 +28,8 @@ Ort, statt für die Klärung einen anderen Einstieg zu verlangen.
 
 ## Bestand bilden
 
-1. Bestimme das maßgebliche Planungssystem. Löse einen angegebenen Scope darin auf; ohne Angabe gilt der
-   gesamte offene Backlog.
+1. Löse einen angegebenen Scope im maßgeblichen Planungssystem auf; ohne Angabe gilt der gesamte offene
+   Backlog.
 2. Ist `.qatlas-project/README.md` vorhanden, folge von dort nur den Lesebedingungen, die für den gewählten
    Scope und seine offenen Vertragsfragen relevant sind. Fachliche Quellen außerhalb des Wissensraums
    bleiben für ihren Gegenstand maßgeblich; bloßes Lesen oder automatische Bereitstellung erhöht ihren Rang
@@ -45,10 +41,8 @@ Ort, statt für die Klärung einen anderen Einstieg zu verlangen.
    vollständig, wenn er an der Reihe ist.
 5. Verändere keinen `in-progress`-Task mit laufendem oder unbekanntem Worker.
 
-Braucht mindestens ein Task der Gesprächsschlange eine echte Nutzerentscheidung, lies vor ihrer ersten
-Präsentation vollständig [Entscheidungen knapp vorlegen](playbook-decision-card.md). Nenne und führe die
-Entscheidungsschlange nach diesem gemeinsamen Dialog, ohne vorauszusetzen, dass der Nutzer die Tasks
-parallel liest.
+Braucht mindestens ein Task der Gesprächsschlange eine echte Nutzerentscheidung, nenne und führe die
+Entscheidungsschlange nach dem gemeinsamen Entscheidungsdialog.
 
 Bei großen Beständen halte immer nur einen sinnvollen Ausschnitt und den gerade besprochenen Task vollständig
 im Kontext. Die Größe des Bestands ist kein Grund, nach der Übersicht zu stoppen oder Drafts ungeprüft zu
@@ -65,11 +59,8 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
    eine Quellenliste allein reicht nicht. Braucht es eine Nutzerentscheidung, stelle genau die nächste
    Entscheidung nach dem gemeinsamen Dialog vor und warte auf die Antwort. Arbeite jede geklärte Antwort
    sofort am fachlich passenden Ort in den aktuellen Taskvertrag ein und entferne überholte Varianten. Ist
-   ein manuell angelegter oder gewachsener Task für ein kleineres Worker-Modell im Regelfall nicht als
-   abgegrenzter Auftrag tragfähig oder enthält er eigenständig abnehmbare Ergebnisse, teile ihn in kleinere
-   Tasks mit je eigenem Ziel, Prüfpfad und sinnvoller Abhängigkeit. Übernimm die geltenden Entscheidungen
-   und Sicherheitsgrenzen konkret in jeden betroffenen Vertrag. Bewahre bestätigtes Ziel und Abnahme der
-   ursprünglichen Arbeit vollständig; lass keinen leeren Resttask zurück. Fahre danach mit der nächsten
+   ein manuell angelegter oder gewachsener Task als abgegrenzter Auftrag nicht tragfähig oder enthält er
+   eigenständig abnehmbare Ergebnisse, teile ihn nach dem Zuschnittblock. Fahre danach mit der nächsten
    offenen Frage oder dem nächsten Draft fort.
 2. **Reife belegen.** Setze einen Task nach dem Statusmodell des maßgeblichen Planungssystems auf `ready`,
    sobald er die Ausführungsreife der Backlog-Norm erreicht. Ist eine Frage erst durch ein noch nicht
@@ -80,28 +71,10 @@ Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
 3. **Menschliche Gates sichtbar machen.** Kläre echte `review`-Übergaben in diesem Modus nur, wenn der Nutzer
    das ausdrücklich in denselben Aufruf einbezieht.
 4. **Ruhende Arbeit prüfen.** Hebe `waiting` nur auf, wenn das Wiederaufnahmesignal belegt eingetreten ist.
-5. **Nächsten Horizont bilden.** Bewahre eine bestehende `next`-Queue, sofern der Nutzer sie nicht
-   ausdrücklich in diesem Aufruf ändern lässt. Ist sie leer, wähle aus den `ready`-Tasks des gewählten
-   Scopes selbstständig einen zusammenhängenden nächsten Horizont von höchstens fünf Tasks und setze ihren
-   Status auf `next`. Wähle nach erfüllbaren Abhängigkeiten, fachlichem Nutzen, früher Risikoklärung und
-   sinnvoller Integration; bei weniger als fünf passenden Tasks nimm entsprechend weniger. Eine bloße
-   Übersicht ist keine Disposition.
-6. **Bestehende Queue konsolidieren.** Entferne Doppelungen, löse widersprüchliche Reihenfolgen und prüfe
-   Abhängigkeiten, ohne ausführbare Taskverträge unnötig umzuschreiben. Ein `ready`-Task mit noch unerfüllter
-   Abhängigkeit bleibt vertraglich reif, gehört aber nicht als ausführbarer Kandidat nach `next`. Hängt
-   seine Abnahme von einer noch unbekannten Entscheidung im Vorgänger ab, bleibt er `draft`.
+5. **Nächsten Horizont bilden.** Bewahre, bilde oder konsolidiere die `next`-Queue nach dem
+   Horizontblock.
 
-Wird in diesem Modus eine maßgebliche Grundlage autorisiert geändert, ermittle ihre betroffenen offenen
-Tasks und gleiche deren aktuelle Verträge gezielt mit den neuen Vorgaben ab. Bewahre bestehende Ziele und
-Abnahmekriterien, sofern der Nutzer ihre Änderung nicht ebenfalls entschieden hat.
-
-## Grenzen
-
-- Erzeuge keine künstlichen Tasks nur, um eine ferne Idee vollständig zu nummerieren. Materialisiere
-  eigenständige Pakete, wenn ihr Vertrag verstanden ist; halte spätere Horizonte kompakt im Projektwissen.
-- Setze nichts auf `in-progress` oder `done` und beginne keine Implementierung.
-- Eine ausdrücklich vom Nutzer zusammengestellte `next`-Menge hat keine harte Größenbegrenzung.
-- Bewahre keine Review- oder Planungshistorie im Task. Er bleibt der konsolidierte aktuelle Stand.
+## Abschluss
 
 Beende erst, wenn jeder anfangs gewählte Draft entweder `ready` ist, mit seiner konkreten derzeit nicht
 klärbaren Frage als `draft` verbleibt oder vom Nutzer ausdrücklich zurückgestellt wurde. Nenne dann die

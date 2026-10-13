@@ -15,6 +15,21 @@ heraus. Der Lauf soll dem Nutzer Zeit sparen: Den offenen Stand kann er selbst i
 bereitet vor, was der Nutzer sonst zusammensuchen müsste, und führt ihn auf kürzestem Weg durch das, was
 nur er beurteilen kann.
 
+## Aufruf
+
+`review [Scope]` nimmt einen Task, ein Projekt oder ohne Scope alle offenen Übergaben des maßgeblichen
+Planungssystems. `review` kennt keine Flags und erhält keine Freigabe für gesperrte Projektdokumentation.
+
+## Leseliste
+
+Die Blöcke wiederholen nichts aus dieser Datei und einander; was du nicht liest, fehlt dir in diesem Lauf.
+Lies jeden vollständig zum genannten Zeitpunkt:
+
+1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md).
+2. **Vor der ersten Übergabe:** [Entscheidungen knapp vorlegen](../../references/playbook-decision-card.md).
+3. **Vor dem Sammelcommit:** [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre
+   [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md).
+
 ## Scope-in
 
 Der Aufruf umfasst die lesende Bestandsaufnahme, Änderungen an Spine und Entscheidungen sowie einen
@@ -43,9 +58,8 @@ Laufs.
 6. Ordne jede Übergabe ein. Eine **Prüfung** liegt nur vor, wenn ein konkretes Ergebnis existiert, das der
    Nutzer selbst ansehen, ausführen oder ausprobieren muss. Alles andere, auch eine Abnahme ohne konkreten
    Prüfgegenstand, ist eine Entscheidung oder Nutzerhandlung.
-7. Lies vor der ersten Übergabe vollständig [Entscheidungen knapp vorlegen](playbook-decision-card.md).
-   Nenne nur die Anzahl der Aufgaben in der Schlange und beginne dann mit der ersten Karte nach diesem
-   gemeinsamen Dialog.
+7. Nenne nur die Anzahl der Aufgaben in der Schlange und beginne dann mit der ersten Karte nach dem
+   gemeinsamen Entscheidungsdialog.
 
 ## Prüfung führen
 
