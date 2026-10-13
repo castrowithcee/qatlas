@@ -42,8 +42,8 @@ Navigation](../qatlas-core-navigation/SKILL.md).
   erreichbaren Nutzer.
 - **`sentinel [Tasks] [--limit <n|0>] [--orchestras <n>] [--fly] [Laufvorgabe]`:** Lies vollständig
   [Sentinel](references/playbook-sentinel.md). Schneide bis zu vier unabhängige Pakete, mit `--orchestras`
-  bis zu `n`, lass jedes von einem eigenen Orchestrator als Run in tmux abarbeiten, integriere die Ergebnisse
-  und bleibe ansprechbar.
+  bis zu `n`, lass jedes von einem eigenen Orchestrator als Run in tmux abarbeiten, reiche bis zum
+  Laufbudget Pakete nach, integriere die Ergebnisse und bleibe ansprechbar.
 - **`review [Scope]`:** Lies vollständig [Übergaben klären](references/playbook-review.md). Führe den
   Nutzer zügig durch konkrete Prüfungen und kläre Entscheidungen und Nutzerhandlungen. Beginne danach keine
   Ausführung.
@@ -112,7 +112,8 @@ Jede Schleife endet mit ihrem eigenen Ergebnis:
   und einer konsistenten Queue.
 - `run` endet an seiner Taskgrenze, standardmäßig nach fünf seriell bearbeiteten Tasks, oder an einer
   definierten Stopbedingung.
-- `sentinel` endet, wenn jedes Paket abgeschlossen und sein Ergebnis integriert oder übergeben ist.
+- `sentinel` endet, wenn sein Laufbudget verbraucht ist oder kein unabhängiger ausführbarer Task mehr
+  nachrückt und jedes Paket integriert oder übergeben ist.
 - `review` endet nach den gewählten menschlichen Übergaben.
 
 `goal` ist eine optionale Vorstufe: Es klärt den Plan, `shape` zerlegt ihn in Tasks und klärt nur, was erst

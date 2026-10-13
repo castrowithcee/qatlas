@@ -36,8 +36,10 @@ das Steuerskript an und sende nie Tastatureingaben in eine Orchestrator-Session.
    ausgegebenen Wechselweg. Außerhalb von tmux legt es einen eigenen Server an; nenne dann den ausgegebenen
    Befehl zum Anhängen. Ein Fenster fasst vier Orchestratoren; weitere öffnet das Skript in zusätzlichen
    Fenstern derselben Session.
-2. Zeigt `list --repo <repo-root>` bereits ein Fenster, läuft für dieses Repo ein Sentinel oder ist ein
-   früheres Fenster noch offen. Starte nicht und kläre es mit dem Nutzer.
+2. Zeigt `list --repo <repo-root>` bereits Panes, prüfe jedes. Trägt es `FERTIG` im Titel oder ist es
+   beendet (`dead`), ist es ein Rest eines früheren Laufs: Sichere es mit `capture` und schließe es mit
+   `close`. Ein lebendes Pane ohne `FERTIG` gehört einem laufenden Sentinel oder dem Nutzer; starte dann
+   nicht und kläre es mit dem Nutzer.
 3. Prüfe für jeden vorgesehenen Host seine Sektion in `orchestra.yaml` mit gültigem Orchestrator-Modell und
    seine CLI im `PATH`: `claude` für Claude Code, `codex` für Codex. Standard ist der eigene Host; eine
    Laufvorgabe darf Pakete einem anderen Host zuweisen.
@@ -53,8 +55,8 @@ lokale `<steuerbranch>`.
 ## Pakete schneiden
 
 Wähle aus dem genannten Scope oder ohne Scope aus dem Backlog die ausführbaren Tasks nach der Taskauswahl
-von [Arbeit ausführen](playbook-run.md) und schneide daraus höchstens vier Pakete, mit `--orchestras <n>`
-höchstens `n`. Ein Paket bündelt zusammengehörige Tasks; Abhängigkeiten liegen nur innerhalb eines Pakets.
+von [Arbeit ausführen](playbook-run.md) und schneide daraus so viele Pakete, wie unabhängige Bereiche
+vorhanden sind, höchstens vier, mit `--orchestras <n>` höchstens `n`. Ein Paket bündelt zusammengehörige Tasks; Abhängigkeiten liegen nur innerhalb eines Pakets.
 Echte Kopplung durch gemeinsame Invarianten, Migrationen oder Laufzeitressourcen bleibt in einem Paket;
 lässt sie sich nicht ausschließen, lege die Tasks zusammen. Mechanisch gemeinsame Dateien dürfen Pakete nach
 [Parallele Arbeit im Run](git-parallel.md) teilen.
@@ -70,10 +72,16 @@ Ein übergreifender Task, der viele Bereiche berührt, bildet ein eigenes Paket 
 
 Ein Paket umfasst höchstens fünf Tasks, mit `--limit <n>` höchstens `n`. Bei `--limit 0` bestimmst du die
 Größe jedes Pakets selbst danach, was ein Orchestrator in einem Lauf tragen kann: Umfang und Kopplung der
-Tasks und ihr absehbarer Kontextbedarf. Was in keinem Paket Platz findet, bleibt in seiner Reihenfolge für
+Tasks und ihr absehbarer Kontextbedarf. Fülle jedes Paket bis zu seiner Größe, soweit ausführbare Tasks
+vorhanden sind. Weniger Pakete oder Tasks wählst du nur auf eine ausdrückliche Mengenvorgabe über
+`--orchestras`, `--limit` oder eine gleichbedeutende Nutzervorgabe, nie aus der Deutung von Wörtern wie
+„Pilot“ oder „Test“. Was in keinem Paket Platz findet, bleibt in seiner Reihenfolge für Nachschub und
 spätere Läufe.
 
-Nenne dem Nutzer die Pakete mit Tasks und Grund des Schnitts in wenigen Zeilen und starte direkt.
+Das Laufbudget ist die Summe der Größen der beim Start geschnittenen Pakete. Jeder abgeschlossene oder
+gesichert an `review` übergebene Task verbraucht einen Platz davon.
+
+Nenne dem Nutzer die Pakete mit Tasks, Grund des Schnitts und Laufbudget in wenigen Zeilen und starte direkt.
 
 ## Orchestratoren starten
 
@@ -145,8 +153,8 @@ Halte deinen Kontext schlank: Lies Diffs zuerst als `--stat` und danach nur die 
 in den Abschluss übernimmst, protokollierst du sofort mit `log` statt es im Gedächtnis zu tragen: Annahmen
 als `annahme`, Abweichungen vom Verfahren als `abweichung`, nicht öffentlich erfasste Risiken als `risiko`,
 neu erfasste Tasks als `erfasst` und offene Nutzerentscheidungen als `entscheiden`, je mit Paket und Task.
-Nach einer Verdichtung deines Kontexts oder einem Neustart rekonstruierst du den Stand aus `list`, `report`
-und dem Planungssystem, nicht aus der Erinnerung.
+Nach einer Verdichtung deines Kontexts oder einem Neustart rekonstruierst du den Stand aus `list`, `report`,
+dem Planungssystem und dem genannten Laufbudget, nicht aus der Erinnerung.
 
 Bearbeite jedes Ereignis:
 
@@ -205,18 +213,25 @@ Operation anbietet, sonst `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/
 
 ## Beenden
 
-- **`done`:** Ist das Paket vollständig integriert und ohne offene Punkte, sichere das Pane mit `capture
-  --repo <repo-root> --package <Paket>` und schließe es mit `close` mit denselben Angaben. Ein Pane mit
-  offenen Punkten wie `review`, Abbruch oder ungelöstem Konflikt bleibt stehen. Mit dem letzten Pane endet
-  die Session.
+- **`done`:** Ist jeder Task des Pakets integriert oder im Planungssystem gesichert, etwa als Übergabe auf
+  `review`, sichere das Pane mit `capture --repo <repo-root> --package <Paket>` und schließe es mit `close`
+  mit denselben Angaben. Stehen bleibt es nur, wenn sich ein offener Punkt wie ein Abbruch oder ein
+  ungelöster Konflikt nicht sichern lässt oder der Nutzer in das Pane geschrieben hat. Mit dem letzten Pane
+  endet die Session.
 - **`exited` ohne `done`:** Sichere die offenen Tasks des Pakets nach dem Git-Ablauf als Übergabe auf
-  `review`, sichere das Pane mit `capture` und lass es stehen.
+  `review`, sichere das Pane mit `capture` und schließe es mit `close`.
 - Räume integrierte Worktrees und Branches nach dem
   [Worktree-Vertrag](../../qatlas-work/references/worktree-contract.md) auf, nach einem Squash-Merge über
   den Squash-Nachweis.
 
-Der Lauf endet, wenn jedes Pane `FERTIG` zeigt oder beendet ist und alle übergebenen Tasks integriert oder
-als Übergabe gesichert sind. Nenne im Bericht die Kennzahlen aus `report --repo <repo-root>` knapp und die
+**Nachschub:** Ist ein Pane geschlossen und das Laufbudget nicht verbraucht, schneide aus den übrigen
+ausführbaren Tasks nach „Pakete schneiden“ ein neues Paket, das von allen laufenden Paketen unabhängig ist.
+Es umfasst höchstens die Paketgröße und den Rest des Laufbudgets, trägt einen neuen Paketnamen und startet
+nach „Orchestratoren starten“. Gleichzeitig laufen nie mehr Orchestratoren, als „Pakete schneiden“ zulässt.
+Nenne dem Nutzer das Paket mit seinen Tasks in einer Zeile.
+
+Der Lauf endet, wenn kein Nachschub mehr möglich ist, jedes verbliebene Pane `FERTIG` zeigt oder beendet ist
+und alle übergebenen Tasks integriert oder als Übergabe gesichert sind. Nenne im Bericht die Kennzahlen aus `report --repo <repo-root>` knapp und die
 verbliebenen Remote-Branches dieses Laufs gesammelt. Schließe mit genau einem Block „Für dich“ über alle
 Pakete nach [Arbeit ausführen](playbook-run.md); seine Einträge entnimmst du den `notes` aus `report`, nicht
 gepushte Commits stehen dort unter **Nicht gepusht**.
