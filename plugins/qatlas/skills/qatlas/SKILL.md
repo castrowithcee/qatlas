@@ -2,8 +2,8 @@
 name: qatlas
 description: >
   Steuert auf ausdrücklichen Aufruf den Qatlas-Arbeitsloop: Ziele klären, Arbeit ausarbeiten und
-  disponieren, Aufgaben autonom ausführen und menschliche Übergaben klären. Ohne Modus nur den nächsten
-  sinnvollen Einstieg empfehlen. Niemals automatisch starten.
+  disponieren, Aufgaben autonom ausführen und menschliche Übergaben klären. Ohne Modus nur die Modus-Karte
+  zeigen. Niemals automatisch starten.
 disable-model-invocation: true
 argument-hint: "[goal|shape|run|sentinel|review] [Idee|Task|Datei|backlog] [--limit <n|all|0>] [--orchestras <n>] [--fly]"
 license: MIT
@@ -49,14 +49,32 @@ du ihn liest.
 - **`review`:** [Übergaben klären](modes/review/review.md). Führt den Nutzer durch Prüfungen und
   Entscheidungen. Beginnt keine Ausführung.
 
-Ohne Modus lies nur den bereits geladenen Projektzustand, nenne knapp den nächsten sinnvollen Modus und
-ändere nichts. Fehlt ein Qatlas-Scaffold, empfehle `qatlas-core setup`. Ist ein genannter Modus nicht
-eindeutig, nenne die verfügbaren Modi jeweils in einem kurzen Satz und frage nach genau einem. Deute eine
-normale Unterhaltung nie als Laufautorisierung.
+Ist ein genannter Modus nicht eindeutig, nenne die verfügbaren Modi jeweils in einem kurzen Satz und frage
+nach genau einem. Deute eine normale Unterhaltung nie als Laufautorisierung.
 
 `goal` ist eine optionale Vorstufe von `shape`; ein direkter Einstieg mit `shape` bleibt gültig. Jeder
 Übergang zwischen Modi braucht einen neuen ausdrücklichen Nutzeraufruf. Jeder Modus endet mit dem Ergebnis,
 das seine Datei festlegt.
+
+## Ohne Modus
+
+Antworte ausschließlich mit dieser Karte als gerendertes Markdown. Lies nichts, empfiehl keinen Modus und
+ändere nichts:
+
+### Qatlas
+
+| Aufruf | Zweck |
+|---|---|
+| `qatlas goal [Idee, Task oder Datei]` | Plan im Gespräch klären, ohne etwas zu ändern |
+| `qatlas shape [Idee, Datei, Task oder backlog]` | Ausführungsreife Tasks schneiden oder bestehende schärfen |
+| `qatlas run [Scope] [--limit <n\|all>] [--fly]` | Tasks seriell mit Orchestrator und Subagents ausführen |
+| `qatlas sentinel [Scope] [--limit <n\|0>] [--orchestras <n>] [--fly]` | Unabhängige Pakete parallel in tmux abarbeiten |
+| `qatlas review [Scope]` | Prüfungen und Entscheidungen Schritt für Schritt klären |
+
+Aufruf: `<modus> [Scope] [--flags] [Laufvorgabe]`, in Claude mit `/qatlas`, in Codex mit `$qatlas`.
+
+Meldet der Sessionkontext `QATLAS SCAFFOLD: nein`, ergänze unter der Karte genau eine Zeile: „Dieses Projekt
+ist noch nicht eingerichtet: `qatlas-core setup`.“
 
 ## Gemeinsamer Vertrag
 
