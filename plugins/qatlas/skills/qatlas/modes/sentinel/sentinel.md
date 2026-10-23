@@ -150,12 +150,17 @@ decided by your own `--fly`. The run directive reads in essence:
 > squash merge, you hand over each pull request of a task individually as described in [integration via pull
 > requests](../../references/playbook-git-pr.md) and start the next one only from the `<basis>` integrated
 > afterwards. The report follows the return format of [executing work](../run/run.md), including the worker
-> profiles with model and effort, and additionally names branches and commits, PR title and PR body, and
-> whether this handover is the last one of the task. The answer is `integrated <sha>` or `rework <reason>`;
-> without an answer, call the same command again with the report unchanged. Until the answer arrives, task,
-> branches and worktree belong to the sentinel; do not touch them. `rework` gives them back to you: work on
-> the reason and hand over again. `integrated` on a handover that is not the last gives you the task back to
-> continue.
+> profiles with model and effort, and additionally names branches and commits and whether this handover is
+> the last one of the task. For integration via pull requests, the report starts with YAML frontmatter
+> (`---` on the first line) with the fields `pr-title` (one non-empty line), `pr-body` (non-empty, usually a
+> `|` block scalar), `branch`, `base` and `last` (`true` or `false`); the rest of the report follows after
+> it. A pull request is one unit of the commit boundary: independent milestones become separate pull
+> requests before you hand over. `handover` rejects a branch with more than one non-merge commit over
+> `base` (exit 2, nothing raised) unless the frontmatter carries `cut-exception: <reason>`. The answer is
+> `integrated <sha>` or `rework <reason>`; without an answer, call the same command again with the report
+> unchanged. Until the answer arrives, task, branches and worktree belong to the sentinel; do not touch
+> them. `rework` gives them back to you: work on the reason and hand over again. `integrated` on a handover
+> that is not the last gives you the task back to continue.
 >
 > If the next task depends on the handed-over one, wait for `integrated` and start it from the new `<basis>`.
 > You may begin a demonstrably independent task of this package during the wait from the current `<basis>`;
@@ -212,18 +217,19 @@ until your `integrated`. Integrate handovers one at a time and log every integra
 1. Check diff, evidence and acceptance yourself as described in [accepting and
    integrating](../../references/playbook-acceptance.md). A substantive need for correction goes back as
    `answer … --answer "rework <reason>"` and counts as a correction attempt under the [at-most-two-corrections
-   rule](../../references/playbook-acceptance.md). If, with squash merge, a handover bundles several commits
-   in the sense of the commit boundary, return it as `rework <cut>` with the required cut; that does not count
-   as a correction attempt. If a worker ran without a profile from `orchestra.yaml` or with inherited instead
-   of explicitly set effort, log that as `abweichung`; it is not a reason for correction.
+   rule](../../references/playbook-acceptance.md). With pull requests, `handover` has already checked that
+   the branch carries one non-merge commit, or a `cut-exception`. If that exception does not hold in the
+   sense of the commit boundary, return the handover as `rework <cut>` with the required cut; that does not
+   count as a correction attempt. If a worker ran without a profile from `orchestra.yaml` or with inherited
+   instead of explicitly set effort, log that as `abweichung`; it is not a reason for correction.
 2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. A conflict, including one that arises
    when catching up with the base later, you return as `rework <reason with files>`; it does not count as a
    correction attempt. Never resolve conflicts yourself. Only if the orchestrator is no longer available do
    you secure the task as a handover to `review` per the git workflow.
 3. Without a conflict, integrate per the git workflow, and for integration via pull requests per
    [integration via pull requests](../../references/playbook-git-pr.md) with PR title and PR body from the
-   report and `ci-wait`. In doing so, check locally only the affected areas via `slot --priority` and leave
-   the full breadth to CI. You treat a known flake by its rule in [accepting and
+   frontmatter of the report (`pr-title`, `pr-body`) and `ci-wait`. In doing so, check locally only the
+   affected areas via `slot --priority` and leave the full breadth to CI. You treat a known flake by its rule in [accepting and
    integrating](../../references/playbook-acceptance.md). Without pull requests, you run the shared checks
    yourself. You integrate tasks spanning several repos per the git workflow.
 4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.

@@ -13,8 +13,10 @@
 // handover, done, exited; start, answer, picked and all types written via log do not wake.
 // `wait --since <seq>` returns all waking events from seq on and the new `cursor` (count of all
 // events); pass it as --since on the next call and nothing is lost. Handover reports are stored as
-// files under reports/ and events carry only their path. If add finds no marked window, an existing
-// log is renamed to events-<timestamp>.jsonl.
+// files under reports/ and events carry only their path. A handover report with YAML frontmatter
+// (pr-title, pr-body, branch, base, last, optional cut-exception) is validated before any tmux access:
+// the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
+// If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
 // Usage:
 //   qatlas-sentinel-tmux.js add --repo <root> --package <package> --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-sentinel-tmux.js list --repo <root>
@@ -285,6 +287,49 @@ function reportText() {
   return value;
 }
 
+// Frontmatter is optional; without it the report passes unchecked. Refs come from an untrusted report:
+// they reach git only as arguments, never via a shell, and may not start with "-".
+function validateHandover(text, repo) {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text);
+  if (!match) return;
+  const bad = message => fail('Handover rejected: ' + message, 2);
+  let YAML;
+  try {
+    YAML = require(path.join(__dirname, '..', '..', '..', '..', '..', 'scripts', 'runtime', 'vendor', 'yaml-2.9.0.js'));
+  } catch (error) { return fail('Check not possible: YAML parser not loadable (' + error.message.split('\n')[0] + ').', 3); }
+  let data;
+  try {
+    const document = YAML.parseDocument(match[1], {
+      version: '1.2', schema: 'core', merge: false, resolveKnownTags: false, uniqueKeys: true, stringKeys: true, logLevel: 'error',
+    });
+    if (document.errors.length) throw document.errors[0];
+    data = document.toJS({ maxAliasCount: 0 });
+  } catch (error) { return bad('frontmatter is not valid YAML (' + error.message.split('\n')[0] + ').'); }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return bad('frontmatter must be a mapping.');
+  const str = key => typeof data[key] === 'string' && data[key].trim() ? data[key].trim() : bad(`"${key}" must be a non-empty string.`);
+  const title = str('pr-title');
+  if (/[\r\n]/.test(title)) bad('"pr-title" must be a single line.');
+  str('pr-body');
+  if (typeof data.last !== 'boolean') bad('"last" must be true or false.');
+  const refs = ['branch', 'base'].map(key => {
+    const ref = str(key);
+    if (ref.startsWith('-')) bad(`"${key}" must not start with "-".`);
+    try {
+      execFileSync('git', ['-C', repo, 'rev-parse', '--verify', '--quiet', `${ref}^{commit}`], { stdio: 'ignore' });
+    } catch { bad(`"${key}" ${JSON.stringify(ref)} does not resolve to a commit in ${repo}.`); }
+    return ref;
+  });
+  const [branch, base] = refs;
+  const exception = data['cut-exception'];
+  if (exception !== undefined && (typeof exception !== 'string' || !exception.trim())) bad('"cut-exception" must be a non-empty string.');
+  const count = Number(execFileSync('git', ['-C', repo, 'rev-list', '--no-merges', '--count', `${base}..${branch}`], { encoding: 'utf8' }).trim());
+  const limit = `A pull request is one unit of the commit boundary: exactly one non-merge commit`;
+  if (count === 0) bad(`branch ${branch} has 0 non-merge commits over ${base}. ${limit}.`);
+  if (count > 1 && exception === undefined) {
+    bad(`branch ${branch} has ${count} non-merge commits over ${base}. ${limit}; independent milestones become separate pull requests. For a justified exception, set "cut-exception: <reason>".`);
+  }
+}
+
 function answer() {
   const repo = repoKey();
   const pane = target();
@@ -388,7 +433,7 @@ try {
   }
   else if (command === 'wait') wait().catch(error => fail(error.message));
   else if (command === 'ask') raise('question', need('--question')[0]).catch(error => fail(error.message));
-  else if (command === 'handover') { const [task] = need('--task'); raise('handover', reportText(), task).catch(error => fail(error.message)); }
+  else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, repoKey()); raise('handover', text, task).catch(error => fail(error.message)); }
   else if (command === 'answer') answer();
   else if (command === 'log') logEvent();
   else if (command === 'report') report();

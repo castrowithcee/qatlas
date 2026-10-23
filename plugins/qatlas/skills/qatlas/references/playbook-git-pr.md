@@ -31,7 +31,9 @@ without a push.
   review; a pull request never bundles independent milestones. Each pull request gets its own task branch of
   the same task with its own slug. A preparatory pull request, for example a mechanical refactoring, is
   integrated before the change that builds on it. Before opening, check the entire diff of the pull request
-  against the commit boundary and split it before you push.
+  against the commit boundary and split it before you push. A sentinel handover enforces this
+  mechanically: `handover` rejects a branch with more than one non-merge commit unless the report frontmatter
+  carries a `cut-exception`.
 - **Closing:** The merge of the pull request replaces local integration. The task is `done` only when all its
   pull requests are merged and the acceptance is evidenced on the new `origin/<control-branch>`.
 - **Dependent work:** A squash merge rules out stacked branches. A dependent task or pull request then
