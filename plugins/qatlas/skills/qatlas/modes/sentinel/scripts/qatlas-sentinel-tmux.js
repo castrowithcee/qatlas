@@ -10,17 +10,23 @@
 // environment.
 // Events are JSON lines in <repo>/.qatlas/local/sentinel/events.jsonl and the single source of truth for
 // answers. `seq` is the 0-based line index, derived on read, not stored. Waking types: question,
-// handover, done, exited; start, plan, answer, picked and all types written via log do not wake.
+// handover, done, exited, stale, disk; start, plan, answer, picked, nudge and all types written via log
+// do not wake.
 // `wait --since <seq>` returns all waking events from seq on and the new `cursor` (count of all
 // events); pass it as --since on the next call and nothing is lost. Handover reports are stored as
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
 // (pr-title, pr-body, branch, base, last, optional cut-exception) is validated before any tmux access:
 // the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
+// `wait` also watches itself, so the sentinel needs no monitor of its own. stale: a live pane without
+// open signal whose conversation part has not changed for --stale minutes (once per standstill phase;
+// the state lives in pane options and so survives across wait calls). disk: free space of the repo
+// filesystem fell below --min-free GB (once per undershoot). nudge is the only way to write into a pane.
 // If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
 // Usage:
 //   qatlas-sentinel-tmux.js add --repo <root> --package <package> --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-sentinel-tmux.js list --repo <root>
-//   qatlas-sentinel-tmux.js wait --repo <root> [--since <seq>] [--timeout <seconds>]
+//   qatlas-sentinel-tmux.js wait --repo <root> [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>]
+//   qatlas-sentinel-tmux.js nudge --repo <root> --package <package> --text <text>   (refused while the pane has an open signal)
 //   qatlas-sentinel-tmux.js title --repo <root> --package <package> --title <title>
 //   qatlas-sentinel-tmux.js ask --repo <root> --package <package> --question <question> [--timeout <seconds>]
 //   qatlas-sentinel-tmux.js handover --repo <root> --package <package> --task <id> --report <text|file> [--timeout <seconds>]
@@ -33,6 +39,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const { parseFrontmatter } = require('../../../scripts/handover-frontmatter.js');
 
@@ -40,10 +47,16 @@ const MAX_PANES = 4;
 const NARROW = 80;
 const MARK = '@qatlas-sentinel';
 const SOCKET = 'qatlas-sentinel';
-const WAKING = new Set(['question', 'handover', 'done', 'exited']);
+const WAKING = new Set(['question', 'handover', 'done', 'exited', 'stale', 'disk']);
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
-const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed', 'plan']);
+const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed', 'plan', 'nudge']);
 const INTEGRATION = new Set(['push', 'pr', 'merge', 'rerun', 'conflict', 'close']);
+// Lowest rows of a pane are not conversation: Claude Code shows notice, rule, input, rule, about four status
+// lines and the mode line (9 rows, seen live); Codex shows blank, input, blank, status, hint (5 rows).
+// 10 covers both; small panes keep at least half their rows.
+const STATUS_ROWS = 10;
+// Digits and spinner/progress glyphs (braille, block, geometric, dingbats) change without progress.
+const VOLATILE = /[0-9\u2800-\u28FF\u2580-\u25FF\u2700-\u27BF\u00B7\u2022\u2026]/g;
 const PREFIX = { question: 'FRAGE · ', handover: 'ÜBERGABE · ' };
 
 const argv = process.argv.slice(2);
@@ -187,6 +200,7 @@ function add() {
   } else {
     [win, pane, session] = newWindow(repo, label, cwd);
     if (fs.existsSync(eventsFile(repo))) {
+      fs.rmSync(path.join(eventsDir(repo), 'disk-low'), { force: true });
       fs.renameSync(eventsFile(repo), path.join(eventsDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
     }
   }
@@ -212,14 +226,79 @@ function recordExits(repo) {
   }
 }
 
+// Conversation part of the visible pane: without the status rows at the bottom, trailing blanks trimmed.
+function conversation(pane) {
+  const height = Number(option(pane, 'pane_height')) || 0;
+  const keep = Math.max(1, height - Math.min(STATUS_ROWS, Math.floor(height / 2)));
+  const lines = tmux(['capture-pane', '-p', '-t', pane]).split('\n').slice(0, keep).map(l => l.trimEnd());
+  while (lines.length && !lines[lines.length - 1]) lines.pop();
+  return lines;
+}
+
+// Standstill tracking per pane in pane options: @qatlas-hash, @qatlas-since (ms), @qatlas-stale (reported).
+const TRACK = ['@qatlas-hash', '@qatlas-since', '@qatlas-stale'];
+function recordStale(repo, minutes) {
+  for (const p of allPanes(repo)) {
+    if (p.dead) continue;
+    if (p.kind) { for (const name of TRACK) tmux(['set', '-p', '-u', '-t', p.pane, name]); continue; }
+    const lines = conversation(p.pane);
+    const masked = lines.join('\n').replace(VOLATILE, '').replace(/\s+/g, ' ');
+    const hash = crypto.createHash('sha1').update(masked).digest('hex');
+    const now = Date.now();
+    const since = Number(option(p.pane, '@qatlas-since'));
+    if (option(p.pane, '@qatlas-hash') !== hash || !since) {
+      setOption(p.pane, '@qatlas-hash', hash);
+      setOption(p.pane, '@qatlas-since', String(now));
+      tmux(['set', '-p', '-u', '-t', p.pane, '@qatlas-stale']);
+    } else if (!option(p.pane, '@qatlas-stale') && now - since >= minutes * 60000) {
+      setOption(p.pane, '@qatlas-stale', '1');
+      record(repo, 'stale', { package: p.package, pane: p.pane,
+        text: `No change for ${((now - since) / 6e4).toFixed(1)} min. Last lines:\n${lines.slice(-5).join('\n')}` });
+    }
+  }
+}
+
+// The marker file re-arms disk after recovery; add clears it together with the old log.
+function recordDisk(repo, minFree) {
+  const stat = fs.statfsSync(repo);
+  const free = stat.bavail * stat.bsize / 1e9;
+  const marker = path.join(eventsDir(repo), 'disk-low');
+  if (free >= minFree) return fs.rmSync(marker, { force: true });
+  if (fs.existsSync(marker)) return;
+  fs.mkdirSync(eventsDir(repo), { recursive: true });
+  fs.writeFileSync(marker, '');
+  record(repo, 'disk', { text: `Free space ${free.toFixed(1)} GB, below ${minFree} GB.` });
+}
+
+function nudge() {
+  const repo = repoKey();
+  const pane = target();
+  const [text] = need('--text');
+  if (option(pane, '@qatlas-kind')) fail(`Pane ${pane} has an open signal; no nudge.`, 2);
+  if (option(pane, 'pane_dead') === '1') fail(`Pane ${pane} is dead; no nudge.`, 2);
+  tmux(['send-keys', '-t', pane, '-l', '--', text]);
+  tmux(['send-keys', '-t', pane, 'Enter']);
+  record(repo, 'nudge', { package: flag('--package'), pane, text });
+  out({ pane, nudged: true });
+}
+
 async function wait() {
   const repo = repoKey();
   const since = Number(flag('--since') || 0);
   if (!Number.isInteger(since) || since < 0) fail('--since must be an integer from 0', 2);
   const end = Date.now() + Number(flag('--timeout') || 600) * 1000;
+  const positive = name => {
+    const value = flag(name) === null ? null : Number(flag(name));
+    if (value !== null && !(value > 0 && Number.isFinite(value))) fail(name + ' must be positive', 2);
+    return value;
+  };
+  const stale = positive('--stale') ?? 20;
+  const minFree = positive('--min-free') ?? 5;
   const waking = () => events(repo).filter(e => e.seq >= since && WAKING.has(e.type));
   for (;;) {
     recordExits(repo);
+    recordStale(repo, stale);
+    recordDisk(repo, minFree);
     const hits = waking();
     if (hits.length) return out({ events: hits, cursor: events(repo).length, timeout: false });
     if (Date.now() >= end) break;
@@ -367,7 +446,7 @@ function report() {
   const secs = ms => Math.round(ms) / 1000;
   const packages = {};
   const tasks = {};
-  const log = { rerun: 0, conflict: 0 };
+  const log = { rerun: 0, conflict: 0, nudge: 0 };
   const notes = {};
   const plan = { budget: null, packages: {} };
   const lastIntegrated = {};
@@ -445,11 +524,12 @@ try {
   else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, repoKey()); raise('handover', text, task).catch(error => fail(error.message)); }
   else if (command === 'answer') answer();
   else if (command === 'log') logEvent();
+  else if (command === 'nudge') nudge();
   else if (command === 'plan') plan();
   else if (command === 'report') report();
   else if (command === 'capture') capture();
   else if (command === 'close') close();
-  else fail('Commands: add, list, title, wait, ask, handover, answer, log, plan, report, capture, close', 2);
+  else fail('Commands: add, list, title, wait, ask, handover, answer, log, nudge, plan, report, capture, close', 2);
 } catch (error) {
   fail((error.stderr ? String(error.stderr).trim() : '') || error.message);
 }

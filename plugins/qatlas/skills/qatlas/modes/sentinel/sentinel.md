@@ -30,7 +30,8 @@ their tasks in the planning system as that multiple-orchestrators section prescr
 The control script is `node <plugin-root>/skills/qatlas/modes/sentinel/scripts/qatlas-sentinel-tmux.js`;
 `<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. The helper commands `probe`,
 `ci-wait` and `slot` are provided by `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js`. Touch
-orchestrator panes only through the control script and never send keystrokes into an orchestrator session.
+orchestrator panes only through the control script; writing into a pane is allowed only via `nudge`, never
+send keystrokes by other means.
 `wait`, `ask` and `handover` block until their `--timeout`; set the host's command timeout above it.
 
 ## Invocation
@@ -197,7 +198,8 @@ sandbox or approvals of the host.
 
 Wait with `wait --repo <repo-root> --since <cursor>`. Begin with `--since 0` and afterwards pass the `cursor`
 of the last output each time, so that no event is lost. It returns on one of the events `question`,
-`handover`, `done` or `exited`, or after a timeout. If the host can run commands in the background, do so, so
+`handover`, `done`, `exited`, `stale` or `disk`, or after a timeout. `wait` is the only monitoring: build no
+monitors, crons or wait loops of your own. If the host can run commands in the background, do so, so
 that you stay available to the user. A `handover` names only the path of its report; read it only at
 integration.
 
@@ -215,8 +217,14 @@ Handle each event:
   recommendation and pass on their answer; with `--fly` you instead answer as the flag file prescribes.
 - **`handover`:** Integrate as described in the following section.
 - **`done` and `exited`:** Proceed as described in "Finish".
-- If the user writes into a pane themselves, that session belongs to them; do not touch it. If an
-  orchestrator visibly hangs without progress, report it to the user instead of intervening.
+- **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20); the event
+  shows the last lines, so a usage limit is recognizable. Nudge with `nudge --repo <repo-root> --package
+  <package> --text "<text>"` only after `stale`, with no open signal, no running test of the package
+  worktree per `slot status`, and at most once per standstill phase. A second `stale` after a nudge you
+  report to the user; with `--fly` you secure the package's open tasks as for `exited`.
+- **`disk`:** Free space fell below `--min-free` GB (default 5). Run the cleanup step the project names for
+  low space, otherwise report it to the user.
+- If the user writes into a pane themselves, that session belongs to them; do not touch it.
 
 ## Integrate
 
