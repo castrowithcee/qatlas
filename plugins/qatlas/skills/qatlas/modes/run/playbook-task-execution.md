@@ -1,132 +1,131 @@
 ---
 description: >
-  Den aktiven Task eines Runs mit abgegrenzten Subagent-Aufträgen umsetzen, die Subagents überwachen und
-  Nebenbefunde erfassen.
+  Implement the active task of a run with bounded subagent assignments, monitor the subagents and record
+  side findings.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Einen Task ausführen
+# Execute a task
 
-Pro Lauf ist immer höchstens ein Task `in-progress`; die ausgewählten Tasks laufen nacheinander. Beanspruche
-ihn unmittelbar vor der ersten schreibenden Ausführung im Spine. Kein Subagent verändert Spine oder
-Branchverwaltung, erstellt Commits oder startet eigene Subagents.
+Per run, at most one task is `in-progress` at any time; the selected tasks run one after another. Claim it in
+the spine immediately before the first writing execution. No subagent changes the spine or branch
+management, creates commits or starts its own subagents.
 
-## Subagents beauftragen
+## Commission subagents
 
-Der Orchestrator gibt jedem Subagent genau einen abgegrenzten Auftrag mit Task-ID und Titel, Arbeitsort,
-erlaubten Zielen, Scope-out, Abnahmekriterien, Prüfungen und Rückgabeformat. Er implementiert die fachliche
-Lösung nicht selbst. Kleine Status-, Integrations- und Verifikationsschritte bleiben bei ihm. Ausnahme: Ist
-das gesamte Ergebnis eines Tasks eine kleine, risikoarme Änderung an wenigen Dateien, die er ohnehin
-vollständig prüfen muss, setzt er sie selbst um; die Karte nennt dann `Subagents: keine`.
+The orchestrator gives each subagent exactly one bounded assignment with task ID and title, working location,
+permitted targets, scope-out, acceptance criteria, checks and return format. It does not implement the
+substantive solution itself. Small status, integration and verification steps stay with it. Exception: if
+the entire result of a task is a small, low-risk change to a few files that it has to check completely
+anyway, it implements it itself; the card then says `Subagents: none`.
 
-Bei einem Umsetzungstask zieht der Subagent dauerhafte Projektdokumentation nicht selbst nach. Er meldet
-bestehende Aussagen, die seine Änderung entwertet, sowie belegte neue Pflichten oder Kopplungen für künftige
-Arbeit mit Fundstelle und Beleg; ohne Befund begründet er `Keine`. Ist Dokumentation selbst ein ausdrückliches
-Taskergebnis, darf er sie bearbeiten. Der Orchestrator verantwortet das Nachziehen nach der Integration.
+For an implementation task, the subagent does not update lasting project documentation itself. It reports
+existing statements that its change invalidates, as well as evidenced new obligations or couplings for
+future work, with location and evidence; without a finding it justifies `Keine`. If documentation is itself
+an explicit task result, it may edit it. The orchestrator is responsible for the follow-up after
+integration.
 
-Beurteile vor jedem Spawn den tatsächlichen Auftrag und seinen Prüfaufwand: Welche Ergebnisse sind
-eigenständig abnehmbar, welche Schritte hängen voneinander ab, welche Sicherheits- und Zielgrenzen gelten,
-und welche Abnahmen kann der Orchestrator nach der Rückgabe selbst belegen? Mehrere unabhängige Tool- oder
-Endpunktgruppen, verschiedene Risiko- und Berechtigungsgrenzen oder ein Umfang, der einen Worker über
-viele Implementierungs- und Prüfschritte bindet, verlangen einen kleineren Zuschnitt.
+Before every spawn, assess the actual assignment and its verification effort: which results can be accepted
+independently, which steps depend on each other, which security and target boundaries apply, and which
+acceptances can the orchestrator itself evidence after the return? Several independent tool or endpoint
+groups, different risk and permission boundaries, or a scope that ties a worker up across many implementation
+and checking steps call for a smaller cut.
 
-Liegt die gesamte Abnahme bereits in einem tragfähigen Taskvertrag, teile ihn bei Bedarf in geordnete
-Worker-Aufträge A, B und weitere mit je eigenem überprüfbarem Meilenstein. Daraus entstehen keine neuen
-Backlog-Tasks. Prüfe und sichere jeden Meilenstein vor dem nächsten Auftrag; spätere Aufträge übernehmen den
-bestätigten Stand. Ein unabhängiger Meilenstein oder ein vorbereitendes mechanisches Refactoring ergibt
-mindestens einen eigenen Commit nach der Commitgrenze der Git-Norm, bei Integration über Pull Requests mit
-Squash-Merge einen eigenen Pull Request nach „Integration über Pull Requests“. Enthält der Task dagegen
-eigenständige Ergebnisse, deren Grenzen, Reihenfolge oder Abnahme der Vertrag noch nicht klärt, setze ihn nach
-der Reifeprüfung auf `draft` und übergib den Zuschnitt an `shape <eindeutiger Task>` zur Klärung am
-bestehenden Ort. Erfinde die fehlende Planung nicht im Run.
+If the whole acceptance already lies in a viable task contract, split it if needed into ordered worker
+assignments A, B and further ones, each with its own verifiable milestone. No new backlog tasks arise from
+this. Check and secure each milestone before the next assignment; later assignments take over the confirmed
+state. An independent milestone or a preparatory mechanical refactoring yields at least one commit of its own
+under the commit boundary of the git norm, and with integration via pull requests with squash merge a pull
+request of its own as described in [integration via pull requests](../../references/playbook-git-pr.md). If,
+on the other hand, the task contains self-contained results whose boundaries, order or acceptance the
+contract does not yet clarify, after the maturity check set it to `draft` and hand the cut over to `shape
+<unambiguous task>` for clarification at the existing location. Do not invent the missing planning in the
+run.
 
-Wähle für jeden abgegrenzten Auftrag zuerst `light`. Nutze `standard`, wenn dessen beschriebene technische
-Abwägungen nötig sind, und `demanding` bei belegter schwieriger Diagnose oder eng gekoppelter Umsetzung,
-die sich nicht sinnvoll weiter teilen lässt. Umfang allein begründet `demanding` nicht. Ein kleiner Worker
-muss dafür nicht erst scheitern. Begründe `standard` und `demanding` vor dem Spawn kurz; ein Modellwechsel
-setzt das Korrekturbudget nicht zurück.
+For each bounded assignment, choose `light` first. Use `standard` when its described technical trade-offs
+are needed, and `demanding` for an evidenced difficult diagnosis or tightly coupled implementation that
+cannot sensibly be split further. Scope alone does not justify `demanding`. A small worker does not first
+have to fail for this. Briefly justify `standard` and `demanding` before the spawn; a model change does not
+reset the correction budget.
 
-Leite den Auftrag aus dem aktuellen Taskvertrag und dem bestätigten Preflight ab. Er enthält in dieser
-Reihenfolge:
+Derive the assignment from the current task contract and the confirmed preflight. It contains, in this
+order:
 
-- **Ziel:** beobachtbares Ergebnis des Tasks.
-- **Arbeitsgrundlage:** Ausgangszustand, bestehende Einstiegspunkte, erwartete Änderungsflächen,
-  maßgebliche Quellen und benötigte Ausführungsvoraussetzungen. Kennzeichne erwartete Flächen als
-  Arbeitskarte, nicht als starre Dateifreigabe, und gib keine Secrets weiter.
-- **Scope:** erlaubte fachliche Ziele sowie ausdrücklicher Scope-out.
-- **Leitplanken:** bindende Architektur-, Sicherheits-, Kompatibilitäts- und Dokumentationsgrenzen sowie
-  der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink. Prüfe
-  insbesondere die Bindung fremder Objekt-IDs an das gewählte Ziel und den Umgang mit nicht
-  vertrauenswürdigen Inhalten, soweit der Task solche Grenzen berührt. Weise den Subagent an: Lässt der
-  Vertrag eine Ziel- oder Berechtigungsgrenze offen, wählt er die engere Auslegung und nennt sie in seiner
-  Rückgabe; Zugriff oder Wirkung erweitert er nie aus eigener Deutung.
-- **Budget:** Zahl der für diesen Task eingesetzten Subagents und verbleibende Korrekturversuche.
-- **Worker-Profil:** gewähltes Profil mit Modell, Effort oder dessen fehlender Unterstützung und bei
-  `standard` oder `demanding` dem Grund.
-- **Stopbedingung:** alle dem Subagent zugewiesenen Abnahmekriterien und vereinbarten Prüfungen sind
-  erfüllt, bei einer größeren Umsetzung der vereinbarte Meilenstein erreicht, oder eine Vertrags-,
-  Berechtigungs-, Risiko- oder Außenwirkungsgrenze ist erreicht.
-- **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, Dokumentationsbefunde mit Fundstelle
-  und Beleg oder begründetes `Keine`, Abweichungen von den erwarteten Änderungsflächen, ungelöste Risiken
-  und Nebenbefunde mit Fundstelle und Beleg.
+- **Goal:** observable result of the task.
+- **Working basis:** starting state, existing entry points, expected change surfaces, authoritative sources
+  and needed execution prerequisites. Label expected surfaces as a work card, not as a rigid file permission,
+  and pass on no secrets.
+- **Scope:** permitted substantive goals as well as an explicit scope-out.
+- **Guardrails:** binding architecture, security, compatibility and documentation boundaries as well as the
+  room for decision, each as a concrete working instruction instead of a mere source link. In particular,
+  check the binding of foreign object IDs to the chosen target and the handling of untrusted content, as far
+  as the task touches such boundaries. Instruct the subagent: if the contract leaves a target or permission
+  boundary open, it chooses the narrower reading and names it in its return; it never widens access or
+  effect from its own interpretation.
+- **Budget:** number of subagents used for this task and remaining correction attempts.
+- **Worker profile:** chosen profile with model, effort or its lack of support, and, for `standard` or
+  `demanding`, the reason.
+- **Stop condition:** all acceptance criteria assigned to the subagent and agreed checks are met, for a
+  larger implementation the agreed milestone is reached, or a contract, permission, risk or external-effect
+  boundary is reached.
+- **Return:** changed files, checks run with result, documentation findings with location and evidence or a
+  justified `Keine`, deviations from the expected change surfaces, unresolved risks and side findings with
+  location and evidence.
 
-Einen kleinen Task setzt normalerweise ein Subagent um. Braucht derselbe Task legitim mehrere getrennte
-Rollen oder Zielbereiche, darf der Orchestrator zwei oder mehr Subagents einsetzen. Ihre Aufträge müssen sich
-nachweislich ergänzen, dürfen keine konkurrierenden Lösungen bauen und bleiben gemeinsam im Fehlerbudget
-dieses einen Tasks. Gleichzeitig schreibende Subagents isoliert der Git-Ablauf. Volltests gleichzeitiger
-Schreiber laufen über `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot -- <testbefehl>`,
-das sie repo-weit begrenzt. Ein weiterer Task beginnt erst, wenn der aktive Task abgeschlossen oder gesichert
-übergeben ist.
+A small task is normally implemented by one subagent. If the same task legitimately needs several separate
+roles or target areas, the orchestrator may use two or more subagents. Their assignments must demonstrably
+complement each other, must not build competing solutions and remain together within the error budget of
+this one task. The git workflow isolates simultaneously writing subagents. Full tests of simultaneous
+writers run via `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot -- <test command>`, which
+limits them repo-wide. A further task begins only when the active task is completed or securely handed over.
 
-Der Subagent darf eine nicht vorhergesagte Datei selbstständig einbeziehen, wenn sie nachweislich innerhalb
-des fachlichen Scopes liegt, und nennt die Abweichung in seiner Rückgabe. Wäre eine Wirkung außerhalb des
-Scopes nötig oder widerspricht der aktuelle Bestand einer bindenden fachlichen Quelle, stoppt er vor dieser
-Wirkung und gibt den Befund an den Orchestrator zurück. Er erweitert den Vertrag nicht selbst. Einen Fehler,
-ein Sicherheitsrisiko oder nachweislich falsche Dokumentation außerhalb des Scopes behebt er nicht, sondern
-meldet ihn als Nebenbefund.
+The subagent may include an unpredicted file on its own if it demonstrably lies within the substantive
+scope, and names the deviation in its return. If an effect outside the scope would be necessary, or the
+current state contradicts a binding substantive source, it stops before that effect and returns the finding
+to the orchestrator. It does not extend the contract itself. A defect, a security risk or demonstrably wrong
+documentation outside the scope it does not fix, but reports as a side finding.
 
-Sende nach dem erfolgreichen Start genau eine knappe Karte:
+After a successful start, send exactly one brief card:
 
-> **Aufgabe:** #84 - Dateizugriff auf SQL umstellen
+> **Task:** #84 - Switch file access to SQL
 >
 > **Subagents:** light: sonnet (low)
 
-Verwende ID und Titel aus dem Spine. Nenne pro gestarteten Subagent das gewählte Profil und die
-Modell-Effort-Kombination in kurzer Form. Meldet der Host die tatsächliche Kombination nicht zurück, nenne
-die angeforderte und kennzeichne sie mit „angefordert“; stoppe nur bei einer belegten Abweichung. Fehlen die
-benötigten Subagents, stoppe vor der Umsetzung und melde diese Voraussetzung. Der Orchestrator ersetzt sie
-nicht als stiller Subagent.
+Use ID and title from the spine. For each started subagent, name the chosen profile and the model-effort
+combination in short form. If the host does not report the actual combination back, name the requested one
+and mark it "requested"; stop only on an evidenced deviation. If the needed subagents are missing, stop
+before implementation and report this prerequisite. The orchestrator does not replace them as a silent
+subagent.
 
-## Subagents überwachen
+## Monitor subagents
 
-Beobachte Arbeitsstand und Rückgaben gegen Taskvertrag, tatsächlichen Diff und vereinbarte Beweise. Greife
-ein, wenn ein Subagent den Scope verlässt, einen vorgeschriebenen Prüf- oder Referenzvergleich auslässt,
-ohne Fortschritt festhängt oder eine ausgeschlossene Wirkung vorbereitet. Begrenze oder stoppe seinen
-Auftrag, statt durch weitere unspezifische Prompts Token zu verbrauchen.
+Observe work state and returns against task contract, actual diff and agreed evidence. Intervene if a
+subagent leaves the scope, omits a prescribed check or reference comparison, hangs without progress or
+prepares an excluded effect. Limit or stop its assignment instead of burning tokens with further unspecific
+prompts.
 
-## Nebenbefunde erfassen
+## Record side findings
 
-Was der Lauf außerhalb des aktiven Taskvertrags bemerkt, behebt er nicht. Erfasse jeden der folgenden
-Befunde vor dem nächsten Task als `draft` im Spine, auch wenn der Run-Scope das Anlegen weiterer Arbeit
-nicht einschließt:
+What the run notices outside the active task contract it does not fix. Record each of the following findings
+as `draft` in the spine before the next task, even if the run scope does not include creating further work:
 
-- ein belegter Fehler im bestehenden Verhalten,
-- ein mögliches oder bestätigtes Sicherheitsrisiko,
-- nachweislich falsche Dokumentation.
+- an evidenced defect in existing behavior,
+- a possible or confirmed security risk,
+- demonstrably wrong documentation.
 
-Der Draft nennt Befund, Fundstelle, Beleg und den Task, bei dem er gefunden wurde; unterstützt das
-Planungssystem Labels, trägt er `run-fund`. Ausarbeitung, Zuschnitt und Reife bleiben bei `shape`. Deckt ein
-bestehender Task den Befund bereits ab, lege nichts an und nenne diesen Task. Dasselbe Muster an mehreren
-Stellen ergibt einen Draft. Verbesserungsideen, Refactoring, Stilfragen und mögliche Erweiterungen sind keine
-Nebenbefunde und werden nicht erfasst.
+The draft names the finding, location, evidence and the task during which it was found; if the planning
+system supports labels, it carries `run-fund`. Elaboration, cut and maturity stay with `shape`. If an
+existing task already covers the finding, create nothing and name that task. The same pattern in several
+places yields one draft. Improvement ideas, refactoring, style questions and possible extensions are not side
+findings and are not recorded.
 
-Ein nicht behobenes Sicherheitsrisiko gelangt nie an einen öffentlich einsehbaren Ort, weder in Spine, Task,
-Abschlussbericht, Commit-Nachricht, Branchnamen, Pull Request noch Kommentar. Maßgeblich ist die
-Sichtbarkeit des Ortes, an dem der Eintrag tatsächlich liegt: Ein Issue in einem öffentlichen Repo ist
-öffentlich, auch wenn das Board, das es führt, privat ist, und ein lokaler Backlog teilt die Sichtbarkeit
-seines Repos und dessen Remotes. Erfasse es als Draft nur, wenn dieser Ort belegt nicht öffentlich ist, etwa
-über die geprüfte Sichtbarkeit des Repos. Ist er öffentlich oder seine Sichtbarkeit nicht belegbar, erfasse
-nichts und melde das Risiko ausschließlich im Abschluss unter **Sicherheit**. Auch an einem nicht
-öffentlichen Ort enthält der Eintrag keine Secrets.
+An unfixed security risk never reaches a publicly viewable place, neither spine, task, final report, commit
+message, branch name, pull request nor comment. What matters is the visibility of the place where the entry
+actually lies: an issue in a public repo is public even if the board that manages it is private, and a local
+backlog shares the visibility of its repo and its remotes. Record it as a draft only if that place is
+evidenced to be non-public, for example via the verified visibility of the repo. If it is public or its
+visibility cannot be evidenced, record nothing and report the risk exclusively in the closing under the
+security category (`Sicherheit`) of [the closing block](../../references/playbook-closing-block.md). Even in
+a non-public place, the entry contains no secrets.

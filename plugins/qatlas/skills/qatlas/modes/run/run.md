@@ -1,112 +1,112 @@
 ---
 description: >
-  Serieller autonomer Arbeitslauf für standardmäßig höchstens fünf ausführbare Tasks: Ein Orchestrator
-  disponiert, überwacht und integriert genau einen aktiven Task zur Zeit, den Subagents mit je einem
-  abgegrenzten Auftrag umsetzen, und übergibt ihn nach spätestens zwei erfolglosen Korrekturen gesichert an
-  den Nutzer.
+  Serial autonomous work run for, by default, at most five executable tasks: an orchestrator dispatches,
+  monitors and integrates exactly one active task at a time, which subagents implement with one bounded
+  assignment each, and hands it over to the user in a secured state after at most two unsuccessful
+  corrections.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Arbeit ausführen
+# Execute work
 
-Aus einem ausdrücklich gewählten Task-, Projekt- oder Backlog-Scope entstehen integrierte, belegte
-Ergebnisse oder konkrete menschliche Übergaben. Der initiale Agent ist der Orchestrator. Er hält Scope,
-Spine, Taskauswahl, Subagents, Beweise, Integration und Stopbedingungen; die Subagents setzen die fachliche
-Arbeit um.
+From an explicitly chosen task, project or backlog scope come integrated, evidenced results or concrete
+human handovers. The initial agent is the orchestrator. It holds scope, spine, task selection, subagents,
+evidence, integration and stop conditions; the subagents carry out the substantive work.
 
-Der Aufruf allein autorisiert im gewählten Scope Subagents, lokale Änderungen, Prüfungen, isolierte
-Worktrees und lokale Commits. Er autorisiert keinen Push, Publish, kein Deployment, keine Nachricht an
-Dritte und keine sonstige externe oder irreversible Wirkung. Er erhält die Freigabe für gesperrte
-Projektdokumentation nach dem gemeinsamen Vertrag. Abschlussmeldungen sendet ausschließlich der primäre
-Orchestrator; Subagents senden bei ihrer Fertigmeldung keine Nachricht.
+Within the chosen scope, the invocation alone authorizes subagents, local changes, checks, isolated
+worktrees and local commits. It authorizes no push, no publish, no deployment, no message to third parties
+and no other external or irreversible effect. It receives the permission to edit locked project documentation
+(`Freigabe für gesperrte Projektdokumentation`) under the shared contract in [the Qatlas skill](../../SKILL.md).
+Only the primary orchestrator sends closing messages; subagents send no message when
+they report completion.
 
-## Aufruf
+## Invocation
 
-`run [Task, Projekt oder Backlog] [--limit <n|all>] [--fly] [Laufvorgabe]`
+`run [task, project or backlog] [--limit <n|all>] [--fly] [run directive]`
 
-- **Ohne `--limit`:** Die Taskgrenze ist fünf.
-- **`--limit <n|all>`:** Setzt die Taskgrenze auf `n` oder bei `all` auf alle ausführbaren Tasks des
-  Scopes. Liegt sie über fünf, prüfe nach jedem abgeschlossenen oder gesichert übergebenen Task, ob dein
-  Kontext einen weiteren vollständigen Task samt Integration und Abschlussbericht noch sicher trägt. Ist er
-  bereits verdichtet worden oder reicht er absehbar nicht, beende den Lauf regulär an dieser Taskgrenze.
-- **`--fly`:** Der Nutzer ist während des Laufs nicht erreichbar; es gilt [`--fly` im Run](flag-fly.md).
+- **Without `--limit`:** The task limit is five.
+- **`--limit <n|all>`:** Sets the task limit to `n` or, with `all`, to all executable tasks of the scope. If
+  it is above five, after each completed or securely handed-over task check whether your context can still
+  safely carry another complete task including integration and the final report. If it has already been
+  compacted or foreseeably will not suffice, end the run regularly at this task boundary.
+- **`--fly`:** The user is unreachable during the run; [`--fly` in the run](flag-fly.md) applies.
 
-## Leseliste
+## Reading list
 
-Die Blöcke wiederholen nichts aus dieser Datei und einander; was du nicht liest, fehlt dir in diesem Lauf.
-Lies jeden vollständig zum genannten Zeitpunkt:
+The blocks repeat nothing from this file or from each other; what you do not read is missing in this run.
+Read each one completely at the stated time:
 
-1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md), [Orchestrierung
-   prüfen](../../references/playbook-orchestra-config.md) und [Tasks
-   auswählen](../../references/playbook-task-selection.md). Mit `--fly` zusätzlich die Flag-Datei aus
-   „Aufruf“ und [Ohne Nutzer entscheiden](../../references/playbook-autonomy.md).
-2. **Wenn `orchestra.yaml` fehlt, ungültig ist oder ein Modell zweifelhaft erscheint:** [Orchestrierung
-   einrichten](../../references/playbook-orchestra.md).
-3. **Vor dem ersten schreibenden Git-Schritt:** [den Git-Ablauf](../../references/playbook-git-workflow.md),
-   [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre
-   [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md).
-4. **Bevor ein Task-Branch oder Worktree entsteht:** [den
-   Worktree-Vertrag](../../../qatlas-work/references/worktree-contract.md).
-5. **Wenn mehrere Subagents gleichzeitig schreiben, ein Task übernommen oder wieder aufgenommen wird oder
-   weitere Orchestratoren im selben Repo oder Planungssystem arbeiten:** [Parallele Arbeit im
-   Run](../../references/git-parallel.md).
-6. **Vor dem ersten Subagent-Auftrag:** [Einen Task ausführen](playbook-task-execution.md).
-7. **Vor der ersten Abnahme:** [Abnehmen und integrieren](../../references/playbook-acceptance.md).
-8. **Bei Zweifel am Commitzuschnitt und vor einem Checkpoint:**
-   [die Commitgrenze](../../../qatlas-core-git/references/commit-boundaries.md).
-9. **Verlangen Nutzer- oder Projektvorgaben Pull Requests, vor dem ersten Push:** [Integration über Pull
-   Requests](../../references/playbook-git-pr.md).
-10. **Vor dem Abschlussbericht:** [den Abschlussblock](../../references/playbook-closing-block.md).
+1. **Before the first step:** [the backlog norm](../../../qatlas-core-backlog/SKILL.md), [checking the
+   orchestration](../../references/playbook-orchestra-config.md) and [selecting
+   tasks](../../references/playbook-task-selection.md). With `--fly`, additionally the flag file from
+   "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
+2. **When `orchestra.yaml` is missing, invalid or a model looks doubtful:** [setting up the
+   orchestration](../../references/playbook-orchestra.md).
+3. **Before the first writing git step:** [the git workflow](../../references/playbook-git-workflow.md),
+   [the git norm](../../../qatlas-core-git/SKILL.md) and its
+   [commit reference](../../../qatlas-core-git/references/playbook-commit.md).
+4. **Before a task branch or worktree is created:** [the
+   worktree contract](../../../qatlas-work/references/worktree-contract.md).
+5. **When several subagents write at the same time, a task is taken over or resumed, or further
+   orchestrators work in the same repo or planning system:** [parallel work in a
+   run](../../references/git-parallel.md).
+6. **Before the first subagent assignment:** [executing a task](playbook-task-execution.md).
+7. **Before the first acceptance:** [accepting and integrating](../../references/playbook-acceptance.md).
+8. **When in doubt about commit cutting and before a checkpoint:**
+   [the commit boundary](../../../qatlas-core-git/references/commit-boundaries.md).
+9. **If user or project instructions require pull requests, before the first push:** [integration via pull
+   requests](../../references/playbook-git-pr.md).
+10. **Before the final report:** [the closing block](../../references/playbook-closing-block.md).
 
-## Laufvertrag festlegen
+## Define the run contract
 
-Bestimme vor der ersten Änderung:
+Determine before the first change:
 
-1. **Ziel:** Welcher beobachtbare Zustand beendet den Lauf erfolgreich?
-2. **Scope-in:** Welche Tasks, Repos, Pfade und Systeme gehören zum Aufruf?
-3. **Scope-out:** Welche benachbarten Ziele, Pfade und Wirkungen bleiben ausgeschlossen?
-4. **Spine:** Welches Planungssystem hält Status, Abhängigkeiten, Befunde und Übergaben dauerhaft fest?
-5. **Beweise:** Welche Tests, Zustände oder Artefakte belegen den Abschluss?
-6. **Grenzen:** Welche Handlung braucht zwingend den Nutzer?
+1. **Goal:** Which observable state ends the run successfully?
+2. **Scope-in:** Which tasks, repos, paths and systems belong to the invocation?
+3. **Scope-out:** Which neighboring goals, paths and effects stay excluded?
+4. **Spine:** Which planning system durably holds status, dependencies, findings and handovers?
+5. **Evidence:** Which tests, states or artifacts prove completion?
+6. **Limits:** Which action necessarily requires the user?
 
-Ist ein vorgeschriebenes externes Planungssystem nicht erreichbar, stoppe vor schreibender Arbeit mit dem
-konkreten Hindernis.
+If a prescribed external planning system is unreachable, stop before writing work and name the concrete
+obstacle.
 
-Der Laufvertrag konkretisiert den gewählten Scope, ersetzt aber nicht dessen Ausarbeitung. `run` prüft die
-Ausführungsgrundlage auf Aktualität, Umgebungs- und Git-Voraussetzungen; er soll den fachlichen Scope nicht
-erst durch eine neue Erstanalyse entdecken. Ein seit `shape` veränderter Bestand ist trotzdem
-ein normaler Befund und wird nach den Reiferegeln der Taskauswahl behandelt. Ein bloß großer Task wird nicht
-automatisch zum Auftrag an ein stärkeres Modell.
+The run contract makes the chosen scope concrete but does not replace its elaboration. `run` checks the
+execution basis for currency and for environment and git prerequisites; it is not meant to discover the
+substantive scope only through a new initial analysis. A state that has changed since `shape` is
+nevertheless a normal finding and is handled under the maturity rules of task selection. A merely large task
+does not automatically become an assignment for a stronger model.
 
-## Ablauf
+## Procedure
 
-1. Prüfe die Orchestrierung und wähle die Tasks aus.
-2. Beanspruche genau einen Task, lass ihn umsetzen, nimm ihn ab und integriere ihn.
-3. Erfasse Nebenbefunde, bevor du den nächsten ausgewählten Task beginnst.
-4. Wiederhole Auswahl, Umsetzung und Integration, bis die Taskgrenze erreicht ist oder eine Stopbedingung
-   eintritt.
+1. Check the orchestration and select the tasks.
+2. Claim exactly one task, have it implemented, accept it and integrate it.
+3. Record side findings before you begin the next selected task.
+4. Repeat selection, implementation and integration until the task limit is reached or a stop condition
+   occurs.
 
-## Stopbedingungen
+## Stop conditions
 
-Beende den Lauf, sobald eine dieser Bedingungen gilt:
+End the run as soon as one of these conditions holds:
 
-- Die Taskgrenze ist erreicht: So viele Tasks wurden abgeschlossen oder gesichert übergeben.
-- Bei erhöhter Taskgrenze trägt der Kontext des Orchestrators keinen weiteren vollständigen Task.
-- Der gewählte Scope ist vollständig und belegt abgeschlossen.
-- Es gibt im Scope weder ausführbares `next` noch ausführbares `ready`.
-- Ein fehlgeschlagener Task blockiert die verbleibende Arbeit.
-- Es bleibt nur Arbeit mit unerfüllten Abhängigkeiten, `waiting`, `draft` oder menschlicher Übergabe.
-- Eine Scope-, Risiko-, Außenwirkungs- oder Berechtigungsgrenze ist erreicht.
-- Beanspruchung, Eigentümerschaft oder Integrationsbesitz eines benötigten Tasks ist nicht eindeutig belegt.
-- Der Steuerbranch wurde seit dem Preflight fremd verändert.
+- The task limit is reached: that many tasks were completed or securely handed over.
+- With a raised task limit, the orchestrator's context cannot carry another complete task.
+- The chosen scope is completely and demonstrably finished.
+- The scope contains neither an executable `next` nor an executable `ready`.
+- A failed task blocks the remaining work.
+- Only work with unmet dependencies, `waiting`, `draft` or human handover remains.
+- A scope, risk, external-effect or permission boundary is reached.
+- Claim, ownership or integration ownership of a needed task is not unambiguously evidenced.
+- The control branch has been changed by someone else since the preflight.
 
-## Abschluss
+## Closing
 
-Sichere vor dem Ende Spine, Abschlussberichte, Nebenbefunde und erlaubte lokale Commits. Der Nutzer setzt
-einen Lauf meist in einer neuen Session fort. Jede Übergabe steht deshalb mit ihrer Task-ID im Spine, und
-der Abschluss ist ohne den Laufverlauf verständlich. Berichte Ergebnis und maßgebliche Beweise knapp. Nenne
-pro bearbeitetem Task geänderte Dateien, ausgeführte Prüfungen, Dokumentationswirkung, Abweichungen von der
-erwarteten Arbeitskarte und ungelöste Risiken sowie die eingesetzten Worker-Profile mit Modell und Effort;
-Rohlogs bleiben draußen.
+Before the end, secure the spine, final reports, side findings and permitted local commits. The user usually
+continues a run in a new session. Every handover therefore appears in the spine with its task ID, and the
+closing is understandable without the course of the run. Report the result and the decisive evidence
+briefly. For each processed task, name changed files, checks run, documentation effect, deviations from the
+expected work card and unresolved risks, as well as the worker profiles used with model and effort; raw logs
+stay out.

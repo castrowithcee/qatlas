@@ -54,7 +54,7 @@ const tmux = args => execFileSync('tmux', inTmux ? args : ['-L', SOCKET, ...args
   { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const out = value => process.stdout.write(JSON.stringify(value) + '\n');
 const fail = (message, code = 1) => { process.stderr.write(message + '\n'); process.exit(code); };
-const need = (...names) => names.map(name => flag(name) || fail('Fehlt: ' + name, 2));
+const need = (...names) => names.map(name => flag(name) || fail('Missing: ' + name, 2));
 const repoKey = () => fs.realpathSync(path.resolve(need('--repo')[0]));
 
 const eventsDir = repo => path.join(repo, '.qatlas', 'local', 'sentinel');
@@ -110,7 +110,7 @@ function target() {
   const repo = repoKey();
   const [name] = need('--package');
   const hit = allPanes(repo).find(p => p.package === name);
-  if (!hit) fail(`Kein Pane für Paket ${name} in den Sentinel-Fenstern von ${repo}`);
+  if (!hit) fail(`No pane for package ${name} in the sentinel windows of ${repo}`);
   return hit.pane;
 }
 
@@ -134,7 +134,7 @@ function newWindow(repo, label, cwd) {
     session = sessionName(repo);
     let exists = true;
     try { tmux(['has-session', '-t', '=' + session]); } catch { exists = false; }
-    if (exists) fail(`Session ${session} existiert bereits, gehört aber nicht zu ${repo}. Nichts geändert.`);
+    if (exists) fail(`Session ${session} already exists but does not belong to ${repo}. Nothing changed.`);
     line = tmux(['new-session', '-d', '-s', session, '-n', label, '-c', cwd, '-P', '-F', '#{window_id}\t#{pane_id}\t#{session_id}', '--', ...rest]);
     tmux(['set', '-t', line.split('\t')[2], 'mouse', 'off']);
   } else {
@@ -168,13 +168,13 @@ function extraWindow(repo, first, label, cwd) {
 function add() {
   const repo = repoKey();
   const [name, label, title, cwd] = need('--package', '--label', '--title', '--cwd');
-  if (!rest.length) fail('Fehlt: Befehl nach --', 2);
-  if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Kein Ordner: ' + cwd);
+  if (!rest.length) fail('Missing: command after --', 2);
+  if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Not a directory: ' + cwd);
   const wins = markedWindows(repo);
   let win = wins.find(w => panes(w).length < MAX_PANES);
   let pane;
   let session;
-  if (allPanes(repo).some(p => p.package === name)) fail('Paket hat bereits ein Pane: ' + name);
+  if (allPanes(repo).some(p => p.package === name)) fail('Package already has a pane: ' + name);
   if (win) {
     session = tmux(['display', '-p', '-t', win, '#{session_name}']);
     pane = tmux(['split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, '-c', cwd, ...rest]);
@@ -192,7 +192,7 @@ function add() {
   layout(win);
   record(repo, 'start', { package: name, pane });
   out({ window: win, pane, session,
-    ...(inTmux ? { switch: 'Ctrl+B s (Session-Liste) oder Ctrl+B ( / Ctrl+B )' } : { attach: `tmux -L ${SOCKET} attach` }) });
+    ...(inTmux ? { switch: 'Ctrl+B s (session list) or Ctrl+B ( / Ctrl+B )' } : { attach: `tmux -L ${SOCKET} attach` }) });
 }
 
 function list() {
@@ -211,7 +211,7 @@ function recordExits(repo) {
 async function wait() {
   const repo = repoKey();
   const since = Number(flag('--since') || 0);
-  if (!Number.isInteger(since) || since < 0) fail('--since muss eine ganze Zahl ab 0 sein', 2);
+  if (!Number.isInteger(since) || since < 0) fail('--since must be an integer from 0', 2);
   const end = Date.now() + Number(flag('--timeout') || 600) * 1000;
   const waking = () => events(repo).filter(e => e.seq >= since && WAKING.has(e.type));
   for (;;) {
@@ -234,7 +234,7 @@ async function raise(kind, text, task) {
   const timeout = Number(flag('--timeout') || 100) * 1000;
   const title = option(pane, '@qatlas-title') || option(pane, 'pane_title');
   const open = option(pane, '@qatlas-kind');
-  if (open && open !== kind) fail(`Pane ${pane} hat bereits ein offenes Signal (${open}).`);
+  if (open && open !== kind) fail(`Pane ${pane} already has an open signal (${open}).`);
   const same = open === kind && (kind === 'handover' ? option(pane, '@qatlas-task') === task : option(pane, '@qatlas-text') === text);
   const changed = !same || (option(pane, '@qatlas-text') !== text && pendingAnswer(repo, pane) === null);
   if (changed) {
@@ -262,7 +262,7 @@ async function raise(kind, text, task) {
     }
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  out({ answer: null, hint: `Noch keine Antwort. Rufe ${kind === 'handover' ? 'handover' : 'ask'} mit demselben Signal erneut auf.` });
+  out({ answer: null, hint: `No answer yet. Call ${kind === 'handover' ? 'handover' : 'ask'} again with the same signal.` });
 }
 
 // Never overwrites an existing file.
@@ -290,9 +290,9 @@ function answer() {
   const pane = target();
   const [text] = need('--answer');
   const kind = option(pane, '@qatlas-kind');
-  if (!kind) fail('Keine offene Frage oder Übergabe in ' + pane);
+  if (!kind) fail('No open question or handover in ' + pane);
   if (kind === 'handover' && !/^(integrated \S+|rework \S[\s\S]*)$/.test(text)) {
-    fail('Auf eine Übergabe ist nur "integrated <sha>" oder "rework <grund>" zulässig.', 2);
+    fail('A handover accepts only "integrated <sha>" or "rework <reason>".', 2);
   }
   const task = kind === 'handover' ? option(pane, '@qatlas-task') : '';
   record(repo, 'answer', { package: flag('--package'), pane, task, text });
@@ -302,8 +302,8 @@ function answer() {
 function logEvent() {
   const repo = repoKey();
   const [type] = need('--type');
-  if (!/^[a-z][a-z0-9-]*$/.test(type)) fail('--type muss [a-z][a-z0-9-]* entsprechen', 2);
-  if (RESERVED.has(type)) fail('Reservierter Ereignistyp: ' + type, 2);
+  if (!/^[a-z][a-z0-9-]*$/.test(type)) fail('--type must match [a-z][a-z0-9-]*', 2);
+  if (RESERVED.has(type)) fail('Reserved event type: ' + type, 2);
   record(repo, type, { package: flag('--package'), task: flag('--task'), text: flag('--text') });
   out({ logged: type, cursor: events(repo).length });
 }

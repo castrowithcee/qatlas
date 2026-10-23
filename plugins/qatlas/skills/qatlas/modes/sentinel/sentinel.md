@@ -1,7 +1,7 @@
 ---
 description: >
-  Paralleler Arbeitslauf: Ein Sentinel schneidet den Backlog in unabhängige Pakete, lässt jedes von einem
-  eigenen Orchestrator als Run in einer eigenen tmux-Session abarbeiten und integriert die Ergebnisse.
+  Parallel work run: a sentinel cuts the backlog into independent packages, has each one worked off by its
+  own orchestrator as a run in its own tmux session, and integrates the results.
 type: playbook
 edit: locked
 license: MIT
@@ -9,255 +9,257 @@ license: MIT
 
 # Sentinel
 
-Die Session, in der der Nutzer `sentinel` aufruft, ist der Sentinel. Er schneidet unabhängige Pakete,
-startet pro Paket einen Orchestrator, integriert dessen Ergebnisse und bleibt für den Nutzer ansprechbar.
-Jeder Orchestrator ist eine eigene interaktive Session, die sein Paket als gewöhnlichen `run` mit eigenen
-Subagents abarbeitet. Fachliche Umsetzung übernimmt der Sentinel nie selbst.
+The session in which the user invokes `sentinel` is the sentinel. It cuts independent packages, starts one
+orchestrator per package, integrates its results and stays available to the user. Each orchestrator is its
+own interactive session that works off its package as an ordinary `run` with its own subagents. The sentinel
+never does the substantive implementation itself.
 
-Der Aufruf autorisiert im gewählten Scope das Starten von Orchestratoren über das Steuerskript,
-Beanspruchung und Statuspflege im Planungssystem, Prüfungen, lokale Integration und lokale Commits. Push,
-Pull Request und Merge sind nur zulässig, wenn Nutzer- oder Projektvorgaben sie verlangen und autorisieren.
-Kein Publish, kein Deployment, keine Nachricht an Dritte und keine sonstige externe oder irreversible
-Wirkung. `sentinel` erhält die Freigabe für gesperrte Projektdokumentation nach dem gemeinsamen Vertrag.
+Within the chosen scope, the invocation authorizes starting orchestrators through the control script,
+claiming and status upkeep in the planning system, checks, local integration and local commits. Push, pull
+request and merge are permitted only when user or project instructions require and authorize them. No
+publish, no deployment, no message to third parties and no other external or irreversible effect.
+`sentinel` receives the permission to edit locked project documentation (`Freigabe für gesperrte
+Projektdokumentation`) under the shared contract in [the Qatlas skill](../../SKILL.md).
 
-Der Sentinel ist Dispatcher und einziger Integrationsbesitzer im Sinn von „Mehrere Orchestratoren“. Push, Pull
-Request, Merge, Taskabschluss und der Status `done` gehören ausschließlich ihm; Projektvorgaben, die einem
-`run` Push, Pull Request oder Merge erlauben, gelten im Sentinel nur für ihn. Orchestratoren beanspruchen ihre
-Tasks im Planungssystem nach „Mehrere Orchestratoren“, setzen aber nie `done`.
+The sentinel is the dispatcher and the sole integration owner in the sense of the multiple-orchestrators
+section of [Parallel work in a run](../../references/git-parallel.md) (`Mehrere Orchestratoren`). Push, pull
+request, merge, task closing and the status `done` belong exclusively to it; project instructions that allow
+a `run` to push, open a pull request or merge apply in the sentinel only to the sentinel. Orchestrators claim
+their tasks in the planning system as that multiple-orchestrators section prescribes, but never set `done`.
 
-Das Steuerskript ist `node <plugin-root>/skills/qatlas/modes/sentinel/scripts/qatlas-sentinel-tmux.js`;
-`<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`. Die Hilfsbefehle `probe`, `ci-wait`
-und `slot` liefert `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js`. Fasse Orchestrator-Panes
-nur über das Steuerskript an und sende nie Tastatureingaben in eine Orchestrator-Session. `wait`, `ask` und
-`handover` blockieren bis zu ihrem `--timeout`; setze das Befehls-Timeout des Hosts darüber.
+The control script is `node <plugin-root>/skills/qatlas/modes/sentinel/scripts/qatlas-sentinel-tmux.js`;
+`<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. The helper commands `probe`,
+`ci-wait` and `slot` are provided by `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js`. Touch
+orchestrator panes only through the control script and never send keystrokes into an orchestrator session.
+`wait`, `ask` and `handover` block until their `--timeout`; set the host's command timeout above it.
 
-## Aufruf
+## Invocation
 
-`sentinel [Tasks oder Scope] [--limit <n|0>] [--orchestras <n>] [--fly] [Laufvorgabe]`
+`sentinel [tasks or scope] [--limit <n|0>] [--orchestras <n>] [--fly] [run directive]`
 
-- **`--limit` und `--orchestras`:** bestimmen Paketgröße und Paketzahl nach „Pakete schneiden“.
-- **`--fly`:** Der Nutzer ist während des Laufs nicht erreichbar; es gilt [`--fly` im Sentinel](flag-fly.md).
+- **`--limit` and `--orchestras`:** determine package size and package count as described in "Cutting packages".
+- **`--fly`:** The user is unreachable during the run; [`--fly` in the sentinel](flag-fly.md) applies.
 
-## Leseliste
+## Reading list
 
-Die Blöcke wiederholen nichts aus dieser Datei und einander; was du nicht liest, fehlt dir in diesem Lauf.
-Lies jeden vollständig zum genannten Zeitpunkt:
+The blocks repeat nothing from this file or from each other; what you do not read is missing in this run.
+Read each one completely at the stated time:
 
-1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md), [Orchestrierung
-   prüfen](../../references/playbook-orchestra-config.md), [Tasks
-   auswählen](../../references/playbook-task-selection.md), [den
-   Git-Ablauf](../../references/playbook-git-workflow.md), [Parallele Arbeit im
-   Run](../../references/git-parallel.md), [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre
-   [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md). Mit `--fly` zusätzlich die
-   Flag-Datei aus „Aufruf“ und [Ohne Nutzer entscheiden](../../references/playbook-autonomy.md).
-2. **Wenn `orchestra.yaml` fehlt, ungültig ist oder ein Modell zweifelhaft erscheint:** [Orchestrierung
-   einrichten](../../references/playbook-orchestra.md).
-3. **Verlangen Nutzer- oder Projektvorgaben Pull Requests, vor dem ersten Orchestrator:** [Integration über
-   Pull Requests](../../references/playbook-git-pr.md).
-4. **Vor der ersten Integration:** [Abnehmen und integrieren](../../references/playbook-acceptance.md), [die
-   Commitgrenze](../../../qatlas-core-git/references/commit-boundaries.md) und [den
-   Worktree-Vertrag](../../../qatlas-work/references/worktree-contract.md).
-5. **Vor dem Abschlussbericht:** [den Abschlussblock](../../references/playbook-closing-block.md).
+1. **Before the first step:** [the backlog norm](../../../qatlas-core-backlog/SKILL.md), [checking the
+   orchestration](../../references/playbook-orchestra-config.md), [selecting
+   tasks](../../references/playbook-task-selection.md), [the
+   git workflow](../../references/playbook-git-workflow.md), [parallel work in a
+   run](../../references/git-parallel.md), [the git norm](../../../qatlas-core-git/SKILL.md) and its
+   [commit reference](../../../qatlas-core-git/references/playbook-commit.md). With `--fly`, additionally the
+   flag file from "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
+2. **When `orchestra.yaml` is missing, invalid or a model looks doubtful:** [setting up the
+   orchestration](../../references/playbook-orchestra.md).
+3. **If user or project instructions require pull requests, before the first orchestrator:** [integration via
+   pull requests](../../references/playbook-git-pr.md).
+4. **Before the first integration:** [accepting and integrating](../../references/playbook-acceptance.md),
+   [the commit boundary](../../../qatlas-core-git/references/commit-boundaries.md) and [the
+   worktree contract](../../../qatlas-work/references/worktree-contract.md).
+5. **Before the final report:** [the closing block](../../references/playbook-closing-block.md).
 
-## Vorbereiten
+## Prepare
 
-1. Prüfe `tmux`, Git-Root, einen sauberen Steuerbranch nach dem Git-Ablauf und die Erreichbarkeit des
-   maßgeblichen Planungssystems; ist es nicht erreichbar, starte nicht. Läuft der Sentinel in tmux,
-   legt das Skript im Server des Nutzers eine eigene Session `sentinel--<repo>` an; nenne dem Nutzer den
-   ausgegebenen Wechselweg. Außerhalb von tmux legt es einen eigenen Server an; nenne dann den ausgegebenen
-   Befehl zum Anhängen. Ein Fenster fasst vier Orchestratoren; weitere öffnet das Skript in zusätzlichen
-   Fenstern derselben Session.
-2. Zeigt `list --repo <repo-root>` bereits Panes, prüfe jedes. Trägt es `FERTIG` im Titel oder ist es
-   beendet (`dead`), ist es ein Rest eines früheren Laufs: Sichere es mit `capture` und schließe es mit
-   `close`. Ein lebendes Pane ohne `FERTIG` gehört einem laufenden Sentinel oder dem Nutzer; starte dann
-   nicht und kläre es mit dem Nutzer.
-3. Prüfe für jeden vorgesehenen Host seine Sektion in `orchestra.yaml` mit gültigem Orchestrator-Modell und
-   seine CLI im `PATH`: `claude` für Claude Code, `codex` für Codex. Standard ist der eigene Host; eine
-   Laufvorgabe darf Pakete einem anderen Host zuweisen.
-4. Erkenne an Nutzer- und Projektvorgaben, ob sie Integration über Pull Requests verlangen; dann gilt
-   „Integration über Pull Requests“. Prüfe in diesem Fall, ob im Ziel-Repo eine
-   Merge Queue aktiv ist, ob der Branchschutz einen aktuellen Stand vor dem Merge verlangt und ob `gh`
-   verfügbar und angemeldet ist. Fehlt `gh`, seine Anmeldung oder die Autorisierung für Push, Pull Request
-   und Merge, starte nicht und kläre es mit dem Nutzer.
+1. Check `tmux`, the git root, a clean control branch per the git workflow and the reachability of the
+   authoritative planning system; if it is unreachable, do not start. If the sentinel runs inside tmux, the
+   script creates its own session `sentinel--<repo>` in the user's server; tell the user the printed way to
+   switch to it. Outside tmux it creates its own server; then tell the user the printed attach command. One
+   window holds four orchestrators; the script opens more in additional windows of the same session.
+2. If `list --repo <repo-root>` already shows panes, check each one. If its title carries `FERTIG` or it has
+   ended (`dead`), it is a leftover of an earlier run: save it with `capture` and close it with `close`. A
+   live pane without `FERTIG` belongs to a running sentinel or to the user; do not start then, and clarify
+   it with the user.
+3. For each intended host, check its section in `orchestra.yaml` with a valid orchestrator model and its CLI
+   on the `PATH`: `claude` for Claude Code, `codex` for Codex. The default is your own host; a run directive
+   may assign packages to another host.
+4. Recognize from user and project instructions whether they require integration via pull requests; if so,
+   [integration via pull requests](../../references/playbook-git-pr.md) applies. In that case, check whether
+   a merge queue is active in the target repo, whether branch protection requires an up-to-date state before
+   the merge, and whether `gh` is available and logged in. If `gh`, its login or the authorization for push,
+   pull request and merge is missing, do not start and clarify it with the user.
 
-Die Integrationsbasis `<basis>` ist bei Integration über Pull Requests `origin/<steuerbranch>`, sonst der
-lokale `<steuerbranch>`.
+The integration base `<basis>` is `origin/<control-branch>` for integration via pull requests, otherwise the
+local `<control-branch>`.
 
-## Pakete schneiden
+## Cutting packages
 
-Wähle aus dem genannten Scope oder ohne Scope aus dem Backlog die ausführbaren Tasks nach „Tasks auswählen“
-und schneide daraus so viele Pakete, wie unabhängige Bereiche vorhanden sind, höchstens vier, mit
-`--orchestras <n>` höchstens `n`. Ein Paket bündelt zusammengehörige Tasks; Abhängigkeiten liegen nur
-innerhalb eines Pakets. Echte Kopplung durch gemeinsame Invarianten, Migrationen oder Laufzeitressourcen
-bleibt in einem Paket; lässt sie sich nicht ausschließen, lege die Tasks zusammen. Mechanisch gemeinsame
-Dateien dürfen Pakete nach „Parallele Arbeit im Run“ teilen.
+From the stated scope, or from the backlog if there is none, select the executable tasks as described in
+[selecting tasks](../../references/playbook-task-selection.md) and cut as many packages from them as there
+are independent areas, at most four, with `--orchestras <n>` at most `n`. A package bundles related tasks;
+dependencies lie only within a package. Real coupling through shared invariants, migrations or runtime
+resources stays within one package; if it cannot be ruled out, merge the tasks. Mechanically shared files may
+be shared by packages as described in [parallel work in a run](../../references/git-parallel.md).
 
-Schätze vor dem Schnitt je Task aus Taskvertrag und Code die Dateien ab, die er berührt. Ändern mehrere Tasks
-dieselbe zentrale Datei, etwa eine Registry, eine gemeinsame Testdatei oder dieselbe Dokumentation, lege sie
-in ein Paket, statt sie über Pakete zu verteilen: Jede Integration an dieser Stelle zwingt jedes andere Paket,
-das sie berührt, zum Nachziehen der Basis.
+Before the cut, estimate for each task from the task contract and the code which files it touches. If
+several tasks change the same central file, such as a registry, a shared test file or the same
+documentation, put them in one package instead of spreading them over packages: every integration at that
+spot forces every other package that touches it to catch up with the base.
 
-Der Sentinel integriert seriell. Ergänze ein Paket, das nur aus einer Abhängigkeitskette besteht, um
-unabhängige Tasks, damit sein Orchestrator während des Wartens auf eine Integration weiterarbeiten kann.
-Ein übergreifender Task, der viele Bereiche berührt, bildet ein eigenes Paket und startet zuerst.
+The sentinel integrates serially. Supplement a package that consists only of a dependency chain with
+independent tasks, so that its orchestrator can keep working while it waits for an integration. A
+cross-cutting task that touches many areas forms its own package and starts first.
 
-Ein Paket umfasst höchstens fünf Tasks, mit `--limit <n>` höchstens `n`. Bei `--limit 0` bestimmst du die
-Größe jedes Pakets selbst danach, was ein Orchestrator in einem Lauf tragen kann: Umfang und Kopplung der
-Tasks und ihr absehbarer Kontextbedarf. Fülle jedes Paket bis zu seiner Größe, soweit ausführbare Tasks
-vorhanden sind. Weniger Pakete oder Tasks wählst du nur auf eine ausdrückliche Mengenvorgabe über
-`--orchestras`, `--limit` oder eine gleichbedeutende Nutzervorgabe, nie aus der Deutung von Wörtern wie
-„Pilot“ oder „Test“. Was in keinem Paket Platz findet, bleibt in seiner Reihenfolge für Nachschub und
-spätere Läufe.
+A package holds at most five tasks, with `--limit <n>` at most `n`. With `--limit 0` you decide the size of
+each package yourself by what an orchestrator can carry in one run: scope and coupling of the tasks and
+their foreseeable context needs. Fill each package up to its size as far as executable tasks are available.
+You choose fewer packages or tasks only on an explicit quantity directive via `--orchestras`, `--limit` or an
+equivalent user directive, never from interpreting words like "pilot" or "test". What fits in no package
+stays in its order for replenishment and later runs.
 
-Das Laufbudget ist die Summe der Größen der beim Start geschnittenen Pakete. Jeder abgeschlossene oder
-gesichert an `review` übergebene Task verbraucht einen Platz davon.
+The run budget is the sum of the sizes of the packages cut at the start. Each task that is completed or
+handed over to `review` in a secured state consumes one slot of it.
 
-Nenne dem Nutzer die Pakete mit Tasks, Grund des Schnitts und Laufbudget in wenigen Zeilen und starte direkt.
+Tell the user the packages with their tasks, the reason for the cut and the run budget in a few lines, and
+start directly.
 
-## Orchestratoren starten
+## Starting orchestrators
 
-Starte jedes Paket im Repo-Root; das Skript verteilt die Panes zu je vier auf Fenster:
+Start each package in the repo root; the script distributes the panes over windows, four each:
 
 ```text
-add --repo <repo-root> --package <Paket> --label "<Projekt>·orchester" --title "<Projekt>·<Paket> · <host>" --cwd <repo-root> -- <cli>
+add --repo <repo-root> --package <package> --label "<project>·orchestrator" --title "<project>·<package> · <host>" --cwd <repo-root> -- <cli>
 ```
 
-- Claude Code: `claude --model <orchestrator> '/qatlas run <Tasks> [--limit <n>] <Laufvorgabe>'`
-- Codex: `codex -m <orchestrator> '$qatlas run <Tasks> [--limit <n>] <Laufvorgabe>'`
+- Claude Code: `claude --model <orchestrator> '/qatlas run <tasks> [--limit <n>] <run directive>'`
+- Codex: `codex -m <orchestrator> '$qatlas run <tasks> [--limit <n>] <run directive>'`
 
-Quote den Prompt in der Shell einfach, damit `$qatlas` nicht expandiert. Setze `--limit` auf die
-Paketgröße, wenn sie fünf übersteigt. Gib `--fly` nie weiter: Ein Orchestrator fragt immer dich, und ob du
-den Nutzer fragst, entscheidet dein eigenes `--fly`. Die Laufvorgabe lautet sinngemäß:
+Quote the prompt simply in the shell so that `$qatlas` is not expanded. Set `--limit` to the package size if
+it exceeds five. Never pass on `--fly`: an orchestrator always asks you, and whether you ask the user is
+decided by your own `--fly`. The run directive reads in essence:
 
-> Paket <Paket> eines Sentinels. Weitere Orchestratoren arbeiten parallel im selben Repo; Integrationsbesitzer
-> ist der Sentinel. Arbeite nach „Mehrere Orchestratoren“ und beanspruche nur Tasks dieses Pakets. Push,
-> Pull Request, Merge, Taskabschluss und `done` übernimmt ausschließlich der Sentinel, auch wenn
-> Projektvorgaben sie einem Run erlauben. Im primären Arbeitsbaum ziehst, wechselst und committest du nichts.
+> Package <package> of a sentinel. Other orchestrators work in parallel in the same repo; the sentinel is the
+> integration owner. Work as described in the multiple-orchestrators section of [parallel work in a
+> run](../../references/git-parallel.md) and claim only tasks of this package. Push, pull request, merge,
+> task closing and `done` are taken over exclusively by the sentinel, even if project instructions allow them
+> to a run. In the primary working tree you do not pull, switch or commit anything.
 >
-> Ist `<basis>` ein `origin/…`-Ref, hole ihn vor jeder Verwendung frisch mit `git fetch`. Lege je Task einen
-> eigenen Worktree ab `<basis>` an. Merge vor jeder Übergabe den aktuellen `<basis>` in den Task-Branch, löse
-> Konflikte selbst und prüfe danach vollständig; Volltests laufen über `node <tools> slot -- <testbefehl>`.
-> Starte jeden Worker mit einem Profil aus `orchestra.yaml` und ausdrücklich gesetztem Modell und Effort.
-> Führe vor jedem Commit die Schutzprüfung als eigenen Befehl aus und werte ihren Exit-Code aus, bevor du
-> committest.
+> If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
+> per task from `<basis>`. Before every handover, merge the current `<basis>` into the task branch, resolve
+> conflicts yourself and then check completely; full tests run via `node <tools> slot -- <test command>`.
+> Start every worker with a profile from `orchestra.yaml` and with model and effort set explicitly. Before
+> every commit, run the protection check as its own command and evaluate its exit code before you commit.
 >
-> Übergib jeden geprüften Task mit `node <skript> handover --repo <repo-root> --package <Paket> --task <id>
-> --report <datei>`; die Berichtsdatei liegt außerhalb jedes Worktrees. Bei Integration über Pull Requests mit
-> Squash-Merge übergibst du jeden Pull Request eines Tasks nach „Integration über Pull Requests“ einzeln und
-> startest den nächsten erst ab dem danach integrierten `<basis>`. Der Bericht folgt dem Rückgabeformat von
-> „Arbeit ausführen“ einschließlich der Worker-Profile mit Modell und Effort und nennt zusätzlich Branches und
-> Commits, PR-Titel und PR-Body sowie, ob diese Übergabe die letzte des Tasks ist. Die Antwort lautet
-> `integrated <sha>` oder `rework <grund>`; ohne Antwort rufe denselben Befehl mit unverändertem Bericht
-> erneut auf. Bis zur Antwort gehören Task, Branches und Worktree dem Sentinel; fasse sie nicht an. `rework`
-> gibt sie dir zurück: Bearbeite den Grund und übergib erneut. `integrated` auf eine nicht letzte Übergabe
-> gibt dir den Task zur Fortsetzung zurück.
+> Hand over every checked task with `node <script> handover --repo <repo-root> --package <package> --task
+> <id> --report <file>`; the report file lies outside every worktree. For integration via pull requests with
+> squash merge, you hand over each pull request of a task individually as described in [integration via pull
+> requests](../../references/playbook-git-pr.md) and start the next one only from the `<basis>` integrated
+> afterwards. The report follows the return format of [executing work](../run/run.md), including the worker
+> profiles with model and effort, and additionally names branches and commits, PR title and PR body, and
+> whether this handover is the last one of the task. The answer is `integrated <sha>` or `rework <reason>`;
+> without an answer, call the same command again with the report unchanged. Until the answer arrives, task,
+> branches and worktree belong to the sentinel; do not touch them. `rework` gives them back to you: work on
+> the reason and hand over again. `integrated` on a handover that is not the last gives you the task back to
+> continue.
 >
-> Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn ab dem neuen `<basis>`.
-> Einen nachweislich unabhängigen Task dieses Pakets darfst du während des Wartens ab dem aktuellen `<basis>`
-> beginnen; der übergebene Task gilt dabei als gesichert übergeben. Rufe `handover` dann nach jeder
-> Subagent-Rückgabe mit `--timeout 10` erneut auf, bis die Antwort da ist, und übergib den nächsten Task erst
-> danach. Ein `rework` hat Vorrang: Sichere den laufenden Task am nächsten geprüften Meilenstein
-> als Checkpoint, bearbeite den Grund, übergib erneut und setze danach fort.
+> If the next task depends on the handed-over one, wait for `integrated` and start it from the new `<basis>`.
+> You may begin a demonstrably independent task of this package during the wait from the current `<basis>`;
+> the handed-over task counts as securely handed over in that case. Then call `handover` again with
+> `--timeout 10` after each subagent return until the answer is there, and hand over the next task only
+> afterwards. A `rework` takes precedence: secure the running task at the next checked milestone as a
+> checkpoint, work on the reason, hand over again and continue afterwards.
 >
-> Was du sonst den Nutzer fragen würdest, fragst du ausschließlich mit `node <skript> ask --repo <repo-root>
-> --package <Paket> --question "<Frage mit Kontext, Optionen und Empfehlung>"`; die Ausgabe ist seine Antwort.
-> Ohne Antwort rufe denselben Befehl erneut auf. Solange eine Übergabe offen ist, ist keine Frage möglich;
-> warte dann zuerst mit `handover` ihre Antwort ab. Setze nach deinem Abschlussblock mit `node <skript> title
-> --repo <repo-root> --package <Paket> --title "FERTIG · <Titel>"` den Pane-Titel.
+> Whatever you would otherwise ask the user, you ask exclusively with `node <script> ask --repo <repo-root>
+> --package <package> --question "<question with context, options and recommendation>"`; the output is the
+> answer. Without an answer, call the same command again. While a handover is open, no question is possible;
+> first wait for its answer with `handover`. After your closing block, set the pane title with `node <script>
+> title --repo <repo-root> --package <package> --title "FERTIG · <title>"`.
 
-Setze `<skript>`, `<tools>`, `<repo-root>`, `<Paket>` und `<basis>` als feste Werte ein: `<skript>` ist das
-Steuerskript, `<tools>` `qatlas-run-tools.js`, je mit absolutem Pfad. Verlasse dich nicht auf
-Umgebungsvariablen des Panes, weil nicht jeder Host Befehle mit ihnen ausführt.
+Insert `<script>`, `<tools>`, `<repo-root>`, `<package>` and `<basis>` as fixed values: `<script>` is the
+control script, `<tools>` is `qatlas-run-tools.js`, each with an absolute path. Do not rely on environment
+variables of the pane, because not every host runs commands with them.
 
-Ergänze den Teil der Laufvorgabe des Nutzers, der dieses Paket betrifft. Füge keine Option hinzu, die
-Berechtigungen, Sandbox oder Freigaben des Hosts lockert.
+Add the part of the user's run directive that concerns this package. Add no option that loosens permissions,
+sandbox or approvals of the host.
 
-## Überwachen
+## Monitoring
 
-Warte mit `wait --repo <repo-root> --since <cursor>`. Beginne mit `--since 0` und übergib danach jeweils
-den `cursor` der letzten Ausgabe, damit kein Ereignis verloren geht. Es kehrt bei einem der Ereignisse
-`question`, `handover`, `done` oder `exited` oder nach Zeitablauf zurück. Kann der Host Befehle im
-Hintergrund ausführen, tue das, damit du für den Nutzer ansprechbar bleibst. Ein `handover` nennt nur den
-Pfad seines Berichts; lies ihn erst bei der Integration.
+Wait with `wait --repo <repo-root> --since <cursor>`. Begin with `--since 0` and afterwards pass the `cursor`
+of the last output each time, so that no event is lost. It returns on one of the events `question`,
+`handover`, `done` or `exited`, or after a timeout. If the host can run commands in the background, do so, so
+that you stay available to the user. A `handover` names only the path of its report; read it only at
+integration.
 
-Halte deinen Kontext schlank: Lies Diffs zuerst als `--stat` und danach nur die betroffenen Stellen. Was du
-in den Abschluss übernimmst, protokollierst du sofort mit `log` statt es im Gedächtnis zu tragen: Annahmen
-als `annahme`, Abweichungen vom Verfahren als `abweichung`, nicht öffentlich erfasste Risiken als `risiko`,
-neu erfasste Tasks als `erfasst` und offene Nutzerentscheidungen als `entscheiden`, je mit Paket und Task.
-Nach einer Verdichtung deines Kontexts oder einem Neustart rekonstruierst du den Stand aus `list`, `report`,
-dem Planungssystem und dem genannten Laufbudget, nicht aus der Erinnerung.
+Keep your context lean: read diffs first as `--stat` and then only the affected spots. What you carry into
+the closing you log immediately with `log` instead of holding it in memory: assumptions as `annahme`,
+deviations from the procedure as `abweichung`, risks not recorded publicly as `risiko`, newly recorded tasks
+as `erfasst` and open user decisions as `entscheiden`, each with package and task. After a compaction of your
+context or a restart, reconstruct the state from `list`, `report`, the planning system and the stated run
+budget, not from memory.
 
-Bearbeite jedes Ereignis:
+Handle each event:
 
-- **`question`:** Belegt das Projektwissen die Antwort, antworte mit `answer --repo <repo-root> --package
-  <Paket> --answer "<Antwort mit Quelle>"`. Sonst frage den Nutzer knapp mit Paket, Frage und Empfehlung
-  und gib seine Antwort weiter; mit `--fly` antwortest du stattdessen nach der Flag-Datei.
-- **`handover`:** Integriere nach dem folgenden Abschnitt.
-- **`done` und `exited`:** Verfahre nach „Beenden“.
-- Schreibt der Nutzer selbst in ein Pane, gehört ihm diese Session; fasse sie nicht an. Hängt ein
-  Orchestrator erkennbar ohne Fortschritt, melde es dem Nutzer, statt einzugreifen.
+- **`question`:** If project knowledge supports the answer, reply with `answer --repo <repo-root> --package
+  <package> --answer "<answer with source>"`. Otherwise ask the user briefly with package, question and
+  recommendation and pass on their answer; with `--fly` you instead answer as the flag file prescribes.
+- **`handover`:** Integrate as described in the following section.
+- **`done` and `exited`:** Proceed as described in "Finish".
+- If the user writes into a pane themselves, that session belongs to them; do not touch it. If an
+  orchestrator visibly hangs without progress, report it to the user instead of intervening.
 
-## Integrieren
+## Integrate
 
-Mit der Übergabe gehören Task und Namensraum bis zu einem `rework` dir, bei einer nicht letzten Übergabe
-bis zu deinem `integrated`. Integriere Übergaben einzeln und protokolliere jeden Integrationsschritt mit
-`log --repo <repo-root> --type <typ> --package <Paket> --task <id> --text <text>`, mit den Typen `push`,
-`pr`, `merge`, `rerun`, `conflict` und `close`.
+With the handover, task and namespace belong to you until a `rework`, and for a handover that is not the last
+until your `integrated`. Integrate handovers one at a time and log every integration step with `log --repo
+<repo-root> --type <type> --package <package> --task <id> --text <text>`, with the types `push`, `pr`,
+`merge`, `rerun`, `conflict` and `close`.
 
-1. Prüfe Diff, Beweise und Abnahme selbst nach „Abnehmen und integrieren“. Inhaltlicher
-   Korrekturbedarf geht als `answer … --answer "rework <grund>"` zurück und zählt als Korrekturversuch nach
-   „Höchstens zwei Korrekturen“. Bündelt eine Übergabe bei Squash-Merge mehrere Commits im Sinn der
-   Commitgrenze, gib sie als `rework <schnitt>` mit dem verlangten Schnitt zurück; das zählt nicht als
-   Korrekturversuch. Lief ein Worker ohne Profil aus `orchestra.yaml` oder mit geerbtem statt ausdrücklich
-   gesetztem Effort, protokolliere das als `abweichung`; es ist kein Korrekturgrund.
-2. Probe Konflikte mit `probe --branch <task-branch> --base <basis>`. Einen Konflikt, auch einen beim späteren
-   Nachziehen der Basis, gibst du als `rework <grund mit Dateien>` zurück; er zählt nicht als
-   Korrekturversuch. Löse Konflikte nie selbst. Nur wenn der Orchestrator nicht mehr verfügbar ist, sicherst
-   du den Task nach dem Git-Ablauf als Übergabe auf `review`.
-3. Integriere ohne Konflikt nach dem Git-Ablauf, bei Integration über Pull Requests nach
-   „Integration über Pull Requests“ mit PR-Titel und PR-Body aus dem Bericht und `ci-wait`. Prüfe dabei lokal
-   nur gezielt die betroffenen Bereiche über `slot --priority` und überlasse der CI die volle Breite. Einen
-   bekannten Flake behandelst du nach dessen Regel in „Abnehmen und integrieren“. Ohne Pull Requests
-   führst du die gemeinsamen Prüfungen selbst aus. Tasks über mehrere Repos integrierst du nach dem
-   Git-Ablauf.
-4. Ist es die letzte Übergabe des Tasks, schließe ihn danach im Planungssystem und setze ihn auf `done`.
-   Antworte mit `answer … --answer "integrated <sha>"`, wobei `<sha>` der Integrationscommit auf dem
-   Steuerbranch ist.
+1. Check diff, evidence and acceptance yourself as described in [accepting and
+   integrating](../../references/playbook-acceptance.md). A substantive need for correction goes back as
+   `answer … --answer "rework <reason>"` and counts as a correction attempt under the [at-most-two-corrections
+   rule](../../references/playbook-acceptance.md). If, with squash merge, a handover bundles several commits
+   in the sense of the commit boundary, return it as `rework <cut>` with the required cut; that does not count
+   as a correction attempt. If a worker ran without a profile from `orchestra.yaml` or with inherited instead
+   of explicitly set effort, log that as `abweichung`; it is not a reason for correction.
+2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. A conflict, including one that arises
+   when catching up with the base later, you return as `rework <reason with files>`; it does not count as a
+   correction attempt. Never resolve conflicts yourself. Only if the orchestrator is no longer available do
+   you secure the task as a handover to `review` per the git workflow.
+3. Without a conflict, integrate per the git workflow, and for integration via pull requests per
+   [integration via pull requests](../../references/playbook-git-pr.md) with PR title and PR body from the
+   report and `ci-wait`. In doing so, check locally only the affected areas via `slot --priority` and leave
+   the full breadth to CI. You treat a known flake by its rule in [accepting and
+   integrating](../../references/playbook-acceptance.md). Without pull requests, you run the shared checks
+   yourself. You integrate tasks spanning several repos per the git workflow.
+4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.
+   Reply with `answer … --answer "integrated <sha>"`, where `<sha>` is the integration commit on the control
+   branch.
 
-Integrierst du über Pull Requests, warte nicht Übergabe für Übergabe auf die CI. Öffne jeden geprüften,
-konfliktfreien Pull Request sofort, damit seine CI neben den übrigen läuft, und bearbeite währenddessen
-weitere Ereignisse. Ist eine Merge Queue aktiv, reihe ihn sofort ein; sie verwaltet Basis und Reihenfolge.
-Ohne Merge Queue mergst du einzeln, sobald seine CI grün ist. Hat sich die Basis seit dem CI-Lauf geändert
-und verlangt der Branchschutz einen aktuellen Stand, ziehe die Basis konfliktfrei selbst nach, etwa über die
-Branch-Aktualisierung von GitHub, und warte erneut auf die CI; einen Konflikt gibst du nach Schritt 2
-zurück. In diesem Fall bleibt die Integration seriell an die CI-Dauer gebunden; nenne das im Bericht als
-Engpass.
+When you integrate via pull requests, do not wait for CI handover by handover. Open every checked,
+conflict-free pull request immediately so that its CI runs alongside the others, and handle further events
+in the meantime. If a merge queue is active, enqueue it immediately; the queue manages base and order.
+Without a merge queue, you merge individually as soon as its CI is green. If the base has changed since the
+CI run and branch protection requires an up-to-date state, catch up with the base yourself without conflict,
+for example via GitHub's branch update, and wait for CI again; you return a conflict as in step 2. In this
+case integration stays serially bound to the CI duration; name that as a bottleneck in the report.
 
-Lösche nach einem Squash-Merge mit erbrachtem Squash-Nachweis nach dem Worktree-Vertrag den Remote-Branch des
-Pull Requests; die Autorisierung für Push und Merge deckt das. Nutze dafür den Qatlas-MCP-Broker, wenn er eine
-passende Operation anbietet, sonst `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` oder `git
-push origin --delete <branch>`.
+After a squash merge with squash evidence provided, delete the pull request's remote branch per the worktree
+contract; the authorization for push and merge covers it. Use the Qatlas MCP broker for it if it offers a
+suitable operation, otherwise `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` or `git push
+origin --delete <branch>`.
 
-## Beenden
+## Finish
 
-- **`done`:** Ist jeder Task des Pakets integriert oder im Planungssystem gesichert, etwa als Übergabe auf
-  `review`, sichere das Pane mit `capture --repo <repo-root> --package <Paket>` und schließe es mit `close`
-  mit denselben Angaben. Stehen bleibt es nur, wenn sich ein offener Punkt wie ein Abbruch oder ein
-  ungelöster Konflikt nicht sichern lässt oder der Nutzer in das Pane geschrieben hat. Mit dem letzten Pane
-  endet die Session.
-- **`exited` ohne `done`:** Sichere die offenen Tasks des Pakets nach dem Git-Ablauf als Übergabe auf
-  `review`, sichere das Pane mit `capture` und schließe es mit `close`.
-- Räume integrierte Worktrees und Branches nach dem Worktree-Vertrag auf, nach einem Squash-Merge über den
-  Squash-Nachweis.
+- **`done`:** If every task of the package is integrated or secured in the planning system, for example as a
+  handover to `review`, save the pane with `capture --repo <repo-root> --package <package>` and close it with
+  `close` with the same arguments. It stays open only if an open point such as an abort or an unresolved
+  conflict cannot be secured, or if the user has written into the pane. With the last pane, the session ends.
+- **`exited` without `done`:** Secure the package's open tasks per the git workflow as a handover to
+  `review`, save the pane with `capture` and close it with `close`.
+- Clean up integrated worktrees and branches per the worktree contract, after a squash merge via the squash
+  evidence.
 
-**Nachschub:** Ist ein Pane geschlossen und das Laufbudget nicht verbraucht, schneide aus den übrigen
-ausführbaren Tasks nach „Pakete schneiden“ ein neues Paket, das von allen laufenden Paketen unabhängig ist.
-Es umfasst höchstens die Paketgröße und den Rest des Laufbudgets, trägt einen neuen Paketnamen und startet
-nach „Orchestratoren starten“. Gleichzeitig laufen nie mehr Orchestratoren, als „Pakete schneiden“ zulässt.
-Nenne dem Nutzer das Paket mit seinen Tasks in einer Zeile.
+**Replenishment:** If a pane is closed and the run budget is not used up, cut a new package from the
+remaining executable tasks as described in "Cutting packages" that is independent of all running packages. It
+comprises at most the package size and the rest of the run budget, carries a new package name and starts as
+described in "Starting orchestrators". Never more orchestrators run at the same time than "Cutting packages"
+permits. Tell the user the package with its tasks in one line.
 
-Der Lauf endet, wenn kein Nachschub mehr möglich ist, jedes verbliebene Pane `FERTIG` zeigt oder beendet ist
-und alle übergebenen Tasks integriert oder als Übergabe gesichert sind. Nenne im Bericht die Kennzahlen aus
-`report --repo <repo-root>` knapp und die verbliebenen Remote-Branches dieses Laufs gesammelt. Schließe mit
-genau einem Abschlussblock „Für dich“ über alle Pakete; seine Einträge entnimmst du den `notes` aus `report`,
-nicht gepushte Commits stehen dort unter **Nicht gepusht**.
+The run ends when no more replenishment is possible, every remaining pane shows `FERTIG` or has ended, and
+all handed-over tasks are integrated or secured as a handover. In the report, state the metrics from `report
+--repo <repo-root>` briefly and the remaining remote branches of this run collected together. Close with
+exactly one closing block (`Für dich`, see [the closing block](../../references/playbook-closing-block.md))
+across all packages; you take its entries from the `notes` in `report`, and unpushed commits appear there
+under `Nicht gepusht`.

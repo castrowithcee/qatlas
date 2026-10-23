@@ -1,37 +1,39 @@
 ---
 description: >
-  Integration eines Run- oder Sentinel-Tasks über Pull Requests, wenn Nutzer- oder Projektvorgaben sie
-  verlangen: Arbeitsbasis, Konfliktprobe, Merge Queue, Zuschnitt bei Squash-Merge und Abschluss.
+  Integration of a run or sentinel task via pull requests when user or project instructions require it:
+  working base, conflict probe, merge queue, cut for squash merge, and closing.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Integration über Pull Requests
+# Integration via pull requests
 
-Dieses Vorgehen greift nur, wenn Nutzer- oder Projektvorgaben eine Integration über Pull Requests verlangen,
-etwa bei einem geschützten Steuerbranch; erkenne das an diesen Vorgaben, nicht durch Raten. Es ändert keine
-Autorisierung: Der Aufruf eines Modus autorisiert weder Push noch Pull Request noch Merge, das tun nur Nutzer-
-oder Projektvorgaben. Fehlt sie, endet der Task mit einem integrationsreifen, lokal gesicherten Task-Branch
-als Übergabe nach „Übergeben“ des Git-Ablaufs, ohne Push.
+This procedure applies only when user or project instructions require integration via pull requests, for
+example with a protected control branch; recognize that from these instructions, not by guessing. It changes
+no authorization: invoking a mode authorizes neither push nor pull request nor merge; only user or project
+instructions do. If they are missing, the task ends with an integration-ready, locally secured task branch as
+a handover, as described in the handover section (`Übergeben`) of [the git workflow](playbook-git-workflow.md),
+without a push.
 
-- **Arbeitsbasis:** Arbeite im Task-Worktree ab frisch geholtem `origin/<steuerbranch>`. Der primäre
-  Arbeitsbaum bleibt unberührt: kein Pull, Switch oder Commit dort durch den Lauf.
-- **Vor dem Öffnen oder Aktualisieren eines Pull Requests:** Führe `git fetch` aus, probe Konflikte mit
-  `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js probe`, merge den aktuellen
-  `origin/<steuerbranch>` in den Task-Branch, löse Konflikte nach den Konfliktregeln des Git-Ablaufs, prüfe
-  erneut und pushe erst dann. Rebase einen bereits gepushten Branch nie. Dieser Merge-Commit schreibt keine
-  Historie um und ist keine fremde Veränderung. Warte auf die CI mit `ci-wait` desselben Skripts.
-- **Merge Queue:** Ist im Ziel-Repo eine GitHub Merge Queue aktiv, integriere den Pull Request über sie,
-  statt die Basis selbst nachzuziehen.
-- **Zuschnitt bei Squash-Merge:** Ein Task ergibt so viele Pull Requests, wie die Commitgrenze der Git-Norm
-  für ein gesquashtes Review verlangt; ein Pull Request bündelt nie unabhängige Meilensteine. Jeder
-  Pull Request erhält einen eigenen Task-Branch desselben Tasks mit eigenem Slug. Ein vorbereitender
-  Pull Request, etwa ein mechanisches Refactoring, wird vor der darauf aufbauenden Änderung integriert.
-  Prüfe vor dem Öffnen den gesamten Diff des Pull Requests gegen die Commitgrenze und teile ihn, bevor du
-  pushst.
-- **Abschluss:** Der Merge des Pull Requests ersetzt die lokale Integration. Der Task ist erst `done`, wenn
-  alle seine Pull Requests gemergt sind und die Abnahme auf dem neuen `origin/<steuerbranch>` belegt ist.
-- **Abhängige Arbeit:** Ein Squash-Merge schließt gestapelte Branches aus. Ein abhängiger Task oder
-  Pull Request startet dann erst ab dem integrierten `origin/<steuerbranch>`, nie auf einem nicht
-  integrierten Vorgänger-Branch.
+- **Working base:** Work in the task worktree from a freshly fetched `origin/<control-branch>`. The primary
+  working tree stays untouched: no pull, switch or commit there by the run.
+- **Before opening or updating a pull request:** Run `git fetch`, probe conflicts with
+  `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js probe`, merge the current
+  `origin/<control-branch>` into the task branch, resolve conflicts per the conflict rules of [the git
+  workflow](playbook-git-workflow.md), check again and only then push. Never rebase a branch that has
+  already been pushed. This merge commit rewrites no history and is not a foreign change. Wait for CI with
+  `ci-wait` of the same script.
+- **Merge queue:** If a GitHub merge queue is active in the target repo, integrate the pull request through
+  it instead of catching up with the base yourself.
+- **Cut for squash merge:** A task yields as many pull requests as the commit boundary of the git norm
+  ([commit boundaries](../../qatlas-core-git/references/commit-boundaries.md)) requires for a squashed
+  review; a pull request never bundles independent milestones. Each pull request gets its own task branch of
+  the same task with its own slug. A preparatory pull request, for example a mechanical refactoring, is
+  integrated before the change that builds on it. Before opening, check the entire diff of the pull request
+  against the commit boundary and split it before you push.
+- **Closing:** The merge of the pull request replaces local integration. The task is `done` only when all its
+  pull requests are merged and the acceptance is evidenced on the new `origin/<control-branch>`.
+- **Dependent work:** A squash merge rules out stacked branches. A dependent task or pull request then
+  starts only from the integrated `origin/<control-branch>`, never on a predecessor branch that is not
+  integrated.

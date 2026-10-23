@@ -34,14 +34,14 @@ const flag = name => { const i = opts.indexOf(name); return i >= 0 ? opts[i + 1]
 
 const out = value => process.stdout.write(JSON.stringify(value) + '\n');
 const fail = (message, code = 1) => { process.stderr.write(message + '\n'); process.exit(code); };
-const need = (...names) => names.map(name => flag(name) || fail('Fehlt: ' + name, 2));
+const need = (...names) => names.map(name => flag(name) || fail('Missing: ' + name, 2));
 const repo = path.resolve(flag('--repo') || process.cwd());
 const sleep = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 const number = (name, fallback) => {
   const raw = flag(name);
   if (raw === null) return fallback;
   const value = Number(raw);
-  return /^\d+(\.\d+)?$/.test(raw) && value > 0 ? value : fail(`Ungültig: ${name} braucht eine positive Zahl`, 2);
+  return /^\d+(\.\d+)?$/.test(raw) && value > 0 ? value : fail(`Invalid: ${name} needs a positive number`, 2);
 };
 
 const git = args => execFileSync('git', ['-C', repo, ...args],
@@ -52,16 +52,16 @@ function probe() {
   let base = flag('--base');
   if (!base) {
     try { base = git(['rev-parse', '--abbrev-ref', 'origin/HEAD']); } catch { base = null; }
-    if (!base || base === 'origin/HEAD') fail('origin/HEAD ist nicht auflösbar; --base angeben', 2);
+    if (!base || base === 'origin/HEAD') fail('origin/HEAD cannot be resolved; pass --base', 2);
   }
   const run = spawnSync('git', ['-C', repo, 'merge-tree', '--write-tree', '--name-only', '--no-messages', base, branch],
     { encoding: 'utf8', maxBuffer: 1 << 28 });
   if (run.error || (run.status !== 0 && run.status !== 1)) {
-    fail('Prüfung nicht möglich: ' + (run.error ? run.error.message : (run.stderr || '').trim() || 'Exit ' + run.status), 3);
+    fail('Check not possible: ' + (run.error ? run.error.message : (run.stderr || '').trim() || 'Exit ' + run.status), 3);
   }
   const lines = run.stdout.split('\n');
   const tree = lines[0].trim();
-  if (!/^[0-9a-f]{40,64}$/.test(tree)) fail('Prüfung nicht möglich: unerwartete Ausgabe von git merge-tree', 3);
+  if (!/^[0-9a-f]{40,64}$/.test(tree)) fail('Check not possible: unexpected output from git merge-tree', 3);
   if (run.status === 0) { out({ result: 'clean', base, branch, tree }); return; }
   const files = [];
   for (const line of lines.slice(1)) {
@@ -74,7 +74,7 @@ function probe() {
 
 function ciWait() {
   const [pr] = need('--pr');
-  if (!/^\d+$/.test(pr)) fail('Ungültig: --pr braucht eine Nummer', 2);
+  if (!/^\d+$/.test(pr)) fail('Invalid: --pr needs a number', 2);
   const timeout = number('--timeout', 3600) * 1000;
   const interval = number('--interval', 20) * 1000;
   const deadline = Date.now() + timeout;
@@ -85,7 +85,7 @@ function ciWait() {
   for (;;) {
     const run = spawnSync('gh', ['pr', 'checks', pr, '--json', 'name,state,bucket,link'],
       { cwd: repo, encoding: 'utf8', maxBuffer: 1 << 26 });
-    if (run.error && run.error.code === 'ENOENT') fail('gh fehlt; die GitHub CLI installieren', 3);
+    if (run.error && run.error.code === 'ENOENT') fail('gh is missing; install the GitHub CLI', 3);
     const stderr = (run.stderr || '').trim();
     let parsed = null;
     try { parsed = JSON.parse(run.stdout); } catch { parsed = null; }
@@ -99,12 +99,12 @@ function ciWait() {
       checks = [];
     } else {
       if (first && /gh auth login|not logged in|authentication|GH_TOKEN/i.test(stderr)) {
-        fail('gh ist nicht angemeldet: ' + stderr, 3);
+        fail('gh is not logged in: ' + stderr, 3);
       }
-      lastError = stderr || (run.error ? run.error.message : 'keine gültige JSON-Ausgabe');
+      lastError = stderr || (run.error ? run.error.message : 'no valid JSON output');
       streak += 1;
       retries += 1;
-      if (streak >= 5) fail('gh pr checks schlug 5-mal in Folge fehl: ' + lastError, 3);
+      if (streak >= 5) fail('gh pr checks failed 5 times in a row: ' + lastError, 3);
     }
     first = false;
     if (Date.now() + interval > deadline) { result('timeout', view(checks), retries); process.exit(4); }
@@ -114,7 +114,7 @@ function ciWait() {
 
 function slotCount() {
   const given = flag('--slots');
-  if (given !== null) return /^[1-9]\d*$/.test(given) ? Number(given) : fail('Ungültig: --slots braucht eine positive Ganzzahl', 2);
+  if (given !== null) return /^[1-9]\d*$/.test(given) ? Number(given) : fail('Invalid: --slots needs a positive integer', 2);
   const file = path.join(os.homedir(), '.qatlas', 'plugins', 'orchestra.yaml');
   if (!fs.existsSync(file)) return 2;
   try {
@@ -123,9 +123,9 @@ function slotCount() {
     if (value === undefined) return 2;
     if (Number.isInteger(value) && value > 0) return value;
   } catch (error) {
-    fail('orchestra.yaml nicht lesbar: ' + error.message, 3);
+    fail('orchestra.yaml not readable: ' + error.message, 3);
   }
-  return fail('Ungültig: test-slots in orchestra.yaml braucht eine positive Ganzzahl', 3);
+  return fail('Invalid: test-slots in orchestra.yaml needs a positive integer', 3);
 }
 
 function alive(pid) {
@@ -133,11 +133,11 @@ function alive(pid) {
 }
 
 function slot() {
-  if (!rest.length) fail('Fehlt: Befehl nach --', 2);
+  if (!rest.length) fail('Missing: command after --', 2);
   const slots = slotCount();
   let common;
   try { common = git(['rev-parse', '--path-format=absolute', '--git-common-dir']); } catch (error) {
-    fail('Kein Git-Repo: ' + repo, 3);
+    fail('Not a git repo: ' + repo, 3);
   }
   const dir = path.join(path.dirname(common), '.qatlas', 'local', 'slots');
   fs.mkdirSync(dir, { recursive: true });
@@ -183,7 +183,7 @@ function slot() {
 
   let lock = first() && take();
   if (!lock) {
-    process.stderr.write(`Warte auf einen freien Testslot (${slots} Slots)\n`);
+    process.stderr.write(`Waiting for a free test slot (${slots} slots)\n`);
     while (!(lock = first() && take())) sleep(2000);
   }
   fs.rmSync(ticket, { force: true });
@@ -195,7 +195,7 @@ function slot() {
   for (const name of ['SIGINT', 'SIGTERM']) {
     process.on(name, () => { signalled = name; child.kill(name); });
   }
-  child.on('error', error => { release(); fail('Befehl nicht startbar: ' + error.message, 127); });
+  child.on('error', error => { release(); fail('Command could not be started: ' + error.message, 127); });
   child.on('exit', (code, signal) => {
     release();
     const name = signal || signalled;
@@ -204,5 +204,5 @@ function slot() {
 }
 
 const commands = { probe, 'ci-wait': ciWait, slot };
-if (!commands[command]) fail('Befehle: ' + Object.keys(commands).join(', '), 2);
+if (!commands[command]) fail('Commands: ' + Object.keys(commands).join(', '), 2);
 commands[command]();
