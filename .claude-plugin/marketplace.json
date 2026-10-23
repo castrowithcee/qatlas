@@ -1,10 +1,11 @@
 {
   "name": "qatlas",
   "owner": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
-  "description": "Qatlas als gemeinsame Infrastruktur und ausdrücklich gestarteter Arbeitsloop mit optionalen Packs.",
+  "description": "Qatlas as shared infrastructure and an explicitly started work loop, with optional packs.",
   "plugins": [
-    { "name": "qatlas", "source": "./plugins/qatlas", "category": "productivity", "defaultEnabled": true, "description": "Gemeinsame Qatlas-Infrastruktur mit Arbeitsloop für Zielklärung, Planung, Ausführung und Review sowie ausdrücklicher Kern- und Workspace-Verwaltung." },
-    { "name": "qatlas-dev", "source": "./plugins/qatlas-dev", "category": "productivity", "description": "Code-Pack: die faulste Lösung, die wirklich funktioniert, in drei Stufen plus ein Review-Skill. Benötigt qatlas." },
-    { "name": "qatlas-council", "source": "./plugins/qatlas-council", "category": "productivity", "description": "Optionales Beratungspack: startet nur auf Aufruf unabhängige Subagents für Ideen, Vorhaben und mit arch für technische Architekturentscheidungen. Benötigt qatlas." }
+    { "name": "qatlas", "source": "./plugins/qatlas", "category": "productivity", "defaultEnabled": true, "description": "Shared Qatlas infrastructure with a work loop for goal setting, planning, execution and review, plus explicit core and workspace management." },
+    { "name": "qatlas-dev", "source": "./plugins/qatlas-dev", "category": "productivity", "description": "Code pack: the laziest solution that actually works, in three levels, plus a review skill. Requires qatlas." },
+    { "name": "qatlas-design", "source": "./plugins/qatlas-design", "category": "productivity", "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a screenshot loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas." },
+    { "name": "qatlas-council", "source": "./plugins/qatlas-council", "category": "productivity", "description": "Optional advisory pack: on explicit call only, starts independent subagents for ideas and plans, and with arch for technical architecture decisions. Requires qatlas." }
   ]
 }

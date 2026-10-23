@@ -6,16 +6,21 @@
       "source": { "source": "local", "path": "./plugins/qatlas" },
       "policy": { "installation": "INSTALLED_BY_DEFAULT", "authentication": "ON_INSTALL" },
       "category": "Productivity",
-      "description": "Gemeinsame Qatlas-Infrastruktur mit Arbeitsloop für Zielklärung, Planung, Ausführung und Review sowie ausdrücklicher Kern- und Workspace-Verwaltung." },
+      "description": "Shared Qatlas infrastructure with a work loop for goal setting, planning, execution and review, plus explicit core and workspace management." },
     { "name": "qatlas-dev",
       "source": { "source": "local", "path": "./plugins/qatlas-dev" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity",
-      "description": "Code-Pack: die faulste Lösung, die wirklich funktioniert, in drei Stufen plus ein Review-Skill. Benötigt qatlas." },
+      "description": "Code pack: the laziest solution that actually works, in three levels, plus a review skill. Requires qatlas." },
+    { "name": "qatlas-design",
+      "source": { "source": "local", "path": "./plugins/qatlas-design" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity",
+      "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a screenshot loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas." },
     { "name": "qatlas-council",
       "source": { "source": "local", "path": "./plugins/qatlas-council" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity",
-      "description": "Optionales Beratungspack: startet nur auf Aufruf unabhängige Subagents für Ideen, Vorhaben und mit arch für technische Architekturentscheidungen. Benötigt qatlas." }
+      "description": "Optional advisory pack: on explicit call only, starts independent subagents for ideas and plans, and with arch for technical architecture decisions. Requires qatlas." }
   ]
 }

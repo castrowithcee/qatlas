@@ -1,6 +1,6 @@
 ---
 description: >
-  Überblick über ausdrückliche Einstiege, automatische Kern-Skills und optionale Packs von Qatlas.
+  Overview of the explicit entry points, the automatic core skills and the optional packs of Qatlas.
 type: meta
 edit: locked
 license: MIT
@@ -8,34 +8,36 @@ license: MIT
 
 # Skills
 
-Qatlas unterscheidet Skills, die nur der Nutzer startet, von solchen, die der Agent bei passendem Anlass
-selbst lädt.
+Qatlas separates skills that only the user starts from skills the agent loads by itself when the occasion
+fits.
 
-## Ausdrückliche Einstiege
+## Explicit entry points
 
-- **`qatlas`:** der Arbeitsloop mit `goal`, `shape`, `run` und `review`.
-- **`qatlas-core`:** seltene Verwaltung wie Einrichtung, Diagnose, Statusline und Wechsel des
-  Planungssystems.
-- **`qatlas-work`:** Einzelverfahren außerhalb des Loops, etwa Git-Worktrees verwalten.
-- **`qatlas-mode`:** Zusammenarbeitsmodi für den Rest der Session, etwa für Leser mit ADHD.
-- **`qatlas-help`:** dieses Handbuch.
+- **`qatlas`:** the work loop with `goal`, `shape`, `run` and `review`.
+- **`qatlas-core`:** rare administration such as setup, diagnosis, status line and switching the planning
+  system.
+- **`qatlas-work`:** single procedures outside the loop, such as managing Git worktrees.
+- **`qatlas-mode`:** collaboration modes for the rest of the session, such as for readers with ADHD.
+- **`qatlas-help`:** this handbook.
 
-## Automatische Kern-Skills
+## Automatic core skills
 
-| Skill | Greift, wenn | Wozu |
+| Skill | Applies when | Purpose |
 |---|---|---|
-| `qatlas-core-navigation` | ein Auftrag Kontext aus dem Repo braucht | Findet Wissen gezielt über Einstiege, Lesebedingungen und Frontmatter |
-| `qatlas-core-filing` | Dateien entstehen, sich ändern, wandern oder importiert werden | Bestimmt Ort, Namen, Kennung und Frontmatter und hält Verweise konsistent |
-| `qatlas-core-backlog` | Planungs- oder Taskarbeit ansteht | Arbeitet im einzigen maßgeblichen Planungssystem nach dessen Regeln |
-| `qatlas-core-git` | in einem Repo gearbeitet, committet oder gepusht wird | Prüft Zustand, schützt parallele Arbeit und hält Commits sauber |
+| `qatlas-core-navigation` | a request needs context from the repo | Finds knowledge through entry points, reading conditions and frontmatter |
+| `qatlas-core-filing` | files are created, changed, moved or imported | Sets place, name, identifier and frontmatter and keeps references consistent |
+| `qatlas-core-backlog` | planning or task work is due | Works in the single authoritative planning system by its rules |
+| `qatlas-core-git` | work happens in a repo, or commits and pushes | Checks state, protects parallel work and keeps commits clean |
 
-Jeder Kern-Skill lädt zuerst nur seinen kurzen Kern und liest Details erst für die konkrete Operation.
+Each core skill first loads only its short core and reads details for the concrete operation.
 
-## Optionale Packs
+## Optional packs
 
-- **`qatlas-dev`:** Methode für Codearbeit nach dem Prinzip „die einfachste Lösung, die vollständig
-  funktioniert“; `qatlas-dev-review` prüft auf Over-Engineering.
-- **`qatlas-council`:** unabhängige Subagents beraten zu Ideen, Vorhaben und mit `arch` zu technischer
-  Architektur.
+- **`qatlas-dev`:** method for code work, the smallest change that fully solves the task;
+  `qatlas-dev-review` reviews a change and `qatlas-dev-audit` a whole repo.
+- **`qatlas-design`:** art direction and a strict house style for web pages and app screens, checked in a
+  real browser.
+- **`qatlas-council`:** independent subagents advise on ideas and plans, and with `arch` on technical
+  architecture.
 
-Packs ergänzen Methode, besitzen aber weder Gespräch noch Planungssystem.
+Packs add method, but own neither the conversation nor the planning system.

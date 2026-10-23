@@ -1,0 +1,24 @@
+{
+  "name": "qatlas-design",
+  "version": "0.1.0",
+  "description": "Design pack for qatlas: researched art direction, a strict no-slop house style measured in a real browser, and a look-and-fix loop for web pages and app screens.",
+  "author": { "name": "Qatlas" },
+  "homepage": "https://github.com/castrowithcee/qatlas",
+  "repository": "https://github.com/castrowithcee/qatlas",
+  "license": "MIT",
+  "keywords": ["design", "frontend", "landing-page", "art-direction", "dashboard"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Qatlas Design",
+    "shortDescription": "Art direction and a no-slop house style for web pages",
+    "longDescription": "Design pack for Qatlas. Deals researched directions (idea, composition, type, palette, pictures, section blueprints) from a library, enforces a strict no-ornament house style with a real-browser inspector, finds credited pictures in open collections and runs a look-and-fix loop on screenshots. Covers landing pages, marketing sites, portfolios and app screens such as dashboards. Needs Node 22+ and an installed Chrome, Edge or Chromium. Requires qatlas.",
+    "developerName": "Qatlas",
+    "category": "Productivity",
+    "capabilities": ["Instructions"],
+    "defaultPrompt": [
+      "Build a landing page for this product with qatlas-design.",
+      "This page looks generic. Redesign it with qatlas-design.",
+      "Review this page with qatlas-design."
+    ]
+  }
+}

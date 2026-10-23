@@ -1,0 +1,14 @@
+format: 1
+allow:
+  - file: plugins/qatlas-design/skills/qatlas-design/evals/evals.json
+    rule: email
+    hash: da76c768e02f6471
+  - file: plugins/qatlas-design/skills/qatlas-design/evals/evals.json
+    rule: phone
+    hash: 0ae1b382b0e447cf
+  - file: plugins/qatlas-design/skills/qatlas-design/evals/evals.json
+    rule: email
+    hash: 02d511b21b5738c3
+  - file: plugins/qatlas-design/skills/qatlas-design/evals/evals.json
+    rule: email
+    hash: 4c2656ecadb220af

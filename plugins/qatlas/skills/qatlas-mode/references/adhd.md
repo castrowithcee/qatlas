@@ -6,6 +6,8 @@ attribution: github.com/ayghri/i-have-adhd
 license: MIT
 type: rule
 edit: locked
+upstream: 0.2.0
+upstream-mod: true
 ---
 
 # ADHD-Modus
