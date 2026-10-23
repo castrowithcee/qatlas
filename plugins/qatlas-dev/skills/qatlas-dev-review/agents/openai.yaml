@@ -1,7 +1,7 @@
 interface:
   display_name: "Qatlas Dev Review"
-  short_description: "Code gezielt auf unnötige Komplexität prüfen"
-  default_prompt: "Nutze $qatlas-dev-review, um diesen Code gezielt auf unnötige Komplexität zu prüfen."
+  short_description: "Quality review of a change, explained in plain English"
+  default_prompt: "Use $qatlas-dev-review to review this change."
 
 policy:
   allow_implicit_invocation: false

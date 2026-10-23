@@ -1,0 +1,7 @@
+interface:
+  display_name: "Qatlas Dev Audit"
+  short_description: "Quality audit of a whole repo, ranked and in plain English"
+  default_prompt: "Use $qatlas-dev-audit to audit this repo."
+
+policy:
+  allow_implicit_invocation: false

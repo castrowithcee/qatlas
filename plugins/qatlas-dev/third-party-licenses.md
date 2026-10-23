@@ -3,8 +3,8 @@ description: >
   Original copyright and MIT license notice for content adapted from DietrichGebert/ponytail.
 type: fact
 edit: locked
-source: https://github.com/DietrichGebert/ponytail/blob/main/LICENSE
-updated: 2026-08-11
+source: https://github.com/DietrichGebert/ponytail/blob/09c434ab73ca43761c5d8b0c5d341926c2fba710/LICENSE
+updated: 2026-10-23
 ---
 
 # Third-Party Licenses
@@ -13,7 +13,7 @@ updated: 2026-08-11
 
 Source: https://github.com/DietrichGebert/ponytail
 
-The `qatlas-dev` and `qatlas-dev-review` skills contain adapted portions of this project.
+The `qatlas-dev`, `qatlas-dev-review` and `qatlas-dev-audit` skills and the mode hook contain adapted portions of this project.
 
 MIT License
 
