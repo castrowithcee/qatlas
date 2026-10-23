@@ -67,7 +67,10 @@ Read each one completely at the stated time:
    authoritative planning system; if it is unreachable, do not start. If the sentinel runs inside tmux, the
    script creates its own session `sentinel--<repo>` in the user's server; tell the user the printed way to
    switch to it. Outside tmux it creates its own server; then tell the user the printed attach command. One
-   window holds four orchestrators; the script opens more in additional windows of the same session.
+   window holds four orchestrators; the script opens more in additional windows of the same session. Before
+   the first orchestrator, check the free space of the file system holding the repo against the threshold
+   named in the project instructions, else 5 GB. Below it, run the cleanup step for low space named there; if
+   that does not suffice or none is named, do not start and name the concrete obstacle.
 2. If `list --repo <repo-root>` already shows panes, check each one. If its title carries `FERTIG` or it has
    ended (`dead`), it is a leftover of an earlier run: save it with `capture` and close it with `close`. A
    live pane without `FERTIG` belongs to a running sentinel or to the user; do not start then, and clarify
@@ -250,6 +253,8 @@ origin --delete <branch>`.
   `review`, save the pane with `capture` and close it with `close`.
 - Clean up integrated worktrees and branches per the worktree contract, after a squash merge via the squash
   evidence.
+- At the end of the sentinel, run the cleanup steps that native project instructions or project memory name
+  for the end of a run, and name them in the final report.
 
 **Replenishment:** If a pane is closed and the run budget is not used up, cut a new package from the
 remaining executable tasks as described in "Cutting packages" that is independent of all running packages. It

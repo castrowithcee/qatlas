@@ -79,7 +79,11 @@ roles or target areas, the orchestrator may use two or more subagents. Their ass
 complement each other, must not build competing solutions and remain together within the error budget of
 this one task. The git workflow isolates simultaneously writing subagents. Full tests of simultaneous
 writers run via `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot -- <test command>`, which
-limits them repo-wide. A further task begins only when the active task is completed or securely handed over.
+limits them repo-wide. `slot` blocks until the command ends and passes its exit code through: run a full
+test through `slot` in the foreground or through the host's background execution with its completion notice,
+and never wait by polling processes (`pgrep`, `ps`) or lock folders. `slot status` (without `--`) prints busy
+and waiting slots as one read-only JSON line. A further task begins only when the active task is completed or
+securely handed over.
 
 The subagent may include an unpredicted file on its own if it demonstrably lies within the substantive
 scope, and names the deviation in its return. If an effect outside the scope would be necessary, or the

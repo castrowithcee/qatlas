@@ -19,6 +19,10 @@
 //     served in arrival order; --priority queues ahead of every caller without it.
 //     Locks live in the primary working tree so worktrees see them. No JSON output;
 //     the command exit code is passed through (signal: 128 plus signal number).
+//   qatlas-run-tools.js slot [--slots <count>] [--repo <path>] status
+//     Read-only view of the test slots; "status" without "--" (after "--" it is a command to run).
+//     Output: {"slots","busy":[{slot,pid,started,cwd,command,orphaned}],
+//     "waiting":[{priority,arrival,pid,cwd,command,orphaned}]}; unknown fields are null. Exit: 0, 3 no git repo.
 
 const fs = require('fs');
 const os = require('os');
@@ -132,32 +136,81 @@ function alive(pid) {
   try { process.kill(pid, 0); return true; } catch (error) { return error.code === 'EPERM'; }
 }
 
-function slot() {
-  if (!rest.length) fail('Missing: command after --', 2);
-  const slots = slotCount();
+// Working directory and command of the caller, stored after the PID in owner files and tickets.
+const detail = () => JSON.stringify({ cwd: process.cwd(), command: rest });
+const readDetail = text => {
+  try {
+    const { cwd, command } = JSON.parse(text);
+    return { cwd: typeof cwd === 'string' ? cwd : null, command: Array.isArray(command) ? command : null };
+  } catch { return { cwd: null, command: null }; }
+};
+const slotDir = () => {
   let common;
   try { common = git(['rev-parse', '--path-format=absolute', '--git-common-dir']); } catch (error) {
     fail('Not a git repo: ' + repo, 3);
   }
-  const dir = path.join(path.dirname(common), '.qatlas', 'local', 'slots');
+  return path.join(path.dirname(common), '.qatlas', 'local', 'slots');
+};
+const ownerFile = lock => path.join(lock, 'owner');
+const orphaned = lock => {
+  let pid;
+  try { pid = Number(fs.readFileSync(ownerFile(lock), 'utf8').split('\n')[0]); } catch {
+    // Folder without owner file: orphaned only if older than a few seconds.
+    try { return Date.now() - fs.statSync(lock).mtimeMs > 10000; } catch { return false; }
+  }
+  return !Number.isInteger(pid) || pid <= 0 || !alive(pid);
+};
+
+function slotStatus() {
+  const slots = slotCount();
+  const dir = slotDir();
+  const list = folder => { try { return fs.readdirSync(folder); } catch { return []; } };
+  const busy = list(dir).filter(entry => /^\d+$/.test(entry)).sort((a, b) => a - b).flatMap(entry => {
+    const lock = path.join(dir, entry);
+    let text = null;
+    try { text = fs.readFileSync(ownerFile(lock), 'utf8'); } catch { /* no owner file yet */ }
+    const lines = text === null ? [] : text.split('\n');
+    const pid = Number(lines[0]);
+    return [{
+      slot: Number(entry),
+      pid: Number.isInteger(pid) && pid > 0 ? pid : null,
+      started: lines[1] || null,
+      ...readDetail(lines[2]),
+      orphaned: orphaned(lock),
+    }];
+  });
+  const queue = path.join(dir, 'queue');
+  const waiting = list(queue).sort().flatMap(entry => {
+    const match = /^(\d+)-(\d+)-(\d+)$/.exec(entry);
+    if (!match) return [];
+    let text = '';
+    try { text = fs.readFileSync(path.join(queue, entry), 'utf8'); } catch { /* ticket just removed */ }
+    return [{
+      priority: Number(match[1]) === 0,
+      arrival: new Date(Number(match[2])).toISOString(),
+      pid: Number(match[3]),
+      ...readDetail(text),
+      orphaned: !alive(Number(match[3])),
+    }];
+  });
+  out({ slots, busy, waiting });
+}
+
+function slot() {
+  const isStatus = sep < 0 && opts.some((arg, i) => arg === 'status' && !['--slots', '--repo'].includes(opts[i - 1]));
+  if (isStatus) return slotStatus();
+  if (!rest.length) fail('Missing: command after --', 2);
+  const slots = slotCount();
+  const dir = slotDir();
   fs.mkdirSync(dir, { recursive: true });
 
-  const owner = lock => path.join(lock, 'owner');
-  const orphaned = lock => {
-    let pid;
-    try { pid = Number(fs.readFileSync(owner(lock), 'utf8').split('\n')[0]); } catch {
-      // Folder without owner file: orphaned only if older than a few seconds.
-      try { return Date.now() - fs.statSync(lock).mtimeMs > 10000; } catch { return false; }
-    }
-    return !Number.isInteger(pid) || pid <= 0 || !alive(pid);
-  };
   const take = () => {
     for (let i = 1; i <= slots; i++) {
       const lock = path.join(dir, String(i));
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           fs.mkdirSync(lock);
-          fs.writeFileSync(owner(lock), `${process.pid}\n${new Date().toISOString()}\n`);
+          fs.writeFileSync(ownerFile(lock), `${process.pid}\n${new Date().toISOString()}\n${detail()}\n`);
           return lock;
         } catch (error) {
           if (error.code !== 'EEXIST') throw error;
@@ -174,7 +227,7 @@ function slot() {
   fs.mkdirSync(queue, { recursive: true });
   const name = `${opts.includes('--priority') ? 0 : 1}-${String(Date.now()).padStart(15, '0')}-${process.pid}`;
   const ticket = path.join(queue, name);
-  fs.writeFileSync(ticket, '', { flag: 'wx' });
+  fs.writeFileSync(ticket, detail() + '\n', { flag: 'wx' });
   const first = () => fs.readdirSync(queue).sort().find(entry => {
     if (alive(Number(entry.split('-')[2]))) return true;
     fs.rmSync(path.join(queue, entry), { force: true });

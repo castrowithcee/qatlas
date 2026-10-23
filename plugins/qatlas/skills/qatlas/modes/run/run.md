@@ -82,7 +82,10 @@ does not automatically become an assignment for a stronger model.
 
 ## Procedure
 
-1. Check the orchestration and select the tasks.
+1. Check the orchestration and select the tasks. Before the first task, check the free space of the file
+   system holding the repo against the threshold named in the project instructions, else 5 GB. Below it, run
+   the cleanup step for low space named there; if that does not suffice or none is named, do not start and
+   name the concrete obstacle.
 2. Claim exactly one task, have it implemented, accept it and integrate it.
 3. Record side findings before you begin the next selected task.
 4. Repeat selection, implementation and integration until the task limit is reached or a stop condition
@@ -109,4 +112,5 @@ continues a run in a new session. Every handover therefore appears in the spine 
 closing is understandable without the course of the run. Report the result and the decisive evidence
 briefly. For each processed task, name changed files, checks run, documentation effect, deviations from the
 expected work card and unresolved risks, as well as the worker profiles used with model and effort; raw logs
-stay out.
+stay out. Run the cleanup steps that native project instructions or project memory name for the end of a
+run, and name them in the report.
