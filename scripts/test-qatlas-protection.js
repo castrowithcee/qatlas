@@ -50,6 +50,15 @@ try {
   assert.strictEqual(result.status, 2);
   assert.match(result.stdout, /personal-data \(ask\)/);
 
+  // A staged diff above Node's 1 MiB default buffer must still be scanned.
+  const large = 'lorem ipsum dolor sit amet\n'.repeat(80000);
+  result = run('large-clean', { staged: { 'big.txt': large } });
+  assert.strictEqual(result.status, 0);
+
+  result = run('large-mail', { staged: { 'big.txt': large + mail['notes.md'] } });
+  assert.strictEqual(result.status, 2);
+  assert.match(result.stdout, /personal-data \(ask\)/);
+
   result = run('mail-example', { staged: { 'a.md': 'nutzer@example.com\n' } });
   assert.strictEqual(result.status, 0);
 
@@ -99,7 +108,7 @@ try {
   assert.match(text, /# eigener Kommentar/);
   assert.match(text, /secrets: warn/);
 
-  process.stdout.write('✓ Qatlas-Protection: 11 Szenarien erfolgreich.\n');
+  process.stdout.write('✓ Qatlas-Protection: 13 Szenarien erfolgreich.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

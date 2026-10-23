@@ -45,7 +45,7 @@ const PERSONAL_RULES = [
 ];
 
 function git(args) {
-  return execFileSync('git', ['-C', target, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  return execFileSync('git', ['-C', target, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 1 << 28 });
 }
 
 function stagedLines() {
