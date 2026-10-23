@@ -34,8 +34,9 @@ without a push.
   against the commit boundary and split it before you push. A sentinel handover enforces this
   mechanically: `handover` rejects a branch with more than one non-merge commit unless the report frontmatter
   carries a `cut-exception`.
-- **Closing:** The merge of the pull request replaces local integration. The task is `done` only when all its
-  pull requests are merged and the acceptance is evidenced on the new `origin/<control-branch>`.
+- **Closing:** `land` performs the merge, the squash evidence and the deletion of the remote branch. The merge
+  of the pull request replaces local integration. The task is `done` only when all its pull requests are
+  merged and the acceptance is evidenced on the new `origin/<control-branch>`.
 - **Dependent work:** A squash merge rules out stacked branches. A dependent task or pull request then
   starts only from the integrated `origin/<control-branch>`, never on a predecessor branch that is not
   integrated.

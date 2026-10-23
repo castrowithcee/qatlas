@@ -13,6 +13,15 @@
 //     Transient gh errors are retried, at most 5 in a row.
 //     Output: {"pr","result":"pass"|"fail"|"timeout","checks":[{name,bucket,link}],"retries"}.
 //     Exit: 0 pass, 1 fail, 4 timeout, 2 usage error, 3 gh missing, not logged in or persistently failing.
+//   qatlas-run-tools.js land --pr <number> --report <file> [--timeout <s>] [--interval <s>] [--repo <path>]
+//     Integrates one pull request via gh: reads branch, pr-title and pr-body from the report frontmatter,
+//     checks that the PR head equals the local branch tip, waits for CI as ci-wait does, squash-merges
+//     with --match-head-commit (one retry), proves the squash (merge tree equals branch tree, else equal
+//     patch-id) and only then deletes the remote branch. Does not open PRs or touch local worktrees/branches.
+//     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|null,"branch_deleted",...}; result is
+//     merged | ci-fail | timeout | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
+//     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed,
+//     2 usage error (also missing frontmatter or field), 3 gh/git check not possible.
 //   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
 //     --slots, else test-slots in ~/.qatlas/plugins/orchestra.yaml, else 2. Waiting callers are
@@ -28,6 +37,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync, spawn, spawnSync } = require('child_process');
+const { parseFrontmatter } = require('./handover-frontmatter.js');
 
 const argv = process.argv.slice(2);
 const command = argv[0];
@@ -76,13 +86,10 @@ function probe() {
   process.exit(1);
 }
 
-function ciWait() {
-  const [pr] = need('--pr');
-  if (!/^\d+$/.test(pr)) fail('Invalid: --pr needs a number', 2);
-  const timeout = number('--timeout', 3600) * 1000;
-  const interval = number('--interval', 20) * 1000;
+// Polls the checks of a pull request until none is pending. Returns {state, checks, retries} with state
+// pass, fail or timeout; exits 3 when gh is unusable.
+function waitForChecks(pr, timeout, interval) {
   const deadline = Date.now() + timeout;
-  const result = (state, checks, retries) => out({ pr: Number(pr), result: state, checks, retries });
   const view = list => list.map(({ name, bucket, link }) => ({ name, bucket, link }));
   let retries = 0, streak = 0, first = true, checks = [], lastError = '';
 
@@ -96,8 +103,8 @@ function ciWait() {
     if (Array.isArray(parsed)) {
       streak = 0;
       checks = parsed;
-      if (checks.some(c => c.bucket === 'fail' || c.bucket === 'cancel')) { result('fail', view(checks), retries); process.exit(1); }
-      if (checks.length && !checks.some(c => c.bucket === 'pending')) { result('pass', view(checks), retries); return; }
+      if (checks.some(c => c.bucket === 'fail' || c.bucket === 'cancel')) return { state: 'fail', checks: view(checks), retries };
+      if (checks.length && !checks.some(c => c.bucket === 'pending')) return { state: 'pass', checks: view(checks), retries };
     } else if (/no checks reported/i.test(stderr)) {
       streak = 0;
       checks = [];
@@ -111,9 +118,129 @@ function ciWait() {
       if (streak >= 5) fail('gh pr checks failed 5 times in a row: ' + lastError, 3);
     }
     first = false;
-    if (Date.now() + interval > deadline) { result('timeout', view(checks), retries); process.exit(4); }
+    if (Date.now() + interval > deadline) return { state: 'timeout', checks: view(checks), retries };
     sleep(interval);
   }
+}
+
+function ciWait() {
+  const [pr] = need('--pr');
+  if (!/^\d+$/.test(pr)) fail('Invalid: --pr needs a number', 2);
+  const timeout = number('--timeout', 3600) * 1000;
+  const interval = number('--interval', 20) * 1000;
+  const { state, checks, retries } = waitForChecks(pr, timeout, interval);
+  out({ pr: Number(pr), result: state, checks, retries });
+  if (state !== 'pass') process.exit(state === 'fail' ? 1 : 4);
+}
+
+const LAND_EXIT = { merged: 0, 'ci-fail': 1, timeout: 4, 'head-mismatch': 5, 'merge-failed': 6, 'proof-failed': 7 };
+
+function land() {
+  const [pr, reportFile] = need('--pr', '--report');
+  if (!/^\d+$/.test(pr)) fail('Invalid: --pr needs a number', 2);
+  const timeout = number('--timeout', 3600) * 1000;
+  const interval = number('--interval', 20) * 1000;
+
+  let text;
+  try { text = fs.readFileSync(reportFile, 'utf8'); } catch (error) { fail('Report not readable: ' + error.message, 2); }
+  let parsed;
+  try { parsed = parseFrontmatter(text); } catch (error) {
+    if (error.kind === 'load') fail('Check not possible: YAML parser not loadable (' + error.message + ').', 3);
+    fail('Report frontmatter invalid: ' + error.message, 2);
+  }
+  if (!parsed) fail('Report has no frontmatter', 2);
+  const field = key => typeof parsed.data[key] === 'string' && parsed.data[key].trim()
+    ? parsed.data[key].trim() : fail(`Report frontmatter: "${key}" must be a non-empty string`, 2);
+  const branch = field('branch'), title = field('pr-title'), body = field('pr-body');
+  // Refs come from an untrusted report: they reach git only as arguments and may not start with "-".
+  const safeRef = (ref, what) => ref.startsWith('-') ? fail(`Invalid: ${what} must not start with "-"`, 2) : ref;
+  safeRef(branch, 'branch');
+
+  const gh = args => {
+    const run = spawnSync('gh', args, { cwd: repo, encoding: 'utf8', maxBuffer: 1 << 26 });
+    if (run.error && run.error.code === 'ENOENT') fail('gh is missing; install the GitHub CLI', 3);
+    return run;
+  };
+  const ghJson = (args, what) => {
+    const run = gh(args);
+    try { if (run.status === 0) return JSON.parse(run.stdout); } catch { /* handled below */ }
+    return fail(`Check not possible: ${what} failed: ${(run.stderr || '').trim() || 'no valid JSON output'}`, 3);
+  };
+  const gitOr3 = args => {
+    try { return git(args); } catch (error) {
+      return fail('Check not possible: git ' + args[0] + ' failed: ' + ((error.stderr || error.message) + '').trim(), 3);
+    }
+  };
+  const finish = (state, extra = {}) => {
+    out({ pr: Number(pr), result: state, merge_sha: null, proof: null, branch_deleted: false, ...extra });
+    process.exit(LAND_EXIT[state]);
+  };
+
+  // 2. The head the report vouches for must be the head GitHub will merge.
+  const sha = gitOr3(['rev-parse', '--verify', '--quiet', branch + '^{commit}']);
+  const info = ghJson(['pr', 'view', pr, '--json', 'headRefOid,headRefName,state,baseRefName'], 'gh pr view');
+  if (info.state !== 'OPEN') finish('head-mismatch', { reason: `pull request is ${info.state}`, head: info.headRefOid, branch_sha: sha });
+  if (info.headRefOid !== sha) finish('head-mismatch', { reason: 'pull request head differs from branch', head: info.headRefOid, branch_sha: sha });
+  const base = safeRef(String(info.baseRefName || ''), 'base');
+  if (!base) fail('Check not possible: pull request has no base branch', 3);
+
+  // 3. CI
+  const ci = waitForChecks(pr, timeout, interval);
+  if (ci.state !== 'pass') finish(ci.state === 'fail' ? 'ci-fail' : 'timeout', { checks: ci.checks });
+
+  // 4. Merge with one retry; --match-head-commit refuses a head that moved after the comparison. A failed
+  // call may still have merged on GitHub (e.g. a dropped connection), so the PR state decides.
+  const mergeArgs = ['pr', 'merge', pr, '--squash', '--subject', title, '--body', body, '--match-head-commit', sha];
+  const isMerged = () => {
+    const run = gh(['pr', 'view', pr, '--json', 'state']);
+    try { return run.status === 0 && JSON.parse(run.stdout).state === 'MERGED'; } catch { return false; }
+  };
+  let merged = gh(mergeArgs);
+  if (merged.status !== 0 && !isMerged()) {
+    sleep(2000);
+    merged = gh(mergeArgs);
+    if (merged.status !== 0 && !isMerged()) {
+      finish('merge-failed', { reason: (merged.stderr || '').trim() || 'gh pr merge failed' });
+    }
+  }
+
+  // 5. Squash evidence
+  const view = ghJson(['pr', 'view', pr, '--json', 'mergeCommit'], 'gh pr view');
+  const mergeSha = view.mergeCommit && view.mergeCommit.oid;
+  if (typeof mergeSha !== 'string' || !/^[0-9a-f]{40,64}$/.test(mergeSha)) {
+    finish('proof-failed', { reason: 'merge commit not reported by gh' });
+  }
+  const unproven = reason => finish('proof-failed', { merge_sha: mergeSha, reason });
+  try { git(['fetch', '--quiet', 'origin', base]); } catch (error) {
+    unproven('git fetch failed: ' + ((error.stderr || error.message) + '').trim());
+  }
+  const tryGit = args => { try { return git(args); } catch { return null; } };
+  if (tryGit(['merge-base', '--is-ancestor', mergeSha, 'FETCH_HEAD']) === null) {
+    unproven(`merge commit is not on origin/${base}`);
+  }
+  let proof = null;
+  if (tryGit(['rev-parse', mergeSha + '^{tree}']) === tryGit(['rev-parse', sha + '^{tree}'])) {
+    proof = 'tree';
+  } else {
+    const patchId = diffArgs => {
+      const diff = tryGit(['diff', ...diffArgs]);
+      if (!diff) return null;
+      const run = spawnSync('git', ['-C', repo, 'patch-id', '--stable'], { input: diff + '\n', encoding: 'utf8', maxBuffer: 1 << 28 });
+      return run.status === 0 ? run.stdout.split(/\s/)[0] || null : null;
+    };
+    const mergeBase = tryGit(['merge-base', mergeSha + '^', sha]);
+    const want = patchId([mergeSha + '^', mergeSha]);
+    if (want && mergeBase && want === patchId([mergeBase, sha])) proof = 'patch-id';
+  }
+  if (!proof) unproven('merge commit content differs from the branch');
+
+  // 6. Only with proof: delete the remote branch.
+  let deleted = false, reason;
+  try { git(['push', 'origin', '--delete', branch]); deleted = true; } catch (error) {
+    reason = ((error.stderr || error.message) + '').trim();
+  }
+  const extra = deleted ? {} : { branch_delete_reason: reason };
+  out({ pr: Number(pr), result: 'merged', merge_sha: mergeSha, proof, branch_deleted: deleted, ...extra });
 }
 
 function slotCount() {
@@ -256,6 +383,6 @@ function slot() {
   });
 }
 
-const commands = { probe, 'ci-wait': ciWait, slot };
+const commands = { probe, 'ci-wait': ciWait, land, slot };
 if (!commands[command]) fail('Commands: ' + Object.keys(commands).join(', '), 2);
 commands[command]();

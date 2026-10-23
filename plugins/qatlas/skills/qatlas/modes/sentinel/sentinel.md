@@ -86,7 +86,11 @@ Read each one completely at the stated time:
    [integration via pull requests](../../references/playbook-git-pr.md) applies. In that case, check whether
    a merge queue is active in the target repo, whether branch protection requires an up-to-date state before
    the merge, and whether `gh` is available and logged in. If `gh`, its login or the authorization for push,
-   pull request and merge is missing, do not start and clarify it with the user.
+   pull request and merge is missing, do not start and clarify it with the user. If project instructions
+   require pull request operations through a Qatlas broker connection, check with `qatlas.search` and
+   `qatlas.describe` before the first orchestrator that the connection exists and offers creating and merging
+   pull requests; otherwise do not start. In that case perform the steps of `land` through the broker instead
+   of calling `land`.
 
 The integration base `<basis>` is `origin/<control-branch>` for integration via pull requests, otherwise the
 local `<control-branch>`.
@@ -234,11 +238,13 @@ until your `integrated`. Integrate handovers one at a time and log every integra
    correction attempt. Never resolve conflicts yourself. Only if the orchestrator is no longer available do
    you secure the task as a handover to `review` per the git workflow.
 3. Without a conflict, integrate per the git workflow, and for integration via pull requests per
-   [integration via pull requests](../../references/playbook-git-pr.md) with PR title and PR body from the
-   frontmatter of the report (`pr-title`, `pr-body`) and `ci-wait`. In doing so, check locally only the
-   affected areas via `slot --priority` and leave the full breadth to CI. You treat a known or new flake by
-   its rule in [accepting and integrating](../../references/playbook-acceptance.md). Without pull requests,
-   you run the shared checks yourself. You integrate tasks spanning several repos per the git workflow.
+   [integration via pull requests](../../references/playbook-git-pr.md) with `land --pr <n> --report <file>`
+   of `qatlas-run-tools.js`; PR title and PR body come from the frontmatter of the report (`pr-title`,
+   `pr-body`). `land` checks the head, waits for CI like `ci-wait`, squash-merges, proves the squash and
+   deletes the remote branch. In doing so, check locally only the affected areas via `slot --priority` and
+   leave the full breadth to CI. You treat a known or new flake by its rule in [accepting and
+   integrating](../../references/playbook-acceptance.md). Without pull requests, you run the shared checks
+   yourself. You integrate tasks spanning several repos per the git workflow.
 4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.
    Reply with `answer … --answer "integrated <sha>"`, where `<sha>` is the integration commit on the control
    branch.
@@ -251,10 +257,12 @@ CI run and branch protection requires an up-to-date state, catch up with the bas
 for example via GitHub's branch update, and wait for CI again; you return a conflict as in step 2. In this
 case integration stays serially bound to the CI duration; name that as a bottleneck in the report.
 
-After a squash merge with squash evidence provided, delete the pull request's remote branch per the worktree
-contract; the authorization for push and merge covers it. Use the Qatlas MCP broker for it if it offers a
-suitable operation, otherwise `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` or `git push
-origin --delete <branch>`.
+`land` deletes the remote branch itself once it has proven the squash; the authorization for push and merge
+covers it. Clean up local worktrees and branches per the worktree contract, with the `proof` result of `land`
+as squash evidence. If a merge queue is active, `land` does not apply; delete the remote branch there per the
+worktree contract after the queue has merged, with the Qatlas MCP broker if it offers a suitable operation,
+otherwise `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` or `git push origin --delete
+<branch>`.
 
 ## Finish
 

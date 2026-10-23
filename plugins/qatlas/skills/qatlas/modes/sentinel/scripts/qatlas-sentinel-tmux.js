@@ -34,6 +34,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const { parseFrontmatter } = require('../../../scripts/handover-frontmatter.js');
 
 const MAX_PANES = 4;
 const NARROW = 80;
@@ -291,22 +292,14 @@ function reportText() {
 // Frontmatter is optional; without it the report passes unchecked. Refs come from an untrusted report:
 // they reach git only as arguments, never via a shell, and may not start with "-".
 function validateHandover(text, repo) {
-  const match = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text);
-  if (!match) return;
   const bad = message => fail('Handover rejected: ' + message, 2);
-  let YAML;
-  try {
-    YAML = require(path.join(__dirname, '..', '..', '..', '..', '..', 'scripts', 'runtime', 'vendor', 'yaml-2.9.0.js'));
-  } catch (error) { return fail('Check not possible: YAML parser not loadable (' + error.message.split('\n')[0] + ').', 3); }
-  let data;
-  try {
-    const document = YAML.parseDocument(match[1], {
-      version: '1.2', schema: 'core', merge: false, resolveKnownTags: false, uniqueKeys: true, stringKeys: true, logLevel: 'error',
-    });
-    if (document.errors.length) throw document.errors[0];
-    data = document.toJS({ maxAliasCount: 0 });
-  } catch (error) { return bad('frontmatter is not valid YAML (' + error.message.split('\n')[0] + ').'); }
-  if (!data || typeof data !== 'object' || Array.isArray(data)) return bad('frontmatter must be a mapping.');
+  let parsed;
+  try { parsed = parseFrontmatter(text); } catch (error) {
+    if (error.kind === 'load') return fail('Check not possible: YAML parser not loadable (' + error.message + ').', 3);
+    return bad(error.kind === 'yaml' ? 'frontmatter is not valid YAML (' + error.message + ').' : error.message);
+  }
+  if (!parsed) return;
+  const { data } = parsed;
   const str = key => typeof data[key] === 'string' && data[key].trim() ? data[key].trim() : bad(`"${key}" must be a non-empty string.`);
   const title = str('pr-title');
   if (/[\r\n]/.test(title)) bad('"pr-title" must be a single line.');
