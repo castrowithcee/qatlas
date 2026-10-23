@@ -1,6 +1,6 @@
 {
   "name": "qatlas-dev",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Code pack for qatlas: a lazy senior developer who makes the smallest change that fully solves the task, plus a quality review of a change and an audit of a whole repo.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
