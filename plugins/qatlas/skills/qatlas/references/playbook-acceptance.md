@@ -27,11 +27,16 @@ invariants again at the latest when all milestones are integrated. Classify ever
   substitute approach. Secure the task immediately for `review` or `waiting`.
 - **Solution error:** The approach was executed but does not meet an acceptance criterion. Derive a concrete
   correction from the diagnosis or new evidence.
-- **Known flake:** A CI failure does not count as a solution error only if the failing test lies outside
-  the diff and is recorded in the planning system as a known flake with a task ID. Then restart the failed
-  job at most once per pull request and name the rerun with this task ID in the closing. Assign a new
-  occurrence to the existing task instead of recording it anew. Every other CI failure remains a solution
-  error.
+- **Known flake:** A CI failure counts as a known flake, not as a solution error, only if the failing test
+  lies outside the diff and is recorded in the planning system as a known flake with a task ID. Then restart
+  the failed job at most once per pull request and name the rerun with this task ID in the closing. Assign a
+  new occurrence to the existing task instead of recording it anew.
+- **New flake:** A CI failure not yet recorded counts as a new flake only if (a) the failing test lies
+  outside the diff, (b) it fails only in some jobs or platforms, (c) the others are green and (d) a targeted
+  local run via `slot` is green. Then record it as a draft in the planning system, restart the failed job at
+  most once per pull request, log the rerun with the new task ID and name it in the closing under newly
+  recorded items (`Neu erfasst` in [the closing block](playbook-closing-block.md)). If the rerun fails again,
+  it is a solution error. Every other CI failure remains a solution error.
 
 ## At most two corrections
 

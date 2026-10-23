@@ -74,7 +74,11 @@ Read each one completely at the stated time:
 2. If `list --repo <repo-root>` already shows panes, check each one. If its title carries `FERTIG` or it has
    ended (`dead`), it is a leftover of an earlier run: save it with `capture` and close it with `close`. A
    live pane without `FERTIG` belongs to a running sentinel or to the user; do not start then, and clarify
-   it with the user.
+   it with the user. Exception: if `list` shows live panes without `FERTIG` and `report` shows a run of this
+   repo, a new session takes it over only on the user's explicit order to continue it. The successor cuts no
+   packages beyond the remaining run budget, adopts the running orchestrators, reconstructs the state from
+   `list`, `report` (including `plan`) and the planning system and continues `wait` from the `cursor` of
+   `list`. Without such an order, the rule above applies.
 3. For each intended host, check its section in `orchestra.yaml` with a valid orchestrator model and its CLI
    on the `PATH`: `claude` for Claude Code, `codex` for Codex. The default is your own host; a run directive
    may assign packages to another host.
@@ -114,6 +118,9 @@ stays in its order for replenishment and later runs.
 
 The run budget is the sum of the sizes of the packages cut at the start. Each task that is completed or
 handed over to `review` in a secured state consumes one slot of it.
+
+After the cut, log each package with the run budget fixed at the start: `plan --repo <repo-root> --budget <n>
+--package <package> --tasks <id,id,...>`, so that a successor can reconstruct them.
 
 Tell the user the packages with their tasks, the reason for the cut and the run budget in a few lines, and
 start directly.
@@ -194,8 +201,8 @@ Keep your context lean: read diffs first as `--stat` and then only the affected 
 the closing you log immediately with `log` instead of holding it in memory: assumptions as `annahme`,
 deviations from the procedure as `abweichung`, risks not recorded publicly as `risiko`, newly recorded tasks
 as `erfasst` and open user decisions as `entscheiden`, each with package and task. After a compaction of your
-context or a restart, reconstruct the state from `list`, `report`, the planning system and the stated run
-budget, not from memory.
+context or a restart, reconstruct the state from `list`, `report` (including `plan`) and the planning system,
+not from memory; a new session continues as described in "Prepare" step 2.
 
 Handle each event:
 
@@ -229,9 +236,9 @@ until your `integrated`. Integrate handovers one at a time and log every integra
 3. Without a conflict, integrate per the git workflow, and for integration via pull requests per
    [integration via pull requests](../../references/playbook-git-pr.md) with PR title and PR body from the
    frontmatter of the report (`pr-title`, `pr-body`) and `ci-wait`. In doing so, check locally only the
-   affected areas via `slot --priority` and leave the full breadth to CI. You treat a known flake by its rule in [accepting and
-   integrating](../../references/playbook-acceptance.md). Without pull requests, you run the shared checks
-   yourself. You integrate tasks spanning several repos per the git workflow.
+   affected areas via `slot --priority` and leave the full breadth to CI. You treat a known or new flake by
+   its rule in [accepting and integrating](../../references/playbook-acceptance.md). Without pull requests,
+   you run the shared checks yourself. You integrate tasks spanning several repos per the git workflow.
 4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.
    Reply with `answer … --answer "integrated <sha>"`, where `<sha>` is the integration commit on the control
    branch.
@@ -266,7 +273,8 @@ origin --delete <branch>`.
 remaining executable tasks as described in "Cutting packages" that is independent of all running packages. It
 comprises at most the package size and the rest of the run budget, carries a new package name and starts as
 described in "Starting orchestrators". Never more orchestrators run at the same time than "Cutting packages"
-permits. Tell the user the package with its tasks in one line.
+permits. Log it with `plan` and the unchanged run budget, as at the cut. Tell the user the package with its
+tasks in one line.
 
 The run ends when no more replenishment is possible, every remaining pane shows `FERTIG` or has ended, and
 all handed-over tasks are integrated or secured as a handover. In the report, state the metrics from `report

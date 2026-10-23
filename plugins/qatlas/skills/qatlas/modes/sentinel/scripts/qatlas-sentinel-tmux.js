@@ -10,7 +10,7 @@
 // environment.
 // Events are JSON lines in <repo>/.qatlas/local/sentinel/events.jsonl and the single source of truth for
 // answers. `seq` is the 0-based line index, derived on read, not stored. Waking types: question,
-// handover, done, exited; start, answer, picked and all types written via log do not wake.
+// handover, done, exited; start, plan, answer, picked and all types written via log do not wake.
 // `wait --since <seq>` returns all waking events from seq on and the new `cursor` (count of all
 // events); pass it as --since on the next call and nothing is lost. Handover reports are stored as
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
@@ -26,6 +26,7 @@
 //   qatlas-sentinel-tmux.js handover --repo <root> --package <package> --task <id> --report <text|file> [--timeout <seconds>]
 //   qatlas-sentinel-tmux.js answer --repo <root> --package <package> --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
 //   qatlas-sentinel-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
+//   qatlas-sentinel-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>   (run budget and package tasks; repeatable)
 //   qatlas-sentinel-tmux.js report --repo <root>
 //   qatlas-sentinel-tmux.js capture --repo <root> --package <package>   (scrollback to <root>/.qatlas/local/sentinel/<package>.log)
 //   qatlas-sentinel-tmux.js close --repo <root> --package <package>
@@ -40,7 +41,7 @@ const MARK = '@qatlas-sentinel';
 const SOCKET = 'qatlas-sentinel';
 const WAKING = new Set(['question', 'handover', 'done', 'exited']);
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
-const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed']);
+const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed', 'plan']);
 const INTEGRATION = new Set(['push', 'pr', 'merge', 'rerun', 'conflict', 'close']);
 const PREFIX = { question: 'FRAGE · ', handover: 'ÜBERGABE · ' };
 
@@ -344,6 +345,17 @@ function answer() {
   out({ pane, answered: true });
 }
 
+function plan() {
+  const repo = repoKey();
+  const budget = Number(need('--budget')[0]);
+  const [name, tasks] = need('--package', '--tasks');
+  if (!Number.isInteger(budget) || budget < 1) fail('--budget must be a positive integer', 2);
+  const ids = tasks.split(',').map(s => s.trim());
+  if (!name.trim() || ids.some(id => !id)) fail('--package and --tasks must not be empty', 2);
+  record(repo, 'plan', { package: name, text: JSON.stringify({ budget, tasks: ids }) });
+  out({ planned: name, budget, tasks: ids, cursor: events(repo).length });
+}
+
 function logEvent() {
   const repo = repoKey();
   const [type] = need('--type');
@@ -364,10 +376,14 @@ function report() {
   const tasks = {};
   const log = { rerun: 0, conflict: 0 };
   const notes = {};
+  const plan = { budget: null, packages: {} };
   const lastIntegrated = {};
   for (const e of list) {
     if (!RESERVED.has(e.type) && !INTEGRATION.has(e.type) && e.type !== 'unlesbar') {
       (notes[e.type] ||= []).push(Object.fromEntries(['package', 'task', 'text'].filter(k => e[k]).map(k => [k, e[k]])));
+    }
+    if (e.type === 'plan') {
+      try { const p = JSON.parse(e.text); plan.budget = p.budget; plan.packages[e.package] = p.tasks; } catch { /* skip */ }
     }
     const pkg = e.package && (packages[e.package] ||= { rueckfragen: 0, start: null });
     if (e.type === 'start' && pkg) pkg.start = time(e);
@@ -392,7 +408,7 @@ function report() {
   for (const p of Object.values(packages)) delete p.start;
   out({
     laufdauer: list.length ? secs(time(list[list.length - 1]) - time(list[0])) : null,
-    tasks, packages, log, notes, events: list.length,
+    tasks, packages, plan, log, notes, events: list.length,
   });
 }
 
@@ -436,10 +452,11 @@ try {
   else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, repoKey()); raise('handover', text, task).catch(error => fail(error.message)); }
   else if (command === 'answer') answer();
   else if (command === 'log') logEvent();
+  else if (command === 'plan') plan();
   else if (command === 'report') report();
   else if (command === 'capture') capture();
   else if (command === 'close') close();
-  else fail('Befehle: add, list, title, wait, ask, handover, answer, log, report, capture, close', 2);
+  else fail('Commands: add, list, title, wait, ask, handover, answer, log, plan, report, capture, close', 2);
 } catch (error) {
   fail((error.stderr ? String(error.stderr).trim() : '') || error.message);
 }
