@@ -217,11 +217,13 @@ Handle each event:
   recommendation and pass on their answer; with `--fly` you instead answer as the flag file prescribes.
 - **`handover`:** Integrate as described in the following section.
 - **`done` and `exited`:** Proceed as described in "Finish".
-- **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20); the event
-  shows the last lines, so a usage limit is recognizable. Nudge with `nudge --repo <repo-root> --package
-  <package> --text "<text>"` only after `stale`, with no open signal, no running test of the package
-  worktree per `slot status`, and at most once per standstill phase. A second `stale` after a nudge you
-  report to the user; with `--fly` you secure the package's open tasks as for `exited`.
+- **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20), or for three
+  times that while the host shows that it waits for its own background agent (Claude Code: "Waiting for N
+  background agents"; no equivalent is detected for Codex). The event shows the last lines, so a usage limit
+  is recognizable. Nudge with `nudge --repo <repo-root> --package <package> --text "<text>"` only after
+  `stale`, with no open signal, no running test of the package worktree per `slot status`, and at most once
+  per standstill phase. A second `stale` after a nudge you report to the user; with `--fly` you secure the
+  package's open tasks as for `exited`.
 - **`disk`:** Free space fell below `--min-free` GB (default 5). Run the cleanup step the project names for
   low space, otherwise report it to the user.
 - If the user writes into a pane themselves, that session belongs to them; do not touch it.

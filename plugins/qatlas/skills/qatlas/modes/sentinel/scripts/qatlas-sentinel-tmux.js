@@ -19,7 +19,9 @@
 // the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
 // `wait` also watches itself, so the sentinel needs no monitor of its own. stale: a live pane without
 // open signal whose conversation part has not changed for --stale minutes (once per standstill phase;
-// the state lives in pane options and so survives across wait calls). disk: free space of the repo
+// the state lives in pane options and so survives across wait calls). While the host shows that the
+// orchestrator waits for its own background agent (Claude Code: "Waiting for N background agent(s)"), the
+// limit is WAITING_FACTOR times --stale, so a hung worker is still reported. disk: free space of the repo
 // filesystem fell below --min-free GB (once per undershoot). nudge is the only way to write into a pane.
 // If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
 // Usage:
@@ -55,6 +57,9 @@ const INTEGRATION = new Set(['push', 'pr', 'merge', 'rerun', 'conflict', 'close'
 // lines and the mode line (9 rows, seen live); Codex shows blank, input, blank, status, hint (5 rows).
 // 10 covers both; small panes keep at least half their rows.
 const STATUS_ROWS = 10;
+// The host line can sit in the hidden status rows, so it is searched in the whole visible pane.
+const WAITING = /Waiting for \d+ background agents?\b/i;
+const WAITING_FACTOR = 3;
 // Digits and spinner/progress glyphs (braille, block, geometric, dingbats) change without progress.
 const VOLATILE = /[0-9\u2800-\u28FF\u2580-\u25FF\u2700-\u27BF\u00B7\u2022\u2026]/g;
 const PREFIX = { question: 'FRAGE · ', handover: 'ÜBERGABE · ' };
@@ -242,6 +247,7 @@ function recordStale(repo, minutes) {
     if (p.dead) continue;
     if (p.kind) { for (const name of TRACK) tmux(['set', '-p', '-u', '-t', p.pane, name]); continue; }
     const lines = conversation(p.pane);
+    const waiting = WAITING.test(tmux(['capture-pane', '-p', '-t', p.pane]));
     const masked = lines.join('\n').replace(VOLATILE, '').replace(/\s+/g, ' ');
     const hash = crypto.createHash('sha1').update(masked).digest('hex');
     const now = Date.now();
@@ -250,10 +256,10 @@ function recordStale(repo, minutes) {
       setOption(p.pane, '@qatlas-hash', hash);
       setOption(p.pane, '@qatlas-since', String(now));
       tmux(['set', '-p', '-u', '-t', p.pane, '@qatlas-stale']);
-    } else if (!option(p.pane, '@qatlas-stale') && now - since >= minutes * 60000) {
+    } else if (!option(p.pane, '@qatlas-stale') && now - since >= minutes * (waiting ? WAITING_FACTOR : 1) * 60000) {
       setOption(p.pane, '@qatlas-stale', '1');
       record(repo, 'stale', { package: p.package, pane: p.pane,
-        text: `No change for ${((now - since) / 6e4).toFixed(1)} min. Last lines:\n${lines.slice(-5).join('\n')}` });
+        text: `No change for ${((now - since) / 6e4).toFixed(1)} min${waiting ? ' while waiting for a background agent' : ''}. Last lines:\n${lines.slice(-5).join('\n')}` });
     }
   }
 }

@@ -212,6 +212,42 @@ try {
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
 
+  // stale: a host "Waiting for N background agents" line in the hidden status rows stretches the limit to three
+  // times --stale, an idle pane keeps the plain limit. Own tmux server; TMUX points the script at it.
+  const sock = `qatlas-test-${process.pid}`;
+  const tm = (...args) => execFileSync('tmux', ['-L', sock, ...args], { encoding: 'utf8' }).trim();
+  let socketPath = null;
+  try {
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'stale-')));
+    const body = (line) => `printf 'work\\n'; i=0; while [ $i -lt 19 ]; do echo; i=$((i+1)); done; ${line}; sleep 300`;
+    const win = tm('new-session', '-d', '-x', '80', '-y', '24', '-P', '-F', '#{window_id}', 'sh', '-c', body('echo idle'));
+    tm('set', '-w', '-t', win, '@qatlas-sentinel', repo);
+    const panes = { idle: tm('display', '-p', '-t', win, '#{pane_id}') };
+    panes.waiting = tm('split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, 'sh', '-c', body("echo 'Waiting for 1 background agent to finish'"));
+    for (const name of Object.keys(panes)) tm('set', '-p', '-t', panes[name], '@qatlas-package', name);
+    socketPath = tm('display', '-p', '#{socket_path}');
+    let cursor = 0;
+    const stale = () => {
+      const res = spawnSync(process.execPath, [sentinel, 'wait', '--repo', repo, '--since', String(cursor), '--timeout', '0.01', '--stale', '20'],
+        { encoding: 'utf8', env: { ...process.env, TMUX: `${socketPath},1,0` } });
+      assert.strictEqual(res.status, 0, res.stderr);
+      const result = JSON.parse(res.stdout);
+      cursor = result.cursor;
+      return result.events.filter(e => e.type === 'stale').map(e => e.package);
+    };
+    const ago = (name, minutes) => tm('set', '-p', '-t', panes[name], '@qatlas-since', String(Date.now() - minutes * 60000));
+    assert.deepStrictEqual(stale(), []);
+    ago('idle', 25); ago('waiting', 25);
+    assert.deepStrictEqual(stale(), ['idle']);
+    ago('waiting', 59);
+    assert.deepStrictEqual(stale(), []);
+    ago('waiting', 61);
+    assert.deepStrictEqual(stale(), ['waiting']);
+  } finally {
+    try { tm('kill-server'); } catch { /* already gone */ }
+    if (socketPath) fs.rmSync(socketPath, { force: true });
+  }
+
   process.stdout.write('✓ Qatlas-Run-Tools: land, ci-wait und Handover-Prüfung erfolgreich.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
