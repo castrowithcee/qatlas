@@ -1,44 +1,46 @@
 ---
 description: >
-  Einstellungen von Qatlas: Orte der Konfiguration, Vererbung, Schlüssel und ihre Wirkung.
+  Qatlas settings: locations of the configuration, inheritance, keys and their effect.
 type: meta
 edit: locked
 license: MIT
 ---
 
-# Konfiguration
+# Configuration
 
-| Datei | Zweck |
+| File | Purpose |
 |---|---|
-| `~/.qatlas/plugins/config.yaml` | Globale Einstellungen für alle Projekte |
-| `<repo>/.qatlas/plugins/config.yaml` | Projektwerte; ein gesetzter Wert überschreibt den globalen, ein fehlender erbt |
-| `~/.qatlas/plugins/statusline.yaml` | Darstellung der Claude-Statusline |
-| `~/.qatlas/plugins/orchestra.yaml` | Modelle und Effort-Stufen für `qatlas run` |
+| `~/.qatlas/plugins/config.yaml` | Global settings for all projects |
+| `<repo>/.qatlas/plugins/config.yaml` | Project values; a set value overrides the global one, a missing one inherits |
+| `~/.qatlas/plugins/statusline.yaml` | Appearance of the Claude statusline |
+| `~/.qatlas/plugins/team.yaml` | Team roles, models and effort levels for `qatlas run` |
 
-## Schlüssel in `config.yaml`
+## Keys in `config.yaml`
 
-| Schlüssel | Ebene | Wirkung |
+| Key | Level | Effect |
 |---|---|---|
-| `session-start.enabled` | global | Schaltet den passiven Qatlas-Kontext beim Sessionstart |
-| `brains.qatlas.enabled` | global, Projekt | Schaltet den Wegweiser auf die Bibliothek `~/qatlas/` |
-| `brains.project` | Projekt | Nennt zusätzliche projektbezogene Quellen mit `paths` und `description` |
-| `protection.enabled` | global, Projekt | Schaltet die Schutzprüfung ganz ab oder an |
-| `protection.secrets` | global, Projekt | `block`, `ask`, `warn` oder `allow` für Secrets vor dem Commit |
-| `protection.personal-data` | global, Projekt | Dieselben Werte für personenbezogene Daten |
+| `session-start.enabled` | global | Switches the passive Qatlas context at session start |
+| `brains.qatlas.enabled` | global, project | Switches the signpost to the library `~/qatlas/` |
+| `brains.project` | project | Names additional project-related sources with `paths` and `description` |
+| `protection.enabled` | global, project | Switches the protection check fully off or on |
+| `protection.secrets` | global, project | `block`, `ask`, `warn` or `allow` for secrets before the commit |
+| `protection.personal-data` | global, project | The same values for personal data |
 
-Standard ist `secrets: block` und `personal-data: ask`. `block` verhindert den Schritt, `ask` fragt vorher
-nach, `warn` meldet nur, `allow` prüft nicht. Ein bestandener Check bleibt still. Ob ein Repo öffentlich
-oder privat ist, leitet Qatlas nicht ab; diese Absicht drückt die Projektkonfiguration aus.
+The default is `secrets: block` and `personal-data: ask`. `block` prevents the step, `ask` asks beforehand,
+`warn` only reports, `allow` does not check. A passed check stays silent. Whether a repo is public or private
+is not derived by Qatlas; the project configuration expresses that intent.
 
-## Freigaben der Schutzprüfung
+## Approvals of the protection check
 
-Ein vom Nutzer bestätigter Fehlalarm bei `personal-data` lässt sich dauerhaft freigeben, damit ihn spätere
-Commits nicht erneut melden. Die Freigaben liegen versioniert und nur projektlokal in
-`<repo>/.qatlas/plugins/protection-allow.yaml`; sie sind kein Schlüssel der `config.yaml`. Sie wirken nur
-bei `personal-data` mit `ask` oder `warn`; Secrets und `block` lassen sich nie freigeben, geänderter Inhalt
-wird wieder gemeldet. Die Datei enthält nur Kennungen, keinen Klartext. Einen Eintrag legt
-`node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <kennung>` an, die
-Kennung nennt der Befund in eckigen Klammern. Das Format steht im Kopf des Skripts.
+A false alarm for `personal-data` confirmed by the user can be approved permanently so that later commits do
+not report it again. The approvals are versioned and live only project-locally in
+`<repo>/.qatlas/plugins/protection-allow.yaml`; they are not a key of `config.yaml`. They apply only to
+`personal-data` with `ask` or `warn`; secrets and `block` can never be approved, and changed content is
+reported again. The file contains only identifiers, no plain text. An entry is created by
+`node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <identifier>`; the
+identifier is named by the finding in square brackets. The format is described in the head of the script.
 
-Zugangsdaten gehören nie in eine `config.yaml`. Eine kommentierte Vorlage liegt im Plugin unter
+Credentials never belong in a `config.yaml`. A commented template lives in the plugin at
 `store/config/config.example.yaml`.
+
+An already existing `AGENTS.md` belongs to the user and is not rewritten by this procedure.

@@ -1,31 +1,32 @@
 ---
 description: >
-  Die nutzereigene orchestra.yaml für run und sentinel prüfen und Worker-Profile mit ausdrücklich gesetztem
-  Modell und Effort auf die Subagents des Hosts abbilden.
+  Check the user's own team.yaml for run and sentinel and map worker profiles with explicitly set model and
+  effort to the host's subagents.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Orchestrierung prüfen
+# Check the team
 
-Lies vor der Taskauswahl `~/.qatlas/plugins/orchestra.yaml`. Diese nutzereigene Datei gilt nur für `run` und
-`sentinel` und ist die einzige Quelle für die gewählten Modelle und Effort-Stufen. Prüfe, dass Format, die
-Sektion des aktuellen Hosts, das Orchestrator-Modell und die benötigten Worker-Profile vorhanden und gültig
-sind. Fehlt die Datei oder ihre Host-Sektion, ist ein Eintrag ungültig oder erscheint ein Modell veraltet oder
-zweifelhaft, richte sie nach „Orchestrierung einrichten“ ein und beginne bis zur Klärung keinen Task.
+Before task selection, read `~/.qatlas/plugins/team.yaml`. This user-owned file applies only to `run` and
+`sentinel` and is the only source for the chosen models and effort levels. The orchestrators of `run` and
+`sentinel` start with the model from `lead`; worker profiles come from `worker`. `supervisor` and
+`integrator` are assigned roles that `run` and `sentinel` currently do not start. Check that the format, the
+section of the current host, the `lead` model and the required worker profiles are present and valid. If
+the file or its host section is missing, an entry is invalid or a model looks outdated or doubtful, set it up
+following "Set up the team" and start no task until it is clarified.
 
-Die Profile sind eine Allowlist: Verwende weder ein nicht eingetragenes Modell noch eine andere
-Effort-Einstellung. Setze `effort: null` nur für ein Modell, das keinen Effort unterstützt; für alle anderen
-Worker wird Effort ausdrücklich gesetzt und nicht vom Orchestrator geerbt.
+The profiles are an allowlist: use neither a model that is not entered nor a different effort setting. Set
+`effort: null` only for a model that supports no effort; for all other workers, effort is set explicitly and
+not inherited from the orchestrator.
 
-Codex setzt beim Spawn Modell und Reasoning-Effort ausdrücklich. Claude Code verwendet für die Effort-Stufen
-`low`, `medium`, `high`, `xhigh` und `max` jeweils den Plugin-Subagent `qatlas:run-low`,
-`qatlas:run-medium`, `qatlas:run-high`, `qatlas:run-xhigh` beziehungsweise `qatlas:run-max` und übergibt
-das Modell ausdrücklich beim Aufruf. Jeder andere Subagent-Typ erbt Effort und gegebenenfalls Modell des
-Orchestrators und ist für Worker unzulässig. Wähle nur eine vom jeweiligen Host und Modell unterstützte Stufe;
-`ultra` ist keine Claude-Code-Effort-Stufe. Für `effort: null` verwende ausschließlich bei einem Modell ohne
-Effort-Unterstützung `qatlas:run-no-effort` ohne Effort-Frontmatter. Dessen Extended Thinking folgt der
-Claude-Code-Session und wird von `orchestra.yaml` nicht gesteuert. Ist der passende Subagent nicht
-verfügbar oder ersetzt der Host Modell oder eine gewählte Effort-Stufe durch andere Werte, starte mit
-diesem Profil nicht. Weiche nicht auf eine andere Effort-Stufe aus.
+Codex sets model and reasoning effort explicitly on spawn. For the effort levels `low`, `medium`, `high`,
+`xhigh` and `max`, Claude Code uses the plugin subagent `qatlas:run-low`, `qatlas:run-medium`,
+`qatlas:run-high`, `qatlas:run-xhigh` or `qatlas:run-max` respectively and passes the model explicitly on the
+call. Any other subagent type inherits effort and possibly model from the orchestrator and is not allowed
+for workers. Choose only a level supported by the respective host and model; `ultra` is not a Claude Code
+effort level. For `effort: null`, use `qatlas:run-no-effort` without effort frontmatter, and only for a model
+without effort support. Its extended thinking follows the Claude Code session and is not controlled by
+`team.yaml`. If the matching subagent is not available or the host replaces the model or a chosen effort
+level with other values, do not start with this profile. Do not fall back to a different effort level.

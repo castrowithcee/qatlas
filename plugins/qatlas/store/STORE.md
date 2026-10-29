@@ -1,32 +1,30 @@
 ---
 description: >
-  Index der versionierten Qatlas-Assets und -Vorlagen: was im Store liegt und wann es gezielt verwendet
-  werden darf.
+  Index of the versioned Qatlas assets and templates: what the store holds and when it may be used on
+  purpose.
 type: meta
 edit: locked
 ---
 
-# Store: Assets und Vorlagen nur bei Bedarf
+# Store: assets and templates only when needed
 
-Der Store enthält ausschließlich Assets und Vorlagen, die mit dem Plugin aktualisiert und für ein konkretes
-Ziel kopiert oder als Ausgangspunkt verwendet werden. Er ist kein Ort für Regeln, Schemata oder andere
-Verhaltensreferenzen. Lade ihn weder beim Sessionstart noch auf Vorrat. Öffne diesen Index nur bei einem
-konkreten Bedarf, wähle einen passenden Eintrag und verwende danach ausschließlich die dort genannten
-Dateien.
+The store holds only assets and templates that are updated with the plugin and copied for a concrete goal or
+used as a starting point. It is not a place for rules, schemas or other behavior references. Load it neither
+at session start nor in advance. Open this index only for a concrete need, pick a matching entry and
+afterwards use only the files named there.
 
-## Bibliothek
+## Library
 
-| Bedarf | Lies nur | Verwendung |
+| Need | Read only | Use |
 |---|---|---|
-| Aufgabe im lokalen Qatlas-Backlog | `backlog/task.md` | Als `.qatlas-project/backlog/task-<id>-<slug>.md` oder im betreffenden Projekt anlegen und nach der Backlog-Referenz ausfüllen. |
-| Projekt im lokalen Qatlas-Backlog | `backlog/project-readme.md` | Als `.qatlas-project/backlog/<project>/README.md` anlegen und nach der Backlog-Referenz ausfüllen. |
-| Wiederkehrende Ablage pro Kunde oder Fall | `customers/customers-framework.md` und `customers/customer-index.md` | Als `<area>-customers/FRAMEWORK.md` und pro Kunde als `<area>-customers/<id>/INDEX.md` kopieren und anpassen. |
-| Plugin-Steuerung nachschlagen | `config/config.example.yaml` | Als versionsgebundene Feldreferenz lesen. Die wirksame `~/.qatlas/plugins/config.yaml` nie pauschal damit ersetzen. |
-| Orchestrierung für `qatlas run` konfigurieren | `config/orchestra.example.yaml` | Als kommentierte Vorlage für `~/.qatlas/plugins/orchestra.yaml` verwenden. Vor dem Anlegen alle Modellwerte konkret ausfüllen; eine vorhandene Nutzerdatei nie pauschal ersetzen. |
-| Claude-Statusline nachschlagen | `statusline/statusline.example.yaml` | Als versionsgebundene Feldreferenz lesen. Die wirksame `~/.qatlas/plugins/statusline.yaml` nie pauschal damit ersetzen. |
-| Statusline auf hellen und dunklen Terminalhintergründen | `statusline/dual-theme.yaml` | Als vollständige Ausgangskonfiguration nach `~/.qatlas/plugins/statusline.yaml` übernehmen, wenn die bestehende Widget-Auswahl ersetzt werden darf. |
+| Task in the local Qatlas backlog | `backlog/task.md` | Create it as `.qatlas-project/backlog/task-<id>-<slug>.md` or in the project concerned and fill it in following the backlog reference. |
+| Project in the local Qatlas backlog | `backlog/project-readme.md` | Create it as `.qatlas-project/backlog/<project>/README.md` and fill it in following the backlog reference. |
+| Recurring filing per customer or case | `customers/customers-framework.md` and `customers/customer-index.md` | Copy and adapt as `<area>-customers/FRAMEWORK.md` and, per customer, as `<area>-customers/<id>/INDEX.md`. |
+| Look up plugin settings | `config/config.example.yaml` | Read as a version-bound field reference. Never replace the effective `~/.qatlas/plugins/config.yaml` wholesale with it. |
+| Configure the team for `qatlas run` | `config/team.example.yaml` | Use as the commented template for `~/.qatlas/plugins/team.yaml`. Fill in every model value concretely before creating it; never replace an existing user file wholesale. |
+| Look up the Claude statusline | `statusline/statusline.example.yaml` | Read as a version-bound field reference. Never replace the effective `~/.qatlas/plugins/statusline.yaml` wholesale with it. |
+| Statusline on light and dark terminal backgrounds | `statusline/dual-theme.yaml` | Adopt as a complete starting configuration into `~/.qatlas/plugins/statusline.yaml` when the existing widget selection may be replaced. |
 
-Der installierte Store ist schreibgeschützt, weil sein versionsgebundener Pfad beim Update ersetzt wird.
-Kopiere benötigtes Material an sein Ziel und ändere es dort. `.qatlas-project/templates/` ist ausschließlich
-die versionierte Vorlagenbibliothek des Nutzers. Qatlas legt dort nichts ab. Eigene Vorlagen gehören
-dorthin, niemals in den Store.
+The installed store is read-only because its version-bound path is replaced on update. Copy needed material
+to its destination and change it there. `.qatlas-project/templates/` is solely the user's versioned template
+library. Qatlas stores nothing there. Custom templates belong there, never in the store.

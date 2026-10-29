@@ -1,51 +1,53 @@
 ---
 description: >
-  Read-only Diagnose eines Qatlas-Projekts: prüft Abhängigkeiten, Store, Scaffold, Projektanweisungen,
-  Nutzerbibliothek und den repo-lokalen Update-Stand, ohne selbst zu reparieren oder zu bestätigen.
+  Read-only diagnosis of a Qatlas project: checks dependencies, store, scaffold, project instructions, user
+  library and the repo-local update state without repairing or confirming anything itself.
 license: MIT
 type: playbook
 edit: locked
 ---
 
-# Qatlas diagnostizieren
+# Diagnose Qatlas
 
-Diagnostiziere den aktuellen Ordner, ohne ihn zu verändern. Der Nutzer besitzt das Timing dieses Skills.
+Diagnose the current folder without changing it. The user owns the timing of this skill.
 
-Verwende den vom Router aufgelösten `<plugin-root>` und keinen festen Installationspfad.
+Use the `<plugin-root>` resolved by the router and no fixed installation path.
 
-## Prüfen
+## Check
 
-Führe beide Befehle ohne `--apply` und ohne `ack` aus:
+Run both commands without `--apply` and without `ack`:
 
 ```sh
 node <plugin-root>/scripts/qatlas-doctor.js
 node <plugin-root>/scripts/qatlas-update.js status
 ```
 
-Der erste Befehl prüft Node, Git, Git-Identität, optionale Git-LFS-Unterstützung, nutzerweiten Store,
-Syntax und Grundstruktur der optionalen `orchestra.yaml`, Projektwissensraum samt Root-README und
-Größenbudget, `.gitignore`, Projektanweisungen und das Scaffold der Nutzerbibliothek unter `~/qatlas/`.
-Fehlende Bibliotheksteile nennt er als Vorschlag für `qatlas-core setup`. Fehlt `orchestra.yaml`, ist das ein
-Hinweis für `run`, kein Setup-Blocker; Doctor legt sie auch mit `--apply` nicht ohne bestätigte Modellwerte
-an. Modell- und Effort-Verfügbarkeit prüft erst `run` im aktuellen Host. Bei einer alten oder
-parallelen Projektwurzel bleibt jeder schreibende Reparaturlauf gesperrt und nennt den Inventarbefehl. Der
-zweite Befehl vergleicht den unter `.qatlas/plugins/updates/state.json` für dieses Repo gespeicherten
-Qatlas-Prüfstand mit der installierten Qatlas-Version. Die optionalen Packs prüfen ihre eigene Version
-jeweils über ihren SessionStart-Hook; leite aus dem Qatlas-Befehl keinen Gesamtstand aller Plugins ab.
+The first command checks Node, git, git identity, optional git LFS support, the user-wide store, syntax and
+basic structure of the optional `team.yaml` (per host `supervisor`, `integrator`, `lead` and `worker` with
+the three profiles, and a leftover configuration file that the startup migration has already taken over,
+which it names for explicit cleanup), the project knowledge space including root README and size budget,
+`.gitignore`, project instructions and the scaffold of the user library under `~/qatlas/`. It names missing
+library parts as a suggestion for `qatlas-core setup`. A missing `team.yaml` is a hint for `run`, not a setup
+blocker; Doctor does not create it even with `--apply` without confirmed model values. Model and effort
+availability is checked only by `run` in the current host. With an old or parallel project root, every
+writing repair run stays blocked and names the inventory command. The second command compares the Qatlas
+review state stored for this repo under `.qatlas/plugins/updates/state.json` with the installed Qatlas
+version. The optional packs check their own version through their SessionStart hook; derive no overall state
+of all plugins from the Qatlas command.
 
-Sind Update-Anweisungen offen, lies nur die ausgegebenen Dateien und prüfe ihre Punkte gegen das aktuelle
-Repo. Vorhandene Repo-Dateien sind primär. Berichte, ob und was anwendbar ist, aber bestätige den Prüfstand
-nicht im Diagnose-Lauf. Ist etwas anwendbar, nenne pro Punkt knapp den konkreten Befund, die vorgeschlagene
-Änderung und ihre praktische Folge oder ihren Grund. Eine bloße Liste aus Dateinamen, Mengen oder
-Schlagwörtern reicht nicht. Erst wenn der Nutzer danach ausdrücklich über vollständige, teilweise oder keine
-Übernahme entscheidet, darfst du Änderungen und `ack` ausführen.
+If update instructions are open, read only the files printed and check their points against the current repo.
+Existing repo files take precedence. Report whether and what is applicable, but do not confirm the review
+state in the diagnosis run. If something is applicable, state per point briefly the concrete finding, the
+proposed change and its practical consequence or reason. A mere list of file names, counts or keywords is not
+enough. Only after the user then explicitly decides on full, partial or no adoption may you make changes and
+run `ack`.
 
-## Berichten
+## Report
 
-Fasse Befunde nach Priorität zusammen: Blocker, fehlende Projektbestandteile, Hinweise und Update-Stand.
-Erfinde keine Reparatur und melde nicht pauschal Drift, nur weil Plugin-Vorlage und vorhandene Repo-Datei
-inhaltlich verschieden sind.
+Summarize findings by priority: blockers, missing project components, hints and update state. Invent no
+repair and do not report drift across the board just because plugin template and existing repo file differ in
+content.
 
-Will der Nutzer Fehlendes ergänzen, verwende anschließend `qatlas-core setup` oder führe den Doctor nach
-der Freigabe mit `--apply` aus. Beide Verfahren kopieren nur fehlende Dateien und ergänzen `.gitignore`.
-Bestätige Update-Stände niemals als Reparatur eines ungeprüften Befunds.
+If the user wants to add what is missing, afterwards use `qatlas-core setup` or run Doctor with `--apply`
+after approval. Both procedures copy only missing files and extend `.gitignore`. Never confirm update states
+as the repair of an unchecked finding.
