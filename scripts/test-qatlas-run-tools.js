@@ -212,6 +212,35 @@ try {
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
 
+  // --code-repo: code repo embedded in (and ignored by) the control repo; refs resolve there, not in --repo.
+  const embedded = (name, extra) => {
+    const code = setup(name, { extra });
+    const ops = path.join(root, name, 'ops');
+    git(root, 'init', '-q', '-b', 'main', ops);
+    write(path.join(ops, '.gitignore'), 'x/\n');
+    git(code.repo, 'clone', '-q', code.repo, path.join(ops, 'x'));
+    git(path.join(ops, 'x'), 'branch', 'main', 'origin/main');
+    return { ...code, ops, codeDir: path.join(ops, 'x') };
+  };
+  const hand = (e, ...more) => spawnSync(process.execPath, [sentinel, 'handover', '--repo', e.ops, '--package', 'p',
+    '--task', 't', '--report', e.report, ...more], { encoding: 'utf8', env: env(e.stubDir) });
+  c = embedded('embed-bad', ['d.txt']);
+  r = hand(c, '--code-repo', c.codeDir);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
+  r = hand(c);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /does not resolve to a commit/);
+  r = hand(c, '--code-repo', 'relative');
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /--code-repo must be an existing absolute path/);
+  c = embedded('embed-ok');
+  r = hand(c);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /does not resolve to a commit/);
+  r = hand(c, '--code-repo', c.codeDir, '--timeout', '0.1');
+  assert.doesNotMatch(r.stderr, /Handover rejected/);
+
   // stale: a host "Waiting for N background agents" line in the hidden status rows stretches the limit to three
   // times --stale, an idle pane keeps the plain limit. Own tmux server; TMUX points the script at it.
   const sock = `qatlas-test-${process.pid}`;
