@@ -7,8 +7,6 @@ description: >
 disable-model-invocation: true
 argument-hint: "[adhd]"
 license: MIT
-type: skill
-edit: locked
 ---
 
 # Qatlas-Modus

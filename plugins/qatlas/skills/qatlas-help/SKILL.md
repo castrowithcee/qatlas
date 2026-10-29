@@ -7,8 +7,6 @@ description: >
 disable-model-invocation: true
 argument-hint: "[intro|flow|skills|config|card]"
 license: MIT
-type: skill
-edit: locked
 ---
 
 # Qatlas-Hilfe

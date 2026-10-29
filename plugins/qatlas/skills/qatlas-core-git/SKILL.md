@@ -10,8 +10,6 @@ description: >
   großen Dateien, Binärdateien und Git LFS sowie bei qatlas-core-git.
 argument-hint: "[status|sync|branch|commit|push|identity|history|lfs]"
 license: MIT
-type: skill
-edit: locked
 ---
 
 # qatlas-core-git

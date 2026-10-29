@@ -1,62 +1,60 @@
 ---
 name: qatlas-core-filing
 description: >
-  Dateien regelkonform anlegen, benennen, ablegen, umbenennen, verschieben, zusammenführen, promoten,
-  archivieren oder löschen, Markdown inhaltlich ändern, Verweise einfügen und Rohmaterial aus
-  .qatlas-project/zone-import/ verarbeiten, sobald der Nutzer es ankündigt oder den Pfad nennt: bestimmt Ort,
-  Namen, Kennung und Frontmatter und hält Navigation und Verweise konsistent. Nicht für reines Lesen, für
-  Codeänderungen innerhalb bestehender Dateien oder für Konvertierungen außerhalb der Importzone.
+  Create, name, file, rename, move, merge, promote, archive or delete files according to the rules, change
+  Markdown content, insert references and process raw material from .qatlas-project/zone-import/ once the
+  user announces it or names the path: sets place, name, type and frontmatter and keeps navigation and
+  references consistent. Also tidies an existing project structure with qatlas-core-filing migrate. Not for
+  pure reading, for code changes inside existing files or for conversions outside the import zone.
 license: MIT
-type: skill
-edit: locked
 ---
 
 # qatlas-core-filing
 
-Der Ort einer Datei folgt dem Gegenstand ihrer Aussage. Weder Markdown, Frontmatter-Typ, Präfix noch
-Agentenleserschaft entscheiden allein darüber.
+The place of a file follows the subject of its statement. Neither Markdown, agent readership nor habit decide
+it alone. Inside `.qatlas-project/` the fixed folders decide, and each folder holds only its types.
 
-## Namen und Format
+## Names and format
 
-- Verwende für gewöhnliche Datei- und Ordnernamen kebab-case, reines ASCII und keine Leerzeichen. Aus
-  Müller wird `mueller`.
-- Reservierte Funktions- und Agentendateien behalten ihre festgelegte Großschreibung: `README.md`,
-  `AGENTS.md`, `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `HISTORY.md`, `FRAMEWORK.md` und
-  `INDEX.md`. Vorhandene Funktionsdateien behalten ihren Zweck und ihre lokale Geltung.
-- Verwende Datumswerte als `YYYY-MM-DD`. Chronologische Dateien dürfen mit diesem Datum beginnen.
-- Schreibe in deutschen Dateien ä, ö, ü und ß direkt. Verwende Em-Dashes und En-Dashes nicht als
-  Satzzeichen.
+- Use kebab-case, plain ASCII and no spaces for ordinary file and folder names. Müller becomes `mueller`.
+- Reserved function and agent files keep their fixed capitalisation: `README.md`, `AGENTS.md`, `CLAUDE.md`,
+  `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `FRAMEWORK.md` and `INDEX.md`. Existing function files keep their
+  purpose and local scope.
+- Content files in the knowledge space start with their frontmatter `type`; only tasks add an ID.
+- Write dates as `YYYY-MM-DD`. Chronological files may start with this date.
+- Write ä, ö, ü and ß directly in German files. Do not use em dashes or en dashes as punctuation.
 
-## Verweise
+## References
 
-Jeder Verweis erzeugt Wartungsaufwand. Erzeuge ihn nur, wenn das Ziel für die Aufgabe wirklich gebraucht
-wird.
+Every reference creates maintenance. Create one only when the task really needs the target.
 
-- Verweise auf ganze Dateien, nicht auf Zeilen oder Abschnitte, und pro Datei höchstens einmal auf dasselbe
-  Ziel.
-- Verlinke nichts, was ohnehin immer im Kontext liegt.
-- Dupliziere keine Norm. Führe Material mit demselben Zweck zusammen.
-- Inhalt und Dokumentation verweisen nicht auf die Metaebene wie Agentendateien, Rules oder Skills.
-  Abhängigkeiten laufen von Meta zu Inhalt.
-- Formuliere Leseverpflichtungen eindeutig: „Bevor du X tust, lies …“, „Details bei Bedarf in …“ oder „Nur
-  öffnen, wenn du tatsächlich Y tust“.
+- Refer to whole files, not to lines or sections, and at most once per file to the same target.
+- Do not link anything that is always in context anyway.
+- Do not duplicate a norm. Merge material with the same purpose.
+- Content and documentation do not refer to the meta level such as agent files, rules or skills.
+  Dependencies run from meta to content.
+- Phrase reading obligations unambiguously: "Before you do X, read …", "Details on demand in …" or "Open
+  only when you actually do Y".
 
-## Vorhandenes schützen
+## Protect what exists
 
-Lies eine vorhandene Datei vor ihrer Änderung. Respektiere ihr Frontmatter und ihre lokale Struktur. Führe
-eine Änderung am maßgeblichen Ort aus, statt eine beinahe identische Kopie anzulegen. Vorlagen, Seeds und
-Pluginmaterial ersetzen Nutzerdateien nie pauschal. Lege keine leeren Ordner auf Vorrat an.
+Read an existing file before changing it. Respect its frontmatter and local structure. Make a change at the
+authoritative place instead of creating a near-identical copy. Templates, seeds and plugin material never
+replace user files wholesale. Never create a folder in the knowledge space beyond its fixed folders unless
+the user explicitly asks for it.
 
-## Operation wählen
+## Choose the operation
 
-Folgt das Anlegen, Ändern oder Verschieben einer Datei einer kanonischen Vorlage oder einem Fachvertrag,
-etwa ein Task samt Abschluss nach `done/` dem lokalen Backlog-Vertrag, genügen Vorlage und Vertrag. Lies die
-Referenzen unten dann nur für das, was beide offen lassen. Sonst lies vor der Operation deren Referenz
-vollständig:
+If creating, changing or moving a file follows a canonical template or a domain contract, such as a task
+including its completion into `done/` under the local backlog contract, template and contract suffice. Read
+the references below only for what both leave open. Otherwise read the operation's reference fully before
+the operation:
 
-- Anlegen ohne passende Vorlage: [Ablegen](references/playbook-create.md)
-- Umbenennen, Verschieben, Zusammenführen, Promoten, Archivieren, Löschen:
-  [Umstrukturieren](references/playbook-restructure.md)
-- Importieren: [Importieren](references/playbook-import.md)
-- Frontmatter setzen oder ändern: [Frontmatter](references/frontmatter.md)
-- Ort, Präfix oder Kennung im Wissensraum bestimmen: [Projektwissensraum](references/structure.md)
+- Create without a fitting template: [File](references/playbook-create.md)
+- Rename, move, merge, promote, archive, delete: [Restructure](references/playbook-restructure.md)
+- Import: [Import](references/playbook-import.md)
+- Set or change frontmatter, including by any content change to a file with `version`:
+  [Frontmatter](references/frontmatter.md)
+- Determine folder, name or task ID in the knowledge space: [Project knowledge space](references/structure.md)
+- `qatlas-core-filing migrate`, or the user asks to tidy the project structure:
+  [Migrate](references/playbook-migrate.md)

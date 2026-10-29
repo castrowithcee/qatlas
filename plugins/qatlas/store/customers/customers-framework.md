@@ -4,8 +4,6 @@ description: >
   Datenschutzleitplanken. Ein Overlay für den Bereich, gilt und wird gelesen, wenn dort gearbeitet wird.
 type: meta
 edit: locked
-version: 1
-updated: YYYY-MM-DD
 ---
 
 # Framework: Kunden

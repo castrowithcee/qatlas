@@ -7,8 +7,6 @@ description: >
 disable-model-invocation: true
 argument-hint: "[setup|doctor|statusline|backlog-system] [Argumente]"
 license: MIT
-type: skill
-edit: locked
 ---
 
 # Qatlas-Core

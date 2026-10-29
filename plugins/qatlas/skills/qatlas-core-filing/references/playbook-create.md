@@ -1,23 +1,25 @@
 ---
 description: >
-  Ablauf für eine neue Datei: Gegenstand, Ort, Vorlage, Name und Kennung, Frontmatter und Navigation.
+  Procedure for a new file: subject, type, folder, template, name, frontmatter and navigation.
 license: MIT
 type: playbook
 edit: locked
 ---
 
-# Ablegen
+# File
 
-1. **Gegenstand:** Bestimme, worüber die Datei eine Aussage trifft. Projektzustand und Pflege gehören nach
-   [Projektwissensraum](structure.md) in `.qatlas-project/`, fachlicher Inhalt an seinen maßgeblichen Ort.
-2. **Ort:** Wähle den vorhandenen passenden Bereich. Ein Entwurf liegt mit `status: draft` bereits am
-   richtigen Ort und reift dort.
-3. **Vorlage:** Prüfe vor einer wiederkehrenden nutzereigenen Struktur `.qatlas-project/templates/`.
-   Verlangt die Aufgabe vorhandene Assets oder Vorlagen von Qatlas, lies den
-   [Store-Index](../../../store/STORE.md), wähle den passenden Eintrag und öffne ausschließlich dessen
-   Dateien.
-4. **Name und Kennung:** Benenne nach den Namensregeln des Skills, im Wissensraum mit Präfix und
-   fortlaufender ID.
-5. **Frontmatter:** Setze es bei Markdown nach dem Frontmatter-Schema.
-6. **Navigation:** Muss der neue Inhalt für bestimmte Arbeit gelesen werden, ergänze in der README des
-   Scopes eine eindeutige Lesebedingung.
+1. **Subject:** Determine what the file makes a statement about. Project state and maintenance belong in
+   `.qatlas-project/` under the [Project knowledge space](structure.md), domain content at its
+   authoritative place.
+2. **Type:** Determine the `type` with the questions of the [Frontmatter schema](frontmatter.md). An open
+   question of the user is no decision yet; it stays in its plan or task.
+3. **Place:** In the knowledge space the type selects the fixed folder. Before creating a file, check
+   whether an existing file of the same type and context should grow instead; a decision file per context
+   collects further decisions of that context.
+4. **Template:** Before a recurring user-owned structure, check `.qatlas-project/templates/`. If the task
+   requires existing assets or templates of Qatlas, read the [Store index](../../../store/STORE.md), choose
+   the fitting entry and open only its files.
+5. **Name:** Name it `<type>-<slug>.md`, a task `task-<id>-<slug>.md`.
+6. **Frontmatter:** Set it for Markdown by the frontmatter schema.
+7. **Navigation:** If the new content must be read for specific work, add an unambiguous read condition to
+   the README of the scope.

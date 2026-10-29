@@ -1,59 +1,58 @@
 ---
 description: >
-  Vertrag des lokalen Qatlas-Backlogs für Tasks, Projekte, Status, Roster, Übergaben und Ideen.
+  Contract of the local Qatlas backlog for tasks, projects, status, roster, handovers and ideas.
 license: MIT
 type: rule
 edit: locked
 ---
 
-# Lokaler Backlog
+# Local backlog
 
-## Aufgaben und Projekte
+## Tasks and projects
 
-- Ein Task ist eine eigenständig in einer Session leistbare Arbeitseinheit in
-  `.qatlas-project/backlog/task-<id>-<slug>.md`. Die ID folgt den Dateikennungen des
-  [Projektwissensraums](../../qatlas-core-filing/references/structure.md).
-- Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `README.md`. Sein Slug ist
-  kebab-case, beginnt nicht mit `task-` und heißt nicht `done`.
-- Die Ordnerzugehörigkeit bestimmt die Projektmitgliedschaft; es gibt kein Feld `project:`.
-- Echte Abhängigkeiten und Reihenfolge stehen im Roster. Ein Link ersetzt keinen Kontext, den der Task zu
-  seiner eigenständigen Ausführung braucht.
+- A task is a unit of work that can be done on its own in one session, in
+  `.qatlas-project/backlog/task-<id>-<slug>.md`. The ID follows the task IDs of the
+  [project knowledge space](../../qatlas-core-filing/references/structure.md).
+- A project is an optional folder `backlog/<project>/` with its own tasks and `README.md`. Its slug is
+  kebab-case, does not start with `task-` and is not `done`. If the project implements a plan, its head
+  links to `.qatlas-project/plans/plan-<slug>.md` instead of repeating goal and scope.
+- Folder membership determines project membership; there is no `project:` field.
+- Real dependencies and order are in the roster. A link replaces no context the task needs to be executed on
+  its own.
 
-## Aktueller Taskzustand
+## Current task state
 
-Ein offener Task ist der kompakte, materialisierte Ist-Stand seiner Arbeit, kein fortgeschriebenes Journal.
-Er bleibt in einem vollständigen Lesen eigenständig ausführbar:
+An open task is the compact, materialised current state of its work, not a running journal. It stays
+executable on its own in one complete reading:
 
-- Warum, Ergebnis, Scope, geltende Leitplanken, Abhängigkeiten, aktuelles Vorgehen und Abnahmekriterien
-  enthalten nur weiterhin gültige Aussagen. Arbeite eine geklärte Entscheidung am fachlich passenden Ort
-  ein und entferne dadurch überholte Alternativen.
-- Für Arbeit an einem vorhandenen System hält der Task die Ausführungsgrundlage nach der Ausführungsreife
-  der Backlog-Norm fest.
-- Der `Abschlussbericht` ist der einzige statusabhängige Übergabepunkt. Er enthält bei `review` nur die
-  aktuelle menschliche Übergabe, bei `waiting` Grund, Wiederaufnahmesignal, belegten Stand und nächsten
-  Schritt und bei `done` den kompakten endgültigen Bericht. Ersetze und konsolidiere seinen bisherigen
-  Inhalt bei einem Übergang, statt Laufberichte oder erledigte Review-Karten anzuhängen.
-- Rohlogs, vollständige Befehlsausgaben, allgemeine Kommunikation, verworfene Versuche und eine für den
-  nächsten Schritt nicht nötige Chronologie gehören nicht in den Task. Die lokale Git-Historie ist der
-  normale Verlaufsspeicher; eine eigene History-Datei entsteht nur, wenn die Chronologie selbst dauerhaftes
-  Projektwissen ist.
-- Verweise auf stabile Repo-Quellen dürfen deren Inhalt knapp zusammenfassen, statt ihn vollständig zu
-  duplizieren. Alle für die konkrete Ausführung nötigen Grenzen und Entscheidungen bleiben trotzdem im Task.
+- Why, result, scope, applicable guardrails, dependencies, current approach and acceptance criteria contain
+  only statements that still hold. Work a settled decision in at its proper place and thereby remove
+  outdated alternatives. A decision that binds beyond the task belongs in `.qatlas-project/decisions/`.
+- For work on an existing system, the task records the execution basis according to the execution maturity
+  of the backlog norm.
+- The section `Abschlussbericht` is the only status-dependent handover point. At `review` it holds only the
+  current human handover, at `waiting` reason, resumption signal, verified state and next step, and at
+  `done` the compact final report. Replace and consolidate its previous content at a transition instead of
+  appending run reports or finished review cards.
+- Raw logs, complete command output, general communication, discarded attempts and a chronology not needed
+  for the next step do not belong in the task. Git history is the record of the past.
+- References to stable repo sources may summarise their content briefly instead of duplicating it fully. All
+  boundaries and decisions needed for the concrete execution still stay in the task.
 
-Kürze nie nach einer harten Token-, Zeilen- oder Zeichengrenze. Ist schon der weiterhin gültige Taskvertrag
-nicht mehr in einer Session ausführbar, schneide die verbleibende Arbeit bewusst neu zu; entferne keine
-bindende Entscheidung oder nötige Begründung nur für eine kleinere Datei.
+Never cut by a hard token, line or character limit. If even the still valid task contract can no longer be
+executed in one session, cut the remaining work anew deliberately; remove no binding decision or necessary
+reason just for a smaller file.
 
-Lies vor einem neuen Task vollständig
-[die kanonische Taskvorlage](../../../store/backlog/task.md), vor einem neuen Projektkopf zusätzlich
-[die kanonische Projektvorlage](../../../store/backlog/project-readme.md). Diese Vorlagen gelten auch ohne
-Planungsskill; Nutzervorlagen unter `.qatlas-project/templates/` ersetzen sie nicht.
+Before a new task read [the canonical task template](../../../store/backlog/task.md) fully, before a new
+project head also [the canonical project template](../../../store/backlog/project-readme.md). These
+templates apply even without the planning skill; user templates under `.qatlas-project/templates/` do not
+replace them.
 
-## Status und Eigentümerschaft
+## Status and ownership
 
-Normalpfad: `draft -> ready -> next -> in-progress -> done`.
+Normal path: `draft -> ready -> next -> in-progress -> done`.
 
-Zulässige Rück- und Übergabepfade:
+Permitted back and handover paths:
 
 - `draft -> waiting`
 - `ready -> draft | next | waiting`
@@ -62,54 +61,52 @@ Zulässige Rück- und Übergabepfade:
 - `review -> next | draft | waiting | done`
 - `waiting -> draft | ready | next`
 
-- `draft`: Das Arbeitspaket selbst hat eine offene Frage zu Ergebnis, Scope-in, Scope-out, Vorgehen,
-  Abnahme oder zu einem ununtersuchten Ist-Stand, der diese Punkte wesentlich verändern könnte.
-- `ready`: Ausführungsreif nach der Backlog-Norm, aber nicht Teil des nächsten Ausführungshorizonts.
-- `next`: Ebenfalls ausführungsreif und für den kommenden Ausführungshorizont zusätzlich disponiert.
-  Der Roster bestimmt Reihenfolge und Abhängigkeiten.
-- `in-progress`: Eine laufende Ausführung hat es beansprucht. Ohne sichtbaren Worker kläre zuerst die
-  Eigentümerschaft und überführe den Task anhand des tatsächlichen nächsten Schritts in einen anderen Status.
-- `review`: Der nächste Schritt ist eine konkrete Entscheidung, Prüfung oder Abnahme des Nutzers.
-- `waiting`: Eine externe Voraussetzung, Ressource oder ein Ereignis verhindert die Fortsetzung. Grund und
-  Wiederaufnahmesignal müssen konkret sein; eine unerledigte interne Task-Abhängigkeit allein genügt nicht.
-- `done`: Abnahmekriterien erfüllt, vereinbarte Prüfungen belegt, Dokumentationswirkung abgearbeitet und
-  keine offene Frage.
+- `draft`: The work package itself has an open question on result, scope-in, scope-out, approach,
+  acceptance or an unexamined current state that could materially change these points.
+- `ready`: Ready for execution by the backlog norm, but not part of the next execution horizon.
+- `next`: Also ready for execution and additionally scheduled for the coming execution horizon. The roster
+  determines order and dependencies.
+- `in-progress`: A running execution has claimed it. Without a visible worker, first clarify ownership and
+  move the task to another status by its actual next step.
+- `review`: The next step is a concrete decision, check or acceptance by the user.
+- `waiting`: An external precondition, resource or event prevents continuation. Reason and resumption signal
+  must be concrete; an unfinished internal task dependency alone is not enough.
+- `done`: Acceptance criteria met, agreed checks verified, documentation impact handled and no open
+  question.
 
-Bewusst zurückgestellte, aber weiterhin ausführbare Arbeit bleibt `ready` und wird nicht nach `next`
-disponiert. Dafür braucht es keinen eigenen Zustand.
+Deliberately deferred but still executable work stays `ready` and is not scheduled into `next`. It needs no
+status of its own.
 
-Eine bestehende `next`-Reihenfolge ist eine bewusste Arbeitsdisposition und wird nicht still verdrängt oder
-umsortiert. Automatisch später ausgewählte Tasks folgen hinter ihr. `next` autorisiert keine Ausführung.
-Die Größe des Horizonts bestimmt weder Parallelität noch den Umfang eines einzelnen Laufs.
+An existing `next` order is a deliberate work disposition and is not silently displaced or reordered. Tasks
+selected automatically later follow behind it. `next` authorises no execution. The size of the horizon
+determines neither parallelism nor the scope of a single run.
 
-Jeder Task trägt genau einen Status. `next` ist im lokalen Backlog kein zusätzliches Queue-Feld neben
-`ready`, sondern ersetzt `ready`, solange der Task zum nächsten Horizont gehört. Inhaltlich impliziert
-`next` weiterhin die vollständige Ausführungsreife von `ready`.
+Every task carries exactly one status. In the local backlog `next` is no additional queue field next to
+`ready`; it replaces `ready` while the task belongs to the next horizon. In content, `next` still implies the
+full execution maturity of `ready`.
 
-Setze einen beanspruchten Task unmittelbar vor der ersten schreibenden Ausführung auf `in-progress` und
-pflege seinen Roster im selben Schritt. Eine bloße Bestandsaufnahme beansprucht ihn noch nicht.
+Set a claimed task to `in-progress` immediately before the first writing execution and maintain its roster
+in the same step. A mere survey does not claim it yet.
 
-Technische Schwierigkeit allein macht einen Task nicht zu `draft`, `review` oder `waiting`. Ein historisch
-archivierter Task darf `final` behalten, bis seine Datei aus anderem Grund bearbeitet wird; dann wird er
-vollständig auf die aktuellen Normen und `done` gehoben.
+Technical difficulty alone makes a task neither `draft`, `review` nor `waiting`. A historically archived task
+may keep `final` until its file is edited for another reason; it is then brought fully to the current norms
+and `done`.
 
-Der Abschluss ist ein Schritt: `status: done`, endgültiger Abschlussbericht und Verschieben nach `done/`.
-Ein `done`-Task liegt nur dort. Widersprechen sich Status und Roster, gewinnt der Status.
+Completion is one step: `status: done`, final `Abschlussbericht` and moving to `done/`. A `done` task lies
+only there. If status and roster contradict each other, the status wins.
 
-Projektindizes verwenden unabhängig davon `active -> final -> archived`. Ihr `active` bedeutet, dass das
-Projekt lebt, nicht dass ein Worker daran arbeitet.
+Project heads use `active -> final -> archived` independently of this. Their `active` means that the project
+is alive, not that a worker is on it.
 
 ## Roster
 
-`BACKLOG.md` ist die einzige Übersicht. Sie enthält eine Zeile pro nicht abgeschlossenem Root-Task und
-Projekt: Link, Status und kurzer Stand. Projektzeilen zeigen auf deren `README.md`. Innerhalb fachlich
-zulässiger Reihenfolge stehen Tasks als `review`, `in-progress`, `next`, `waiting`, `ready`, `draft`;
-Projektzeilen folgen ihrer fachlichen Reihenfolge. Abgeschlossene Root-Tasks fallen heraus, Projekte dürfen
-ihre Bauhistorie behalten.
+`BACKLOG.md` is the only overview. It holds one line per unfinished root task and project: link, status and
+brief state. Project lines point to their `README.md`. Within an order that is admissible for the subject,
+tasks stand as `review`, `in-progress`, `next`, `waiting`, `ready`, `draft`; project lines follow their
+subject order. Finished root tasks drop out; projects may keep their build record.
 
-## Ideen
+## Ideas
 
-`IDEAS.md` ist das getrennte Inventar unverbindlicher Ideen. Es trägt keine Task-IDs, Datumsfelder oder
-Status.
-Wird eine Idee bewusst zu Arbeit, lege zuerst den vollständigen Task oder das Projekt an und entferne danach
-den übernommenen Ideenpunkt.
+`IDEAS.md` is the separate inventory of non-binding ideas. It carries no task IDs, date fields or status.
+When an idea deliberately becomes work, first create the complete task or project and then remove the adopted
+idea entry.

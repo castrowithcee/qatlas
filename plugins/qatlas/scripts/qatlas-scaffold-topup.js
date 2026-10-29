@@ -42,7 +42,11 @@ function scaffoldTopUp(target, bundle, { apply = false, only = null, exclude = [
   const selected = walk(base).filter(rel => {
     if ((only && !only.includes(rel)) || exclude.includes(rel)) return false;
     if (!existing || rel === 'README.md') return true;
-    return fs.existsSync(path.join(project, path.dirname(rel)));
+    const dir = path.join(project, path.dirname(rel));
+    if (!fs.existsSync(dir)) return false;
+    // A folder that already holds content needs no placeholder.
+    if (path.basename(rel) === '.gitkeep') return !fs.readdirSync(dir).some(name => name !== '.gitkeep');
+    return true;
   });
   const absent = selected.filter(rel => !fs.existsSync(path.join(project, rel)));
   const created = [];

@@ -1,25 +1,24 @@
 ---
 description: >
-  Ablauf für Umbenennen, Verschieben, Zusammenführen, Promoten, Archivieren und Löschen vorhandener Dateien
-  mit Inventar, Verweisen, Kennungen und Navigation.
+  Procedure for renaming, moving, merging, promoting, archiving and deleting existing files with inventory,
+  references, names and navigation.
 license: MIT
 type: playbook
 edit: locked
 ---
 
-# Umstrukturieren
+# Restructure
 
-1. **Inventar:** Ermittle Ziel, Bearbeitungsrecht, betroffene Verweise und mögliche Kennungskollisionen,
-   bevor du etwas veränderst. `edit: locked` braucht eine ausdrückliche Freigabe.
-2. **Umbenennen und Verschieben:** Präfix und ID bleiben stabil. Suche nach Verweisen auf den alten Pfad und
-   ändere nur tatsächlich gebrochene.
-3. **Zusammenführen:** Übernimm alle bindenden Aussagen in die Zieldatei am maßgeblichen Ort. Entferne
-   danach die Quelle und richte ihre Verweise auf das Ziel.
-4. **Promoten:** Wird ein Inhalt verbindlicher, etwa ein Memory zu einer Entscheidung oder Konvention, setzt
-   das eine Entscheidung des Nutzers voraus. Der Inhalt erhält eine neue Datei mit eigenem Präfix und eigener
-   ID; die alte Datei und ihr Indexeintrag entfallen.
-5. **Archivieren und Löschen:** Lösche eine Nutzerdatei nur auf ausdrücklichen Auftrag. Bewahre Inhalt nur
-   dann in einem Archiv auf, wenn die Projektkonvention es vorsieht oder seine Historie dauerhaft gebraucht
-   wird.
-6. **Navigation:** Passe Lesebedingungen in betroffenen READMEs und Indexzeilen in `MEMORY.md` an den neuen
-   Stand an.
+1. **Inventory:** Determine target, edit rights, affected references and possible name collisions before you
+   change anything. `edit: locked` needs explicit approval.
+2. **Rename and move:** Type prefix and task ID stay stable. Search for references to the old path and
+   change only those actually broken.
+3. **Merge:** Take all binding statements into the target file at the authoritative place and raise its
+   `version`. Then remove the source and point its references to the target.
+4. **Promote:** If content becomes more binding, such as a memory becoming a decision or convention, that
+   requires a decision by the user. The content moves into a file of the new type in its folder; the old file
+   and its index line are removed.
+5. **Archive and delete:** Delete a user file only on explicit request. The knowledge space keeps no archive
+   folder; Git keeps what was removed. Outside it, keep content in an archive only if the local convention
+   provides for it.
+6. **Navigation:** Bring read conditions in affected READMEs and index lines in `MEMORY.md` up to date.

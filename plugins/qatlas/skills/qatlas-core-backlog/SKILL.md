@@ -5,8 +5,6 @@ description: >
   setzen, übergeben oder abschließen sowie Roster, Projekte und Ideen des lokalen Qatlas-Backlogs pflegen.
   Verwenden, sobald Planungs- oder Taskarbeit über das bloße Anzeigen des geladenen Backlogs hinausgeht.
 license: MIT
-type: skill
-edit: locked
 ---
 
 # qatlas-core-backlog

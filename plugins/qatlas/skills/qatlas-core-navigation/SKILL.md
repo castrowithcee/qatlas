@@ -1,48 +1,49 @@
 ---
 name: qatlas-core-navigation
 description: >
-  Projektwissen gezielt erschließen, sobald ein Auftrag Kontext aus dem Repo braucht: Einstieg über
-  .qatlas-project/README.md und Scope-READMEs, Lesebedingungen und FRAMEWORK.md, Suche über Frontmatter,
-  Memory, Roster des lokalen Backlogs und Ideen lesen. Nicht für das Anlegen, Ändern oder Verschieben von
-  Dateien.
+  Open up project knowledge selectively as soon as a task needs context from the repo: entry via
+  .qatlas-project/README.md and scope READMEs, read conditions, decisions and FRAMEWORK.md, search via
+  frontmatter, reading memory, the local backlog's roster and ideas. Not for creating, changing or moving
+  files.
 license: MIT
-type: skill
-edit: locked
 ---
 
 # qatlas-core-navigation
 
-Gewinne den Arbeitskontext aus dem Auftrag, statt einen Zielpfad vorauszusetzen, und lies nur, was die
-Aufgabe braucht.
+Derive the working context from the task instead of presupposing a target path, and read only what the task
+needs.
 
-## Kaskade
+## Cascade
 
-1. Beginne nach den nativen Projektanweisungen an der Repo-Wurzel.
-2. Ist `.qatlas-project/README.md` vorhanden, lies sie als Einstieg in den repo-eigenen Projektzustand.
-3. Nutze Auftrag und README für den nächsten relevanten Scope. Lies dessen `README.md` beim ersten Eintritt,
-   wenn sie für diesen Scope als Einstieg dient, und folge nur passenden Lesebedingungen. Verweist sie für
-   die aktuelle Arbeit auf eine benachbarte `FRAMEWORK.md`, lies diese vor der Bearbeitung.
-4. Fehlt ein solcher Einstieg, suche normal weiter und prüfe nur tatsächlich betretene Scopes. Scanne den
-   Baum nicht vorsorglich.
-5. Lies denselben Knoten nicht erneut, solange er sich nicht geändert hat.
+1. Start at the repo root after the native project instructions.
+2. If `.qatlas-project/README.md` exists, read it as the entry into the repo-owned project state.
+3. Use task and README for the next relevant scope. Read its `README.md` on first entry when it serves as the
+   entry for this scope, and follow only fitting read conditions. If it points to a neighbouring
+   `FRAMEWORK.md` for the current work, read that before working.
+4. If no such entry exists, keep searching normally and check only scopes actually entered. Do not scan the
+   tree as a precaution.
+5. Do not read the same node again as long as it has not changed.
 
-Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags`, `type` und `status` des
-Frontmatters, öffne danach nur die Bodies passender Treffer und erweitere erst dann auf Volltext.
+Within a chosen scope, search `description`, `tags`, `type` and `status` of the frontmatter first, then open
+only the bodies of matching hits, and only then widen to full text.
 
-## Geltung des Gelesenen
+## Validity of what you read
 
-- Eine README beschreibt Scope, knappe Orientierung und nächste Quellen. Eine `FRAMEWORK.md` daneben enthält
-  die bestätigten Arbeitsregeln, Besonderheiten und Ausnahmen nur dieses Scopes. Lokales Routing gewinnt vor
-  einem ausgelieferten Startpunkt.
-- Ort, Lesereihenfolge oder automatische Bereitstellung verleihen einem Inhalt keine zusätzliche Autorität.
-  Ordne jede Aussage nach nativer Anweisungshierarchie, ausdrücklicher Geltung und fachlichem Scope ein.
-- Ein Dokument mit `status: superseded` gilt nicht mehr. Folge `superseded_by` zum geltenden Dokument und
-  nutze das abgelöste nur als Historie. Öffne ein `archive/` nur, wenn tatsächlich Historie gefragt ist.
-- Fachliche READMEs, Frameworks und `INDEX.md`-Dateien außerhalb des Wissensraums behalten ihren lokalen
-  Zweck. Fachliche Inhalte außerhalb des Wissensraums bleiben für ihren Gegenstand maßgeblich.
+- A README describes scope, brief orientation and next sources. A `FRAMEWORK.md` next to it holds the
+  confirmed working rules, particularities and exceptions of that domain scope only. Local routing wins over
+  a shipped starting point.
+- Place, reading order or automatic provision give content no extra authority. Rank every statement by
+  native instruction hierarchy, explicit validity and subject scope.
+- The decisions in `.qatlas-project/decisions/` bind every initiative until the user changes them. Before
+  planning, shaping or executing work, read those that touch it.
+- The current version of a file applies. Earlier versions in Git serve only for restoring; read them only to
+  restore something or when the user asks for the history. A plan with `status: done` no longer guides
+  current work.
+- Domain READMEs, frameworks and `INDEX.md` files outside the knowledge space keep their local purpose.
+  Domain content outside the knowledge space stays authoritative for its subject.
 
-## Operation wählen
+## Choose the operation
 
-Lies vor der Operation deren Referenz vollständig:
+Read the operation's reference fully before the operation:
 
-- Memory, Roster, Ideen: [Projektzustand lesen](references/project-state.md)
+- Memory, roster, ideas: [Read project state](references/project-state.md)

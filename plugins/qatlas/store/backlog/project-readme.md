@@ -1,27 +1,22 @@
 ---
 description: >
-  <Projektname>: was es liefert, in einem Satz.
+  <Project name>: what it delivers, in one sentence.
 type: meta
 edit: shared
 status: active        # active | final | archived
 ---
 
-# Projekt: <Name>
+# Project: <Name>
 
-<!-- Kanonische Vorlage für einen Projektkopf im lokalen Qatlas-Backlog. Nach
-.qatlas-project/backlog/<project>/README.md kopieren und vor dem Schreiben alle Platzhalter ersetzen.
-Aufgaben erhalten eigene Dateien; Reihenfolge und Abhängigkeiten werden hier zusammengeführt. -->
+<!-- Canonical template for a project head in the local Qatlas backlog. Copy to
+.qatlas-project/backlog/<project>/README.md and replace all placeholders before writing. Tasks get files of
+their own; order and dependencies are brought together here. -->
 
-## Ziel
-<!-- Ergebnis und beobachtbares Abschlusskriterium. -->
+## Plan
+<!-- Link to .qatlas-project/plans/plan-<slug>.md, which holds goal and scope. Without a plan: result,
+observable completion criterion, scope-in and scope-out in a few lines. -->
 
-## Scope-in
-<!-- Welche Ergebnisse und Arbeitspakete gehören zu diesem Projekt? -->
-
-## Scope-out
-<!-- Welche benachbarten Ziele und Arbeitspakete bleiben ausdrücklich ausgeschlossen? -->
-
-## Aufgabenliste
-<!-- Eine Zeile pro Aufgabe in Arbeitsreihenfolge:
-- [<Titel>](task-<id>-<slug>.md) - Status, kurzer Stand.
-Bei Bedarf mit Überschriften gruppieren und Abhängigkeiten hier vermerken. -->
+## Tasks
+<!-- One line per task in working order:
+- [<Title>](task-<id>-<slug>.md) - status, brief state.
+Group with headings where needed and note dependencies here. -->

@@ -7,8 +7,6 @@ description: >
 disable-model-invocation: true
 argument-hint: "[tree [new [Auftrag]|Auswahl|aufräumen]]"
 license: MIT
-type: skill
-edit: locked
 ---
 
 # Qatlas Work

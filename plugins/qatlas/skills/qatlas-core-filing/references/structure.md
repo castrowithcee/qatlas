@@ -1,101 +1,91 @@
 ---
 description: >
-  Aufbau des Projektwissensraums .qatlas-project/: Gegenstand, Navigationsknoten, Funktionsdateien und
-  -ordner, Zonen, Vorlagen sowie Dateipräfixe und fortlaufende Kennungen.
+  Layout of the project knowledge space .qatlas-project/: fixed folders with their types, the ban on further
+  folders, the root README, zones, FRAMEWORK.md outside the space, file names and task IDs.
 license: MIT
 type: rule
 edit: locked
 ---
 
-# Projektwissensraum
+# Project knowledge space
 
-`.qatlas-project/` ist der versionierte, repo-eigene Wissens- und Arbeitszustand. Er hält Zweck, Aufbau,
-Architektur, Konventionen und Entscheidungen über das Projekt und seine Pflege. Der fachliche Inhalt des
-Repos bleibt an seinem maßgeblichen Ort: In einem Personal OS liegen etwa Weiterbildungsentscheidungen und
-Finanzregeln außerhalb, Entscheidungen über Struktur und Pflege des Bestands innerhalb. Vorhandene
-Spezifikationen und Dokumentationsbäume werden nicht dupliziert. Außerhalb des Wissensraums gelten die
-vorhandenen lokalen Strukturen; sie werden nicht auf dieses Schema umgeordnet. Nur die beiden Zonen bleiben
-unversioniert; eine Nutzerentscheidung darf den gesamten Wissensraum lokal gitignorieren.
+`.qatlas-project/` is the versioned, repo-owned state of knowledge and work. It holds purpose, layout,
+architecture, conventions, decisions and plans about the project and its maintenance. The domain content of
+the repo stays at its authoritative place: in a personal OS, decisions on further training or finance rules
+live outside, decisions on structure and maintenance of the collection inside. Existing specifications and
+documentation trees are not duplicated. Outside the knowledge space the existing local structures apply and
+are not reordered to this layout. Only the two zones stay unversioned; a user decision may gitignore the
+whole knowledge space locally.
 
-## Navigationsknoten
+## Fixed folders
 
-- Die Root-`README.md` erklärt den Projektzustand, grenzt fachliche Repo-Inhalte ab und nennt deren
-  tatsächliche Einstiegspunkte mit eindeutigen Lesebedingungen.
-- Eine weitere README entsteht nur für einen eigenen Scope. Sie ist kein Vollinventar, Fachartikel,
-  Regelwerk, Memory oder Arbeitsjournal.
-- Jede README im Wissensraum bleibt einschließlich Frontmatter bei höchstens 80 Zeilen und 500 durch
-  Leerraum getrennten Wörtern. Lagere Details aus, ohne bindende Aussagen wegzukürzen. Eine vorhandene
-  längere README wird vollständig gelesen und als Befund gemeldet, nicht abgeschnitten.
-- Eine `FRAMEWORK.md` entsteht neben der README erst mit bestätigten eigenen Regeln des Scopes, und die
-  README nennt, für welche Arbeit sie vorher zu lesen ist. Sie enthält keine
-  allgemeine Fachkunde und wiederholt weder native Projektanweisungen noch einzelne begründete
-  Entscheidungen.
-- Lege im Wissensraum kein neues `INDEX.md` an.
-- Pflegebefugnis für Navigation und Fakten erzeugt keine neue Regelautorität und erlaubt keine Änderung der
-  Projektabsicht.
+Setup creates every folder below. Each folder holds exactly the listed types:
 
-## Funktionsdateien und -ordner
+| Folder | Content | `type` |
+|---|---|---|
+| `backlog/` | routing to the authoritative planning system and, if local, its work packages | `meta`, `task` |
+| `memory/` | lasting hints that cannot be derived elsewhere, with their index `MEMORY.md` | `memory`, `meta` |
+| `plans/` | initiatives cut into tasks, kept as reference | `plan` |
+| `decisions/` | decisions of the user, one file per context | `decision` |
+| `decisions/conventions/` | decisions on how work in this project is done | `decision` |
+| `architecture/` | description of the current architecture | `knowledge` |
+| `knowledge/` | domain knowledge, synthesis and snapshots of external sources | `knowledge`, `fact` |
+| `playbooks/` | repeatable procedures | `playbook` |
+| `templates/` | the user's own templates; Qatlas places and updates nothing there | as the template's target |
+| `zone-import/` | gitignored buffer for untrusted raw material | none |
+| `zone-export/` | gitignored buffer for explicitly requested deliverables only | none |
 
-- `MEMORY.md`: Index des Repo-Memorys. `HISTORY.md`: fortlaufender Verlauf eines Scopes. Diese Namen,
-  `README.md`, `FRAMEWORK.md` und `BACKLOG.md` sind exklusiv und tragen kein Präfix.
-- `backlog/`: Routing zum maßgeblichen Planungssystem und, wenn lokal gewählt, der lokale Backlog. Aufbau
-  und Lebenszyklus bestimmt die Backlog-Norm. `BACKLOG.md` und `MEMORY.md` bestehen jeweils nur einmal auf
-  Projektebene.
-- `memory/`: dauerhafte, nicht anderweitig ableitbare Hinweise. Aktualisiere vorhandene Memories, statt sie
-  zu duplizieren. Neue Memories entstehen auch auf ausdrückliche Bitte des Nutzers und erhalten genau eine
-  Indexzeile.
-- Inhaltsbereiche wie `overview/`, `decisions/`, `conventions/`, `architecture/` und `knowledge/` entstehen
-  erst mit ihrem ersten Inhalt direkt unter der Wissenswurzel. Erfordern mehrere eigenständige Gegenstände es
-  wirklich, darf der Bestand bewusst darunter gegliedert werden, etwa nach `marketplace/` und `cli/`.
-  Gemeinsame Aussagen bleiben einmal am gemeinsamen Ort. Eine neue Repo-Grenze oder eine Liste möglicher
-  Bereiche erzeugt keine vorsorgliche Struktur.
-- `templates/`: optionale, versionierte Vorlagenbibliothek des Nutzers. Qatlas legt dort nichts ab und
-  aktualisiert nichts. Vorlagen tragen beschreibende Namen, nie reservierte Funktionsnamen.
-- `zone-import/`: gitignorierter Puffer für nicht vertrauenswürdiges Rohmaterial. Dauerhafter Inhalt wird
-  richtig abgelegt; nur erfolgreich verarbeitete Originale wandern nach `processed/<yyyy-mm>/`.
-- `zone-export/`: gitignorierter Puffer ausschließlich für ausdrücklich angeforderte Lieferobjekte. Lege
-  dort nie von selbst etwas ab.
+Never create another folder or subfolder in the knowledge space unless the user explicitly asks for it.
+Exceptions are the structure the backlog contract defines inside `backlog/` and
+`zone-import/processed/<yyyy-mm>/`. Content that fits no folder is a question to the user, not a reason for
+a new folder.
 
-Die beiden Zonen sind stets vorhanden. Ein Original zu archivieren ist Routine, eine Zone zu leeren ist eine
-Löschung. Große oder veränderliche Binärdateien gehören in einen Dateispeicher oder Git LFS, nicht dauerhaft
-in eine Zone. Technische Projektkonfiguration und der Prüfstand projektbezogener Plugin-Updates liegen unter
-`.qatlas/plugins/`, checkout-lokaler Laufzeitzustand unter `.qatlas/local/`; keiner davon gehört zum
-Wissensraum.
+- Update existing memories instead of duplicating them. New memories also arise on the user's explicit
+  request and get exactly one index line.
+- Only successfully processed originals move from `zone-import/` to `processed/<yyyy-mm>/`. Archiving an
+  original is routine, emptying a zone is a deletion. Never place anything in `zone-export/` on your own.
+- Large or changing binaries belong in a file store or Git LFS, not permanently in a zone.
+- Technical project configuration and the check state of project-related plugin updates live under
+  `.qatlas/plugins/`, checkout-local runtime state under `.qatlas/local/`; neither belongs to the knowledge
+  space.
 
-## Dateikennungen
+## Root README
 
-Neue Inhaltsdateien heißen `<präfix>-<id>-<slug>.md`. Wähle das Präfix nach dem Gegenstand:
+`.qatlas-project/README.md` is the only README in the knowledge space apart from project heads under the
+backlog contract. It explains the project state, names
+the folders, delimits the domain content of the repo and names its actual entry points with unambiguous
+read conditions. Including frontmatter it stays at most 80 lines and 500 whitespace-separated words. Move
+details out without cutting binding statements. Read an existing longer README fully and report it as a
+finding instead of truncating it. Create no `INDEX.md` in the knowledge space. Authority to maintain
+navigation creates no new rule authority and does not permit changing the project's intent.
 
-| Präfix | Gegenstand |
-|---|---|
-| `overview` | Projektzweck und Grenzen |
-| `decision` | allgemeine Projektentscheidung |
-| `adr` | Architekturentscheidung |
-| `convention` | Konvention |
-| `arch` | aktuelle Architekturbeschreibung |
-| `req` | Anforderung |
-| `plan` | bestätigter Plan eines Vorhabens |
-| `task` | lokales Arbeitspaket |
-| `ops` | Betriebsverfahren |
-| `quality`, `risk`, `history` | Qualität, Risiko oder Historie |
-| `memory`, `template` | Memory oder Nutzervorlage |
+## FRAMEWORK.md
 
-Das Präfix verpflichtet zu keinem Ordner, bleibt aber auch in einem gleichnamigen Typordner sichtbar. Es
-muss nicht dem Frontmatter-`type` entsprechen.
+A `FRAMEWORK.md` exists only outside the knowledge space, next to the README of a domain scope, mostly in
+text repos such as Obsidian vaults, Markdown collections or a personal OS. Propose it to the user and create
+it only after their agreement, once the scope has confirmed working rules, particularities or exceptions of
+its own. The README of that scope names the work for which it must be read beforehand. It contains no
+general domain knowledge and repeats neither native project instructions nor single decisions. Rules for
+the project as a whole are decisions in `decisions/conventions/`.
 
-Die ID ist je Präfix eine fortlaufende Dezimalzahl über die gesamte Wissenswurzel, auch über fachliche
-Unterbereiche und Archive. Ermittle alle vorhandenen Kennungen des Präfixes, etwa für Tasks:
+## File names
+
+Content files are named `<type>-<slug>.md`; the prefix is always the frontmatter `type`. Only tasks carry an
+ID: `task-<id>-<slug>.md`. `meta` files keep their reserved names without a prefix. The slug is kebab-case
+and unique per type across the knowledge space. Renaming it is a restructuring with all references.
+
+The task ID is a sequential decimal number across the whole knowledge space, including backlog projects.
+Find all existing task IDs:
 
 ```sh
 find .qatlas-project -type f -name 'task-*.md' | grep -E '/task-[0-9]{4,}-[^/]*$'
 ```
 
-Wähle eins mehr als den höchsten Wert und fülle auf mindestens vier Stellen auf; ohne Treffer beginnt sie bei
-`0001`. Prüfe vor dem Schreiben und vor der Integration erneut auf Kollisionen. Bei parallelen neuen
-Einträgen erhält der noch nicht integrierte Eintrag die nächste freie ID samt angepassten Verweisen. IDs
-werden nicht wiederverwendet; Präfix und ID bleiben stabil und werden nicht kosmetisch neu nummeriert.
-Ältere Kennungen anderer Form zählen für die Vergabe nicht mit und bleiben unverändert.
+Choose one more than the highest value and pad to at least four digits; without a match it starts at
+`0001`. Check again for collisions before writing and before integrating. With parallel new entries, the
+entry not yet integrated takes the next free ID together with adjusted references. IDs are never reused and
+never renumbered for cosmetics. Task IDs of another form count for nothing and stay unchanged.
 
-`knowledge/` enthält tatsächliches Fachwissen oder Synthesen mit sprechenden Namen ohne verpflichtendes
-Präfix oder Nummer. Funktionsdateien, technische Formate und rohe Zonenartefakte folgen ihren festen Namen
-oder eigenen Formaten. Bei mehrdeutigen Funktionsnamen nenne den Scope.
+Files with an older name or folder stay valid and unchanged until `qatlas-core-filing migrate` converts
+them. Function files, technical formats and raw zone artefacts follow their fixed names or own formats.
+Name the scope when a function name is ambiguous.

@@ -7,8 +7,6 @@ description: >
 disable-model-invocation: true
 argument-hint: "[goal|shape|run|sentinel|review] [Idee|Task|Datei|backlog] [--limit <n|all|0>] [--orchestras <n>] [--fly]"
 license: MIT
-type: skill
-edit: locked
 ---
 
 # Qatlas

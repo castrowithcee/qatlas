@@ -1,124 +1,128 @@
 ---
 description: >
-  Frontmatter-Schema für inhaltliche Markdown-Dateien: description, Inhaltstypen, Bearbeitungsrechte,
-  Pflichtfelder, Datumsfelder sowie Versionierung und Ablösung wichtiger Dokumente.
+  Frontmatter schema for content Markdown files: description, the nine content types and how to tell them
+  apart, edit rights, required fields and in-place versioning.
 license: MIT
 type: rule
 edit: locked
 ---
 
-# Frontmatter-Schema
+# Frontmatter schema
 
-Jede inhaltliche Markdown-Datei beginnt mit Frontmatter. Rohzonen und ausdrücklich definierte strukturelle
-READMEs außerhalb von `.qatlas-project/` bleiben frei davon.
+Every content Markdown file starts with frontmatter. The two zones stay free of it. Files that follow an
+official agent standard, such as `SKILL.md`, agent-native commands and agent instruction files like
+`AGENTS.md`, follow that standard and carry neither `type` nor `edit`.
 
-## Suchfelder
+## Search fields
 
-`description` ist ein knapper, eigenständiger Satz über Gegenstand und Zweck mit den unterscheidenden
-Suchbegriffen. Bereich und Thema stehen im Pfad. Schreibe sie als gefalteten Block-Skalar:
+`description` is one short, self-contained sentence on subject and purpose with the distinguishing search
+terms. Area and topic are in the path. Write it as a folded block scalar:
 
 ```yaml
 description: >
-  Gegenstand und Zweck der Datei als ein Satz mit den entscheidenden Suchbegriffen.
+  Subject and purpose of the file as one sentence with the decisive search terms.
 ```
 
-Optionale `tags` sind eine Liste aus lowercase-kebab-case-Werten, kein zweiter Suchtext.
+Optional `tags` are a list of lowercase kebab-case values, not a second search text.
 
-## Vorrang und Bearbeitung
+## Types
 
-Repo-Wissen hat Vorrang vor Trainingswissen. `fact` bleibt an seine externe Quelle, `decision` an eine
-Entscheidung des Nutzers gebunden. Der Agent hält keine eigene Entscheidung als `decision` fest.
+`type` tells how to handle a file without reading its content. Check the questions in this order; the first
+match decides:
 
-`type` beschreibt die Art des Inhalts. `edit` beschreibt unabhängig davon die zulässige Pflege.
-`edit: locked` schützt akzeptierte Entscheidungen und tatsächlich normative oder instruierende Inhalte;
-ändere sie nur nach Freigabe und am vorhandenen Ort. `edit: shared` erlaubt Agent und Nutzer die Pflege im
-autorisierten Arbeitsfluss, aber keine Änderung der Projektabsicht ohne entsprechende Nutzerentscheidung.
-Entferne ein vorhandenes `locked` nie pauschal; klassifiziere Inhalt für Inhalt und hole die erforderliche
-Freigabe ein. Ein Entwurf ist noch keine akzeptierte Entscheidung. Beschreibende Architektur, Wissen,
-Navigation und operative Dokumentation sind gewöhnlich `shared`. Aktualisiere einen Architektur-Fakt nach
-autorisierter Umsetzung, ohne dadurch eine akzeptierte Entscheidung zu entsperren. Weder Umbenennen,
-Verschieben, `type`, Präfix, Dotfolder-Lage noch bloßes Lesen ändern Bearbeitungsrecht, Geltungsbereich
-oder Rang einer Aussage.
+| Order | `type` | Question | Default `edit` |
+|---|---|---|---|
+| 1 | `task` | Is it a work package to be done? | `shared` |
+| 2 | `meta` | Is it a file that exists because Qatlas brings it into the project: navigation, index, planning entry or scope framework? | `shared`; `FRAMEWORK.md` `locked` |
+| 3 | `plan` | Is it an initiative that can be completed? | `shared` |
+| 4 | `decision` | Did the user settle it, and does it hold until the user changes it? | `locked` |
+| 5 | `rule` | Does it always bind the agent's behaviour? | `locked` |
+| 6 | `playbook` | Does it describe steps for how to do something, for a human or an agent? | `shared` |
+| 7 | `fact` | Does it reproduce an external source? | `shared` |
+| 8 | `memory` | Is it a short hint for later sessions? | `shared` |
+| 9 | `knowledge` | Anything else: domain knowledge, synthesis, description of the current architecture. | `shared` |
 
-## Typen und Pflichtfelder
+- **Plan or decision:** A plan has an end. It records an initiative ("buy a mountain bike") as a reference;
+  the tasks cut from it decide the concrete work. A decision has no end. It holds ("the bike is red") and
+  binds every later initiative until the user changes it. Whatever a plan settles for good becomes a
+  decision, and the plan links to it instead of repeating it.
+- **Decision or rule:** A decision belongs to its project or scope and carries its reason. A rule is a
+  standing norm for agent behaviour across work, as shipped by Qatlas or kept in the user's library.
+- **Playbook or skill:** A playbook is content anyone can follow. A skill is an agent-standard `SKILL.md` and
+  outside this schema.
 
-`description`, `type` und `edit` sind immer vorhanden. `status` und `tags` sind optional, wenn sie
-einen echten Zweck erfüllen. Die zusätzlichen Felder dieser Tabelle sind abschließend:
+Repo knowledge takes precedence over training knowledge. `fact` stays bound to its external source,
+`decision` to a decision by the user. The agent never records its own decision as `decision`; an open
+question stays in its plan or task until the user settles it.
 
-| `type` | Bedeutung und zusätzliche Felder | Übliche Pflege |
-|---|---|---|
-| `meta` | Dauerhafte Steuerung, Rahmen oder Navigation; keine Datumsfelder, nur eine `FRAMEWORK.md` trägt `version` und `updated`. | Normativer Rahmen `locked`, Navigation und beschreibende Projektpflege `shared`. |
-| `rule` | Dauerhafte Verhaltensnorm; `version`, `updated`, optional `paths`. | `locked` |
-| `skill` | Aktiv ausgelöstes Verfahren; `name`, optional `argument-hint` und `disable-model-invocation`, keine Datumsfelder. | `locked` |
-| `fact` | Extern gebundene Wahrheit; optional `source`, Pflichtfelder `version` und `updated`. | `shared`, wenn sie im Arbeitsfluss gegen die Quelle gepflegt werden soll; sonst begründet `locked`. |
-| `knowledge` | Veränderliches Fachwissen und Synthese; `version`, `created`, `updated`. | `shared` |
-| `playbook` | Wiederholbares neutrales Verfahren; `version`, `updated`. | Beschreibendes Verfahren `shared`, tatsächlich normative Vorgabe `locked`. |
-| `decision` | Entscheidung oder bestätigter Plan des Nutzers; `created`, `status`, bei Ablösung `supersedes` oder `superseded_by`. | Akzeptierte Entscheidung `locked`, noch nicht akzeptierter Entwurf `shared`. |
-| `history` | Nur ergänztes Protokoll, wenn die Chronologie ausgewertet wird; `created`, `updated`. | `shared` |
-| `task` | Lokales Arbeitspaket; `status`, `created`, `updated`. | `shared` |
-| `memory` | Datei im festen Memory-Subsystem; keine weiteren Pflichtfelder. | `shared` |
+## Edit rights
 
-Feste Ziele mit `type: meta` und `edit: shared` sind jede README im Projektwissensraum, jede `HISTORY.md`,
-`.qatlas-project/backlog/BACKLOG.md` und `.qatlas-project/backlog/IDEAS.md`. Eine `FRAMEWORK.md` im
-Projektwissensraum trägt `type: meta` und `edit: locked`; sie enthält nur bestätigte, für ihren Scope
-geltende Arbeitsregeln. Ein Projektkopf im lokalen Backlog trägt zusätzlich `status`.
+`edit` states the permitted maintenance independently of `type`. `edit: locked` protects decisions and
+genuinely normative or instructing content; change it only with approval and in place. `edit: shared` lets
+agent and user maintain the file in the authorised workflow, but never changes the project's intent without
+a matching user decision. Follow the default from the table and deviate only for a stated reason. Never
+remove an existing `locked` wholesale; classify content by content and obtain the required approval.
+Neither renaming, moving, `type`, folder nor merely reading changes edit rights, scope or rank of a
+statement.
 
-Eine ausgelieferte kopierfertige Vorlage unter `store/` oder `skills/*/assets/` darf bereits das
-Frontmatter eines solchen Ausnahmeziels tragen, wenn ihr Body den konkreten Zieldateinamen nennt und vor dem
-Schreiben die Ersetzung aller Platzhalter verlangt. Beurteile ihr Frontmatter dann gegen dieses Ziel. Die
-Ausnahme gilt weder für gewöhnliche Inhaltsdateien noch für nutzereigene Vorlagen.
+## Fields
 
-`status` ist ein Pflichtfeld oder Suchmerkmal, aber seine Werte gehören zum jeweiligen Lebenszyklus und
-nicht in dieses allgemeine Inhaltsschema. Für lokale Tasks bestimmt der lokale Backlog-Vertrag die
-aktuelle Zustandsmenge. Projektköpfe und andere Inhaltstypen behalten ihre eigenen
-Statusmodelle.
+`description`, `type` and `edit` are always present. The additional fields are exhaustive:
 
-`source` steht nur auf einem Snapshot von etwas Externem. Datumsfelder stehen nie auf `skill` und auf
-`meta` nur in einer `FRAMEWORK.md`.
+| `type` | Additional fields |
+|---|---|
+| `meta` | none; a project head in the local backlog adds `status` |
+| `task` | `status`, `created`, `updated` |
+| `plan` | `status` (`active` or `done`), `version`, `created`, `updated` |
+| `decision`, `playbook`, `knowledge`, `memory` | `version`, `created`, `updated` |
+| `rule` | `version`, `created`, `updated`, optional `paths` |
+| `fact` | `version`, `created`, `updated`, optional `source` |
 
-## Versionierung und Ablösung
+Dates are `YYYY-MM-DD`. Task status values belong to the local backlog contract. A plan is `done` once it is
+fulfilled or dropped; it then no longer guides current work, and what holds from it stands in its decisions.
+Fixed `meta` targets are the root README of the knowledge space, `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, a
+project head in the local backlog and a `FRAMEWORK.md` outside the knowledge space.
 
-Ob und wann sich ein wichtiges Dokument geändert hat, steht in der Datei selbst; Git beantwortet, was sich
-geändert hat. Es gibt genau eine gültige Datei je Gegenstand, nie eine Kopie mit Versionssuffix im Namen.
+A shipped copy-ready template under `store/` or `skills/*/assets/` may already carry the frontmatter of its
+target when its body names the concrete target file and requires all placeholders to be replaced before
+writing. Judge its frontmatter against that target. The exception applies neither to ordinary content files
+nor to user-owned templates.
 
-- **Fortgeschrieben:** `knowledge`, `fact`, `rule`, `playbook` und `FRAMEWORK.md` werden am Ort geändert.
-  `version` ist eine ganze Zahl ab `1`. Jede inhaltliche Änderung erhöht sie um eins und setzt `updated`
-  auf das Änderungsdatum. Reine Form-, Tippfehler- oder Verweiskorrekturen ändern keines der beiden
-  Felder.
-- **Festgeschrieben:** Eine `decision` hält mit `status` ihren Zustand: `draft`, `accepted` oder
-  `superseded`. Eine angenommene Entscheidung bleibt bis auf Formkorrekturen unverändert. Ihre inhaltliche
-  Änderung braucht eine neue Nutzerentscheidung und entsteht als neues Dokument mit neuer Kennung, das das
-  alte vollständig ersetzt und `supersedes: <alte Kennung>` trägt. Das alte erhält nur `status:
-  superseded` und `superseded_by: <neue Kennung>` und wandert im selben Schritt nach `archive/` in dem
-  Ordner, in dem es lag; die Nutzerentscheidung zur Ablösung deckt diesen Umzug auch bei `edit: locked`.
-  Verweise in Navigation und offenen Tasks zeigen danach auf das neue Dokument, historische Verweise auf
-  den Archivpfad. Die Kennung ist der Dateiname ohne `.md` und bleibt beim Umzug gleich.
-- **Ohne Version:** `task`, `history`, `memory`, `skill`, übriges `meta` und Vorlagen folgen ihrem eigenen
-  Lebenszyklus. Ausgelieferter Plugin-Text wird über die Plugin-Version versioniert und trägt kein
-  `version`.
+## Versioning
 
-Fehlen einem bestehenden Dokument diese Felder, ergänze sie still, sobald du die Datei schreibst, auch bei
-`edit: locked`; sie ändern keine Aussage. Der vorgefundene Stand wird `version: 1` mit `updated` aus dem
-Datum des letzten Commits der Datei, ohne Git-Historie aus dem heutigen Datum. Ändert derselbe Schreibvorgang
-den Inhalt, folgt darauf `version: 2` mit heutigem Datum. Eine Entscheidung erhält bei `edit: locked`
-`status: accepted`, sonst `status: draft`.
+There is exactly one valid file per subject, never a copy with a version in its name.
 
-## Invarianten
+- Every file with `version` is changed in place. `version` is a whole number from `1`. Every change of
+  content raises it by one and sets `updated` to the date of the change. Pure corrections of form, typos or
+  references change neither field.
+- A decision changes only on a decision by the user, in place and with a new `version`. A file per context
+  may grow by further decisions of the same context.
+- A plan raises `version` whenever it sharpens.
+- The current version applies until the user decides otherwise. Earlier versions live in Git only for
+  restoring; read them only to restore something or when the user asks for the history.
+- Shipped plugin text is versioned by the plugin version and carries no `version` or `created`; a shipped
+  `fact` keeps only `updated` as the date of its last check against the source.
 
-1. Ändere `type` nachträglich nur nach Rückfrage. Bestimme `edit` nach der tatsächlichen Verbindlichkeit und
-   Pflegebefugnis, nicht allein aus `type`, Pfad oder Dateiname.
-2. Mische Rahmen (`meta`, `rule`, `skill`) und Inhaltstypen nicht in derselben Datei.
-3. Eine Datei hat ein `edit`, bestimmt vom strengsten Material. Markiere keine Abschnitte einzeln.
-4. Teile eine Datei nicht künstlich nur für ihr Frontmatter auf.
-5. Ändere `fact` nur mit seiner Quelle. Löse eine akzeptierte `decision` nur auf eine neue
-   Nutzerentscheidung durch ein neues Dokument ab.
+When an existing file lacks these fields, add them silently as soon as you write the file, even under
+`edit: locked`; they change no statement. The state found becomes `version: 1`, `created` from the date of
+the file's first commit and `updated` from its last commit, without Git history both from today. If the
+same write changes content, `version: 2` with today's date follows.
 
-Minimale Form für `knowledge`:
+## Invariants
+
+1. Change `type` afterwards only after asking. Set `edit` by actual bindingness and maintenance authority,
+   not by `type`, path or file name alone.
+2. Do not mix framework (`meta`, `rule`) and content types in the same file.
+3. A file has one `edit`, set by its strictest material. Do not mark sections individually.
+4. Do not split a file artificially just for its frontmatter.
+5. Change a `fact` only together with its source.
+
+Minimal form for `knowledge`:
 
 ```yaml
 ---
 description: >
-  Gegenstand und Zweck der Datei als ein Satz mit den entscheidenden Suchbegriffen.
+  Subject and purpose of the file as one sentence with the decisive search terms.
 type: knowledge
 edit: shared
 version: 1
@@ -127,6 +131,4 @@ updated: YYYY-MM-DD
 ---
 ```
 
-Offizielle Agentenstandards für Skills, Rules und Commands haben Vorrang vor diesem Inhaltsschema. Ein
-agent-nativer Command trägt kein `type` oder `edit`. Ausgelieferter Qatlas-Text darf `license` tragen;
-Projektinhalt nicht.
+Shipped Qatlas text may carry `license`; project content does not.

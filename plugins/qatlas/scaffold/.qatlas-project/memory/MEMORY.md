@@ -1,13 +1,13 @@
 ---
 description: >
-  Gemeinsamer Memory-Index für alle Agenten: eine Zeile pro Memory, mit einem Fakt oder einem Feedback
-  pro Datei in diesem Ordner. Er ersetzt das native Memory des Agenten, das sonst nur lokal und pro Agent
-  vorhanden wäre. So bleiben Memories im Repo und sind für jeden Agenten verfügbar. Das gilt ebenso für
-  Memories, die dem Nutzer wichtig sind.
-type: memory
+  Shared memory index for all agents: one line per memory, with one fact or one piece of feedback per file
+  in this folder. It replaces the agent's native memory, which would otherwise exist only locally and per
+  agent. Memories thus stay in the repo and are available to every agent, including those that matter to the
+  user.
+type: meta
 edit: shared
 ---
 
 # Memory
 
-<!-- Eine Zeile pro Repo-Memory: - [Titel](memory-<id>-<slug>.md) - kurzer Aufhänger. -->
+<!-- One line per repo memory: - [Title](memory-<slug>.md) - short hook. -->
