@@ -36,17 +36,18 @@ Assign every file its target folder, name and type, plus the frontmatter delta:
 |---|---|
 | a type in its fixed folder with `<type>-<slug>.md` | unchanged apart from missing fields |
 | an ID or another prefix in the name, such as `decision-0003-…`, `adr-`, `convention-`, `memory-0001-…` | `<type>-<slug>.md` in the type's folder |
-| a plan stored as `decision` | `plans/plan-<slug>.md` with `type: plan`, `edit: shared`, `status` `active` or `done` |
-| a convention, whatever its type | `decisions/conventions/decision-<slug>.md` |
-| an architecture decision or accepted risk | `decisions/decision-<slug>.md` |
+| `type: decision` or `type: rule`, or a `decisions/` folder | `policy` in `policies/`, a former `decisions/conventions/` in `policies/conventions/` |
+| a plan stored as `decision`, `rule` or `policy` | `plans/plan-<slug>.md` with `type: plan`, `edit: shared`, `status` `active` or `done` |
+| a convention, whatever its type | `policies/conventions/policy-<slug>.md` |
+| an architecture decision or accepted risk | `policies/policy-<slug>.md` |
 | a current architecture description | `architecture/knowledge-<slug>.md` |
 | an operating procedure | `playbooks/playbook-<slug>.md` |
 | an overview of the project | merged into the root README |
 | a requirement | a plan or a task, chosen by the user |
 | quality reports, findings, other knowledge | `knowledge/knowledge-<slug>.md` |
-| a `FRAMEWORK.md` inside the knowledge space | `decisions/conventions/decision-<slug>.md` |
+| a `FRAMEWORK.md` inside the knowledge space | `policies/conventions/policy-<slug>.md` |
 | a scope README or `INDEX.md` below the root | merged into the root README, then removed |
-| `type: history`, `HISTORY.md`, a superseded decision, an `archive/` folder | proposed for deletion; Git keeps them |
+| `type: history`, `HISTORY.md`, a superseded decision or policy, an `archive/` folder | proposed for deletion; Git keeps them |
 | a task | keeps its name and folder under the backlog contract |
 | the memory index | `memory/MEMORY.md` with `type: meta` |
 

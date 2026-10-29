@@ -82,7 +82,7 @@ user assignment, the authoritative task contract, or an applicable global or pro
 effect, connection, target area, and limits separately and unambiguously. Use the configured Qatlas MCP
 broker and its available tool descriptions for this.
 
-A task takes over the decisions, conventions, and requirements that apply to its subject as concrete
+A task takes over the policies and requirements that apply to its subject as concrete
 instructions and verifiable acceptance. Source links serve verification and do not replace these
 statements. If an authorized work mode changes an authoritative foundation, check the open tasks it affects
 for stale directives; change neither goal nor acceptance criteria silently.
@@ -90,8 +90,8 @@ for stale directives; change neither goal nor acceptance criteria silently.
 If a mode file names the release for locked project documentation (`Freigabe für gesperrte
 Projektdokumentation`), its invocation permits bringing existing locked project documentation (`edit: locked`)
 in the chosen scope up to date, as far as conversation, task contract, or evidenced implementation result
-support its new content. This release never covers agent instructions, rules, skills, and accepted user
-decisions. A broad backlog invocation unlocks no project documentation.
+support its new content. This release never covers agent instructions, rules, skills, and the user's
+policies. A broad backlog invocation unlocks no project documentation.
 
 The user is the decider, not a reader of the planning system. If a mode presupposes a real user decision,
 fetch it briefly and without presupposed task reading, always guide through only the current question, and

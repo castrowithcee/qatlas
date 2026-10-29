@@ -3,16 +3,16 @@ description: >
   Layout of the project knowledge space .qatlas-project/: fixed folders with their types, the ban on further
   folders, the root README, zones, FRAMEWORK.md outside the space, file names and task IDs.
 license: MIT
-type: rule
+type: policy
 edit: locked
 ---
 
 # Project knowledge space
 
 `.qatlas-project/` is the versioned, repo-owned state of knowledge and work. It holds purpose, layout,
-architecture, conventions, decisions and plans about the project and its maintenance. The domain content of
-the repo stays at its authoritative place: in a personal OS, decisions on further training or finance rules
-live outside, decisions on structure and maintenance of the collection inside. Existing specifications and
+architecture, policies and plans about the project and its maintenance. The domain content of the repo
+stays at its authoritative place: in a personal OS, policies on further training or finances live outside,
+policies on structure and maintenance of the collection inside. Existing specifications and
 documentation trees are not duplicated. Outside the knowledge space the existing local structures apply and
 are not reordered to this layout. Only the two zones stay unversioned; a user decision may gitignore the
 whole knowledge space locally.
@@ -26,8 +26,8 @@ Setup creates every folder below. Each folder holds exactly the listed types:
 | `backlog/` | routing to the authoritative planning system and, if local, its work packages | `meta`, `task` |
 | `memory/` | lasting hints that cannot be derived elsewhere, with their index `MEMORY.md` | `memory`, `meta` |
 | `plans/` | initiatives cut into tasks, kept as reference | `plan` |
-| `decisions/` | decisions of the user, one file per context | `decision` |
-| `decisions/conventions/` | decisions on how work in this project is done | `decision` |
+| `policies/` | binding settings of the user, one file per context | `policy` |
+| `policies/conventions/` | policies on how work in this project is done | `policy` |
 | `architecture/` | description of the current architecture | `knowledge` |
 | `knowledge/` | domain knowledge, synthesis and snapshots of external sources | `knowledge`, `fact` |
 | `playbooks/` | repeatable procedures | `playbook` |
@@ -65,8 +65,8 @@ A `FRAMEWORK.md` exists only outside the knowledge space, next to the README of 
 text repos such as Obsidian vaults, Markdown collections or a personal OS. Propose it to the user and create
 it only after their agreement, once the scope has confirmed working rules, particularities or exceptions of
 its own. The README of that scope names the work for which it must be read beforehand. It contains no
-general domain knowledge and repeats neither native project instructions nor single decisions. Rules for
-the project as a whole are decisions in `decisions/conventions/`.
+general domain knowledge and repeats neither native project instructions nor single policies. Working rules
+for the project as a whole are policies in `policies/conventions/`.
 
 ## File names
 

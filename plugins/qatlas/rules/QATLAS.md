@@ -2,7 +2,7 @@
 description: >
   Immer geltender Qatlas-Kern: Vorrang, Einstieg, Interaktion und Zeiger auf die automatischen Kern-Skills.
 license: MIT
-type: rule
+type: policy
 edit: locked
 ---
 

@@ -15,7 +15,7 @@ edit: locked
    change only those actually broken.
 3. **Merge:** Take all binding statements into the target file at the authoritative place and raise its
    `version`. Then remove the source and point its references to the target.
-4. **Promote:** If content becomes more binding, such as a memory becoming a decision or convention, that
+4. **Promote:** If content becomes more binding, such as a memory becoming a policy, that
    requires a decision by the user. The content moves into a file of the new type in its folder; the old file
    and its index line are removed.
 5. **Archive and delete:** Delete a user file only on explicit request. The knowledge space keeps no archive

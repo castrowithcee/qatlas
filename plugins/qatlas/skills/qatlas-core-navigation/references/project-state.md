@@ -2,7 +2,7 @@
 description: >
   Lesepolitik für den verwalteten Projektzustand: Memory, Roster des lokalen Backlogs und Ideen.
 license: MIT
-type: rule
+type: policy
 edit: locked
 ---
 

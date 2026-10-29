@@ -59,8 +59,8 @@ work; a user decision needed for the documentation or task maturity stays open u
 ## Clarify before cutting
 
 Start at `.qatlas-project/README.md` if it exists and follow only the read conditions that fit the
-initiative. Read the decisions in `.qatlas-project/decisions/` that touch the initiative; every new
-initiative respects the decisions already made. Read a `FRAMEWORK.md` of an affected domain scope when its
+initiative. Read the policies in `.qatlas-project/policies/` that touch the initiative; every new
+initiative respects the policies already set. Read a `FRAMEWORK.md` of an affected domain scope when its
 README requires it. Also examine existing native instructions, domain documentation, implementation and
 relevant external sources before planning a green field. Weigh statements by native hierarchy, explicit
 scope and subject; where they are found or that they are provided automatically gives them no extra rank.
@@ -93,10 +93,11 @@ do not create a competing documentation tree.
   concrete work and name the plan as their source. When the plan sharpens, change it in place with a new
   `version`; once its tasks are done or dropped, set `status: done`. A single small package without a target
   state of its own needs no plan.
-- **Decisions:** Record every final decision the user makes in this run in `.qatlas-project/decisions/`,
-  a decision on how work in the project is done in `decisions/conventions/`. Add it with its necessary
-  reason to the existing decision file of its context, or create one for a new context; the plan links to
-  it instead of repeating it. A decision that the user changes is changed in place with a new `version`.
+- **Policies:** Record every final decision the user makes in this run as a policy in
+  `.qatlas-project/policies/`, one on how work in the project is done in `policies/conventions/`. Add it
+  with its necessary reason to the existing policy file of its context, or create one for a new context;
+  the plan links to it instead of repeating it. A policy that the user changes is changed in place with a
+  new `version`.
 - **Domain scope rules:** If a domain scope outside the knowledge space needs lasting working rules,
   particularities or exceptions of its own, propose a `FRAMEWORK.md` next to its README and create it only
   after the user agrees.

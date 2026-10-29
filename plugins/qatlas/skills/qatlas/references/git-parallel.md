@@ -2,7 +2,7 @@
 description: >
   Supplementary git rules for Qatlas Run when subagents write concurrently, when a task is taken over or
   resumed, and when several leads are active.
-type: rule
+type: policy
 edit: locked
 license: MIT
 ---

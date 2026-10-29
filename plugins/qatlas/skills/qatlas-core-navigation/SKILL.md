@@ -2,7 +2,7 @@
 name: qatlas-core-navigation
 description: >
   Open up project knowledge selectively as soon as a task needs context from the repo: entry via
-  .qatlas-project/README.md and scope READMEs, read conditions, decisions and FRAMEWORK.md, search via
+  .qatlas-project/README.md and scope READMEs, read conditions, policies and FRAMEWORK.md, search via
   frontmatter, reading memory, the local backlog's roster and ideas. Not for creating, changing or moving
   files.
 license: MIT
@@ -34,7 +34,7 @@ only the bodies of matching hits, and only then widen to full text.
   a shipped starting point.
 - Place, reading order or automatic provision give content no extra authority. Rank every statement by
   native instruction hierarchy, explicit validity and subject scope.
-- The decisions in `.qatlas-project/decisions/` bind every initiative until the user changes them. Before
+- The policies in `.qatlas-project/policies/` bind every initiative until the user changes them. Before
   planning, shaping or executing work, read those that touch it.
 - The current version of a file applies. Earlier versions in Git serve only for restoring; read them only to
   restore something or when the user asks for the history. A plan with `status: done` no longer guides

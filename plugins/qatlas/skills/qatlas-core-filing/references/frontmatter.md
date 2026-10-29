@@ -1,9 +1,9 @@
 ---
 description: >
-  Frontmatter schema for content Markdown files: description, the nine content types and how to tell them
+  Frontmatter schema for content Markdown files: description, the eight content types and how to tell them
   apart, edit rights, required fields and in-place versioning.
 license: MIT
-type: rule
+type: policy
 edit: locked
 ---
 
@@ -35,29 +35,30 @@ match decides:
 | 1 | `task` | Is it a work package to be done? | `shared` |
 | 2 | `meta` | Is it a file that exists because Qatlas brings it into the project: navigation, index, planning entry or scope framework? | `shared`; `FRAMEWORK.md` `locked` |
 | 3 | `plan` | Is it an initiative that can be completed? | `shared` |
-| 4 | `decision` | Did the user settle it, and does it hold until the user changes it? | `locked` |
-| 5 | `rule` | Does it always bind the agent's behaviour? | `locked` |
-| 6 | `playbook` | Does it describe steps for how to do something, for a human or an agent? | `shared` |
-| 7 | `fact` | Does it reproduce an external source? | `shared` |
-| 8 | `memory` | Is it a short hint for later sessions? | `shared` |
-| 9 | `knowledge` | Anything else: domain knowledge, synthesis, description of the current architecture. | `shared` |
+| 4 | `policy` | Does it bind everyone who works in its scope, human or agent, until the user changes it? | `locked` |
+| 5 | `playbook` | Does it describe steps for how to do something, for a human or an agent? | `shared` |
+| 6 | `fact` | Does it reproduce an external source? | `shared` |
+| 7 | `memory` | Is it a short hint for later sessions? | `shared` |
+| 8 | `knowledge` | Anything else: domain knowledge, synthesis, description of the current architecture. | `shared` |
 
-- **Plan or decision:** A plan has an end. It records an initiative ("buy a mountain bike") as a reference;
-  the tasks cut from it decide the concrete work. A decision has no end. It holds ("the bike is red") and
+- **Plan or policy:** A plan has an end. It records an initiative ("buy a mountain bike") as a reference;
+  the tasks cut from it decide the concrete work. A policy has no end. It holds ("the bike is red") and
   binds every later initiative until the user changes it. Whatever a plan settles for good becomes a
-  decision, and the plan links to it instead of repeating it.
-- **Decision or rule:** A decision belongs to its project or scope and carries its reason. A rule is a
-  standing norm for agent behaviour across work, as shipped by Qatlas or kept in the user's library.
+  policy, and the plan links to it instead of repeating it.
+- **What a policy holds:** a single settled choice ("the database is Postgres") as well as a set of norms
+  for how work is done ("file names are kebab-case"). Where its reason is not self-evident, it carries it,
+  so that a later change can weigh it. Its place sets its reach: the project's policies live in its
+  knowledge space, the user's cross-project policies in the user's library, Qatlas policies in the plugin.
 - **Playbook or skill:** A playbook is content anyone can follow. A skill is an agent-standard `SKILL.md` and
   outside this schema.
 
-Repo knowledge takes precedence over training knowledge. `fact` stays bound to its external source,
-`decision` to a decision by the user. The agent never records its own decision as `decision`; an open
-question stays in its plan or task until the user settles it.
+Repo knowledge takes precedence over training knowledge. `fact` stays bound to its external source, a
+project or library `policy` to a decision by the user. The agent never records its own decision as
+`policy`; an open question stays in its plan or task until the user settles it.
 
 ## Edit rights
 
-`edit` states the permitted maintenance independently of `type`. `edit: locked` protects decisions and
+`edit` states the permitted maintenance independently of `type`. `edit: locked` protects policies and
 genuinely normative or instructing content; change it only with approval and in place. `edit: shared` lets
 agent and user maintain the file in the authorised workflow, but never changes the project's intent without
 a matching user decision. Follow the default from the table and deviate only for a stated reason. Never
@@ -74,12 +75,12 @@ statement.
 | `meta` | none; a project head in the local backlog adds `status` |
 | `task` | `status`, `created`, `updated` |
 | `plan` | `status` (`active` or `done`), `version`, `created`, `updated` |
-| `decision`, `playbook`, `knowledge`, `memory` | `version`, `created`, `updated` |
-| `rule` | `version`, `created`, `updated`, optional `paths` |
+| `policy` | `version`, `created`, `updated`, optional `paths` |
+| `playbook`, `knowledge`, `memory` | `version`, `created`, `updated` |
 | `fact` | `version`, `created`, `updated`, optional `source` |
 
 Dates are `YYYY-MM-DD`. Task status values belong to the local backlog contract. A plan is `done` once it is
-fulfilled or dropped; it then no longer guides current work, and what holds from it stands in its decisions.
+fulfilled or dropped; it then no longer guides current work, and what holds from it stands in its policies.
 Fixed `meta` targets are the root README of the knowledge space, `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, a
 project head in the local backlog and a `FRAMEWORK.md` outside the knowledge space.
 
@@ -95,8 +96,8 @@ There is exactly one valid file per subject, never a copy with a version in its 
 - Every file with `version` is changed in place. `version` is a whole number from `1`. Every change of
   content raises it by one and sets `updated` to the date of the change. Pure corrections of form, typos or
   references change neither field.
-- A decision changes only on a decision by the user, in place and with a new `version`. A file per context
-  may grow by further decisions of the same context.
+- A policy changes only on a decision by the user, in place and with a new `version`. A file per context
+  may grow by further policies of the same context.
 - A plan raises `version` whenever it sharpens.
 - The current version applies until the user decides otherwise. Earlier versions live in Git only for
   restoring; read them only to restore something or when the user asks for the history.
@@ -112,7 +113,7 @@ same write changes content, `version: 2` with today's date follows.
 
 1. Change `type` afterwards only after asking. Set `edit` by actual bindingness and maintenance authority,
    not by `type`, path or file name alone.
-2. Do not mix framework (`meta`, `rule`) and content types in the same file.
+2. Do not mix `meta` with content types, nor `policy` with non-binding content, in the same file.
 3. A file has one `edit`, set by its strictest material. Do not mark sections individually.
 4. Do not split a file artificially just for its frontmatter.
 5. Change a `fact` only together with its source.

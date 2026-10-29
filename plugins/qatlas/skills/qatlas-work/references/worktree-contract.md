@@ -2,7 +2,7 @@
 description: >
   Contract for central git worktrees: branch names, path, collisions, creation, ownership, and safe
   cleanup, shared by Qatlas Work Tree and Qatlas Run.
-type: rule
+type: policy
 edit: locked
 license: MIT
 ---

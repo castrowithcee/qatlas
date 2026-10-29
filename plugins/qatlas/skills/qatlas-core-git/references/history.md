@@ -3,7 +3,7 @@ description: >
   Historie bereinigen, umschreiben und per --force-with-lease veröffentlichen: was als geteilt gilt, wann
   die Ausnahme greift und wie das Ergebnis geprüft wird.
 license: MIT
-type: rule
+type: policy
 edit: locked
 ---
 

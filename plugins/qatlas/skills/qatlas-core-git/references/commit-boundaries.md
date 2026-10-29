@@ -2,7 +2,7 @@
 description: >
   Grenzen zwischen Task, Commit, Review und Release sowie Regeln für Meilenstein-Commits und Checkpoints.
 license: MIT
-type: rule
+type: policy
 edit: locked
 ---
 
