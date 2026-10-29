@@ -1,7 +1,7 @@
 ---
 description: >
   Check instruction for existing projects after the device-wide role configuration was renamed to team.yaml
-  with format 2.
+  with format 2 and the parallel mode was renamed to qatlas team with the roles supervisor, lead and worker.
 license: MIT
 type: rule
 edit: locked
@@ -19,3 +19,16 @@ commented template lives at `store/config/team.example.yaml`.
 - If `team.yaml` already exists, nothing is written. An invalid old file blocks the takeover and is reported.
 - Nothing changes in this repo itself, and no project file is touched by this update.
 - Once the user has checked the new file, offer to delete the old one; do not delete it yourself.
+
+# The parallel mode is now qatlas team
+
+The parallel mode `qatlas sentinel` is now called `qatlas team`, and the flag `--orchestras <n>` is now
+`--leads <n>`. The roles are supervisor (formerly sentinel), lead (formerly orchestrator) and worker. The
+control script, the pane option, the tmux socket and session name and the local run state moved with the
+mode; behavior is otherwise unchanged.
+
+- End running sentinel runs before the update; a run started under the old name cannot be continued.
+- Old run state under `.qatlas/local/sentinel/` is not taken over and can be deleted. Offer that; do not
+  delete it yourself.
+- If project instructions or memory of this repo mention `qatlas sentinel`, "sentinel" or "orchestrator",
+  check them against `qatlas team`, supervisor and lead and propose the concrete change to the user.

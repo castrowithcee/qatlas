@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// Mechanical helper commands for qatlas run and qatlas sentinel. All commands work
+// Mechanical helper commands for qatlas run and qatlas team. All commands work
 // in the git repo of --repo (default: current directory).
 // Usage:
 //   qatlas-run-tools.js probe --branch <branch> [--base <ref>] [--repo <path>]

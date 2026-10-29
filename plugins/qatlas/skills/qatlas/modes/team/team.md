@@ -1,45 +1,45 @@
 ---
 description: >
-  Parallel work run: a sentinel cuts the backlog into independent packages, has each one worked off by its
-  own orchestrator as a run in its own tmux session, and integrates the results.
+  Parallel work run: a supervisor cuts the backlog into independent packages, has each one worked off by its
+  own lead as a run in its own tmux session, and integrates the results.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Sentinel
+# Team
 
-The session in which the user invokes `sentinel` is the sentinel. It cuts independent packages, starts one
-orchestrator per package, integrates its results and stays available to the user. Each orchestrator is its
-own interactive session that works off its package as an ordinary `run` with its own subagents. The sentinel
+The session in which the user invokes `team` is the supervisor. It cuts independent packages, starts one
+lead per package, integrates its results and stays available to the user. Each lead is its
+own interactive session that works off its package as an ordinary `run` with its own subagents. The supervisor
 never does the substantive implementation itself.
 
-Within the chosen scope, the invocation authorizes starting orchestrators through the control script,
+Within the chosen scope, the invocation authorizes starting leads through the control script,
 claiming and status upkeep in the planning system, checks, local integration and local commits. Push, pull
 request and merge are permitted only when user or project instructions require and authorize them. No
 publish, no deployment, no message to third parties and no other external or irreversible effect.
-`sentinel` receives the permission to edit locked project documentation (`Freigabe für gesperrte
+`team` receives the permission to edit locked project documentation (`Freigabe für gesperrte
 Projektdokumentation`) under the shared contract in [the Qatlas skill](../../SKILL.md).
 
-The sentinel is the dispatcher and the sole integration owner in the sense of the multiple-orchestrators
-section of [Parallel work in a run](../../references/git-parallel.md) (`Mehrere Orchestratoren`). Push, pull
+The supervisor is the dispatcher and the sole integration owner in the sense of the several-leads
+section of [Parallel work in a run](../../references/git-parallel.md) (`Several leads`). Push, pull
 request, merge, task closing and the status `done` belong exclusively to it; project instructions that allow
-a `run` to push, open a pull request or merge apply in the sentinel only to the sentinel. Orchestrators claim
-their tasks in the planning system as that multiple-orchestrators section prescribes, but never set `done`.
+a `run` to push, open a pull request or merge apply in the supervisor only to the supervisor. Leads claim
+their tasks in the planning system as that several-leads section prescribes, but never set `done`.
 
-The control script is `node <plugin-root>/skills/qatlas/modes/sentinel/scripts/qatlas-sentinel-tmux.js`;
+The control script is `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tmux.js`;
 `<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. The helper commands `probe`,
 `ci-wait` and `slot` are provided by `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js`. Touch
-orchestrator panes only through the control script; writing into a pane is allowed only via `nudge`, never
+lead panes only through the control script; writing into a pane is allowed only via `nudge`, never
 send keystrokes by other means.
 `wait`, `ask` and `handover` block until their `--timeout`; set the host's command timeout above it.
 
 ## Invocation
 
-`sentinel [tasks or scope] [--limit <n|0>] [--orchestras <n>] [--fly] [run directive]`
+`team [tasks or scope] [--limit <n|0>] [--leads <n>] [--fly] [run directive]`
 
-- **`--limit` and `--orchestras`:** determine package size and package count as described in "Cutting packages".
-- **`--fly`:** The user is unreachable during the run; [`--fly` in the sentinel](flag-fly.md) applies.
+- **`--limit` and `--leads`:** determine package size and package count as described in "Cutting packages".
+- **`--fly`:** The user is unreachable during the run; [`--fly` in the team](flag-fly.md) applies.
 
 ## Reading list
 
@@ -47,15 +47,15 @@ The blocks repeat nothing from this file or from each other; what you do not rea
 Read each one completely at the stated time:
 
 1. **Before the first step:** [the backlog norm](../../../qatlas-core-backlog/SKILL.md), [checking the
-   orchestration](../../references/playbook-orchestra-config.md), [selecting
+   team](../../references/playbook-team-config.md), [selecting
    tasks](../../references/playbook-task-selection.md), [the
    git workflow](../../references/playbook-git-workflow.md), [parallel work in a
    run](../../references/git-parallel.md), [the git norm](../../../qatlas-core-git/SKILL.md) and its
    [commit reference](../../../qatlas-core-git/references/playbook-commit.md). With `--fly`, additionally the
    flag file from "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
 2. **When `team.yaml` is missing, invalid or a model looks doubtful:** [setting up the
-   orchestration](../../references/playbook-orchestra.md).
-3. **If user or project instructions require pull requests, before the first orchestrator:** [integration via
+   team](../../references/playbook-team.md).
+3. **If user or project instructions require pull requests, before the first lead:** [integration via
    pull requests](../../references/playbook-git-pr.md).
 4. **Before the first integration:** [accepting and integrating](../../references/playbook-acceptance.md),
    [the commit boundary](../../../qatlas-core-git/references/commit-boundaries.md) and [the
@@ -64,20 +64,20 @@ Read each one completely at the stated time:
 
 ## Prepare
 
-1. Check `tmux`, the git root, a clean control branch per the git workflow and the reachability of the
-   authoritative planning system; if it is unreachable, do not start. If the sentinel runs inside tmux, the
-   script creates its own session `sentinel--<repo>` in the user's server; tell the user the printed way to
+1. `tmux` is required; Windows is not supported. Check `tmux`, the git root, a clean control branch per the git workflow and the reachability of the
+   authoritative planning system; if it is unreachable, do not start. If the supervisor runs inside tmux, the
+   script creates its own session `team--<repo>` in the user's server; tell the user the printed way to
    switch to it. Outside tmux it creates its own server; then tell the user the printed attach command. One
-   window holds four orchestrators; the script opens more in additional windows of the same session. Before
-   the first orchestrator, check the free space of the file system holding the repo against the threshold
+   window holds four leads; the script opens more in additional windows of the same session. Before
+   the first lead, check the free space of the file system holding the repo against the threshold
    named in the project instructions, else 5 GB. Below it, run the cleanup step for low space named there; if
    that does not suffice or none is named, do not start and name the concrete obstacle.
 2. If `list --repo <repo-root>` already shows panes, check each one. If its title carries `FERTIG` or it has
    ended (`dead`), it is a leftover of an earlier run: save it with `capture` and close it with `close`. A
-   live pane without `FERTIG` belongs to a running sentinel or to the user; do not start then, and clarify
+   live pane without `FERTIG` belongs to a running supervisor or to the user; do not start then, and clarify
    it with the user. Exception: if `list` shows live panes without `FERTIG` and `report` shows a run of this
    repo, a new session takes it over only on the user's explicit order to continue it. The successor cuts no
-   packages beyond the remaining run budget, adopts the running orchestrators, reconstructs the state from
+   packages beyond the remaining run budget, adopts the running leads, reconstructs the state from
    `list`, `report` (including `plan`) and the planning system and continues `wait` from the `cursor` of
    `list`. Without such an order, the rule above applies.
 3. For each intended host, check its section in `team.yaml` with a valid `lead` entry and its CLI
@@ -89,7 +89,7 @@ Read each one completely at the stated time:
    the merge, and whether `gh` is available and logged in. If `gh`, its login or the authorization for push,
    pull request and merge is missing, do not start and clarify it with the user. If project instructions
    require pull request operations through a Qatlas broker connection, check with `qatlas.search` and
-   `qatlas.describe` before the first orchestrator that the connection exists and offers creating and merging
+   `qatlas.describe` before the first lead that the connection exists and offers creating and merging
    pull requests; otherwise do not start. In that case perform the steps of `land` through the broker instead
    of calling `land`.
 
@@ -100,7 +100,7 @@ local `<control-branch>`.
 
 From the stated scope, or from the backlog if there is none, select the executable tasks as described in
 [selecting tasks](../../references/playbook-task-selection.md) and cut as many packages from them as there
-are independent areas, at most four, with `--orchestras <n>` at most `n`. A package bundles related tasks;
+are independent areas, at most four, with `--leads <n>` at most `n`. A package bundles related tasks;
 dependencies lie only within a package. Real coupling through shared invariants, migrations or runtime
 resources stays within one package; if it cannot be ruled out, merge the tasks. Mechanically shared files may
 be shared by packages as described in [parallel work in a run](../../references/git-parallel.md).
@@ -110,14 +110,14 @@ several tasks change the same central file, such as a registry, a shared test fi
 documentation, put them in one package instead of spreading them over packages: every integration at that
 spot forces every other package that touches it to catch up with the base.
 
-The sentinel integrates serially. Supplement a package that consists only of a dependency chain with
-independent tasks, so that its orchestrator can keep working while it waits for an integration. A
+The supervisor integrates serially. Supplement a package that consists only of a dependency chain with
+independent tasks, so that its lead can keep working while it waits for an integration. A
 cross-cutting task that touches many areas forms its own package and starts first.
 
 A package holds at most five tasks, with `--limit <n>` at most `n`. With `--limit 0` you decide the size of
-each package yourself by what an orchestrator can carry in one run: scope and coupling of the tasks and
+each package yourself by what a lead can carry in one run: scope and coupling of the tasks and
 their foreseeable context needs. Fill each package up to its size as far as executable tasks are available.
-You choose fewer packages or tasks only on an explicit quantity directive via `--orchestras`, `--limit` or an
+You choose fewer packages or tasks only on an explicit quantity directive via `--leads`, `--limit` or an
 equivalent user directive, never from interpreting words like "pilot" or "test". What fits in no package
 stays in its order for replenishment and later runs.
 
@@ -130,25 +130,25 @@ After the cut, log each package with the run budget fixed at the start: `plan --
 Tell the user the packages with their tasks, the reason for the cut and the run budget in a few lines, and
 start directly.
 
-## Starting orchestrators
+## Starting leads
 
 Start each package in the repo root; the script distributes the panes over windows, four each:
 
 ```text
-add --repo <repo-root> --package <package> --label "<project>·orchestrator" --title "<project>·<package> · <host>" --cwd <repo-root> -- <cli>
+add --repo <repo-root> --package <package> --label "<project>·lead" --title "<project>·<package> · <host>" --cwd <repo-root> -- <cli>
 ```
 
 - Claude Code: `claude --model <lead> '/qatlas run <tasks> [--limit <n>] <run directive>'`
 - Codex: `codex -m <lead> '$qatlas run <tasks> [--limit <n>] <run directive>'`
 
 Quote the prompt simply in the shell so that `$qatlas` is not expanded. Set `--limit` to the package size if
-it exceeds five. Never pass on `--fly`: an orchestrator always asks you, and whether you ask the user is
+it exceeds five. Never pass on `--fly`: a lead always asks you, and whether you ask the user is
 decided by your own `--fly`. The run directive reads in essence:
 
-> Package <package> of a sentinel. Other orchestrators work in parallel in the same repo; the sentinel is the
-> integration owner. Work as described in the multiple-orchestrators section of [parallel work in a
+> Package <package> of a team. Other leads work in parallel in the same repo; the supervisor is the
+> integration owner. Work as described in the several-leads section of [parallel work in a
 > run](../../references/git-parallel.md) and claim only tasks of this package. Push, pull request, merge,
-> task closing and `done` are taken over exclusively by the sentinel, even if project instructions allow them
+> task closing and `done` are taken over exclusively by the supervisor, even if project instructions allow them
 > to a run. In the primary working tree you do not pull, switch or commit anything.
 >
 > If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
@@ -171,7 +171,7 @@ decided by your own `--fly`. The run directive reads in essence:
 > requests before you hand over. `handover` rejects a branch with more than one non-merge commit over `base`
 > (exit 2, nothing raised) unless the frontmatter carries `cut-exception: <reason>`. The answer is `integrated
 > <sha>` or `rework <reason>`; without an answer, call the same command again with the report unchanged. Until
-> the answer arrives, task, branches and worktree belong to the sentinel; do not touch them. `rework` gives
+> the answer arrives, task, branches and worktree belong to the supervisor; do not touch them. `rework` gives
 > them back to you: work on the reason and hand over again. `integrated` on a handover that is not the last
 > gives you the task back to continue.
 >
@@ -248,7 +248,7 @@ until your `integrated`. Integrate handovers one at a time and log every integra
    the control root, pass it with `--repo <code-repo>` here and to `land`; `<basis>` and the control branch
    then refer to that repo. A conflict, including one that arises when catching up with the base later, you
    return as `rework <reason with files>`; it does not count as a correction attempt. Never resolve conflicts
-   yourself. Only if the orchestrator is no longer available do you secure the task as a handover to `review`
+   yourself. Only if the lead is no longer available do you secure the task as a handover to `review`
    per the git workflow.
 3. Without a conflict, integrate per the git workflow, and for integration via pull requests per
    [integration via pull requests](../../references/playbook-git-pr.md) with `land --pr <n> --report <file>`
@@ -287,13 +287,13 @@ otherwise `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` or `gi
   `review`, save the pane with `capture` and close it with `close`.
 - Clean up integrated worktrees and branches per the worktree contract, after a squash merge via the squash
   evidence.
-- At the end of the sentinel, run the cleanup steps that native project instructions or project memory name
+- At the end of the team run, run the cleanup steps that native project instructions or project memory name
   for the end of a run, and name them in the final report.
 
 **Replenishment:** If a pane is closed and the run budget is not used up, cut a new package from the
 remaining executable tasks as described in "Cutting packages" that is independent of all running packages. It
 comprises at most the package size and the rest of the run budget, carries a new package name and starts as
-described in "Starting orchestrators". Never more orchestrators run at the same time than "Cutting packages"
+described in "Starting leads". Never more leads run at the same time than "Cutting packages"
 permits. Log it with `plan` and the unchanged run budget, as at the cut. Tell the user the package with its
 tasks in one line.
 

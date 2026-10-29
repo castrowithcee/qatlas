@@ -1,6 +1,6 @@
 'use strict';
 
-// Shared frontmatter parser for handover reports (sentinel handover check, land).
+// Shared frontmatter parser for handover reports (team handover check, land).
 // parseFrontmatter(text) returns null without frontmatter, else {data}. Errors carry a kind:
 // "load" (YAML parser not loadable), "yaml" (invalid YAML), "mapping" (not a mapping).
 const path = require('path');

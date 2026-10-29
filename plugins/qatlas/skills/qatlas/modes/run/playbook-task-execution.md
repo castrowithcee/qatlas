@@ -15,7 +15,7 @@ management, creates commits or starts its own subagents.
 
 ## Commission subagents
 
-The orchestrator gives each subagent exactly one bounded assignment with task ID and title, working location,
+The lead gives each subagent exactly one bounded assignment with task ID and title, working location,
 permitted targets, scope-out, acceptance criteria, checks and return format. It does not implement the
 substantive solution itself. Small status, integration and verification steps stay with it. Exception: if
 the entire result of a task is a small, low-risk change to a few files that it has to check completely
@@ -24,12 +24,12 @@ anyway, it implements it itself; the card then says `Subagents: none`.
 For an implementation task, the subagent does not update lasting project documentation itself. It reports
 existing statements that its change invalidates, as well as evidenced new obligations or couplings for
 future work, with location and evidence; without a finding it justifies `Keine`. If documentation is itself
-an explicit task result, it may edit it. The orchestrator is responsible for the follow-up after
+an explicit task result, it may edit it. The lead is responsible for the follow-up after
 integration.
 
 Before every spawn, assess the actual assignment and its verification effort: which results can be accepted
 independently, which steps depend on each other, which security and target boundaries apply, and which
-acceptances can the orchestrator itself evidence after the return? Several independent tool or endpoint
+acceptances can the lead itself evidence after the return? Several independent tool or endpoint
 groups, different risk and permission boundaries, or a scope that ties a worker up across many implementation
 and checking steps call for a smaller cut.
 
@@ -75,7 +75,7 @@ order:
   location and evidence.
 
 A small task is normally implemented by one subagent. If the same task legitimately needs several separate
-roles or target areas, the orchestrator may use two or more subagents. Their assignments must demonstrably
+roles or target areas, the lead may use two or more subagents. Their assignments must demonstrably
 complement each other, must not build competing solutions and remain together within the error budget of
 this one task. The git workflow isolates simultaneously writing subagents. Full tests of simultaneous
 writers run via `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot -- <test command>`, which
@@ -88,7 +88,7 @@ securely handed over.
 The subagent may include an unpredicted file on its own if it demonstrably lies within the substantive
 scope, and names the deviation in its return. If an effect outside the scope would be necessary, or the
 current state contradicts a binding substantive source, it stops before that effect and returns the finding
-to the orchestrator. It does not extend the contract itself. A defect, a security risk or demonstrably wrong
+to the lead. It does not extend the contract itself. A defect, a security risk or demonstrably wrong
 documentation outside the scope it does not fix, but reports as a side finding.
 
 After a successful start, send exactly one brief card:
@@ -100,7 +100,7 @@ After a successful start, send exactly one brief card:
 Use ID and title from the spine. For each started subagent, name the chosen profile and the model-effort
 combination in short form. If the host does not report the actual combination back, name the requested one
 and mark it "requested"; stop only on an evidenced deviation. If the needed subagents are missing, stop
-before implementation and report this prerequisite. The orchestrator does not replace them as a silent
+before implementation and report this prerequisite. The lead does not replace them as a silent
 subagent.
 
 ## Monitor subagents

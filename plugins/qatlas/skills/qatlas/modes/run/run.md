@@ -1,6 +1,6 @@
 ---
 description: >
-  Serial autonomous work run for, by default, at most five executable tasks: an orchestrator dispatches,
+  Serial autonomous work run for, by default, at most five executable tasks: a lead dispatches,
   monitors and integrates exactly one active task at a time, which subagents implement with one bounded
   assignment each, and hands it over to the user in a secured state after at most two unsuccessful
   corrections.
@@ -12,14 +12,14 @@ license: MIT
 # Execute work
 
 From an explicitly chosen task, project or backlog scope come integrated, evidenced results or concrete
-human handovers. The initial agent is the orchestrator. It holds scope, spine, task selection, subagents,
+human handovers. The initial agent is the lead. It holds scope, spine, task selection, subagents,
 evidence, integration and stop conditions; the subagents carry out the substantive work.
 
 Within the chosen scope, the invocation alone authorizes subagents, local changes, checks, isolated
 worktrees and local commits. It authorizes no push, no publish, no deployment, no message to third parties
 and no other external or irreversible effect. It receives the permission to edit locked project documentation
 (`Freigabe für gesperrte Projektdokumentation`) under the shared contract in [the Qatlas skill](../../SKILL.md).
-Only the primary orchestrator sends closing messages; subagents send no message when
+Only the primary lead sends closing messages; subagents send no message when
 they report completion.
 
 ## Invocation
@@ -39,18 +39,18 @@ The blocks repeat nothing from this file or from each other; what you do not rea
 Read each one completely at the stated time:
 
 1. **Before the first step:** [the backlog norm](../../../qatlas-core-backlog/SKILL.md), [checking the
-   orchestration](../../references/playbook-orchestra-config.md) and [selecting
+   team](../../references/playbook-team-config.md) and [selecting
    tasks](../../references/playbook-task-selection.md). With `--fly`, additionally the flag file from
    "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
 2. **When `team.yaml` is missing, invalid or a model looks doubtful:** [setting up the
-   orchestration](../../references/playbook-orchestra.md).
+   team](../../references/playbook-team.md).
 3. **Before the first writing git step:** [the git workflow](../../references/playbook-git-workflow.md),
    [the git norm](../../../qatlas-core-git/SKILL.md) and its
    [commit reference](../../../qatlas-core-git/references/playbook-commit.md).
 4. **Before a task branch or worktree is created:** [the
    worktree contract](../../../qatlas-work/references/worktree-contract.md).
 5. **When several subagents write at the same time, a task is taken over or resumed, or further
-   orchestrators work in the same repo or planning system:** [parallel work in a
+   leads work in the same repo or planning system:** [parallel work in a
    run](../../references/git-parallel.md).
 6. **Before the first subagent assignment:** [executing a task](playbook-task-execution.md).
 7. **Before the first acceptance:** [accepting and integrating](../../references/playbook-acceptance.md).
@@ -82,7 +82,7 @@ does not automatically become an assignment for a stronger model.
 
 ## Procedure
 
-1. Check the orchestration and select the tasks. Before the first task, check the free space of the file
+1. Check the team and select the tasks. Before the first task, check the free space of the file
    system holding the repo against the threshold named in the project instructions, else 5 GB. Below it, run
    the cleanup step for low space named there; if that does not suffice or none is named, do not start and
    name the concrete obstacle.
@@ -96,7 +96,7 @@ does not automatically become an assignment for a stronger model.
 End the run as soon as one of these conditions holds:
 
 - The task limit is reached: that many tasks were completed or securely handed over.
-- With a raised task limit, the orchestrator's context cannot carry another complete task.
+- With a raised task limit, the lead's context cannot carry another complete task.
 - The chosen scope is completely and demonstrably finished.
 - The scope contains neither an executable `next` nor an executable `ready`.
 - A failed task blocks the remaining work.

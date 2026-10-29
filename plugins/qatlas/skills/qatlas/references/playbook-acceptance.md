@@ -9,8 +9,8 @@ license: MIT
 
 # Accept and integrate
 
-This procedure applies to anyone who accepts and integrates a task result: the orchestrator of a run and the
-sentinel.
+This procedure applies to anyone who accepts and integrates a task result: the lead of a run and the
+supervisor.
 
 ## Verify acceptance
 

@@ -9,7 +9,7 @@ const { execFileSync, spawnSync } = require('child_process');
 
 const skill = path.resolve(__dirname, '..', 'plugins', 'qatlas', 'skills', 'qatlas');
 const tools = path.join(skill, 'scripts', 'qatlas-run-tools.js');
-const sentinel = path.join(skill, 'modes', 'sentinel', 'scripts', 'qatlas-sentinel-tmux.js');
+const team = path.join(skill, 'modes', 'team', 'scripts', 'qatlas-team-tmux.js');
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-run-tools-'));
 const gitDir = path.dirname(execFileSync('which', ['git'], { encoding: 'utf8' }).trim());
 
@@ -231,7 +231,7 @@ try {
 
   // validateHandover (shared frontmatter parser): two commits without cut-exception are rejected before tmux.
   c = setup('handover', { extra: ['d.txt'] });
-  r = spawnSync(process.execPath, [sentinel, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
+  r = spawnSync(process.execPath, [team, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
     '--report', c.report], { encoding: 'utf8', env: env(c.stubDir) });
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
@@ -246,7 +246,7 @@ try {
     git(path.join(ops, 'x'), 'branch', 'main', 'origin/main');
     return { ...code, ops, codeDir: path.join(ops, 'x') };
   };
-  const hand = (e, ...more) => spawnSync(process.execPath, [sentinel, 'handover', '--repo', e.ops, '--package', 'p',
+  const hand = (e, ...more) => spawnSync(process.execPath, [team, 'handover', '--repo', e.ops, '--package', 'p',
     '--task', 't', '--report', e.report, ...more], { encoding: 'utf8', env: env(e.stubDir) });
   c = embedded('embed-bad', ['d.txt']);
   r = hand(c, '--code-repo', c.codeDir);
@@ -274,14 +274,14 @@ try {
     const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'stale-')));
     const body = (line) => `printf 'work\\n'; i=0; while [ $i -lt 19 ]; do echo; i=$((i+1)); done; ${line}; sleep 300`;
     const win = tm('new-session', '-d', '-x', '80', '-y', '24', '-P', '-F', '#{window_id}', 'sh', '-c', body('echo idle'));
-    tm('set', '-w', '-t', win, '@qatlas-sentinel', repo);
+    tm('set', '-w', '-t', win, '@qatlas-team', repo);
     const panes = { idle: tm('display', '-p', '-t', win, '#{pane_id}') };
     panes.waiting = tm('split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, 'sh', '-c', body("echo 'Waiting for 1 background agent to finish'"));
     for (const name of Object.keys(panes)) tm('set', '-p', '-t', panes[name], '@qatlas-package', name);
     socketPath = tm('display', '-p', '#{socket_path}');
     let cursor = 0;
     const stale = () => {
-      const res = spawnSync(process.execPath, [sentinel, 'wait', '--repo', repo, '--since', String(cursor), '--timeout', '0.01', '--stale', '20'],
+      const res = spawnSync(process.execPath, [team, 'wait', '--repo', repo, '--since', String(cursor), '--timeout', '0.01', '--stale', '20'],
         { encoding: 'utf8', env: { ...process.env, TMUX: `${socketPath},1,0` } });
       assert.strictEqual(res.status, 0, res.stderr);
       const result = JSON.parse(res.stdout);

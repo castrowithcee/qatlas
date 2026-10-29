@@ -14,8 +14,8 @@ license: MIT
 | **qatlas shape [idea or file]** | Records confirmed knowledge and cuts small tasks ready to run. |
 | **qatlas shape <task>** | Sharpens one clearly named existing task. |
 | **qatlas shape backlog [scope]** | Sharpens drafts, settles prerequisites and repairs the queue. |
-| **qatlas run [--limit <n\|all>] [--fly]** | Runs at most five tasks in series by default, with an orchestrator and subagents; `--fly` works without questions. |
-| **qatlas sentinel [--limit <n\|0>] [--orchestras <n>] [--fly]** | Works through up to four independent batches of five tasks each in parallel in tmux; `--orchestras` changes the number of batches, `--limit 0` leaves the batch size to the sentinel. |
+| **qatlas run [--limit <n\|all>] [--fly]** | Runs at most five tasks in series by default, with a lead and subagents; `--fly` works without questions. |
+| **qatlas team [--limit <n\|0>] [--leads <n>] [--fly]** | Works through up to four independent batches of five tasks each in parallel in tmux; `--leads` changes the number of batches, `--limit 0` leaves the batch size to the supervisor. |
 | **qatlas review** | Walks through concrete checks step by step and settles decisions one at a time. |
 | **qatlas-work tree** | Shows Git worktrees, creates one with `new` or cleans up safely. |
 | **qatlas-core setup** | Sets up project state, project instructions, library and settings. |

@@ -1,4 +1,4 @@
-# Only qatlas run and qatlas sentinel read the user-owned copy at ~/.qatlas/plugins/team.yaml.
+# Only qatlas run and qatlas team read the user-owned copy at ~/.qatlas/plugins/team.yaml.
 # This file changes no host settings and controls no other subagent calls.
 format: 2
 
@@ -12,7 +12,7 @@ profiles:
   demanding: "Hard diagnosis or tightly coupled implementation that cannot sensibly be cut smaller."
 
 # Roles per host:
-#   lead        starts the orchestrators of qatlas run and qatlas sentinel.
+#   lead        starts the leads of qatlas run and qatlas team.
 #   supervisor  assignment for a later role.
 #   integrator  assignment for a later role.
 #   worker      model and effort per profile.

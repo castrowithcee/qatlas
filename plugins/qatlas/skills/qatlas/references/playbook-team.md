@@ -19,7 +19,7 @@ them. Create the file only after consent. Without the file and without consent, 
 limits would not be established.
 
 For an existing file, check format, host, the three described profiles, the `lead` entry and all chosen
-`worker` profiles. Also check that `supervisor` and `integrator` hold valid models; `run` and `sentinel`
+`worker` profiles. Also check that `supervisor` and `integrator` hold valid models; `run` and `team`
 currently do not start them. Accept as model values only IDs or native aliases supported by the host; do not
 interpret bare family names as aliases yourself. If the section of the current host is missing, propose its
 concretely filled-in addition and change the user file only after consent; start no task until then. Check

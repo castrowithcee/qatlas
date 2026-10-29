@@ -1,6 +1,6 @@
 ---
 description: >
-  Integration of a run or sentinel task via pull requests when user or project instructions require it:
+  Integration of a run or team task via pull requests when user or project instructions require it:
   working base, conflict probe, merge queue, cut for squash merge, and closing.
 type: playbook
 edit: locked
@@ -31,7 +31,7 @@ without a push.
   review; a pull request never bundles independent milestones. Each pull request gets its own task branch of
   the same task with its own slug. A preparatory pull request, for example a mechanical refactoring, is
   integrated before the change that builds on it. Before opening, check the entire diff of the pull request
-  against the commit boundary and split it before you push. A sentinel handover enforces this
+  against the commit boundary and split it before you push. A team handover enforces this
   mechanically: `handover` rejects a branch with more than one non-merge commit unless the report frontmatter
   carries a `cut-exception`.
 - **Closing:** `land` performs the merge, the squash evidence and the deletion of the remote branch. The merge

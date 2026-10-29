@@ -585,7 +585,7 @@ function legacyTeamFile(homeDir = os.homedir()) {
   return path.join(homeDir, '.qatlas', 'plugins', 'orchestra.yaml');
 }
 
-const TEAM_HEADER = '# Qatlas team: role assignment for qatlas run and qatlas sentinel.\n'
+const TEAM_HEADER = '# Qatlas team: role assignment for qatlas run and qatlas team.\n'
   + '# Migrated from the previous file; its comments were not carried over.\n';
 
 function migrateTeam({ homeDir, apply }) {

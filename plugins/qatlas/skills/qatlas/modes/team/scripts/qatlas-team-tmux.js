@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
-// Controls the orchestrator windows of a Qatlas sentinel in tmux. Windows belong to exactly one repo and
+// Controls the lead windows of a Qatlas team in tmux. Windows belong to exactly one repo and
 // are marked via its root; the script touches only windows so marked. Each window holds at most four
-// panes; further packages open another window in the same session. If the sentinel runs in tmux,
-// add creates its own session `sentinel--<repo>` on the user server (mouse off there, no
-// server-wide options); otherwise the fallback server `-L qatlas-sentinel` is used. A pane
+// panes; further packages open another window in the same session. If the supervisor runs in tmux,
+// add creates its own session `team--<repo>` on the user server (mouse off there, no
+// server-wide options); otherwise the fallback server `-L qatlas-team` is used. A pane
 // is addressed via repo and package because hosts like Codex do not reliably run commands with the pane
 // environment.
-// Events are JSON lines in <repo>/.qatlas/local/sentinel/events.jsonl and the single source of truth for
+// Events are JSON lines in <repo>/.qatlas/local/team/events.jsonl and the single source of truth for
 // answers. `seq` is the 0-based line index, derived on read, not stored. Waking types: question,
 // handover, done, exited, stale, disk; start, plan, answer, picked, nudge and all types written via log
 // do not wake.
@@ -19,27 +19,27 @@
 // the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
 // Refs resolve in --code-repo (default --repo), so code may live in a repo embedded in the control repo;
 // run files always stay in --repo.
-// `wait` also watches itself, so the sentinel needs no monitor of its own. stale: a live pane without
+// `wait` also watches itself, so the supervisor needs no monitor of its own. stale: a live pane without
 // open signal whose conversation part has not changed for --stale minutes (once per standstill phase;
 // the state lives in pane options and so survives across wait calls). While the host shows that the
-// orchestrator waits for its own background agent (Claude Code: "Waiting for N background agent(s)"), the
+// lead waits for its own background agent (Claude Code: "Waiting for N background agent(s)"), the
 // limit is WAITING_FACTOR times --stale, so a hung worker is still reported. disk: free space of the repo
 // filesystem fell below --min-free GB (once per undershoot). nudge is the only way to write into a pane.
 // If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
 // Usage:
-//   qatlas-sentinel-tmux.js add --repo <root> --package <package> --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
-//   qatlas-sentinel-tmux.js list --repo <root>
-//   qatlas-sentinel-tmux.js wait --repo <root> [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>]
-//   qatlas-sentinel-tmux.js nudge --repo <root> --package <package> --text <text>   (refused while the pane has an open signal)
-//   qatlas-sentinel-tmux.js title --repo <root> --package <package> --title <title>
-//   qatlas-sentinel-tmux.js ask --repo <root> --package <package> --question <question> [--timeout <seconds>]
-//   qatlas-sentinel-tmux.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <text|file> [--timeout <seconds>]
-//   qatlas-sentinel-tmux.js answer --repo <root> --package <package> --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
-//   qatlas-sentinel-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
-//   qatlas-sentinel-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>   (run budget and package tasks; repeatable)
-//   qatlas-sentinel-tmux.js report --repo <root>
-//   qatlas-sentinel-tmux.js capture --repo <root> --package <package>   (scrollback to <root>/.qatlas/local/sentinel/<package>.log)
-//   qatlas-sentinel-tmux.js close --repo <root> --package <package>
+//   qatlas-team-tmux.js add --repo <root> --package <package> --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
+//   qatlas-team-tmux.js list --repo <root>
+//   qatlas-team-tmux.js wait --repo <root> [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>]
+//   qatlas-team-tmux.js nudge --repo <root> --package <package> --text <text>   (refused while the pane has an open signal)
+//   qatlas-team-tmux.js title --repo <root> --package <package> --title <title>
+//   qatlas-team-tmux.js ask --repo <root> --package <package> --question <question> [--timeout <seconds>]
+//   qatlas-team-tmux.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <text|file> [--timeout <seconds>]
+//   qatlas-team-tmux.js answer --repo <root> --package <package> --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
+//   qatlas-team-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
+//   qatlas-team-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>   (run budget and package tasks; repeatable)
+//   qatlas-team-tmux.js report --repo <root>
+//   qatlas-team-tmux.js capture --repo <root> --package <package>   (scrollback to <root>/.qatlas/local/team/<package>.log)
+//   qatlas-team-tmux.js close --repo <root> --package <package>
 
 const fs = require('fs');
 const path = require('path');
@@ -49,8 +49,8 @@ const { parseFrontmatter } = require('../../../scripts/handover-frontmatter.js')
 
 const MAX_PANES = 4;
 const NARROW = 80;
-const MARK = '@qatlas-sentinel';
-const SOCKET = 'qatlas-sentinel';
+const MARK = '@qatlas-team';
+const SOCKET = 'qatlas-team';
 const WAKING = new Set(['question', 'handover', 'done', 'exited', 'stale', 'disk']);
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
 const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed', 'plan', 'nudge']);
@@ -81,7 +81,7 @@ const fail = (message, code = 1) => { process.stderr.write(message + '\n'); proc
 const need = (...names) => names.map(name => flag(name) || fail('Missing: ' + name, 2));
 const repoKey = () => fs.realpathSync(path.resolve(need('--repo')[0]));
 
-const eventsDir = repo => path.join(repo, '.qatlas', 'local', 'sentinel');
+const eventsDir = repo => path.join(repo, '.qatlas', 'local', 'team');
 const eventsFile = repo => path.join(eventsDir(repo), 'events.jsonl');
 
 // O_APPEND keeps single-line appends atomic even with several writers.
@@ -134,7 +134,7 @@ function target() {
   const repo = repoKey();
   const [name] = need('--package');
   const hit = allPanes(repo).find(p => p.package === name);
-  if (!hit) fail(`No pane for package ${name} in the sentinel windows of ${repo}`);
+  if (!hit) fail(`No pane for package ${name} in the team windows of ${repo}`);
   return hit.pane;
 }
 
@@ -149,7 +149,7 @@ function setTitle(pane, title) {
 }
 
 // tmux does not allow `.` and `:` in session names.
-const sessionName = repo => 'sentinel--' + path.basename(repo).replace(/[.:]/g, '_');
+const sessionName = repo => 'team--' + path.basename(repo).replace(/[.:]/g, '_');
 
 function newWindow(repo, label, cwd) {
   let line;
