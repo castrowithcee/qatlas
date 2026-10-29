@@ -9,8 +9,6 @@ description: >
 disable-model-invocation: true
 attribution: github.com/DietrichGebert/ponytail
 license: MIT
-type: skill
-edit: locked
 upstream: 5.3.2
 upstream-mod: true
 ---
