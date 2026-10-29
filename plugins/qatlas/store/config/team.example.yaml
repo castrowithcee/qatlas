@@ -1,0 +1,45 @@
+# Only qatlas run and qatlas sentinel read the user-owned copy at ~/.qatlas/plugins/team.yaml.
+# This file changes no host settings and controls no other subagent calls.
+format: 2
+
+# Optional: number of concurrent full test runs per repo for qatlas-run-tools.js slot (default 2).
+# test-slots: 2
+
+# The descriptions decide how work is cut, not the size of a backlog task.
+profiles:
+  light: "Narrow task with a clear approach and a direct check."
+  standard: "Several dependent steps or technical trade-offs within the task."
+  demanding: "Hard diagnosis or tightly coupled implementation that cannot sensibly be cut smaller."
+
+# Roles per host:
+#   lead        starts the orchestrators of qatlas run and qatlas sentinel.
+#   supervisor  assignment for a later role.
+#   integrator  assignment for a later role.
+#   worker      model and effort per profile.
+# Worker effort is set when the model supports it.
+# The lead model must already be correct when the run starts.
+# Model values are host IDs or native host aliases; never replace them silently when new models appear.
+# For each profile choose only a combination that the host and the model support.
+hosts:
+  codex:
+    supervisor: null
+    integrator: null
+    lead: null
+    worker:
+      # Available effort levels depend on the chosen Codex model.
+      light:     { model: null, effort: high }
+      standard:  { model: null, effort: high }
+      demanding: { model: null, effort: xhigh }
+  claude-code:
+    supervisor: null
+    integrator: null
+    lead: null
+    worker:
+      # Suggestion: Haiku for light, Sonnet for standard, Opus for demanding.
+      # Qatlas ships agents for low, medium, high, xhigh and max.
+      # Which of them run depends on the chosen Claude model and host limits.
+      # Models without effort, such as Haiku 4.5, need effort: null.
+      # Their extended thinking follows the Claude Code session and cannot be set here.
+      light:     { model: haiku,  effort: null }
+      standard:  { model: sonnet, effort: high }
+      demanding: { model: opus,   effort: high }

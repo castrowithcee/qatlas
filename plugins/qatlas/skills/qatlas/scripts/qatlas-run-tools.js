@@ -24,7 +24,7 @@
 //     2 usage error (also missing frontmatter or field), 3 gh/git check not possible.
 //   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
-//     --slots, else test-slots in ~/.qatlas/plugins/orchestra.yaml, else 2. Waiting callers are
+//     --slots, else test-slots in ~/.qatlas/plugins/team.yaml, else 2. Waiting callers are
 //     served in arrival order; --priority queues ahead of every caller without it.
 //     Locks live in the primary working tree so worktrees see them. No JSON output;
 //     the command exit code is passed through (signal: 128 plus signal number).
@@ -246,17 +246,17 @@ function land() {
 function slotCount() {
   const given = flag('--slots');
   if (given !== null) return /^[1-9]\d*$/.test(given) ? Number(given) : fail('Invalid: --slots needs a positive integer', 2);
-  const file = path.join(os.homedir(), '.qatlas', 'plugins', 'orchestra.yaml');
+  const file = path.join(os.homedir(), '.qatlas', 'plugins', 'team.yaml');
   if (!fs.existsSync(file)) return 2;
   try {
     const { parseYamlText } = require('../../../scripts/runtime/config-loader.js');
-    const value = parseYamlText(fs.readFileSync(file, 'utf8'))['test-slots'];
+    const value = parseYamlText(fs.readFileSync(file, 'utf8'), 2)['test-slots'];
     if (value === undefined) return 2;
     if (Number.isInteger(value) && value > 0) return value;
   } catch (error) {
-    fail('orchestra.yaml not readable: ' + error.message, 3);
+    fail('team.yaml not readable: ' + error.message, 3);
   }
-  return fail('Invalid: test-slots in orchestra.yaml needs a positive integer', 3);
+  return fail('Invalid: test-slots in team.yaml needs a positive integer', 3);
 }
 
 function alive(pid) {

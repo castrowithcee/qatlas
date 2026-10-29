@@ -9,12 +9,13 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { scaffoldTopUp, walk } = require('./qatlas-scaffold-topup.js');
-const { projectMigrationInventory } = require('./qatlas-migrations.js');
+const { legacyTeamFile, projectMigrationInventory } = require('./qatlas-migrations.js');
 const {
   createConfig,
   parseYamlText,
   readConfig,
   readStatusline,
+  teamProblems,
   topUpConfig,
 } = require('./runtime/config-loader.js');
 
@@ -127,24 +128,22 @@ if (!configState.exists) {
 for (const diagnostic of configState.diagnostics) missing.push('config: ' + diagnostic);
 
 // User-owned: never created by --apply.
-const orchestraFile = path.join(os.homedir(), '.qatlas', 'plugins', 'orchestra.yaml');
-if (!fs.existsSync(orchestraFile)) {
-  notes.push('orchestra: ~/.qatlas/plugins/orchestra.yaml fehlt. Für qatlas run im Setup mit '
+const teamFile = path.join(os.homedir(), '.qatlas', 'plugins', 'team.yaml');
+if (!fs.existsSync(teamFile)) {
+  notes.push('team: ~/.qatlas/plugins/team.yaml fehlt. Für qatlas run im Setup mit '
     + 'geprüften Host-Modellen anlegen; Doctor erzeugt keine Platzhalter.');
 } else {
   try {
-    const orchestra = parseYamlText(fs.readFileSync(orchestraFile, 'utf8'));
-    const isMap = value => value && typeof value === 'object' && !Array.isArray(value);
-    if (!isMap(orchestra.profiles) || !isMap(orchestra.hosts)
-      || !Object.keys(orchestra.hosts).length
-      || !['light', 'standard', 'demanding'].every(name =>
-        typeof orchestra.profiles[name] === 'string')) {
-      throw new Error('Profile oder Hosts fehlen.');
-    }
+    const problems = teamProblems(parseYamlText(fs.readFileSync(teamFile, 'utf8'), 2));
+    if (problems.length) throw new Error(problems.join(' '));
   } catch (error) {
-    missing.push('orchestra: ' + orchestraFile + ' ist ungültig und bleibt unangetastet: '
-      + error.message);
+    missing.push('team: ' + teamFile + ' ist ungültig und bleibt unangetastet: ' + error.message);
   }
+}
+const previousTeamFile = legacyTeamFile();
+if (fs.existsSync(previousTeamFile)) {
+  notes.push('team: ' + previousTeamFile + ' stammt aus der früheren Konfiguration und wird nicht mehr '
+    + 'gelesen. Nach Prüfung von team.yaml ausdrücklich aufräumen.');
 }
 
 const statuslineState = readStatusline();

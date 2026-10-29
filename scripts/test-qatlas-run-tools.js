@@ -114,7 +114,31 @@ const json = r => JSON.parse(r.stdout.trim().split('\n').pop());
 const mergeCalls = c => { try { return fs.readFileSync(path.join(c.stubDir, 'merge-calls'), 'utf8').trim().split('\n'); } catch { return []; } };
 const hasBranch = c => git(c.bare, 'branch', '--list', 'task') !== '';
 
+function testSlotCount() {
+  const home = path.join(root, 'slot-home');
+  const repo = path.join(root, 'slot-repo');
+  fs.mkdirSync(path.join(home, '.qatlas', 'plugins'), { recursive: true });
+  fs.mkdirSync(repo);
+  execFileSync('git', ['init', '-q', repo]);
+  const team = path.join(home, '.qatlas', 'plugins', 'team.yaml');
+  const status = () => spawnSync(process.execPath, [tools, 'slot', '--repo', repo, 'status'],
+    { encoding: 'utf8', env: { ...process.env, HOME: home } });
+  const slots = () => { const r = status(); assert.strictEqual(r.status, 0, r.stderr); return JSON.parse(r.stdout).slots; };
+  assert.strictEqual(slots(), 2);
+  fs.writeFileSync(team, 'format: 2\ntest-slots: 5\n');
+  assert.strictEqual(slots(), 5);
+  fs.writeFileSync(team, 'format: 2\n');
+  assert.strictEqual(slots(), 2);
+  for (const bad of ['format: 2\ntest-slots: 0\n', 'format: 2\ntest-slots: x\n', 'format: 1\ntest-slots: 5\n']) {
+    fs.writeFileSync(team, bad);
+    const r = status();
+    assert.strictEqual(r.status, 3, bad);
+    assert.ok(r.stderr.includes('team.yaml'));
+  }
+}
+
 try {
+  testSlotCount();
   let c = setup('tree');
   let r = land(c);
   assert.strictEqual(r.status, 0, r.stderr);

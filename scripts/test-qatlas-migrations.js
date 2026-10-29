@@ -10,8 +10,12 @@ const YAML = require('../plugins/qatlas/scripts/runtime/vendor/yaml-2.9.0.js');
 const {
   DEFAULT_CONFIG,
   DEFAULT_STATUSLINE,
+  parseYamlText,
+  teamProblems,
 } = require('../plugins/qatlas/scripts/runtime/config-loader.js');
 const {
+  TEAM_MIGRATION,
+  legacyTeamFile,
   migrateProject,
   projectMigrationInventory,
   runMigrations,
@@ -209,6 +213,112 @@ function testInvalidLegacyFile() {
   const result = migrate(f);
   assert.ok(result.blocked.some(problem => problem.includes('settings.json')));
   assert.strictEqual(result.applied.length, 0);
+}
+
+const OLD_TEAM = `# old comment
+format: 1
+test-slots: 3
+profiles:
+  light: "a"
+  standard: "b"
+  demanding: "c"
+hosts:
+  claude-code:
+    orchestrator: opus
+    workers:
+      light:     { model: sonnet, effort: low }
+      standard:  { model: sonnet, effort: medium }
+      demanding: { model: opus,   effort: high }
+`;
+
+function testTeamMigration() {
+  const f = fixture('team');
+  const old = legacyTeamFile(f.home);
+  const teamFile = path.join(f.home, '.qatlas', 'plugins', 'team.yaml');
+  write(old, OLD_TEAM);
+  const first = migrate(f);
+  assert.deepStrictEqual(first.blocked, []);
+  assert.ok(first.applied.includes(TEAM_MIGRATION));
+  assert.deepStrictEqual(first.cleanup, [old]);
+  assert.ok(first.backupDir && fs.existsSync(path.join(first.backupDir, 'files', '.qatlas', 'plugins', 'orchestra.yaml')));
+  assert.strictEqual(fs.readFileSync(old, 'utf8'), OLD_TEAM);
+  const team = readYaml(teamFile);
+  assert.deepStrictEqual(team, {
+    format: 2, 'test-slots': 3,
+    profiles: { light: 'a', standard: 'b', demanding: 'c' },
+    hosts: { 'claude-code': {
+      supervisor: 'opus', integrator: 'opus', lead: 'opus',
+      worker: {
+        light: { model: 'sonnet', effort: 'low' },
+        standard: { model: 'sonnet', effort: 'medium' },
+        demanding: { model: 'opus', effort: 'high' },
+      },
+    } },
+  });
+  assert.deepStrictEqual(teamProblems(parseYamlText(fs.readFileSync(teamFile, 'utf8'), 2)), []);
+  assert.ok(fs.readFileSync(teamFile, 'utf8').startsWith('# '));
+  const before = fs.readFileSync(teamFile, 'utf8');
+  const second = migrate(f);
+  assert.deepStrictEqual(second.applied.filter(id => id === TEAM_MIGRATION), []);
+  assert.deepStrictEqual(second.blocked, []);
+  assert.strictEqual(fs.readFileSync(teamFile, 'utf8'), before);
+
+  // team.yaml already present: nothing is written.
+  const g = fixture('team-existing');
+  write(legacyTeamFile(g.home), OLD_TEAM);
+  const existing = path.join(g.home, '.qatlas', 'plugins', 'team.yaml');
+  write(existing, 'format: 2\n');
+  const kept = migrate(g);
+  assert.deepStrictEqual(kept.applied.filter(id => id === TEAM_MIGRATION), []);
+  assert.deepStrictEqual(kept.blocked, []);
+  assert.strictEqual(fs.readFileSync(existing, 'utf8'), 'format: 2\n');
+  assert.strictEqual(fs.existsSync(path.join(g.home, '.qatlas', 'state', 'migrations')), false);
+
+  // Invalid, unknown top key, unknown host key: blocked, nothing written.
+  for (const broken of ['format: [\n', OLD_TEAM.replace('format: 1\n', 'format: 1\nextra: 1\n'),
+    OLD_TEAM.replace('    workers:', '    spare: x\n    workers:'), OLD_TEAM.replace('format: 1', 'format: 3')]) {
+    const h = fixture('team-broken');
+    write(legacyTeamFile(h.home), broken);
+    const result = migrate(h);
+    assert.deepStrictEqual(result.applied.filter(id => id === TEAM_MIGRATION), []);
+    assert.strictEqual(result.blocked.length, 1, JSON.stringify(result.blocked));
+    assert.ok(result.blocked[0].includes('orchestra.yaml'));
+    assert.strictEqual(fs.readFileSync(legacyTeamFile(h.home), 'utf8'), broken);
+    assert.strictEqual(fs.existsSync(path.join(h.home, '.qatlas', 'plugins', 'team.yaml')), false);
+  }
+
+  // Session start output names the old file for cleanup.
+  const i = fixture('team-cli');
+  initProject(i);
+  write(legacyTeamFile(i.home), OLD_TEAM);
+  const run = runNode(path.join(pluginRoot, 'scripts', 'qatlas-migrations.js'), ['--target', i.project],
+    { cwd: i.project, home: i.home });
+  assert.ok(run.stdout.includes('QATLAS-MIGRATION:'));
+  assert.ok(run.stdout.includes('ALTE DATEI ZUM AUFRÄUMEN: ' + legacyTeamFile(i.home)));
+}
+
+function testDoctorTeamFile() {
+  const f = fixture('doctor-team');
+  initProject(f);
+  const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
+  const teamFile = path.join(f.home, '.qatlas', 'plugins', 'team.yaml');
+  const check = () => runNode(doctor, ['--target', f.project], { cwd: f.project, home: f.home });
+  assert.ok(check().stdout.includes('team.yaml fehlt'));
+  const valid = readYaml(path.join(pluginRoot, 'store', 'config', 'team.example.yaml'));
+  write(teamFile, YAML.stringify(valid));
+  const ok = check();
+  assert.ok(!ok.stdout.includes('team.yaml'), ok.stdout);
+  const incomplete = JSON.parse(JSON.stringify(valid));
+  delete incomplete.hosts['claude-code'].worker.demanding;
+  write(teamFile, YAML.stringify(incomplete));
+  const bad = check();
+  assert.ok(bad.stdout.includes('team.yaml ist ungültig'), bad.stdout);
+  assert.ok(bad.stdout.includes('worker.demanding'));
+  write(teamFile, YAML.stringify({ ...valid, format: 1 }));
+  assert.ok(check().stdout.includes('team.yaml ist ungültig'));
+  write(teamFile, YAML.stringify(valid));
+  write(legacyTeamFile(f.home), OLD_TEAM);
+  assert.ok(check().stdout.includes(legacyTeamFile(f.home)));
 }
 
 function testProjectDetection() {
@@ -588,6 +698,8 @@ try {
   testConflictingLegacyFiles();
   testConflictingStatuslineTargets();
   testInvalidLegacyFile();
+  testTeamMigration();
+  testDoctorTeamFile();
   testProjectDetection();
   testExplicitProjectMigration();
   testProjectMigrationConflictsAndRecovery();
@@ -597,7 +709,7 @@ try {
   testWritingConsumersRespectMigration();
   testSkippedUpdateVersions();
   testUpdateCommandsAcrossVersions();
-  process.stdout.write('✓ Qatlas-Migrationen: 16 Szenarien erfolgreich.\n');
+  process.stdout.write('✓ Qatlas-Migrationen: 18 Szenarien erfolgreich.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

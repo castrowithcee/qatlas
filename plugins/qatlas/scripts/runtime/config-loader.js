@@ -98,7 +98,7 @@ function parseFile(file) {
   }
 }
 
-function parseYamlText(source) {
+function parseYamlText(source, format = 1) {
   const document = YAML.parseDocument(String(source).replace(/^﻿/, ''), {
     version: '1.2', schema: 'core', merge: false, resolveKnownTags: false,
     uniqueKeys: true, stringKeys: true, logLevel: 'error',
@@ -106,8 +106,35 @@ function parseYamlText(source) {
   if (document.errors.length) throw document.errors[0];
   const value = document.toJS({ maxAliasCount: 0 });
   if (!isObject(value)) throw new Error('Das YAML-Wurzeldokument muss eine Map sein.');
-  if (value.format !== 1) throw new Error('Das Feld format muss den Wert 1 haben.');
+  if (value.format !== format) throw new Error('Das Feld format muss den Wert ' + format + ' haben.');
   return value;
+}
+
+const TEAM_PROFILES = ['light', 'standard', 'demanding'];
+const TEAM_ROLES = ['supervisor', 'integrator', 'lead'];
+
+// Structure check shared by the doctor and the team migration; returns a list of problems.
+function teamProblems(value) {
+  if (!isObject(value.profiles) || !TEAM_PROFILES.every(name => typeof value.profiles[name] === 'string')) {
+    return ['profiles braucht die Profile ' + TEAM_PROFILES.join(', ') + ' als Text.'];
+  }
+  if (!isObject(value.hosts) || !Object.keys(value.hosts).length) return ['hosts fehlt oder ist leer.'];
+  const problems = [];
+  for (const [host, entry] of Object.entries(value.hosts)) {
+    if (!isObject(entry)) { problems.push('hosts.' + host + ' muss eine Map sein.'); continue; }
+    for (const role of TEAM_ROLES) {
+      if (entry[role] !== null && typeof entry[role] !== 'string') {
+        problems.push('hosts.' + host + '.' + role + ' braucht ein Modell oder null.');
+      }
+    }
+    for (const profile of TEAM_PROFILES) {
+      const worker = isObject(entry.worker) ? entry.worker[profile] : undefined;
+      if (!isObject(worker) || !('model' in worker) || !('effort' in worker)) {
+        problems.push('hosts.' + host + '.worker.' + profile + ' braucht model und effort.');
+      }
+    }
+  }
+  return problems;
 }
 
 function stringifyYaml(value) {
@@ -287,5 +314,6 @@ module.exports = {
   readConfig,
   readStatusline,
   stringifyYaml,
+  teamProblems,
   topUpConfig,
 };

@@ -14,9 +14,11 @@ const {
   DEFAULT_STATUSLINE,
   parseYamlText,
   stringifyYaml,
+  teamProblems,
 } = require('./runtime/config-loader.js');
 
 const HOME_MIGRATION = 'legacy-home-config-v1';
+const TEAM_MIGRATION = 'team-config-v1';
 const PROJECT_ROOT = '.qatlas-project';
 const LEGACY_PROJECT_ROOTS = ['.qatlas/project', '__qatlas__', '__callbell__'];
 const PROJECT_ID = /^(overview|decision|adr|convention|arch|req|plan|task|ops|quality|risk|history|memory|template)-(\d{4,})-[a-z0-9][a-z0-9-]*\.md$/;
@@ -579,6 +581,72 @@ function migrateLegacyHome({ homeDir, pluginRoot, apply }) {
   return { applied: true, blocked: [], backupDir };
 }
 
+function legacyTeamFile(homeDir = os.homedir()) {
+  return path.join(homeDir, '.qatlas', 'plugins', 'orchestra.yaml');
+}
+
+const TEAM_HEADER = '# Qatlas team: role assignment for qatlas run and qatlas sentinel.\n'
+  + '# Migrated from the previous file; its comments were not carried over.\n';
+
+function migrateTeam({ homeDir, apply }) {
+  const paths = migrationPaths(homeDir);
+  const teamFile = path.join(paths.pluginHome, 'team.yaml');
+  const oldFile = legacyTeamFile(homeDir);
+  const none = { applied: false, blocked: [], backupDir: null, cleanup: [] };
+  let state;
+  try { state = readMigrationState(paths.stateFile); }
+  catch (error) { return { ...none, blocked: [paths.stateFile + ': ' + error.message] }; }
+  if (state.plugins.qatlas.applied[TEAM_MIGRATION]) return none;
+  if (!fs.existsSync(oldFile) || fs.existsSync(teamFile)) return none;
+
+  const blocked = message => ({ ...none, blocked: [oldFile + ' bleibt unverändert und wird nicht migriert: ' + message] });
+  let old;
+  try { old = parseYamlText(fs.readFileSync(oldFile, 'utf8'), 1); }
+  catch (error) { return blocked(error.message); }
+  const unknown = Object.keys(old).filter(key => !['format', 'test-slots', 'profiles', 'hosts'].includes(key));
+  if (unknown.length) return blocked('unbekannte Schlüssel ' + unknown.join(', ') + '.');
+  if (!isObject(old.hosts)) return blocked('hosts fehlt oder ist keine Map.');
+
+  const hosts = {};
+  for (const [name, host] of Object.entries(old.hosts)) {
+    if (!isObject(host)) return blocked('hosts.' + name + ' muss eine Map sein.');
+    const extra = Object.keys(host).filter(key => !['orchestrator', 'workers'].includes(key));
+    if (extra.length) return blocked('unbekannte Schlüssel in hosts.' + name + ': ' + extra.join(', ') + '.');
+    hosts[name] = {
+      supervisor: host.orchestrator, integrator: host.orchestrator,
+      lead: host.orchestrator, worker: clone(host.workers),
+    };
+  }
+  const team = { format: 2 };
+  if (old['test-slots'] !== undefined) team['test-slots'] = old['test-slots'];
+  team.profiles = clone(old.profiles);
+  team.hosts = hosts;
+  const content = TEAM_HEADER + stringifyYaml(team);
+  try {
+    const parsed = parseYamlText(content, 2);
+    const problems = teamProblems(parsed);
+    if (problems.length) return blocked(problems.join(' '));
+  } catch (error) { return blocked(error.message); }
+  if (!apply) return { ...none, planned: [teamFile] };
+
+  const snapshots = snapshot([teamFile, paths.stateFile]);
+  const backupDir = createBackup(paths, [oldFile]);
+  try {
+    atomicWrite(teamFile, content, 0o600);
+    const verified = parseYamlText(fs.readFileSync(teamFile, 'utf8'), 2);
+    const problems = teamProblems(verified);
+    if (problems.length || !isDeepStrictEqual(verified, team)) {
+      throw new Error(problems.join(' ') || 'Die geschriebene Datei weicht vom Plan ab.');
+    }
+    state.plugins.qatlas.applied[TEAM_MIGRATION] = new Date().toISOString();
+    atomicWrite(paths.stateFile, JSON.stringify(state, null, 2) + '\n', 0o600);
+  } catch (error) {
+    restore(snapshots);
+    return { ...none, blocked: ['Migration zurückgerollt: ' + error.message], backupDir };
+  }
+  return { applied: true, blocked: [], backupDir, cleanup: [oldFile] };
+}
+
 function projectMigrationProblems(projectRoot) {
   const inventory = projectMigrationInventory(projectRoot, { detailed: false });
   if (!inventory.unresolved) return [];
@@ -614,12 +682,14 @@ function runMigrations({
   apply = true,
 } = {}) {
   const home = migrateLegacyHome({ homeDir, pluginRoot, apply });
+  const team = migrateTeam({ homeDir, apply });
   return {
-    applied: home.applied ? [HOME_MIGRATION] : [],
-    blocked: [...home.blocked, ...machineMigrationProblems(homeDir),
+    applied: [...(home.applied ? [HOME_MIGRATION] : []), ...(team.applied ? [TEAM_MIGRATION] : [])],
+    blocked: [...home.blocked, ...team.blocked, ...machineMigrationProblems(homeDir),
       ...projectMigrationProblems(path.resolve(projectRoot))],
-    backupDir: home.backupDir,
-    planned: home.planned || [],
+    backupDir: home.backupDir || team.backupDir,
+    planned: [...(home.planned || []), ...(team.planned || [])],
+    ...(team.cleanup.length ? { cleanup: team.cleanup } : {}),
   };
 }
 
@@ -685,6 +755,10 @@ if (require.main === module) {
   if (result.applied.length) {
     lines.push('QATLAS-MIGRATION: Geräteweiter Legacy-Zustand wurde automatisch und verifiziert migriert.');
     if (result.backupDir) lines.push('BACKUP: ' + result.backupDir);
+    for (const file of result.cleanup || []) {
+      lines.push('ALTE DATEI ZUM AUFRÄUMEN: ' + file + ' wird nicht mehr gelesen und blieb unverändert '
+        + 'liegen. Nenne sie dem Nutzer und lösche sie nur auf seine ausdrückliche Anweisung.');
+    }
     lines.push('Informiere den Nutzer vor der übrigen Antwort knapp über Migration und Backup.');
   }
   if (result.blocked.length) {
@@ -699,8 +773,10 @@ if (require.main === module) {
 
 module.exports = {
   HOME_MIGRATION,
+  TEAM_MIGRATION,
   LEGACY_PROJECT_ROOTS,
   PROJECT_ROOT,
+  legacyTeamFile,
   migrateProject,
   projectMigrationInventory,
   runMigrations,
