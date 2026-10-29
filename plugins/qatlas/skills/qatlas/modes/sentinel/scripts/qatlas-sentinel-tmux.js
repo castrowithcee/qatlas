@@ -17,6 +17,8 @@
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
 // (pr-title, pr-body, branch, base, last, optional cut-exception) is validated before any tmux access:
 // the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
+// Refs resolve in --code-repo (default --repo), so code may live in a repo embedded in the control repo;
+// run files always stay in --repo.
 // `wait` also watches itself, so the sentinel needs no monitor of its own. stale: a live pane without
 // open signal whose conversation part has not changed for --stale minutes (once per standstill phase;
 // the state lives in pane options and so survives across wait calls). While the host shows that the
@@ -31,7 +33,7 @@
 //   qatlas-sentinel-tmux.js nudge --repo <root> --package <package> --text <text>   (refused while the pane has an open signal)
 //   qatlas-sentinel-tmux.js title --repo <root> --package <package> --title <title>
 //   qatlas-sentinel-tmux.js ask --repo <root> --package <package> --question <question> [--timeout <seconds>]
-//   qatlas-sentinel-tmux.js handover --repo <root> --package <package> --task <id> --report <text|file> [--timeout <seconds>]
+//   qatlas-sentinel-tmux.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <text|file> [--timeout <seconds>]
 //   qatlas-sentinel-tmux.js answer --repo <root> --package <package> --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
 //   qatlas-sentinel-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
 //   qatlas-sentinel-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>   (run budget and package tasks; repeatable)
@@ -374,6 +376,13 @@ function reportText() {
   return value;
 }
 
+function codeRepo(repo) {
+  const value = flag('--code-repo');
+  if (value === null) return repo;
+  if (!path.isAbsolute(value) || !fs.existsSync(value)) fail(`--code-repo must be an existing absolute path: ${value}`, 2);
+  return fs.realpathSync(value);
+}
+
 // Frontmatter is optional; without it the report passes unchecked. Refs come from an untrusted report:
 // they reach git only as arguments, never via a shell, and may not start with "-".
 function validateHandover(text, repo) {
@@ -527,7 +536,7 @@ try {
   }
   else if (command === 'wait') wait().catch(error => fail(error.message));
   else if (command === 'ask') raise('question', need('--question')[0]).catch(error => fail(error.message));
-  else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, repoKey()); raise('handover', text, task).catch(error => fail(error.message)); }
+  else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, codeRepo(repoKey())); raise('handover', text, task).catch(error => fail(error.message)); }
   else if (command === 'answer') answer();
   else if (command === 'log') logEvent();
   else if (command === 'nudge') nudge();

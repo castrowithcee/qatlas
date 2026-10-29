@@ -157,22 +157,23 @@ decided by your own `--fly`. The run directive reads in essence:
 > Start every worker with a profile from `team.yaml` and with model and effort set explicitly. Before
 > every commit, run the protection check as its own command and evaluate its exit code before you commit.
 >
-> Hand over every checked task with `node <script> handover --repo <repo-root> --package <package> --task
-> <id> --report <file>`; the report file lies outside every worktree. For integration via pull requests with
-> squash merge, you hand over each pull request of a task individually as described in [integration via pull
-> requests](../../references/playbook-git-pr.md) and start the next one only from the `<basis>` integrated
-> afterwards. The report follows the return format of [executing work](../run/run.md), including the worker
-> profiles with model and effort, and additionally names branches and commits and whether this handover is
-> the last one of the task. For integration via pull requests, the report starts with YAML frontmatter
-> (`---` on the first line) with the fields `pr-title` (one non-empty line), `pr-body` (non-empty, usually a
-> `|` block scalar), `branch`, `base` and `last` (`true` or `false`); the rest of the report follows after
-> it. A pull request is one unit of the commit boundary: independent milestones become separate pull
-> requests before you hand over. `handover` rejects a branch with more than one non-merge commit over
-> `base` (exit 2, nothing raised) unless the frontmatter carries `cut-exception: <reason>`. The answer is
-> `integrated <sha>` or `rework <reason>`; without an answer, call the same command again with the report
-> unchanged. Until the answer arrives, task, branches and worktree belong to the sentinel; do not touch
-> them. `rework` gives them back to you: work on the reason and hand over again. `integrated` on a handover
-> that is not the last gives you the task back to continue.
+> Hand over every checked task with `node <script> handover --repo <repo-root> --package <package> --task <id>
+> --report <file>`; if the code lies in a repo other than the control root, add `--code-repo <absolute path>`
+> so that `branch` and `base` are checked there. The report file lies outside every worktree. For integration
+> via pull requests with squash merge, you hand over each pull request of a task individually as described in
+> [integration via pull requests](../../references/playbook-git-pr.md) and start the next one only from the
+> `<basis>` integrated afterwards. The report follows the return format of [executing work](../run/run.md),
+> including the worker profiles with model and effort, and additionally names branches and commits and whether
+> this handover is the last one of the task. For integration via pull requests, the report starts with YAML
+> frontmatter (`---` on the first line) with the fields `pr-title` (one non-empty line), `pr-body` (non-empty,
+> usually a `|` block scalar), `branch`, `base` and `last` (`true` or `false`); the rest of the report follows
+> after it. A pull request is one unit of the commit boundary: independent milestones become separate pull
+> requests before you hand over. `handover` rejects a branch with more than one non-merge commit over `base`
+> (exit 2, nothing raised) unless the frontmatter carries `cut-exception: <reason>`. The answer is `integrated
+> <sha>` or `rework <reason>`; without an answer, call the same command again with the report unchanged. Until
+> the answer arrives, task, branches and worktree belong to the sentinel; do not touch them. `rework` gives
+> them back to you: work on the reason and hand over again. `integrated` on a handover that is not the last
+> gives you the task back to continue.
 >
 > If the next task depends on the handed-over one, wait for `integrated` and start it from the new `<basis>`.
 > You may begin a demonstrably independent task of this package during the wait from the current `<basis>`;
@@ -243,10 +244,12 @@ until your `integrated`. Integrate handovers one at a time and log every integra
    sense of the commit boundary, return the handover as `rework <cut>` with the required cut; that does not
    count as a correction attempt. If a worker ran without a profile from `team.yaml` or with inherited
    instead of explicitly set effort, log that as `abweichung`; it is not a reason for correction.
-2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. A conflict, including one that arises
-   when catching up with the base later, you return as `rework <reason with files>`; it does not count as a
-   correction attempt. Never resolve conflicts yourself. Only if the orchestrator is no longer available do
-   you secure the task as a handover to `review` per the git workflow.
+2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. If the code lies in a repo other than
+   the control root, pass it with `--repo <code-repo>` here and to `land`; `<basis>` and the control branch
+   then refer to that repo. A conflict, including one that arises when catching up with the base later, you
+   return as `rework <reason with files>`; it does not count as a correction attempt. Never resolve conflicts
+   yourself. Only if the orchestrator is no longer available do you secure the task as a handover to `review`
+   per the git workflow.
 3. Without a conflict, integrate per the git workflow, and for integration via pull requests per
    [integration via pull requests](../../references/playbook-git-pr.md) with `land --pr <n> --report <file>`
    of `qatlas-run-tools.js`; PR title and PR body come from the frontmatter of the report (`pr-title`,
