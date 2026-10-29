@@ -1,6 +1,6 @@
 {
   "name": "qatlas",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "Qatlas combines passive session context, rules, and project state with explicitly started setup, planning, serial execution, and safe administration tools.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
