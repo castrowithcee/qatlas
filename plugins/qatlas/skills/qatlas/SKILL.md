@@ -87,11 +87,11 @@ instructions and verifiable acceptance. Source links serve verification and do n
 statements. If an authorized work mode changes an authoritative foundation, check the open tasks it affects
 for stale directives; change neither goal nor acceptance criteria silently.
 
-If a mode file names the release for locked project documentation, its invocation permits bringing existing
-locked project documentation (`edit: locked`) in the chosen scope up to date, as far as conversation, task
-contract, or evidenced implementation result support its new content. This release never covers agent
-instructions, rules, skills, and accepted user decisions. A broad backlog invocation unlocks no project
-documentation.
+If a mode file names the release for locked project documentation (`Freigabe für gesperrte
+Projektdokumentation`), its invocation permits bringing existing locked project documentation (`edit: locked`)
+in the chosen scope up to date, as far as conversation, task contract, or evidenced implementation result
+support its new content. This release never covers agent instructions, rules, skills, and accepted user
+decisions. A broad backlog invocation unlocks no project documentation.
 
 The user is the decider, not a reader of the planning system. If a mode presupposes a real user decision,
 fetch it briefly and without presupposed task reading, always guide through only the current question, and

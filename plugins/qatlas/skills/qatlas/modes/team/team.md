@@ -64,14 +64,14 @@ Read each one completely at the stated time:
 
 ## Prepare
 
-1. `tmux` is required; Windows is not supported. Check `tmux`, the git root, a clean control branch per the git workflow and the reachability of the
-   authoritative planning system; if it is unreachable, do not start. If the supervisor runs inside tmux, the
-   script creates its own session `team--<repo>` in the user's server; tell the user the printed way to
-   switch to it. Outside tmux it creates its own server; then tell the user the printed attach command. One
-   window holds four leads; the script opens more in additional windows of the same session. Before
-   the first lead, check the free space of the file system holding the repo against the threshold
-   named in the project instructions, else 5 GB. Below it, run the cleanup step for low space named there; if
-   that does not suffice or none is named, do not start and name the concrete obstacle.
+1. `tmux` is required; Windows is not supported. Check `tmux`, the git root, a clean control branch per the
+   git workflow and the reachability of the authoritative planning system; if it is unreachable, do not start.
+   If the supervisor runs inside tmux, the script creates its own session `team--<repo>` in the user's server;
+   tell the user the printed way to switch to it. Outside tmux it creates its own server; then tell the user
+   the printed attach command. One window holds four leads; the script opens more in additional windows of the
+   same session. Before the first lead, check the free space of the file system holding the repo against the
+   threshold named in the project instructions, else 5 GB. Below it, run the cleanup step for low space named
+   there; if that does not suffice or none is named, do not start and name the concrete obstacle.
 2. If `list --repo <repo-root>` already shows panes, check each one. If its title carries `FERTIG` or it has
    ended (`dead`), it is a leftover of an earlier run: save it with `capture` and close it with `close`. A
    live pane without `FERTIG` belongs to a running supervisor or to the user; do not start then, and clarify
