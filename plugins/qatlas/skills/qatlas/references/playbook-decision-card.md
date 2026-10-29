@@ -1,82 +1,81 @@
 ---
 description: >
-  Gemeinsames Gesprächsmuster für schnelle, einzeln geführte Nutzerentscheidungen zu Aufgaben in Shape
-  und Review, ohne vorausgesetzte Lektüre des Planungssystems.
+  Shared conversation pattern for fast user decisions on tasks in shape and review, guided one at a time,
+  without assuming that the user has read the planning system.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Entscheidungen knapp vorlegen
+# Present decisions briefly
 
-Dieser Vertrag gilt, wenn `shape` oder `review` eine echte Nutzerentscheidung zu einer oder
-mehreren Aufgaben braucht. Der jeweilige Modus behält die Verantwortung für Auswahl, fachliche Prüfung,
-Persistenz, Status und Abschluss. Diese Reference regelt nur die Übergabe im Gespräch.
+This contract applies when `shape` or `review` needs a real user decision on one or more tasks. The
+respective mode keeps responsibility for selection, substantive checking, persistence, status and closing.
+This reference governs only the handover in the conversation.
 
-Der Nutzer ist Entscheider, nicht Mitleser des Planungssystems. Jede Karte muss deshalb ohne vorherige
-Lektüre des Tasks verständlich sein. Ein Link, eine Tasknummer oder ein Verweis auf vorhandenen Kontext
-ersetzt die knappe Einordnung nie.
+The user is the decider, not a co-reader of the planning system. Every card must therefore be understandable
+without prior reading of the task. A link, a task number or a reference to existing context never replaces
+the brief framing. Write the card in the interaction language; the templates below fix its structure.
 
-## Umfang einmal nennen
+## Name the scope once
 
-Bestimme zuerst die Aufgaben der Entscheidungsschlange. Nenne vor der ersten Karte genau einmal ihre
-Anzahl:
-
-```text
-Es geht um 3 Aufgaben mit offenen Entscheidungen.
-```
-
-Passe Zahl und Singular an die tatsächliche Schlange an. Zeige an dieser Stelle keine parallele
-Aufgabenübersicht. Führe danach immer nur durch die aktuelle Aufgabe. Sind in einer Aufgabe mehrere
-voneinander abhängige Entscheidungen nötig, kläre sie nacheinander als `Entscheidung 1/2`,
-`Entscheidung 2/2`, bevor du zur nächsten Aufgabe wechselst.
-
-## Genau eine Karte zeigen
+First determine the tasks of the decision queue. Before the first card, state their number exactly once:
 
 ```text
-Aufgabe 2/5 - #<Nummer> <Titel>
-
-Darum geht es:
-<Ein bis zwei Sätze zum belegten Stand und dazu, warum die Entscheidung nötig ist.>
-
-Zu entscheiden:
-<Die konkrete Entscheidungsfrage.>
-
-Optionen:
-1. <Option> - <wesentliche Folge sowie tragender Vorteil oder Nachteil>
-2. <Option> - <wesentliche Folge sowie tragender Vorteil oder Nachteil>
-
-Empfehlung:
-1 - <Begründung aus Ziel, Risiko und Folgewirkung.>
-
-Antwort: 1, 2 oder eine eigene Vorgabe.
+3 tasks have open decisions.
 ```
 
-- Verwende die exakte Kennung und den aktuellen Titel aus dem Planungssystem. Hat es keine numerische
-  Kennung, verwende seine eindeutige Task-ID; erfinde keine Nummer.
-- Biete eine bis vier konkrete, grundsätzlich einander ausschließende Optionen. Mehrere sind nur nötig,
-  wenn eine echte Wahl besteht.
-- Begründe jede Option knapp durch ihre entscheidungsrelevante Folge. Verstecke die Empfehlung weder in
-  der Reihenfolge noch in einer wohlwollenderen Beschreibung einer Option; nenne sie danach ausdrücklich
-  und begründet.
-- Freitext ist keine fachliche Option. Führe `Freitext`, `Andere` oder `Type something` nie als nummerierte
-  Option auf, sondern erlaube eine eigene Vorgabe nur in der Antwortzeile.
-- Gib die Karte im normalen Gespräch aus. Nutze kein Auswahlwerkzeug, das Freitext als zusätzliche
-  nummerierte Option einfügt oder die Einordnung von der Entscheidung trennt.
-- Muss der Nutzer selbst handeln, ersetze die Optionen durch die konkrete Handlung, den exakten Ort oder
-  Befehl und den erwarteten Nachweis. Begründe knapp, warum die Handlung nötig ist.
-- Warte nur auf die Antwort zu dieser Karte. Kläre bei Mehrdeutigkeit nur diese Entscheidung und gehe nach
-  ihrer Verarbeitung ohne Zwischenbericht zur nächsten Karte.
+Adjust number and singular to the actual queue. Show no parallel task overview at this point. Afterwards,
+guide only through the current task. If one task needs several mutually dependent decisions, clarify them one
+after another as `Decision 1/2`, `Decision 2/2` before you move to the next task.
 
-## Shape vor einem Task
-
-Braucht `shape` eine Richtungsentscheidung, bevor daraus eine Aufgabe mit Kennung entstehen kann, erfinde
-keine Taskidentität. Nenne einmal die Anzahl der offenen Richtungsentscheidungen und ersetze die erste Zeile
-der Karte durch:
+## Show exactly one card
 
 ```text
-Vorhaben - <knapper Arbeitstitel>
+Task 2/5 - #<number> <title>
+
+Context:
+<One or two sentences on the evidenced state and on why the decision is needed.>
+
+To decide:
+<The concrete decision question.>
+
+Options:
+1. <Option> - <essential consequence and the decisive advantage or disadvantage>
+2. <Option> - <essential consequence and the decisive advantage or disadvantage>
+
+Recommendation:
+1 - <Reason from goal, risk and consequences.>
+
+Answer: 1, 2 or your own direction.
 ```
 
-Freie Klärungsfragen, mit denen der Nutzer seine noch nicht ausformulierte Absicht erst beschreibt, sind
-keine solche Entscheidungskarte. Sobald ein Task existiert, gilt das normale Aufgabenformat.
+- Use the exact identifier and the current title from the planning system. If it has no numeric identifier,
+  use its unique task ID; invent no number.
+- Offer one to four concrete, fundamentally mutually exclusive options. Several are needed only if a real
+  choice exists.
+- Justify each option briefly by its decision-relevant consequence. Hide the recommendation neither in the
+  order nor in a more favourable description of an option; state it afterwards explicitly and with reasons.
+- If the options meet the goal to different extents, the consequence of each partial option names what it
+  drops as a reduction of scope. A smaller task size is no advantage of an option and no reason for the
+  recommendation; if the better option is larger, recommend it and name its cut into packages.
+- Free text is not a substantive option. Never list `Free text`, `Other` or `Type something` as a numbered
+  option; allow your own direction only in the answer line.
+- Output the card in the normal conversation. Use no selection tool that inserts free text as an additional
+  numbered option or separates the framing from the decision.
+- If the user has to act themselves, replace the options with the concrete action, the exact place or
+  command and the expected evidence. Briefly justify why the action is needed.
+- Wait only for the answer to this card. In case of ambiguity, clarify only this decision, and after
+  processing it move to the next card without an interim report.
+
+## Shape before a task
+
+If `shape` needs a direction decision before a task with an identifier can arise from it, invent no task
+identity. State the number of open direction decisions once and replace the first line of the card with:
+
+```text
+Initiative - <brief working title>
+```
+
+Free clarifying questions with which the user first describes an intent not yet formulated are no such
+decision card. As soon as a task exists, the normal task format applies.
