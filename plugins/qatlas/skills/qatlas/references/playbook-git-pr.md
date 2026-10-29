@@ -17,7 +17,7 @@ a handover, as described in the handover section (`Übergeben`) of [the git work
 without a push.
 
 In a simple `run`, the run itself pushes, opens the pull request, waits for CI and merges. In `team`, the lead
-pushes its own task branch, opens the pull request and fixes a red CI; the supervisor merges with `land`. The
+pushes its own task branch, opens the pull request and fixes a red CI; the integrator merges with `land`. The
 bullets below apply to the `run` unless "In a team" names the difference.
 
 - **Working base:** Work in the task worktree from a freshly fetched `origin/<control-branch>`. The primary
@@ -38,7 +38,7 @@ bullets below apply to the `run` unless "In a team" names the difference.
   `ci-wait` and fixes a red CI itself with follow-up commits; it never rewrites pushed history. Such
   fixes after the first push do not count against the cut rule. It hands over the open pull request only with
   green CI. If the project has no CI (`ci-wait` exit 8), the green complete local test is the evidence. A
-  conflict with the base comes back from the supervisor as `rework`. The supervisor opens no pull request; it
+  conflict with the base comes back from the integrator as `rework`. The integrator opens no pull request; it
   merges with `land --pr <n> --report <file>`. If branch protection requires an up-to-date state, it catches
   up with the base without conflict and waits for CI again; `land` then accepts the remote head. On `land`
   exit 8 (`no-ci`) it tests the merged state with the project tests via `slot` and calls `land … --no-ci`.

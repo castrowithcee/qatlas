@@ -68,10 +68,10 @@ hand the task over to the user with the finding.
   integration target, the agreed evidence, and the attribution of every change to the assignment. A success
   message does not replace this check. Unattributable work is not integrated. In the light path, committing
   after this check is the integration.
-- The lead is the integration owner of the control branch. It integrates task branches individually and,
-  before each integration, re-checks that the tip of the control branch matches its last checked state. A
-  control branch changed by someone else stops automatic integration; updating and conflict handling are a
-  separate, deliberate step.
+- The lead is the integration owner of the control branch; in a `team` the integrator is, and the leads
+  integrate nothing. The owner integrates task branches individually and, before each integration, re-checks
+  that the tip of the control branch matches its last checked state. A control branch changed by someone else
+  stops automatic integration; updating and conflict handling are a separate, deliberate step.
 - Do not rewrite shared history and do not resolve conflicts automatically. Delegate a conflict as an
   integration assignment of its own and check the resolution before accepting it.
 

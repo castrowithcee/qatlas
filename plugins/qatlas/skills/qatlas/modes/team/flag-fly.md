@@ -1,7 +1,7 @@
 ---
 description: >
-  Meaning of --fly in team: the user is unreachable during the run, and the supervisor answers the leads'
-  questions itself.
+  Meaning of --fly in team: the user is unreachable during the run, and the supervisor answers the questions
+  of the leads and the integrator itself.
 type: playbook
 edit: locked
 license: MIT
@@ -11,7 +11,7 @@ license: MIT
 
 The user is unreachable during the run; no step waits for their answer. Before the first lead, settle
 everything that would stall the run later, by [deciding without the user](../../references/playbook-autonomy.md).
-The flag applies to you alone: the leads keep asking you and never receive it.
+The flag applies to you alone: the leads and the integrator keep asking you and never receive it.
 
 Answer a `question` that project knowledge does not settle by the same decision ladder:
 

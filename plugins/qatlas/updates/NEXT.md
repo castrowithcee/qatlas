@@ -38,8 +38,9 @@ mode; behavior is otherwise unchanged.
 
 With integration via pull requests, each `qatlas team` lead now pushes its own task branch, opens the pull
 request and fixes a red CI itself; it hands over the open pull request with green CI, or without CI with a
-green complete local test, and no longer has to merge the current base before a handover. The supervisor still
-merges, closes tasks and sets `done`.
+green complete local test, and no longer has to merge the current base before a handover. A dedicated
+integrator session started by the supervisor merges, closes tasks and sets `done`; the supervisor integrates
+nothing.
 
-- If project instructions allow push or pull request creation to only one role, check them against this and
-  propose the concrete change to the user.
+- If project instructions allow push, pull request creation or merge to only one role, check them against this
+  (merge: the integrator) and propose the concrete change to the user.

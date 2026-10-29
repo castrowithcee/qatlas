@@ -41,7 +41,7 @@ Read the chosen mode's file in full. It names every further block and when you r
   tasks and the backlog. Implements nothing.
 - **`run`:** [Execute work](modes/run/run.md). A lead executes executable tasks in sequence with subagents.
 - **`team`:** [Team](modes/team/team.md). A supervisor and leads work independent packages in parallel in
-  tmux; the supervisor integrates their results.
+  tmux; an integrator session integrates their results.
 - **`review`:** [Settle handoffs](modes/review/review.md). Walks the user through checks and decisions.
   Starts no execution.
 
