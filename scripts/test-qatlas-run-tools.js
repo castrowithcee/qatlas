@@ -514,6 +514,14 @@ try {
     sup = ok('wait', '--since', String(before), '--timeout', '0.01', '--min-free', '1000000000');
     assert.deepStrictEqual(types(sup), ['stale']);
     assert.strictEqual(sup.events[0].package, 'b');
+    // A recorded draft wakes only the supervisor and stays a note; other log types wake nobody.
+    const mark = log().length;
+    ok('log', '--type', 'erfasst', '--package', 'a', '--task', 't9', '--text', 'draft');
+    ok('log', '--type', 'annahme', '--package', 'a', '--text', 'note');
+    sup = ok('wait', '--since', String(mark), '--timeout', '0.01', '--min-free', '1000000000');
+    assert.deepStrictEqual(types(sup), ['erfasst']);
+    assert.deepStrictEqual(ok('wait', '--role', 'integrator', '--since', String(mark), '--timeout', '0.01').events, []);
+    assert.deepStrictEqual(ok('report').notes.erfasst, [{ package: 'a', task: 't9', text: 'draft' }]);
     // A stale lock (crashed holder) is taken over.
     const lock = path.join(repo, '.qatlas', 'local', 'team', 'detect.lock');
     fs.mkdirSync(lock);

@@ -16,11 +16,12 @@ integrator is one further interactive session. The supervisor never does the sub
 any integration itself.
 
 Within the chosen scope, the invocation authorizes starting leads and the integrator through the control
-script, claiming and status upkeep in the planning system, checks, local integration and local commits. Push,
-pull request and merge are permitted only when user or project instructions require and authorize them. No
-publish, no deployment, no message to third parties and no other external or irreversible effect. `team`
-receives the permission to edit locked project documentation (`Freigabe für gesperrte Projektdokumentation`)
-under the shared contract in [the Qatlas skill](../../SKILL.md).
+script, shaping the drafts recorded in this run as described in "Shaping new drafts", claiming and status
+upkeep in the planning system, checks, local integration and local commits. Push, pull request and merge are
+permitted only when user or project instructions require and authorize them. No publish, no deployment, no
+message to third parties and no other external or irreversible effect. `team` receives the permission to edit
+locked project documentation (`Freigabe für gesperrte Projektdokumentation`) under the shared contract in [the
+Qatlas skill](../../SKILL.md).
 
 The integrator ([the integrator playbook](integrator.md)) is the sole integration owner in the sense of the
 several-leads section of [Parallel work in a run](../../references/git-parallel.md). Merge, task closing and
@@ -183,9 +184,9 @@ integrator loads no skill of its own. Add the part of the user's run directive t
 
 Wait with `wait --repo <repo-root> --since <cursor>`. Begin with `--since 0` and afterwards pass the `cursor`
 of the last output each time, so that no event is lost. It returns on one of the events `question`, `done`,
-`exited`, `stale` or `disk`, or after a timeout; handovers go to the integrator and wake you never. `wait` is
-the only monitoring: build no monitors, crons or wait loops of your own. If the host can run commands in the
-background, do so, so that you stay available to the user.
+`exited`, `stale`, `disk` or `erfasst`, or after a timeout; handovers go to the integrator and wake you
+never. `wait` is the only monitoring: build no monitors, crons or wait loops of your own. If the host can run
+commands in the background, do so, so that you stay available to the user.
 
 Keep your context lean: read diffs first as `--stat` and then only the affected spots. What you carry into
 the closing you log immediately with `log` instead of holding it in memory: assumptions as `annahme`,
@@ -212,7 +213,26 @@ Handle each event:
   for `exited`.
 - **`disk`:** Free space fell below `--min-free` GB (default 5). Run the cleanup step the project names for
   low space, otherwise report it to the user.
+- **`erfasst`:** A lead or the integrator recorded a draft; proceed as described in "Shaping new drafts".
 - If the user writes into a pane themselves, that session belongs to them; do not touch it.
+
+## Shaping new drafts
+
+If the authoritative planning system is external, have every draft logged as `erfasst` shaped by its own
+subagent in the background, so that your context stays lean. With the local backlog, only the integration
+owner writes the spine; the draft then waits for a later `shape`. Start the subagent with the `standard` or
+`demanding` profile from `team.yaml` as [checking the team](../../references/playbook-team-config.md)
+describes. Its assignment reads in essence:
+
+> Read `<plugin-root>/skills/qatlas/SKILL.md` completely and work the mode `shape <task> --fly`. You shape
+> for the supervisor of a running team: write only to this task and to the tasks you split from it, change
+> no file, create no commit and leave the `next` queue untouched. Return the status of every task and the
+> prepared decision questions.
+
+Insert `<plugin-root>` and `<task>` as fixed values. Log every task that stays `draft` with a prepared
+decision as `entscheiden` with its decision question. A task that became `ready` is available for
+replenishment if it lies within the scope of this run; a run over named tasks takes none. The run budget
+stays unchanged.
 
 ## Finish
 
@@ -236,10 +256,10 @@ described in "Starting leads". Never more leads run at the same time than "Cutti
 permits. Log it with `plan` and the unchanged run budget, as at the cut. Tell the user the package with its
 tasks in one line.
 
-The run ends when no more replenishment is possible, every remaining pane shows `FERTIG` or has ended, and all
-handed-over tasks are integrated or secured as a handover. The notes of the integrator reach you like those of
-the leads through `log`, `report` and the closing block. In the report, state the metrics from `report --repo
-<repo-root>` briefly and the remaining remote branches of this run collected together. Close with exactly one
-closing block (`Für dich`, see [the closing block](../../references/playbook-closing-block.md)) across all
-packages; you take its entries from the `notes` in `report`, and unpushed commits appear there under `Nicht
-gepusht`.
+The run ends when no more replenishment is possible, every remaining pane shows `FERTIG` or has ended, all
+handed-over tasks are integrated or secured as a handover and no shaping subagent is still running. The notes
+of the integrator reach you like those of the leads through `log`, `report` and the closing block. In the
+report, state the metrics from `report --repo <repo-root>` briefly and the remaining remote branches of this
+run collected together. Close with exactly one closing block (`Für dich`, see [the closing
+block](../../references/playbook-closing-block.md)) across all packages; you take its entries from the
+`notes` in `report`, and unpushed commits appear there under `Nicht gepusht`.

@@ -1,76 +1,77 @@
 ---
 description: >
-  Einstieg in Shape: Varianten nach Scope, Leseliste und der gemeinsame Vertrag aller Shape-Läufe vom
-  Planungssystem bis zum Sammelcommit.
+  Entry to shape: variants by scope, the --fly flag, reading list and the shared contract of all shape runs
+  from the planning system to the collective commit.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Ausarbeiten
+# Shape
 
-`shape` macht aus einer Idee, einer Datei, einem Task oder einem Backlog-Ausschnitt ausführungsreife Arbeit
-mit begründeter Reihenfolge. Bestandsarbeit, Rückfragen und nötige Dokumentation dienen diesem Zuschnitt;
-die geplante Arbeit wird nicht umgesetzt.
+`shape` turns an idea, a file, a task or a backlog section into execution-ready work with a reasoned order.
+Examining what exists, asking questions and necessary documentation serve this cut; the planned work is not
+implemented.
 
-## Aufruf
+## Invocation
 
-- `shape [Idee oder Dateipfad]` arbeitet nach [Idee ausarbeiten](option-idea.md).
-- `shape <eindeutiger Task>` und `shape backlog [Scope]` arbeiten nach [Vorhandene Arbeit
-  ausarbeiten](option-backlog.md). Das Wort `backlog` ist nach `shape` ein reservierter Scope, keine Idee.
-  `shape backlog` ohne weiteren Scope umfasst den gesamten offenen Arbeitsvorrat.
+- `shape [idea or file path]` works per [shaping an idea](option-idea.md).
+- `shape <unambiguous task> [--fly]` and `shape backlog [scope] [--fly]` work per [shaping existing
+  work](option-backlog.md). After `shape`, the word `backlog` is a reserved scope, not an idea. `shape
+  backlog` without further scope covers the entire open work supply.
+- **`--fly`:** The user is unreachable during the run; [`--fly` in shape](flag-fly.md) applies. It exists only
+  for existing work, because an idea needs the user's intent.
 
-`shape` kennt keine Flags. Für eine Idee, eine Datei oder einen einzelnen Task erhält es die Freigabe für
-gesperrte Projektdokumentation nach dem gemeinsamen Vertrag; `shape backlog [Scope]` erhält sie nicht.
-Erfordert dort eine Aufgabe eine Änderung an `edit: locked`, hole die dafür nötige ausdrückliche Freigabe ein.
+For an idea, a file or a single task, `shape` receives the permission to edit locked project documentation
+(`Freigabe für gesperrte Projektdokumentation`) under the shared contract; `shape backlog [scope]` does not.
+If a task there requires a change to `edit: locked`, obtain the explicit permission needed for it.
 
-## Leseliste
+## Reading list
 
-Die Blöcke wiederholen nichts aus dieser Datei und einander; was du nicht liest, fehlt dir in diesem Lauf.
-Lies jeden vollständig zum genannten Zeitpunkt:
+The blocks repeat nothing from this file or from each other; what you do not read is missing in this run.
+Read each one completely at the stated time:
 
-1. **Vor dem ersten Schritt:** die Datei deiner Variante aus „Aufruf“ und [die
-   Backlog-Norm](../../../qatlas-core-backlog/SKILL.md).
-2. **Vor dem ersten Zuschnitt, Teilen oder Einarbeiten eines Tasks:** [Tasks
-   zuschneiden](playbook-task-cut.md).
-3. **Vor der Pflege der `next`-Queue:** [Nächsten Horizont disponieren](playbook-horizon.md).
-4. **Vor der ersten Präsentation einer echten Nutzerentscheidung:** [Entscheidungen knapp
-   vorlegen](../../references/playbook-decision-card.md).
-5. **Vor dem Sammelcommit:** [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre
-   [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md).
+1. **Before the first step:** the file of your variant from "Invocation" and [the backlog
+   norm](../../../qatlas-core-backlog/SKILL.md). With `--fly`, additionally the flag file from "Invocation"
+   and [deciding without the user](../../references/playbook-autonomy.md).
+2. **Before the first cut, split or working-in of a task:** [cutting tasks](playbook-task-cut.md).
+3. **Before maintaining the `next` queue:** [scheduling the next horizon](playbook-horizon.md).
+4. **Before the first presentation of a real user decision, with `--fly` before recording the first one:**
+   [presenting decisions briefly](../../references/playbook-decision-card.md).
+5. **Before the collective commit:** [the git norm](../../../qatlas-core-git/SKILL.md) and its [commit
+   reference](../../../qatlas-core-git/references/playbook-commit.md).
 
-## Planungssystem
+## Planning system
 
-Kläre zuerst, wo der Nutzer Arbeit verwaltet. Nutze das beim Sessionstart geladene Backlog-Binding und die
-nativen Projektanweisungen. Ein externes System hat mit seinen Feldern, IDs, Status und Schreibwegen
-Vorrang. Erzeuge weder ein lokales Ersatz- noch ein Spiegel-Backlog. Ist das maßgebliche System nicht
-erreichbar, darf die Ausarbeitung im Gespräch fortfahren; melde Arbeitspakete aber nicht als dort angelegt.
+First clarify where the user manages work. Use the backlog binding loaded at session start and the native
+project instructions. An external system takes precedence with its fields, IDs, statuses and write paths.
+Create neither a local substitute nor a mirror backlog. If the authoritative system is unreachable, the
+shaping may continue in conversation; do not report work packages as created there, though.
 
-Nur ohne andere Vorgabe gilt der lokale Qatlas-Backlog. Fehlt dafür das Scaffold, verweise auf
-`qatlas-core setup`, bevor du unter `.qatlas-project/` schreibst.
+Only without another directive does the local Qatlas backlog apply. If its scaffold is missing, point to
+`qatlas-core setup` before you write under `.qatlas-project/`.
 
-## Entscheidungen und Analyse
+## Decisions and analysis
 
-Bleibt nach der eigenen Untersuchung eine echte Nutzerentscheidung zu einer vorhandenen oder werdenden
-Aufgabe offen, führe den Nutzer nach dem gemeinsamen Entscheidungsdialog, ohne vorauszusetzen, dass er die
-Tasks parallel liest. Freie Fragen, mit denen der Nutzer eine noch nicht ausformulierte Absicht erst
-beschreibt, bleiben davon unberührt.
+If a real user decision on an existing or emerging task remains open after your own examination, guide the
+user through the shared decision dialogue without assuming that they read the tasks in parallel. Free
+questions with which the user first describes an intent not yet formulated are not affected by this.
 
-Der ausdrückliche Aufruf autorisiert Subagents für getrennte Bestandsanalyse, Evidenzgewinnung,
-Risikoprüfung und einen unabhängigen Vollständigkeitscheck. Delegiere nur unabhängige Fragen mit echtem
-Mehrwert. Subagents schreiben keine Tasks, treffen keine Produktentscheidung und bauen keinen konkurrierenden
-Plan; der Hauptagent führt Befunde, Gespräch, Dokumentation und Paketschnitt zusammen. Ein beauftragter
-Bestands-Subagent arbeitet lesend und gibt mindestens Ausgangszustand, Einstiegspunkte, erwartete
-Änderungsflächen, Prüfpfade, Dokumentationswirkung, offene Vertragsfragen und eine begründete Empfehlung
-für `draft` oder `ready` zurück. Kleine, bereits klar belegbare Pakete brauchen keinen Subagent; die
-Ausführungsgrundlage bleibt trotzdem Pflicht.
+The explicit invocation authorizes subagents for separate analysis of the existing state, gathering of
+evidence, risk checks and an independent completeness check. Delegate only independent questions with real
+added value. Subagents write no tasks, make no product decision and build no competing plan; the main agent
+brings findings, conversation, documentation and package cut together. A commissioned subagent for the
+existing state works read-only and returns at least the initial state, entry points, expected change
+surfaces, check paths, documentation effect, open contract questions and a reasoned recommendation for
+`draft` or `ready`. Small packages that are already clearly evidenced need no subagent; the execution basis
+stays mandatory nonetheless.
 
-## Grenzen und Abschluss
+## Limits and closing
 
-Setze in diesem Modus nie `in-progress` oder `done`, beginne keine Implementierung und führe keinen Task aus.
-`next` bereitet den kommenden Horizont vor, autorisiert aber keine Ausführung.
+In this mode, never set `in-progress` or `done`, begin no implementation and execute no task. `next`
+prepares the coming horizon but authorizes no execution.
 
-`shape` endet in jeder Variante mit genau einem lokalen Sammelcommit pro betroffenem Repo über die in diesem
-Lauf geänderten Dateien, damit ein folgender `run` auf einem sauberen Stand beginnt. Der ausdrückliche
-Aufruf ersetzt dafür die Einzelabnahme der Nachricht; zeige Nachricht und ID danach und pushe nichts. Den
-Lauf startest du nicht selbst.
+In every variant, `shape` ends with exactly one local collective commit per affected repo over the files
+changed in this run, so that a following `run` starts from a clean state. The explicit invocation replaces
+the individual approval of the message for this; show message and ID afterwards and push nothing. You do not
+start the run yourself.

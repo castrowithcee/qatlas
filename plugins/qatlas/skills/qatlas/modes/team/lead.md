@@ -60,6 +60,9 @@ the handed-over task counts as securely handed over in that case. Then call `han
 afterwards. A `rework` takes precedence: secure the running task at the next checked milestone as a
 checkpoint, work on the reason, hand over again and continue afterwards.
 
+Log every draft you record in the planning system right away with `node <script> log --repo <repo-root>
+--type erfasst --package <package> --task <id> --text "<title>"`; the supervisor has it shaped.
+
 Whatever you would otherwise ask the user, you ask the supervisor exclusively with `node <script> ask --repo
 <repo-root> --package <package> --question "<question with context, options and recommendation>"`; the
 output is the answer. Without an answer, call the same command again. While a handover is open, no question

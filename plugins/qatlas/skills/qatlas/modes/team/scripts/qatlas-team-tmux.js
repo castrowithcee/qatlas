@@ -16,12 +16,13 @@
 // Events are JSON lines in <repo>/.qatlas/local/team/events.jsonl and the single source of truth for
 // answers. `seq` is the 0-based line index, derived on read, not stored. Waking types: question,
 // handover, done, exited, stale, disk; start, plan, answer, picked, nudge and all types written via log
-// do not wake.
+// except erfasst do not wake.
 // `wait --role supervisor|integrator` (default supervisor) routes them: the integrator receives only
 // handover; the supervisor receives all other waking types, also those of the integrator pane (its question,
-// its done). `wait --since <seq>` returns the waking events of the role from seq on and the new `cursor`
-// (count of all events); every consumer keeps its own cursor and passes it as --since on the next call,
-// so the events of the other role cost nothing. Handover reports are stored as
+// its done), and erfasst, a newly recorded draft it has shaped. erfasst stays a log type, so it is not
+// reserved and still appears in the report notes. `wait --since <seq>` returns the waking events of the role
+// from seq on and the new `cursor` (count of all events); every consumer keeps its own cursor and passes it
+// as --since on the next call, so the events of the other role cost nothing. Handover reports are stored as
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
 // (pr-title, pr-body, branch, base, last, optional cut-exception) is validated before any tmux access:
 // the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
@@ -68,7 +69,7 @@ const NARROW = 80;
 const MARK = '@qatlas-team';
 const SOCKET = 'qatlas-team';
 const WAKING = new Set(['question', 'handover', 'done', 'exited', 'stale', 'disk']);
-const SUPERVISOR_WAKING = new Set([...WAKING].filter(type => type !== 'handover'));
+const SUPERVISOR_WAKING = new Set([...[...WAKING].filter(type => type !== 'handover'), 'erfasst']);
 const LOCK_STALE_MS = 30000;
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
 const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed', 'plan', 'nudge']);

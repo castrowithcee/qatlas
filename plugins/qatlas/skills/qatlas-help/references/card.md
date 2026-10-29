@@ -12,8 +12,8 @@ license: MIT
 |---|---|
 | **qatlas goal [idea, task or file]** | Works out a plan with answered questions in conversation, as the basis for Shape. |
 | **qatlas shape [idea or file]** | Records confirmed knowledge and cuts small tasks ready to run. |
-| **qatlas shape <task>** | Sharpens one clearly named existing task. |
-| **qatlas shape backlog [scope]** | Sharpens drafts, settles prerequisites and repairs the queue. |
+| **qatlas shape <task> [--fly]** | Sharpens one clearly named existing task. |
+| **qatlas shape backlog [scope] [--fly]** | Sharpens drafts, settles prerequisites and repairs the queue; `--fly` prepares every user decision in its draft instead of asking. |
 | **qatlas run [--limit <n\|all>] [--fly]** | Runs at most five tasks in series by default, with a lead and subagents; `--fly` works without questions. |
 | **qatlas team [--limit <n\|0>] [--leads <n>] [--fly]** | Works through up to four independent batches of five tasks each in parallel in tmux; `--leads` changes the number of batches, `--limit 0` leaves the batch size to the supervisor. |
 | **qatlas review** | Walks through concrete checks step by step and settles decisions one at a time. |

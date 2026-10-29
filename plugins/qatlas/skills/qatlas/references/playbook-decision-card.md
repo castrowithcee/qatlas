@@ -52,6 +52,8 @@ Answer: 1, 2 or your own direction.
 
 - Use the exact identifier and the current title from the planning system. If it has no numeric identifier,
   use its unique task ID; invent no number.
+- If the task already holds a prepared decision, check it against the current state and present it from
+  there instead of deriving it anew.
 - Offer one to four concrete, fundamentally mutually exclusive options. Several are needed only if a real
   choice exists.
 - Justify each option briefly by its decision-relevant consequence. Hide the recommendation neither in the
