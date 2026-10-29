@@ -11,16 +11,28 @@
 //   qatlas-run-tools.js ci-wait --pr <number> [--timeout <seconds>] [--interval <seconds>] [--repo <path>]
 //     Waits via gh until no check of the pull request is running (default: timeout 3600, interval 20).
 //     Transient gh errors are retried, at most 5 in a row.
-//     Output: {"pr","result":"pass"|"fail"|"timeout","checks":[{name,bucket,link}],"retries"}.
-//     Exit: 0 pass, 1 fail, 4 timeout, 2 usage error, 3 gh missing, not logged in or persistently failing.
-//   qatlas-run-tools.js land --pr <number> --report <file> [--timeout <s>] [--interval <s>] [--repo <path>]
-//     Integrates one pull request via gh: reads branch, pr-title and pr-body from the report frontmatter,
-//     checks that the PR head equals the local branch tip, waits for CI as ci-wait does, squash-merges
-//     with --match-head-commit (one retry), proves the squash (merge tree equals branch tree, else equal
-//     patch-id) and only then deletes the remote branch. Does not open PRs or touch local worktrees/branches.
+//     A pull request without any check (gh "no checks reported", also an empty list) is not waited out: after
+//     3 consecutive such polls (two intervals, since gh can report it briefly right after the PR is opened)
+//     the result is "none".
+//     Output: {"pr","result":"pass"|"fail"|"timeout"|"none","checks":[{name,bucket,link}],"retries"}.
+//     Exit: 0 pass, 1 fail, 4 timeout, 8 none (no CI), 2 usage error, 3 gh missing, not logged in or persistently failing.
+//   qatlas-run-tools.js land --pr <number> --report <file> [--no-ci] [--timeout <s>] [--interval <s>] [--repo <path>]
+//     Integrates one pull request via gh: reads branch, pr-title and pr-body (and the optional head) from the
+//     report frontmatter, checks that the PR head is the head the report vouches for (frontmatter "head",
+//     else the local branch tip), waits for CI as ci-wait does, squash-merges with --match-head-commit (one
+//     retry), proves the squash (merge tree equals PR head tree, else equal patch-id) and only then deletes
+//     the remote branch. Does not open PRs or touch local worktrees/branches.
+//     A PR head ahead of the vouched head is accepted if the vouched head is its ancestor and the commits in
+//     between are merge commits or already on origin/<base> (e.g. GitHub "Update branch"); any new own
+//     commit stays head-mismatch, as does a merge whose tree is not the conflict-free merge of its two
+//     parents (needs git >= 2.38, else exit 3). The PR head is fetched via origin pull/<number>/head. Merge, proof and
+//     deletion then use the PR head.
+//     Without any check (see ci-wait) land does not merge: result "no-ci". With --no-ci the merger confirms
+//     that the merged state was tested locally with the project tests; land then merges without CI. Checks
+//     that do exist are still waited for.
 //     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|null,"branch_deleted",...}; result is
-//     merged | ci-fail | timeout | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
-//     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed,
+//     merged | ci-fail | timeout | no-ci | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
+//     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed, 8 no-ci,
 //     2 usage error (also missing frontmatter or field), 3 gh/git check not possible.
 //   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
@@ -87,11 +99,12 @@ function probe() {
 }
 
 // Polls the checks of a pull request until none is pending. Returns {state, checks, retries} with state
-// pass, fail or timeout; exits 3 when gh is unusable.
+// pass, fail, timeout or none (no check at all, NO_CHECKS_POLLS polls in a row); exits 3 when gh is unusable.
+const NO_CHECKS_POLLS = 3;
 function waitForChecks(pr, timeout, interval) {
   const deadline = Date.now() + timeout;
   const view = list => list.map(({ name, bucket, link }) => ({ name, bucket, link }));
-  let retries = 0, streak = 0, first = true, checks = [], lastError = '';
+  let retries = 0, streak = 0, absent = 0, first = true, checks = [], lastError = '';
 
   for (;;) {
     const run = spawnSync('gh', ['pr', 'checks', pr, '--json', 'name,state,bucket,link'],
@@ -103,11 +116,14 @@ function waitForChecks(pr, timeout, interval) {
     if (Array.isArray(parsed)) {
       streak = 0;
       checks = parsed;
+      absent = checks.length ? 0 : absent + 1;
+      if (absent >= NO_CHECKS_POLLS) return { state: 'none', checks: [], retries };
       if (checks.some(c => c.bucket === 'fail' || c.bucket === 'cancel')) return { state: 'fail', checks: view(checks), retries };
       if (checks.length && !checks.some(c => c.bucket === 'pending')) return { state: 'pass', checks: view(checks), retries };
     } else if (/no checks reported/i.test(stderr)) {
       streak = 0;
       checks = [];
+      if (++absent >= NO_CHECKS_POLLS) return { state: 'none', checks: [], retries };
     } else {
       if (first && /gh auth login|not logged in|authentication|GH_TOKEN/i.test(stderr)) {
         fail('gh is not logged in: ' + stderr, 3);
@@ -130,16 +146,17 @@ function ciWait() {
   const interval = number('--interval', 20) * 1000;
   const { state, checks, retries } = waitForChecks(pr, timeout, interval);
   out({ pr: Number(pr), result: state, checks, retries });
-  if (state !== 'pass') process.exit(state === 'fail' ? 1 : 4);
+  if (state !== 'pass') process.exit({ fail: 1, timeout: 4, none: 8 }[state]);
 }
 
-const LAND_EXIT = { merged: 0, 'ci-fail': 1, timeout: 4, 'head-mismatch': 5, 'merge-failed': 6, 'proof-failed': 7 };
+const LAND_EXIT = { merged: 0, 'ci-fail': 1, timeout: 4, 'head-mismatch': 5, 'merge-failed': 6, 'proof-failed': 7, 'no-ci': 8 };
 
 function land() {
   const [pr, reportFile] = need('--pr', '--report');
   if (!/^\d+$/.test(pr)) fail('Invalid: --pr needs a number', 2);
   const timeout = number('--timeout', 3600) * 1000;
   const interval = number('--interval', 20) * 1000;
+  const noCi = opts.includes('--no-ci');
 
   let text;
   try { text = fs.readFileSync(reportFile, 'utf8'); } catch (error) { fail('Report not readable: ' + error.message, 2); }
@@ -155,6 +172,7 @@ function land() {
   // Refs come from an untrusted report: they reach git only as arguments and may not start with "-".
   const safeRef = (ref, what) => ref.startsWith('-') ? fail(`Invalid: ${what} must not start with "-"`, 2) : ref;
   safeRef(branch, 'branch');
+  const vouchedHead = parsed.data.head === undefined ? null : safeRef(field('head'), 'head');
 
   const gh = args => {
     const run = spawnSync('gh', args, { cwd: repo, encoding: 'utf8', maxBuffer: 1 << 26 });
@@ -177,16 +195,45 @@ function land() {
   };
 
   // 2. The head the report vouches for must be the head GitHub will merge.
-  const sha = gitOr3(['rev-parse', '--verify', '--quiet', branch + '^{commit}']);
+  const tryGit = args => { try { return git(args); } catch { return null; } };
+  const tip = tryGit(['rev-parse', '--verify', '--quiet', branch + '^{commit}']);
+  const vouched = vouchedHead === null ? tip : tryGit(['rev-parse', '--verify', '--quiet', vouchedHead + '^{commit}']);
+  if (!vouched) fail(`Check not possible: ${vouchedHead === null ? 'branch ' + branch : 'head ' + vouchedHead} does not resolve to a commit`, 3);
   const info = ghJson(['pr', 'view', pr, '--json', 'headRefOid,headRefName,state,baseRefName'], 'gh pr view');
-  if (info.state !== 'OPEN') finish('head-mismatch', { reason: `pull request is ${info.state}`, head: info.headRefOid, branch_sha: sha });
-  if (info.headRefOid !== sha) finish('head-mismatch', { reason: 'pull request head differs from branch', head: info.headRefOid, branch_sha: sha });
+  if (info.state !== 'OPEN') finish('head-mismatch', { reason: `pull request is ${info.state}`, head: info.headRefOid, branch_sha: vouched });
+  if (tip && tip !== vouched) finish('head-mismatch', { reason: 'report head differs from branch', head: info.headRefOid, branch_sha: tip });
   const base = safeRef(String(info.baseRefName || ''), 'base');
   if (!base) fail('Check not possible: pull request has no base branch', 3);
+  // The PR head was moved on the remote (e.g. "Update branch"): accepted only if it adds nothing of its own
+  // to the vouched head, i.e. every commit in between is a merge or already on origin/<base>.
+  const sha = info.headRefOid;
+  if (sha !== vouched) {
+    if (tryGit(['fetch', '--quiet', 'origin', `pull/${pr}/head`]) === null || tryGit(['rev-parse', 'FETCH_HEAD^{commit}']) !== sha) {
+      finish('head-mismatch', { reason: 'pull request head not fetchable', head: sha, branch_sha: vouched });
+    }
+    gitOr3(['fetch', '--quiet', 'origin', base]);
+    const baseTip = gitOr3(['rev-parse', 'FETCH_HEAD^{commit}']);
+    const ahead = tryGit(['merge-base', '--is-ancestor', vouched, sha]) !== null
+      && tryGit(['rev-list', '--no-merges', `${vouched}..${sha}`, '^' + baseTip]) === '';
+    if (!ahead) finish('head-mismatch', { reason: 'pull request head differs from branch', head: sha, branch_sha: vouched });
+    // A merge in between must be a plain two-parent merge: its tree equals the conflict-free merge of its parents.
+    for (const merge of gitOr3(['rev-list', '--merges', `${vouched}..${sha}`]).split('\n').filter(Boolean)) {
+      const parents = gitOr3(['rev-list', '--parents', '-n', '1', merge]).split(' ').slice(1);
+      const mismatch = reason => finish('head-mismatch', { reason: `merge ${merge} ${reason}`, head: sha, branch_sha: vouched });
+      if (parents.length !== 2) mismatch('has ' + parents.length + ' parents');
+      const run = spawnSync('git', ['-C', repo, 'merge-tree', '--write-tree', ...parents], { encoding: 'utf8', maxBuffer: 1 << 28 });
+      if (run.error || (run.status !== 0 && run.status !== 1)) {
+        fail('Check not possible: git merge-tree --write-tree failed (git >= 2.38 needed): ' + (run.error ? run.error.message : (run.stderr || '').trim() || 'Exit ' + run.status), 3);
+      }
+      if (run.status === 1) mismatch('has conflicts between its parents (resolution is an own change)');
+      if (run.stdout.split('\n')[0].trim() !== gitOr3(['rev-parse', merge + '^{tree}'])) mismatch('contains changes beyond the merge of its parents');
+    }
+  }
 
   // 3. CI
   const ci = waitForChecks(pr, timeout, interval);
-  if (ci.state !== 'pass') finish(ci.state === 'fail' ? 'ci-fail' : 'timeout', { checks: ci.checks });
+  if (ci.state === 'none' && !noCi) finish('no-ci', { checks: [], reason: 'no checks reported; test the merged state locally and repeat with --no-ci' });
+  if (ci.state === 'fail' || ci.state === 'timeout') finish(ci.state === 'fail' ? 'ci-fail' : 'timeout', { checks: ci.checks });
 
   // 4. Merge with one retry; --match-head-commit refuses a head that moved after the comparison. A failed
   // call may still have merged on GitHub (e.g. a dropped connection), so the PR state decides.
@@ -214,7 +261,6 @@ function land() {
   try { git(['fetch', '--quiet', 'origin', base]); } catch (error) {
     unproven('git fetch failed: ' + ((error.stderr || error.message) + '').trim());
   }
-  const tryGit = args => { try { return git(args); } catch { return null; } };
   if (tryGit(['merge-base', '--is-ancestor', mergeSha, 'FETCH_HEAD']) === null) {
     unproven(`merge commit is not on origin/${base}`);
   }

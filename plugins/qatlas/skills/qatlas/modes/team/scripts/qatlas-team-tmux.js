@@ -17,6 +17,11 @@
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
 // (pr-title, pr-body, branch, base, last, optional cut-exception) is validated before any tmux access:
 // the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
+// For a handed-over pull request the frontmatter adds pr (positive integer), head (SHA of the handed-over
+// tip) and pushed (SHA at the first push); pr requires both. Then pushed must be an ancestor of head (or
+// equal), a local branch must point at head, and the cut rule applies to base..pushed, so later CI-fix
+// commits between pushed and head pass. `cut` runs the cut rule alone before the first push (exit 0 ok,
+// 2 rejected with the handover message), without tmux and without run files.
 // Refs resolve in --code-repo (default --repo), so code may live in a repo embedded in the control repo;
 // run files always stay in --repo.
 // `wait` also watches itself, so the supervisor needs no monitor of its own. stale: a live pane without
@@ -34,6 +39,7 @@
 //   qatlas-team-tmux.js title --repo <root> --package <package> --title <title>
 //   qatlas-team-tmux.js ask --repo <root> --package <package> --question <question> [--timeout <seconds>]
 //   qatlas-team-tmux.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <text|file> [--timeout <seconds>]
+//   qatlas-team-tmux.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
 //   qatlas-team-tmux.js answer --repo <root> --package <package> --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
 //   qatlas-team-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
 //   qatlas-team-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>   (run budget and package tasks; repeatable)
@@ -383,8 +389,40 @@ function codeRepo(repo) {
   return fs.realpathSync(value);
 }
 
-// Frontmatter is optional; without it the report passes unchecked. Refs come from an untrusted report:
-// they reach git only as arguments, never via a shell, and may not start with "-".
+// Refs come from an untrusted report: they reach git only as arguments, never via a shell, and may not start
+// with "-". Returns the full commit SHA; an optional ref that does not resolve yields null.
+function resolveCommit(repo, ref, key, bad, optional = false) {
+  if (ref.startsWith('-')) bad(`"${key}" must not start with "-".`);
+  try {
+    return execFileSync('git', ['-C', repo, 'rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch { return optional ? null : bad(`"${key}" ${JSON.stringify(ref)} does not resolve to a commit in ${repo}.`); }
+}
+
+// A pull request is one unit of the commit boundary: exactly one non-merge commit over the base.
+function checkCut(repo, base, tip, label, exception, bad) {
+  const count = Number(execFileSync('git', ['-C', repo, 'rev-list', '--no-merges', '--count', `${base}..${tip}`], { encoding: 'utf8' }).trim());
+  const limit = `A pull request is one unit of the commit boundary: exactly one non-merge commit`;
+  if (count === 0) bad(`${label} has 0 non-merge commits over ${base}. ${limit}.`);
+  if (count > 1 && exception === undefined) {
+    bad(`${label} has ${count} non-merge commits over ${base}. ${limit}; independent milestones become separate pull requests. For a justified exception, set "cut-exception: <reason>".`);
+  }
+}
+
+// cut --branch <branch> --base <ref>: the cut check alone, run before the first push. --repo is required
+// like for handover (it only locates the default code repo); no tmux access, no run files.
+function cut(repo) {
+  const bad = message => fail('Handover rejected: ' + message, 2);
+  const [branch, base] = need('--branch', '--base');
+  resolveCommit(repo, branch, 'branch', bad);
+  resolveCommit(repo, base, 'base', bad);
+  checkCut(repo, base, branch, `branch ${branch}`, undefined, bad);
+  out({ result: 'ok', branch, base });
+}
+
+// Frontmatter is optional; without it the report passes unchecked. With "pr", the report hands over an open
+// pull request: "pushed" (state at the first push) carries the cut check, "head" is the handed-over tip and
+// may lie behind later CI-fix commits; without "pr", the branch itself is cut-checked.
 function validateHandover(text, repo) {
   const bad = message => fail('Handover rejected: ' + message, 2);
   let parsed;
@@ -399,23 +437,25 @@ function validateHandover(text, repo) {
   if (/[\r\n]/.test(title)) bad('"pr-title" must be a single line.');
   str('pr-body');
   if (typeof data.last !== 'boolean') bad('"last" must be true or false.');
-  const refs = ['branch', 'base'].map(key => {
-    const ref = str(key);
-    if (ref.startsWith('-')) bad(`"${key}" must not start with "-".`);
-    try {
-      execFileSync('git', ['-C', repo, 'rev-parse', '--verify', '--quiet', `${ref}^{commit}`], { stdio: 'ignore' });
-    } catch { bad(`"${key}" ${JSON.stringify(ref)} does not resolve to a commit in ${repo}.`); }
-    return ref;
-  });
-  const [branch, base] = refs;
   const exception = data['cut-exception'];
   if (exception !== undefined && (typeof exception !== 'string' || !exception.trim())) bad('"cut-exception" must be a non-empty string.');
-  const count = Number(execFileSync('git', ['-C', repo, 'rev-list', '--no-merges', '--count', `${base}..${branch}`], { encoding: 'utf8' }).trim());
-  const limit = `A pull request is one unit of the commit boundary: exactly one non-merge commit`;
-  if (count === 0) bad(`branch ${branch} has 0 non-merge commits over ${base}. ${limit}.`);
-  if (count > 1 && exception === undefined) {
-    bad(`branch ${branch} has ${count} non-merge commits over ${base}. ${limit}; independent milestones become separate pull requests. For a justified exception, set "cut-exception: <reason>".`);
+  const base = str('base');
+  resolveCommit(repo, base, 'base', bad);
+  const branch = str('branch');
+  if (data.pr === undefined) {
+    resolveCommit(repo, branch, 'branch', bad);
+    checkCut(repo, base, branch, `branch ${branch}`, exception, bad);
+    return;
   }
+  if (!Number.isInteger(data.pr) || data.pr <= 0) bad('"pr" must be a positive integer.');
+  const head = resolveCommit(repo, str('head'), 'head', bad);
+  const pushed = resolveCommit(repo, str('pushed'), 'pushed', bad);
+  const local = resolveCommit(repo, branch, 'branch', bad, true);
+  if (local && local !== head) bad(`branch ${branch} (${local}) is not the handed-over head ${head}.`);
+  try {
+    execFileSync('git', ['-C', repo, 'merge-base', '--is-ancestor', pushed, head], { stdio: 'ignore' });
+  } catch { bad(`"pushed" ${pushed} is not an ancestor of "head" ${head}.`); }
+  checkCut(repo, base, pushed, `branch ${branch} at first push (${pushed.slice(0, 12)})`, exception, bad);
 }
 
 function answer() {
@@ -537,6 +577,7 @@ try {
   else if (command === 'wait') wait().catch(error => fail(error.message));
   else if (command === 'ask') raise('question', need('--question')[0]).catch(error => fail(error.message));
   else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, codeRepo(repoKey())); raise('handover', text, task).catch(error => fail(error.message)); }
+  else if (command === 'cut') cut(codeRepo(repoKey()));
   else if (command === 'answer') answer();
   else if (command === 'log') logEvent();
   else if (command === 'nudge') nudge();
@@ -544,7 +585,7 @@ try {
   else if (command === 'report') report();
   else if (command === 'capture') capture();
   else if (command === 'close') close();
-  else fail('Commands: add, list, title, wait, ask, handover, answer, log, nudge, plan, report, capture, close', 2);
+  else fail('Commands: add, list, title, wait, ask, handover, cut, answer, log, nudge, plan, report, capture, close', 2);
 } catch (error) {
   fail((error.stderr ? String(error.stderr).trim() : '') || error.message);
 }

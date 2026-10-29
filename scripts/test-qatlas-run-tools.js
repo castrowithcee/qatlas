@@ -14,7 +14,7 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-run-tools-'));
 const gitDir = path.dirname(execFileSync('which', ['git'], { encoding: 'utf8' }).trim());
 
 // gh stub, steered by files in $STUB_DIR: view.json, checks.json, merge-mode (same|different),
-// merge-fail-first, merge-fail-after (merges, then reports failure), merge-calls (log), merge-oid. `pr merge` writes the squash commit to the bare remote.
+// merge-fail-first, (no checks.json: gh reports "no checks reported") merge-fail-after (merges, then reports failure), merge-calls (log), merge-oid. `pr merge` writes the squash commit to the bare remote.
 const stub = `#!${process.execPath}
 'use strict';
 const fs = require('fs');
@@ -29,7 +29,9 @@ if (group === 'pr' && action === 'view') {
     process.stdout.write(JSON.stringify({ mergeCommit: oid ? { oid: oid.trim() } : null }));
   } else process.stdout.write(read('view.json'));
 } else if (group === 'pr' && action === 'checks') {
-  process.stdout.write(read('checks.json'));
+  const checks = read('checks.json');
+  if (checks === null) { process.stderr.write("no checks reported on the 'task' branch\\n"); process.exit(1); }
+  process.stdout.write(checks);
 } else if (group === 'pr' && action === 'merge') {
   fs.appendFileSync(path.join(dir, 'merge-calls'), JSON.stringify(process.argv.slice(2)) + '\\n');
   const calls = read('merge-calls').trim().split('\\n').length;
@@ -94,7 +96,7 @@ function setup(name, { checks = green, mode = 'same', failFirst = false, failAft
   }
   const sha = git(repo, 'rev-parse', 'task');
   write(path.join(stubDir, 'bare'), bare);
-  write(path.join(stubDir, 'checks.json'), JSON.stringify(checks));
+  if (checks !== null) write(path.join(stubDir, 'checks.json'), JSON.stringify(checks));
   write(path.join(stubDir, 'merge-mode'), mode);
   write(path.join(stubDir, 'view.json'), JSON.stringify(
     { headRefOid: head || sha, headRefName: 'task', baseRefName: 'main', state: 'OPEN' }));
@@ -112,6 +114,22 @@ const land = c => spawnSync(process.execPath, [tools, 'land', '--pr', '16', '--r
   '--interval', '0.1', '--timeout', '2', '--repo', c.repo], { encoding: 'utf8', env: env(c.stubDir) });
 const json = r => JSON.parse(r.stdout.trim().split('\n').pop());
 const mergeCalls = c => { try { return fs.readFileSync(path.join(c.stubDir, 'merge-calls'), 'utf8').trim().split('\n'); } catch { return []; } };
+const landWith = (c, ...more) => spawnSync(process.execPath, [tools, 'land', '--pr', '16', '--report', c.report,
+  '--interval', '0.1', '--timeout', '30', '--repo', c.repo, ...more], { encoding: 'utf8', env: env(c.stubDir) });
+const ciWait = c => spawnSync(process.execPath, [tools, 'ci-wait', '--pr', '16', '--interval', '0.1', '--timeout', '30', '--repo', c.repo],
+  { encoding: 'utf8', env: env(c.stubDir) });
+// Remote branch update (as GitHub "Update branch" or a push): clone, run fn, push to task and pull/16/head.
+const remoteUpdate = (c, fn) => {
+  const other = path.join(path.dirname(c.repo), 'updater');
+  git(root, 'clone', '-q', c.bare, other);
+  git(other, 'checkout', '-q', 'task');
+  fn(other);
+  git(other, 'push', '-q', 'origin', 'task');
+  const tip = git(other, 'rev-parse', 'HEAD');
+  git(c.bare, 'update-ref', 'refs/pull/16/head', tip);
+  write(path.join(c.stubDir, 'view.json'), JSON.stringify({ headRefOid: tip, headRefName: 'task', baseRefName: 'main', state: 'OPEN' }));
+  return tip;
+};
 const hasBranch = c => git(c.bare, 'branch', '--list', 'task') !== '';
 
 function testSlotCount() {
@@ -235,6 +253,139 @@ try {
     '--report', c.report], { encoding: 'utf8', env: env(c.stubDir) });
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
+
+  // No CI: ci-wait and land report it at once (debounce: 3 polls), land merges only with --no-ci.
+  const quick = (fn, c) => { const t = Date.now(); const res = fn(c); assert.ok(Date.now() - t < 10000, 'no CI must not wait out the timeout'); return res; };
+  c = setup('no-ci', { checks: null });
+  r = quick(ciWait, c);
+  assert.strictEqual(r.status, 8);
+  assert.strictEqual(r.stdout, '{"pr":16,"result":"none","checks":[],"retries":0}\n');
+  r = quick(landWith, c);
+  assert.strictEqual(r.status, 8, r.stderr);
+  assert.strictEqual(json(r).result, 'no-ci');
+  assert.deepStrictEqual(mergeCalls(c), []);
+  assert.ok(hasBranch(c));
+  r = quick(c => landWith(c, '--no-ci'), c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(json(r).result, 'merged');
+  assert.ok(!hasBranch(c));
+  // --no-ci does not skip checks that exist.
+  c = setup('no-ci-red', { checks: red });
+  r = landWith(c, '--no-ci');
+  assert.strictEqual(r.status, 1);
+  assert.strictEqual(json(r).result, 'ci-fail');
+
+  // Remote head after a branch update: merge of the base into the PR branch is accepted, a new own commit is not.
+  c = setup('remote-update', { moved: true });
+  git(c.repo, 'fetch', '-q', 'origin');
+  let updated = remoteUpdate(c, other => git(other, 'merge', '-q', '--no-edit', 'origin/main'));
+  r = land(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  o = json(r);
+  assert.strictEqual(o.result, 'merged');
+  assert.strictEqual(o.proof, 'tree');
+  assert.strictEqual(o.branch_deleted, true);
+  let mergeArgs = JSON.parse(mergeCalls(c)[0]);
+  assert.strictEqual(mergeArgs[mergeArgs.indexOf('--match-head-commit') + 1], updated);
+  // Report head (vouched tip) with the local branch gone behind: accepted as well.
+  c = setup('remote-update-head', { moved: true });
+  updated = remoteUpdate(c, other => git(other, 'merge', '-q', '--no-edit', 'origin/main'));
+  write(c.report, fs.readFileSync(c.report, 'utf8').replace('last: true', `last: true\nhead: ${c.sha}`));
+  r = land(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  // Evil merge: the merge of the base carries an extra file.
+  c = setup('remote-evil-merge', { moved: true });
+  remoteUpdate(c, other => {
+    git(other, 'merge', '-q', '--no-edit', 'origin/main');
+    write(path.join(other, 'evil.txt'), 'x\n');
+    git(other, 'add', 'evil.txt');
+    git(other, 'commit', '-q', '--amend', '--no-edit');
+  });
+  r = land(c);
+  assert.strictEqual(r.status, 5);
+  o = json(r);
+  assert.strictEqual(o.result, 'head-mismatch');
+  assert.match(o.reason, /beyond the merge of its parents/);
+  assert.deepStrictEqual(mergeCalls(c), []);
+  c = setup('remote-own-commit', { moved: true });
+  remoteUpdate(c, other => { git(other, 'merge', '-q', '--no-edit', 'origin/main'); commit(other, 'e.txt', 'e\n'); });
+  r = land(c);
+  assert.strictEqual(r.status, 5);
+  assert.strictEqual(json(r).result, 'head-mismatch');
+  assert.deepStrictEqual(mergeCalls(c), []);
+  assert.ok(hasBranch(c));
+  c = setup('remote-own-commit-only');
+  remoteUpdate(c, other => commit(other, 'e.txt', 'e\n'));
+  assert.strictEqual(land(c).status, 5);
+  assert.deepStrictEqual(mergeCalls(c), []);
+
+  // Handover of an open PR: pr/head/pushed. First push carries the cut check, a CI fix after it passes.
+  const handover = (c, extra, ...more) => {
+    const orig = c.report + '.orig';
+    if (!fs.existsSync(orig)) fs.copyFileSync(c.report, orig);
+    write(c.report, fs.readFileSync(orig, 'utf8').replace('last: true', 'last: true' + extra));
+    return spawnSync(process.execPath, [team, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
+      '--report', c.report, '--timeout', '0.1', ...more], { encoding: 'utf8', env: env(c.stubDir) });
+  };
+  c = setup('pr-handover');
+  const pushed = c.sha;
+  commit(c.repo, 'fix.txt', 'fix\n');
+  const fixed = git(c.repo, 'rev-parse', 'HEAD');
+  r = handover(c, `\npr: 16\nhead: ${fixed}\npushed: ${pushed}`);
+  assert.doesNotMatch(r.stderr, /Handover rejected/);
+  assert.notStrictEqual(r.status, 2, r.stderr);
+  // Same report without pr: the old check counts base..branch and rejects the CI fix commit.
+  r = handover(c, '');
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /branch task has 2 non-merge commits over main/);
+  // Missing head or pushed, bad pr, head different from the local branch, pushed not an ancestor of head.
+  r = handover(c, `\npr: 16\nhead: ${fixed}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"pushed" must be a non-empty string/);
+  r = handover(c, `\npr: 16\npushed: ${pushed}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"head" must be a non-empty string/);
+  r = handover(c, `\npr: abc\nhead: ${fixed}\npushed: ${pushed}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"pr" must be a positive integer/);
+  r = handover(c, `\npr: 16\nhead: ${pushed}\npushed: ${pushed}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /is not the handed-over head/);
+  r = handover(c, `\npr: 16\nhead: ${fixed}\npushed: "${'0'.repeat(40)}"`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"pushed" .* does not resolve/);
+  r = handover(c, `\npr: 16\nhead: ${fixed}\npushed: -x`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /must not start with "-"/);
+  git(c.repo, 'checkout', '-q', '-b', 'side', 'main');
+  commit(c.repo, 's.txt', 's\n');
+  const side = git(c.repo, 'rev-parse', 'HEAD');
+  r = handover(c, `\npr: 16\nhead: ${fixed}\npushed: ${side}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /is not an ancestor of "head"/);
+
+  // Two milestones at the first push: cut rejects before the push, a handover with pushed = second milestone too.
+  c = setup('cut', { extra: ['d.txt'] });
+  const cutRun = (cc, branch = 'task') => spawnSync(process.execPath, [team, 'cut', '--repo', cc.repo, '--branch', branch,
+    '--base', 'main'], { encoding: 'utf8', env: env(cc.stubDir) });
+  r = cutRun(c);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
+  assert.ok(!fs.existsSync(path.join(c.repo, '.qatlas')));
+  r = handover(c, `\npr: 16\nhead: ${c.sha}\npushed: ${c.sha}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /at first push .* has 2 non-merge commits over main/);
+  r = handover(c, `\ncut-exception: two milestones\npr: 16\nhead: ${c.sha}\npushed: ${c.sha}`);
+  assert.notStrictEqual(r.status, 2, r.stderr);
+  c = setup('cut-ok');
+  r = cutRun(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(json(r).result, 'ok');
+  assert.ok(!fs.existsSync(path.join(c.repo, '.qatlas')));
+  r = cutRun(c, 'main');
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /0 non-merge commits/);
+  assert.strictEqual(cutRun(c, '-x').status, 2);
 
   // --code-repo: code repo embedded in (and ignored by) the control repo; refs resolve there, not in --repo.
   const embedded = (name, extra) => {
