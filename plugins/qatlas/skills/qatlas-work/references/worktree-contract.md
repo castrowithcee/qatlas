@@ -1,75 +1,72 @@
 ---
 description: >
-  Vertrag für zentrale Git-Worktrees: Branchnamen, Pfad, Kollisionen, Anlage, Eigentum und sicheres
-  Aufräumen, gemeinsam für Qatlas Work Tree und Qatlas Run.
+  Contract for central git worktrees: branch names, path, collisions, creation, ownership, and safe
+  cleanup, shared by Qatlas Work Tree and Qatlas Run.
 type: rule
 edit: locked
 license: MIT
 ---
 
-# Worktree-Vertrag
+# Worktree contract
 
-Git registriert alle Worktrees eines Repos gemeinsam; dieses Register ist die maßgebliche Quelle. Der Ordner
-unter `~/.qatlas/state/worktrees/` ist nur der gemeinsame Ablageort für alle Agenten desselben Nutzers.
+Git registers all worktrees of a repo together; this register is the authoritative source. The folder under
+`~/.qatlas/state/worktrees/` is only the shared storage location for all agents of the same user.
 
-## Anlegen
+## Creating
 
-1. Ermittle Git-Root, primären Arbeitsbaum, Branches, Worktrees und vollständigen Status. Committe und stashe
-   nichts. Lokale Änderungen bleiben in ihrem Arbeitsbaum und gelangen nicht in den neuen.
-2. Folgt das Repo nachweislich einer eigenen Branch-Konvention aus Projektvorgaben oder durchgängig benannten
-   Branches, gilt sie. Sonst heißt ein Task-Branch `task/<id>-<slug>`; `<id>` ist die Kennung aus dem Spine
-   als ASCII-Slug, `<slug>` stammt aus dem Task-Dateinamen oder Titel. Arbeit ohne Task erhält einen
-   eindeutigen `work/<zweck>`-Branch. Ein Unterbranch hängt an den Namen seines Task-Branches `--<rolle>` an,
-   etwa `task/0042-export--tests`. Besteht bereits ein Branch `task` oder `work`, ersetzt `-` den Schrägstrich
-   hinter diesem Präfix. Was der Agent selbst benennt, nennt nie Qatlas, einen Agenten, Host oder ein Modell,
-   weil Branchnamen in die Historie des Repos gelangen können.
-3. Ermittle den Pfad mit `node <plugin-root>/scripts/qatlas-worktree-path.js <branch> --target <repo-root>`;
-   `<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`. Bereits registrierte Worktrees
-   an einem anderen Pfad bleiben dort.
-4. Prüfe Namens-, Branch- und Pfadkollisionen gegen das Git-Register und das Dateisystem. Überschreibe nichts.
-   Gehört eine Kollision nicht eindeutig derselben Arbeit, bilde einen unterscheidbaren Zweck oder stoppe.
-   Verwende einen vorhandenen Branch oder Worktree nur weiter, wenn er nachweislich derselben offenen Arbeit
-   gehört.
-5. Ein vorhandener lokaler Branch startet an seiner eigenen Spitze und wird nie zurückgesetzt. Bei einem
-   eindeutig gleichnamigen Remote-Branch darf ein lokaler Tracking-Branch entstehen. Für einen neuen Branch
-   gilt der aus Auftrag oder Spine folgende Startpunkt, sonst das aktuelle `HEAD`.
-6. Lege den Worktree ausschließlich mit `git worktree add` an, ohne `-B` und `--force`, und prüfe den
-   Eintrag danach über `git worktree list --porcelain`.
+1. Determine git root, primary working tree, branches, worktrees, and full status. Commit and stash
+   nothing. Local changes stay in their working tree and do not reach the new one.
+2. If the repo demonstrably follows a branch convention of its own from project requirements or
+   consistently named branches, it applies. Otherwise a task branch is called `task/<id>-<slug>`; `<id>` is
+   the identifier from the spine as an ASCII slug, `<slug>` comes from the task file name or title. Work
+   without a task gets a unique `work/<purpose>` branch. A sub-branch appends `--<role>` to the name of its
+   task branch, for example `task/0042-export--tests`. If a branch `task` or `work` already exists, `-`
+   replaces the slash after that prefix. What the agent names itself never names Qatlas, an agent, host, or
+   model, because branch names can end up in the repo's history.
+3. Determine the path with `node <plugin-root>/scripts/qatlas-worktree-path.js <branch> --target <repo-root>`;
+   `<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. Worktrees already registered
+   at a different path stay there.
+4. Check name, branch, and path collisions against the git register and the file system. Overwrite nothing.
+   If a collision does not unambiguously belong to the same work, form a distinguishable purpose or stop.
+   Reuse an existing branch or worktree only if it demonstrably belongs to the same open work.
+5. An existing local branch starts at its own tip and is never reset. For an unambiguous remote branch of
+   the same name, a local tracking branch may be created. For a new branch, the start point following from
+   the assignment or spine applies, otherwise the current `HEAD`.
+6. Create the worktree exclusively with `git worktree add`, without `-B` and `--force`, and check the entry
+   afterwards via `git worktree list --porcelain`.
 
-Ein Worktree enthält nur versionierte Dateien. Ignorierte Dateien, eingebettete Repos und lokaler Zustand
-wie `.env` fehlen dort und werden nicht hineinkopiert. Prüfungen, die solche Inhalte brauchen, laufen im
-primären Arbeitsbaum, solange dort kein anderer Schreiber arbeitet.
+A worktree contains only versioned files. Ignored files, embedded repos, and local state such as `.env` are
+missing there and are not copied in. Checks that need such content run in the primary working tree as long
+as no other writer works there.
 
-## Eigentum
+## Ownership
 
-Der Namensraum eines Tasks umfasst seine Task-Branches, deren Unterbranches und die daraus abgeleiteten
-Worktrees. Er gehört dem Orchestrator, der den Task beansprucht hat; nur dieser legt darin Branches und
-Worktrees an, integriert und entfernt sie. Ein Name belegt keine Eigentümerschaft; maßgeblich bleiben
-Beanspruchung und Git-Register. Worktrees gehören einer Arbeit, nie einer Agentenidentität. Übergibt ein
-Orchestrator einen Task an einen anderen Integrationsbesitzer, geht der Namensraum mit über: Nur dieser
-integriert und räumt danach auf; der Übergebende fasst die übergebenen Branches und Worktrees nicht mehr an.
+A task's namespace comprises its task branches, their sub-branches, and the worktrees derived from them. It
+belongs to the lead that claimed the task; only that lead creates branches and worktrees in it, integrates,
+and removes them. A name does not establish ownership; the claim and the git register remain authoritative.
+Worktrees belong to a piece of work, never to an agent identity. If a lead hands a task over to another
+integration owner, the namespace passes along: only the latter integrates and cleans up afterwards; the
+handing-over lead no longer touches the handed-over branches and worktrees.
 
-## Aufräumen
+## Cleaning up
 
-1. Lies das Register erneut und löse das Ziel eindeutig auf. Entferne niemals den primären oder den
-   aktuellen Arbeitsbaum.
-2. Prüfe im Ziel Status, ungetrackte Dateien, Branch, Upstream und nicht integrierte Commits. Das
-   Integrationsziel eines Unterbranches ist sein Task-Branch, das eines Task-Branches der Steuerbranch.
-   Prüfe mit `git merge-base --is-ancestor <branch> <ziel>`, ob die Branch-Spitze darin enthalten ist. Nach
-   einem Squash-Merge schlägt diese Prüfung immer fehl; als Integration gilt dann der Squash-Nachweis: Der
-   Pull Request des Branches ist gemergt, sein Merge-Commit liegt auf dem Steuerbranch, und
-   `git rev-parse <merge-commit>^{tree}` gleicht `git rev-parse <branch>^{tree}` der zuletzt geprüften,
-   unveränderten Branch-Spitze. Ist der Arbeitsbaum nicht sauber, das Ziel nicht eindeutig belegt oder
-   keiner der beiden Nachweise erbracht, entferne nichts und zeige den konkreten Zustand. Beanspruchte
-   Arbeit eines laufenden oder unbekannten Workers bleibt bestehen.
-3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <pfad>` ohne
-   `--force`. Entferne danach mit `rmdir` die dadurch leer gewordenen Zwischenordner einschließlich des
-   Repo-Ordners; `~/.qatlas/state/worktrees/` selbst bleibt.
-4. Lösche den lokalen Branch nach der Zielprüfung nur mit `git branch -d`. Schlägt der Befehl fehl, erzwinge
-   die Löschung nicht; einzige Ausnahme ist ein Branch mit erbrachtem Squash-Nachweis, den `git branch -D`
-   entfernen darf. Remote-Branches werden nur auf ausdrücklichen Wunsch oder nach einer Regel des laufenden
-   Verfahrens gelöscht; nenne verbliebene gesammelt im Abschluss.
+1. Re-read the register and resolve the target unambiguously. Never remove the primary or the current
+   working tree.
+2. In the target, check status, untracked files, branch, upstream, and non-integrated commits. The
+   integration target of a sub-branch is its task branch, that of a task branch the control branch. Check
+   with `git merge-base --is-ancestor <branch> <target>` whether the branch tip is contained in it. After a
+   squash merge this check always fails; integration then means the squash evidence: the branch's pull
+   request is merged, its merge commit is on the control branch, and `git rev-parse <merge-commit>^{tree}`
+   equals `git rev-parse <branch>^{tree}` of the last checked, unchanged branch tip. If the working tree is
+   not clean, the target is not unambiguously established, or neither evidence is provided, remove nothing
+   and show the concrete state. Claimed work of a running or unknown worker stays.
+3. Remove a clean, fully integrated working tree with `git worktree remove <path>` without `--force`.
+   Afterwards remove with `rmdir` the intermediate folders that have become empty, including the repo
+   folder; `~/.qatlas/state/worktrees/` itself stays.
+4. Delete the local branch after the target check only with `git branch -d`. If the command fails, do not
+   force the deletion; the only exception is a branch with provided squash evidence, which `git branch -D`
+   may remove. Remote branches are deleted only on explicit request or under a rule of the running
+   procedure; name remaining ones collectively in the closing.
 
-Einen schmutzigen oder nicht integrierten Strang zu verwerfen, ist eine eigene destruktive Aktion: Zeige den
-exakten Zustand und hole eine ausdrückliche Bestätigung für genau diesen Worktree ein. Lösche einen
-Worktree-Ordner nie von Hand.
+Discarding a dirty or non-integrated strand is a destructive action of its own: show the exact state and
+obtain explicit confirmation for exactly that worktree. Never delete a worktree folder by hand.

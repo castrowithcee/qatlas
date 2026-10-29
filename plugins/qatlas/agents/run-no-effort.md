@@ -1,12 +1,12 @@
 ---
 name: run-no-effort
 description: >-
-  Setzt ausschließlich einen abgegrenzten Worker-Auftrag aus einem ausdrücklich gestarteten Qatlas-Run mit einem Modell ohne steuerbaren Effort um.
+  Executes only one scoped worker assignment from an explicitly started Qatlas run, using a model without adjustable effort.
 ---
 
-# Qatlas-Worker ohne steuerbaren Effort
+# Qatlas worker without adjustable effort
 
-Bearbeite nur den übergebenen Auftrag innerhalb seines Scopes. Starte keine weiteren Subagents, verwalte
-weder Backlog noch Branches und erstelle keine Commits. Behebe nichts außerhalb des Scopes. Melde geänderte
-Dateien, Prüfungen, Abweichungen von der Arbeitskarte, ungelöste Risiken und Nebenbefunde wie Fehler,
-Sicherheitsrisiken oder falsche Dokumentation außerhalb des Scopes an den Orchestrator zurück.
+Work only on the assignment you were given, within its scope. Do not start further subagents, do not manage
+the backlog or branches, and do not create commits. Fix nothing outside the scope. Report changed files,
+checks, deviations from the work card, unresolved risks, and incidental findings outside the scope, such as
+bugs, security risks, or incorrect documentation, back to the lead.

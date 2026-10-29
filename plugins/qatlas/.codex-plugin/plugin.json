@@ -1,7 +1,7 @@
 {
   "name": "qatlas",
   "version": "0.22.1",
-  "description": "Qatlas verbindet passiven Sessionkontext, Regeln und Projektzustand mit ausdrücklich gestarteter Einrichtung, Planung, serieller Ausführung und sicheren Verwaltungswerkzeugen.",
+  "description": "Qatlas combines passive session context, rules, and project state with explicitly started setup, planning, serial execution, and safe administration tools.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
   "repository": "https://github.com/castrowithcee/qatlas",
@@ -11,20 +11,20 @@
   "hooks": "./hooks/qatlas-hooks.json",
   "interface": {
     "displayName": "Qatlas",
-    "shortDescription": "Kontext halten und Arbeit sicher ausführen",
-    "longDescription": "Qatlas vereint passive Infrastruktur mit ausdrücklich gestarteten Einstiegen: qatlas für Zielklärung anhand einer Idee, eines Tasks oder einer Datei, Shape für neue Ideen oder vorhandene Tasks und den Backlog-Scope, serielle Ausführung und Review; qatlas-core für Einrichtung und seltene Kernverwaltung; qatlas-work für Workspace-Arbeit außerhalb des Loops. Sessionkontext, Regeln, Scaffold, Backlog-Binding, Memory, Ablage, Import und Git bleiben gemeinsam im Plugin. Der Orchestrator steuert genau einen aktiven Task, schneidet Worker-Aufträge zu und prüft ihre Ergebnisse. Der Run-Aufruf allein erlaubt keine externe oder irreversible Wirkung; eine konkrete externe Tooloperation braucht separate eindeutige Autorität aus Auftrag, Taskvertrag oder geltender Agentendatei.",
+    "shortDescription": "Keep context and run work safely",
+    "longDescription": "Qatlas combines passive infrastructure with explicitly started entry points: qatlas for clarifying a goal from an idea, a task, or a file, shape for new ideas or existing tasks and the backlog scope, serial execution, and review; qatlas-core for setup and rare core administration; qatlas-work for workspace work outside the loop. Session context, rules, scaffold, backlog binding, memory, filing, import, and Git stay together in the plugin. The lead drives exactly one active task, cuts worker assignments, and checks their results. Invoking run alone permits no external or irreversible effect; a concrete external tool operation needs separate, unambiguous authority from the assignment, the task contract, or an applicable agent file.",
     "developerName": "Qatlas",
     "category": "Productivity",
     "capabilities": ["Instructions", "Lifecycle hooks", "Multi-agent orchestration"],
     "defaultPrompt": [
-      "Richte dieses Projekt mit qatlas-core setup ein.",
-      "Prüfe dieses Projekt mit qatlas-core doctor.",
-      "Klär mit qatlas goal den Plan und die offenen Fragen dieser Idee.",
-      "Arbeite diese Idee mit qatlas shape aus.",
-      "Disponiere mit qatlas shape backlog die nächste Arbeitsqueue.",
-      "Führe mit qatlas run bis zu fünf Aufgaben dieses Projekts seriell aus.",
-      "Klär mit qatlas review die offenen menschlichen Übergaben.",
-      "Zeige mit qatlas-work tree die gemeinsamen Git-Worktrees dieses Projekts."
+      "Set up this project with qatlas-core setup.",
+      "Check this project with qatlas-core doctor.",
+      "Clarify the plan and open questions of this idea with qatlas goal.",
+      "Shape this idea with qatlas shape.",
+      "Schedule the next work queue with qatlas shape backlog.",
+      "Run up to five tasks of this project in sequence with qatlas run.",
+      "Settle the open human handoffs with qatlas review.",
+      "Show this project's shared Git worktrees with qatlas-work tree."
     ]
   }
 }

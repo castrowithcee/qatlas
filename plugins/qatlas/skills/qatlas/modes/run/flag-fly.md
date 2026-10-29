@@ -1,16 +1,17 @@
 ---
 description: >
-  Bedeutung von --fly im Run: Der Nutzer ist während des Laufs nicht erreichbar, und der Orchestrator
-  entscheidet, nimmt an oder übergibt, ohne zu warten.
+  Meaning of --fly in run: the user is unreachable during the run, and the lead decides, assumes, or hands
+  off without waiting.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# `--fly` im Run
+# `--fly` in run
 
-Der Nutzer ist während des Laufs nicht erreichbar; kein Schritt wartet auf seine Antwort. Kläre vor dem
-ersten Task alles, was den Lauf später anhalten würde, und entscheide jede Frage, die sonst den Nutzer
-bräuchte, nach „Ohne Nutzer entscheiden“. Eine menschliche Übergabe setzt du nach dem Abnahmeblock auf
-`review` und fährst mit dem nächsten unabhängigen Task fort. Jede Annahme hältst du im Task fest und nennst
-sie im Abschlussblock unter **Angenommen**.
+The user is unreachable during the run; no step waits for their answer. Before the first task, settle
+everything that would stall the run later, and decide every question that would otherwise need the user by
+[deciding without the user](../../references/playbook-autonomy.md). You set a human handoff to `review`
+after the acceptance block and continue with the next independent task. You record every assumption in the
+task and list it under the assumption category (`Angenommen`) of [the closing
+block](../../references/playbook-closing-block.md).
