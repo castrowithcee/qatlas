@@ -452,6 +452,87 @@ try {
     if (socketPath) fs.rmSync(socketPath, { force: true });
   }
 
+  // Integrator role: routing per role, one integrator, detection written once. Own tmux server.
+  const sock2 = `qatlas-test-int-${process.pid}`;
+  const tm2 = (...args) => execFileSync('tmux', ['-L', sock2, ...args], { encoding: 'utf8' }).trim();
+  let socketPath2 = null;
+  try {
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'integrator-')));
+    tm2('new-session', '-d', '-x', '80', '-y', '24', '-s', 'base', 'sleep 300');
+    socketPath2 = tm2('display', '-p', '#{socket_path}');
+    const tenv = { ...process.env, TMUX: `${socketPath2},1,0` };
+    const run = (...args) => spawnSync(process.execPath, [team, args[0], '--repo', repo, ...args.slice(1)],
+      { encoding: 'utf8', env: tenv });
+    const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
+    const common = ['--label', 'w', '--title', 't', '--cwd', repo];
+    ok('add', '--package', 'a', ...common, '--', 'sleep', '300');
+    ok('add', '--package', 'b', ...common, '--', 'sleep', '300');
+    ok('add', '--role', 'integrator', ...common, '--', 'sleep', '300');
+    ok('add', '--package', 'c', ...common, '--', 'true');
+    // Second integrator, reserved package name, and mixed addressing are rejected.
+    assert.notStrictEqual(run('add', '--role', 'integrator', ...common, '--', 'sleep', '300').status, 0);
+    assert.strictEqual(run('add', '--package', 'integrator', ...common, '--', 'sleep', '300').status, 2);
+    assert.strictEqual(run('plan', '--budget', '1', '--package', 'integrator', '--tasks', '1').status, 2);
+    assert.strictEqual(run('ask', '--role', 'integrator', '--package', 'a', '--question', 'q').status, 2);
+    const listed = ok('list').panes;
+    assert.deepStrictEqual(listed.map(x => `${x.package}:${x.role}`).sort(), [':integrator', 'a:lead', 'b:lead', 'c:lead']);
+    // Signals: lead handover; question and done of the integrator pane; a lead cannot be addressed as integrator.
+    ok('handover', '--package', 'a', '--task', 't1', '--report', 'report text', '--timeout', '0.01');
+    assert.strictEqual(run('handover', '--role', 'integrator', '--task', 't2', '--report', 'x', '--timeout', '0.01').status, 2);
+    ok('ask', '--role', 'integrator', '--question', 'iq', '--timeout', '0.01');
+    ok('title', '--role', 'integrator', '--title', 'FERTIG integrator');
+    const log = () => fs.readFileSync(path.join(repo, '.qatlas', 'local', 'team', 'events.jsonl'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
+    const count = type => log().filter(e => e.type === type).length;
+    const sh = (n) => `${JSON.stringify(process.execPath)} ${JSON.stringify(team)} wait --repo ${JSON.stringify(repo)} --since 0 --timeout 0.01 --min-free 1000000000 --stale 20 ${n}`;
+    // Two supervisor callers at once: one exited for c, one disk.
+    spawnSync('sh', ['-c', `${sh('--role supervisor')} >/dev/null & ${sh('')} >/dev/null & wait`], { env: tenv });
+    assert.strictEqual(count('exited'), 1);
+    assert.strictEqual(count('disk'), 1);
+    const before = log().length;
+    const types = res => res.events.map(e => e.type).sort();
+    let sup = ok('wait', '--since', '0', '--timeout', '0.01', '--min-free', '1000000000');
+    assert.deepStrictEqual(types(sup), ['disk', 'done', 'exited', 'question']);
+    assert.ok(sup.events.filter(e => e.type === 'question' || e.type === 'done').every(e => e.role === 'integrator'));
+    const integ = ok('wait', '--role', 'integrator', '--since', '0', '--timeout', '0.01');
+    assert.deepStrictEqual(integ.events.map(e => [e.type, e.package]), [['handover', 'a']]);
+    // The consumers' cursors are independent: the integrator's cursor loses nothing for the supervisor.
+    assert.strictEqual(integ.cursor, log().length);
+    assert.strictEqual(log().length, before);
+    // Integrator wait writes no detection events: c is gone, b stale, disk low, none of it is written.
+    const panes = Object.fromEntries(ok('list').panes.map(x => [x.package || x.role, x.pane]));
+    assert.strictEqual(count('stale'), 0);
+    ok('wait', '--since', String(integ.cursor), '--timeout', '0.01', '--min-free', '1000000000'); // arms stale tracking
+    tm2('set', '-p', '-t', panes.b, '@qatlas-since', String(Date.now() - 25 * 60000));
+    const integ2 = ok('wait', '--role', 'integrator', '--since', String(integ.cursor), '--timeout', '0.01', '--stale', '20');
+    assert.deepStrictEqual(integ2.events, []);
+    assert.strictEqual(count('stale'), 0);
+    // Two concurrent supervisor callers (and one integrator caller): b is reported stale exactly once.
+    spawnSync('sh', ['-c', `${sh('--role supervisor')} >/dev/null & ${sh('')} >/dev/null & ${sh('--role integrator')} >/dev/null & wait`], { env: tenv });
+    assert.strictEqual(count('stale'), 1);
+    assert.strictEqual(count('exited'), 1);
+    assert.strictEqual(count('disk'), 1);
+    sup = ok('wait', '--since', String(before), '--timeout', '0.01', '--min-free', '1000000000');
+    assert.deepStrictEqual(types(sup), ['stale']);
+    assert.strictEqual(sup.events[0].package, 'b');
+    // A stale lock (crashed holder) is taken over.
+    const lock = path.join(repo, '.qatlas', 'local', 'team', 'detect.lock');
+    fs.mkdirSync(lock);
+    const old = new Date(Date.now() - 120000);
+    fs.utimesSync(lock, old, old);
+    ok('wait', '--since', '0', '--timeout', '0.01', '--min-free', '1000000000');
+    assert.ok(!fs.existsSync(lock));
+    // report: the integrator is a role, not a package.
+    const rep = ok('report');
+    assert.deepStrictEqual(Object.keys(rep.packages).sort(), ['a', 'b', 'c']);
+    assert.deepStrictEqual(rep.integrator, { vorhanden: true, rueckfragen: 1 });
+    // answer addresses the integrator by role; a handover answers the lead by package.
+    assert.strictEqual(ok('answer', '--role', 'integrator', '--answer', 'ok').answered, true);
+    assert.strictEqual(ok('answer', '--package', 'a', '--answer', 'integrated abc').answered, true);
+  } finally {
+    try { tm2('kill-server'); } catch { /* already gone */ }
+    if (socketPath2) fs.rmSync(socketPath2, { force: true });
+  }
+
   process.stdout.write('✓ Qatlas-Run-Tools: land, ci-wait und Handover-Prüfung erfolgreich.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });

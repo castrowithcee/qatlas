@@ -8,12 +8,20 @@
 // server-wide options); otherwise the fallback server `-L qatlas-team` is used. A pane
 // is addressed via repo and package because hosts like Codex do not reliably run commands with the pane
 // environment.
+// Roles: `add` opens a lead pane per package (default) or, with `--role integrator`, at most one integrator
+// pane per repo that integrates all handovers of the leads. The integrator is not a package: it takes no
+// --package, is stored as pane option @qatlas-role and addressed with `--role integrator` instead of
+// --package (ask, title, nudge, answer, capture, close); `integrator` is a reserved package name. The
+// supervisor starts it after the leads. list shows the role of every pane; report counts no package for it.
 // Events are JSON lines in <repo>/.qatlas/local/team/events.jsonl and the single source of truth for
 // answers. `seq` is the 0-based line index, derived on read, not stored. Waking types: question,
 // handover, done, exited, stale, disk; start, plan, answer, picked, nudge and all types written via log
 // do not wake.
-// `wait --since <seq>` returns all waking events from seq on and the new `cursor` (count of all
-// events); pass it as --since on the next call and nothing is lost. Handover reports are stored as
+// `wait --role supervisor|integrator` (default supervisor) routes them: the integrator receives only
+// handover; the supervisor receives all other waking types, also those of the integrator pane (its question,
+// its done). `wait --since <seq>` returns the waking events of the role from seq on and the new `cursor`
+// (count of all events); every consumer keeps its own cursor and passes it as --since on the next call,
+// so the events of the other role cost nothing. Handover reports are stored as
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
 // (pr-title, pr-body, branch, base, last, optional cut-exception) is validated before any tmux access:
 // the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
@@ -24,7 +32,9 @@
 // 2 rejected with the handover message), without tmux and without run files.
 // Refs resolve in --code-repo (default --repo), so code may live in a repo embedded in the control repo;
 // run files always stay in --repo.
-// `wait` also watches itself, so the supervisor needs no monitor of its own. stale: a live pane without
+// The supervisor's `wait` also watches itself, so the supervisor needs no monitor of its own; only it detects
+// and writes exited, stale and disk, under an exclusive lock directory (detect.lock, stale after
+// LOCK_STALE_MS) so concurrent supervisor calls never write one event twice. stale: a live pane without
 // open signal whose conversation part has not changed for --stale minutes (once per standstill phase;
 // the state lives in pane options and so survives across wait calls). While the host shows that the
 // lead waits for its own background agent (Claude Code: "Waiting for N background agent(s)"), the
@@ -32,20 +42,20 @@
 // filesystem fell below --min-free GB (once per undershoot). nudge is the only way to write into a pane.
 // If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
 // Usage:
-//   qatlas-team-tmux.js add --repo <root> --package <package> --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
+//   qatlas-team-tmux.js add --repo <root> (--package <package> | --role integrator) --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-team-tmux.js list --repo <root>
-//   qatlas-team-tmux.js wait --repo <root> [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>]
-//   qatlas-team-tmux.js nudge --repo <root> --package <package> --text <text>   (refused while the pane has an open signal)
-//   qatlas-team-tmux.js title --repo <root> --package <package> --title <title>
-//   qatlas-team-tmux.js ask --repo <root> --package <package> --question <question> [--timeout <seconds>]
+//   qatlas-team-tmux.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>]
+//   qatlas-team-tmux.js nudge --repo <root> (--package <package> | --role integrator) --text <text>   (refused while the pane has an open signal)
+//   qatlas-team-tmux.js title --repo <root> (--package <package> | --role integrator) --title <title>
+//   qatlas-team-tmux.js ask --repo <root> (--package <package> | --role integrator) --question <question> [--timeout <seconds>]
 //   qatlas-team-tmux.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <text|file> [--timeout <seconds>]
 //   qatlas-team-tmux.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
-//   qatlas-team-tmux.js answer --repo <root> --package <package> --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
+//   qatlas-team-tmux.js answer --repo <root> (--package <package> | --role integrator) --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
 //   qatlas-team-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
 //   qatlas-team-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>   (run budget and package tasks; repeatable)
 //   qatlas-team-tmux.js report --repo <root>
-//   qatlas-team-tmux.js capture --repo <root> --package <package>   (scrollback to <root>/.qatlas/local/team/<package>.log)
-//   qatlas-team-tmux.js close --repo <root> --package <package>
+//   qatlas-team-tmux.js capture --repo <root> (--package <package> | --role integrator)   (scrollback to <root>/.qatlas/local/team/<package>.log)
+//   qatlas-team-tmux.js close --repo <root> (--package <package> | --role integrator)
 
 const fs = require('fs');
 const path = require('path');
@@ -58,6 +68,8 @@ const NARROW = 80;
 const MARK = '@qatlas-team';
 const SOCKET = 'qatlas-team';
 const WAKING = new Set(['question', 'handover', 'done', 'exited', 'stale', 'disk']);
+const SUPERVISOR_WAKING = new Set([...WAKING].filter(type => type !== 'handover'));
+const LOCK_STALE_MS = 30000;
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
 const RESERVED = new Set([...WAKING, 'start', 'answer', 'picked', 'captured', 'closed', 'plan', 'nudge']);
 const INTEGRATION = new Set(['push', 'pr', 'merge', 'rerun', 'conflict', 'close']);
@@ -94,7 +106,7 @@ const eventsFile = repo => path.join(eventsDir(repo), 'events.jsonl');
 function record(repo, type, fields = {}) {
   fs.mkdirSync(eventsDir(repo), { recursive: true });
   const entry = { at: new Date().toISOString(), type };
-  for (const key of ['package', 'task', 'pane', 'text', 'report']) if (fields[key]) entry[key] = fields[key];
+  for (const key of ['package', 'role', 'task', 'pane', 'text', 'report']) if (fields[key]) entry[key] = fields[key];
   fs.appendFileSync(eventsFile(repo), JSON.stringify(entry) + '\n');
 }
 
@@ -128,7 +140,7 @@ function panes(win) {
       const text = option(pane, '@qatlas-text');
       const task = option(pane, '@qatlas-task');
       const detail = kind === 'handover' ? { report: option(pane, '@qatlas-report') } : kind && text ? { question: text } : {};
-      return { pane, package: option(pane, '@qatlas-package'), title, dead: dead === '1',
+      return { pane, package: option(pane, '@qatlas-package'), role: option(pane, '@qatlas-role') || 'lead', title, dead: dead === '1',
         ...(kind ? { kind } : {}), ...(kind && task ? { task } : {}), ...detail };
     });
 }
@@ -136,10 +148,20 @@ function panes(win) {
 const option = (pane, name) => tmux(['display', '-p', '-t', pane, `#{${name}}`]);
 const setOption = (pane, name, value) => tmux(['set', '-p', '-t', pane, name, value]);
 
+// The integrator is addressed by --role integrator; a package pane by --package. Events of the integrator
+// pane carry role instead of package.
+const who = () => ({ package: flag('--package'), role: flag('--role') });
+
 function target() {
   const repo = repoKey();
+  if (flag('--role') !== null) {
+    if (flag('--role') !== 'integrator' || flag('--package') !== null) fail('Address a pane with --package <package> or --role integrator, not both', 2);
+    const hit = allPanes(repo).find(p => p.role === 'integrator');
+    if (!hit) fail(`No integrator pane in the team windows of ${repo}`);
+    return hit.pane;
+  }
   const [name] = need('--package');
-  const hit = allPanes(repo).find(p => p.package === name);
+  const hit = allPanes(repo).find(p => p.package === name && p.role !== 'integrator');
   if (!hit) fail(`No pane for package ${name} in the team windows of ${repo}`);
   return hit.pane;
 }
@@ -197,14 +219,22 @@ function extraWindow(repo, first, label, cwd) {
 
 function add() {
   const repo = repoKey();
-  const [name, label, title, cwd] = need('--package', '--label', '--title', '--cwd');
+  const [label, title, cwd] = need('--label', '--title', '--cwd');
+  const role = flag('--role') ?? 'lead';
+  if (role !== 'lead' && role !== 'integrator') fail('--role must be lead or integrator', 2);
+  const integrator = role === 'integrator';
+  if (integrator && flag('--package') !== null) fail('The integrator takes no --package', 2);
+  const name = integrator ? null : need('--package')[0];
+  if (name === 'integrator') fail('Reserved package name: integrator', 2);
   if (!rest.length) fail('Missing: command after --', 2);
   if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Not a directory: ' + cwd);
   const wins = markedWindows(repo);
   let win = wins.find(w => panes(w).length < MAX_PANES);
   let pane;
   let session;
-  if (allPanes(repo).some(p => p.package === name)) fail('Package already has a pane: ' + name);
+  if (integrator ? allPanes(repo).some(p => p.role === 'integrator') : allPanes(repo).some(p => p.package === name)) {
+    fail(integrator ? 'Repo already has an integrator pane' : 'Package already has a pane: ' + name);
+  }
   if (win) {
     session = tmux(['display', '-p', '-t', win, '#{session_name}']);
     pane = tmux(['split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, '-c', cwd, ...rest]);
@@ -217,11 +247,11 @@ function add() {
       fs.renameSync(eventsFile(repo), path.join(eventsDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
     }
   }
-  setOption(pane, '@qatlas-package', name);
+  if (integrator) setOption(pane, '@qatlas-role', role); else setOption(pane, '@qatlas-package', name);
   setOption(pane, '@qatlas-title', title);
   setTitle(pane, title);
   layout(win);
-  record(repo, 'start', { package: name, pane });
+  record(repo, 'start', { package: name, role: integrator ? role : null, pane });
   out({ window: win, pane, session,
     ...(inTmux ? { switch: 'Ctrl+B s (session list) or Ctrl+B ( / Ctrl+B )' } : { attach: `tmux -L ${SOCKET} attach` }) });
 }
@@ -235,7 +265,7 @@ function list() {
 function recordExits(repo) {
   const seen = new Set(events(repo).filter(e => e.type === 'exited').map(e => e.pane));
   for (const p of allPanes(repo)) {
-    if (p.dead && !seen.has(p.pane)) record(repo, 'exited', { package: p.package, pane: p.pane });
+    if (p.dead && !seen.has(p.pane)) record(repo, 'exited', { package: p.package, role: p.role === 'integrator' ? p.role : null, pane: p.pane });
   }
 }
 
@@ -266,7 +296,7 @@ function recordStale(repo, minutes) {
       tmux(['set', '-p', '-u', '-t', p.pane, '@qatlas-stale']);
     } else if (!option(p.pane, '@qatlas-stale') && now - since >= minutes * (waiting ? WAITING_FACTOR : 1) * 60000) {
       setOption(p.pane, '@qatlas-stale', '1');
-      record(repo, 'stale', { package: p.package, pane: p.pane,
+      record(repo, 'stale', { package: p.package, role: p.role === 'integrator' ? p.role : null, pane: p.pane,
         text: `No change for ${((now - since) / 6e4).toFixed(1)} min${waiting ? ' while waiting for a background agent' : ''}. Last lines:\n${lines.slice(-5).join('\n')}` });
     }
   }
@@ -292,12 +322,34 @@ function nudge() {
   if (option(pane, 'pane_dead') === '1') fail(`Pane ${pane} is dead; no nudge.`, 2);
   tmux(['send-keys', '-t', pane, '-l', '--', text]);
   tmux(['send-keys', '-t', pane, 'Enter']);
-  record(repo, 'nudge', { package: flag('--package'), pane, text });
+  record(repo, 'nudge', { ...who(), pane, text });
   out({ pane, nudged: true });
+}
+
+// Exclusive section for the detection of exited, stale and disk: mkdir is atomic. A lock older than
+// LOCK_STALE_MS (crashed holder) is taken over. A caller that loses the race skips detection for this
+// round; the holder writes the events, the next round reads them.
+function detectLocked(repo, fn) {
+  const lock = path.join(eventsDir(repo), 'detect.lock');
+  fs.mkdirSync(eventsDir(repo), { recursive: true });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try { fs.mkdirSync(lock); } catch (error) {
+      if (error.code !== 'EEXIST') throw error;
+      const age = Date.now() - (fs.statSync(lock, { throwIfNoEntry: false })?.mtimeMs ?? Date.now());
+      if (age < LOCK_STALE_MS) return;
+      fs.rmSync(lock, { recursive: true, force: true });
+      continue;
+    }
+    try { fn(); } finally { fs.rmSync(lock, { recursive: true, force: true }); }
+    return;
+  }
 }
 
 async function wait() {
   const repo = repoKey();
+  const role = flag('--role') ?? 'supervisor';
+  if (role !== 'supervisor' && role !== 'integrator') fail('--role must be supervisor or integrator', 2);
+  const wakes = role === 'integrator' ? new Set(['handover']) : SUPERVISOR_WAKING;
   const since = Number(flag('--since') || 0);
   if (!Number.isInteger(since) || since < 0) fail('--since must be an integer from 0', 2);
   const end = Date.now() + Number(flag('--timeout') || 600) * 1000;
@@ -308,17 +360,16 @@ async function wait() {
   };
   const stale = positive('--stale') ?? 20;
   const minFree = positive('--min-free') ?? 5;
-  const waking = () => events(repo).filter(e => e.seq >= since && WAKING.has(e.type));
   for (;;) {
-    recordExits(repo);
-    recordStale(repo, stale);
-    recordDisk(repo, minFree);
-    const hits = waking();
-    if (hits.length) return out({ events: hits, cursor: events(repo).length, timeout: false });
-    if (Date.now() >= end) break;
+    if (role === 'supervisor') {
+      detectLocked(repo, () => { recordExits(repo); recordStale(repo, stale); recordDisk(repo, minFree); });
+    }
+    const all = events(repo);
+    const hits = all.filter(e => e.seq >= since && wakes.has(e.type));
+    if (hits.length) return out({ events: hits, cursor: all.length, timeout: false });
+    if (Date.now() >= end) return out({ events: [], cursor: all.length, timeout: true });
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  out({ events: [], cursor: events(repo).length, timeout: true });
 }
 
 // A repeated call with the same signal keeps waiting and never discards an answer that has arrived
@@ -327,6 +378,7 @@ async function wait() {
 // the other kind is an error.
 async function raise(kind, text, task) {
   const repo = repoKey();
+  if (kind === 'handover' && flag('--role') !== null) fail('Only a lead hands over; the integrator integrates.', 2);
   const pane = target();
   const timeout = Number(flag('--timeout') || 100) * 1000;
   const title = option(pane, '@qatlas-title') || option(pane, 'pane_title');
@@ -346,7 +398,7 @@ async function raise(kind, text, task) {
       for (const name of ['@qatlas-task', '@qatlas-report']) tmux(['set', '-p', '-u', '-t', pane, name]);
     }
     setTitle(pane, PREFIX[kind] + title);
-    record(repo, kind, { package: flag('--package'), pane, task, ...(report ? { report } : { text }) });
+    record(repo, kind, { ...who(), pane, task, ...(report ? { report } : { text }) });
   }
   const end = Date.now() + timeout;
   while (Date.now() < end) {
@@ -354,7 +406,7 @@ async function raise(kind, text, task) {
     if (answer !== null) {
       for (const name of ['@qatlas-kind', '@qatlas-text', '@qatlas-task', '@qatlas-report']) tmux(['set', '-p', '-u', '-t', pane, name]);
       setTitle(pane, title);
-      record(repo, 'picked', { package: flag('--package'), pane, task });
+      record(repo, 'picked', { ...who(), pane, task });
       return out({ answer });
     }
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -468,7 +520,7 @@ function answer() {
     fail('A handover accepts only "integrated <sha>" or "rework <reason>".', 2);
   }
   const task = kind === 'handover' ? option(pane, '@qatlas-task') : '';
-  record(repo, 'answer', { package: flag('--package'), pane, task, text });
+  record(repo, 'answer', { ...who(), pane, task, text });
   out({ pane, answered: true });
 }
 
@@ -479,6 +531,7 @@ function plan() {
   if (!Number.isInteger(budget) || budget < 1) fail('--budget must be a positive integer', 2);
   const ids = tasks.split(',').map(s => s.trim());
   if (!name.trim() || ids.some(id => !id)) fail('--package and --tasks must not be empty', 2);
+  if (name === 'integrator') fail('Reserved package name: integrator', 2);
   record(repo, 'plan', { package: name, text: JSON.stringify({ budget, tasks: ids }) });
   out({ planned: name, budget, tasks: ids, cursor: events(repo).length });
 }
@@ -504,6 +557,7 @@ function report() {
   const log = { rerun: 0, conflict: 0, nudge: 0 };
   const notes = {};
   const plan = { budget: null, packages: {} };
+  const integrator = { vorhanden: false, rueckfragen: 0 };
   const lastIntegrated = {};
   for (const e of list) {
     if (!RESERVED.has(e.type) && !INTEGRATION.has(e.type) && e.type !== 'unlesbar') {
@@ -515,6 +569,10 @@ function report() {
     const pkg = e.package && (packages[e.package] ||= { rueckfragen: 0, start: null });
     if (e.type === 'start' && pkg) pkg.start = time(e);
     if (e.type === 'question' && pkg) pkg.rueckfragen++;
+    if (e.role === 'integrator') {
+      integrator.vorhanden = true;
+      if (e.type === 'question') integrator.rueckfragen++;
+    }
     if (Object.hasOwn(log, e.type)) log[e.type]++;
     if (!e.task) continue;
     const t = tasks[e.task] ||= { package: e.package || null, durchlaufzeit: null, wartezeit: null, rework: 0, handovers: 0 };
@@ -535,7 +593,7 @@ function report() {
   for (const p of Object.values(packages)) delete p.start;
   out({
     laufdauer: list.length ? secs(time(list[list.length - 1]) - time(list[0])) : null,
-    tasks, packages, plan, log, notes, events: list.length,
+    tasks, packages, integrator, plan, log, notes, events: list.length,
   });
 }
 
@@ -543,8 +601,8 @@ function capture() {
   const repo = repoKey();
   const pane = target();
   const content = tmux(['capture-pane', '-p', '-J', '-S', '-', '-t', pane]) + '\n';
-  const file = writeUnique(eventsDir(repo), safe(flag('--package')), '.log', content);
-  record(repo, 'captured', { package: flag('--package'), pane, text: file });
+  const file = writeUnique(eventsDir(repo), safe(flag('--package') ?? flag('--role')), '.log', content);
+  record(repo, 'captured', { ...who(), pane, text: file });
   out({ pane, file });
 }
 
@@ -558,7 +616,7 @@ function close() {
   if (!last) layout(win);
   let sessionClosed = false;
   try { tmux(['has-session', '-t', session]); } catch { sessionClosed = true; }
-  record(repo, 'closed', { package: flag('--package'), pane });
+  record(repo, 'closed', { ...who(), pane });
   out({ closed: pane, windowClosed: last, sessionClosed });
 }
 
@@ -571,7 +629,7 @@ try {
     const [title] = need('--title');
     const was = option(pane, 'pane_title');
     setTitle(pane, title);
-    if (title.startsWith('FERTIG') && !was.startsWith('FERTIG')) record(repo, 'done', { package: flag('--package'), pane, text: title });
+    if (title.startsWith('FERTIG') && !was.startsWith('FERTIG')) record(repo, 'done', { ...who(), pane, text: title });
     out({ pane, title });
   }
   else if (command === 'wait') wait().catch(error => fail(error.message));
