@@ -10,12 +10,13 @@ license: MIT
 # Check the team
 
 Before task selection, read `~/.qatlas/plugins/team.yaml`. This user-owned file applies only to `run` and
-`team` and is the only source for the chosen models and effort levels. The leads of `run` and
-`team` start with the model from `lead`; worker profiles come from `worker`. `supervisor` and
-`integrator` are assigned roles that `run` and `team` currently do not start. Check that the format, the
-section of the current host, the `lead` model and the required worker profiles are present and valid. If
-the file or its host section is missing, an entry is invalid or a model looks outdated or doubtful, set it up
-following "Set up the team" and start no task until it is clarified.
+`team` and is the only source for the chosen models and effort levels. The leads of `run` and `team` start
+with the model from `lead`; `team` starts its integrator with the model from `integrator`; worker profiles
+come from `worker`. `supervisor` is the user's own session, which `run` and `team` do not start. Check that
+the format, the section of the current host, the `lead` model, for `team` the `integrator` model and the
+required worker profiles are present and valid. If the file or its host section is missing, an entry is
+invalid or a model looks outdated or doubtful, set it up following "Set up the team" and start no task until
+it is clarified.
 
 The profiles are an allowlist: use neither a model that is not entered nor a different effort setting. Set
 `effort: null` only for a model that supports no effort; for all other workers, effort is set explicitly and

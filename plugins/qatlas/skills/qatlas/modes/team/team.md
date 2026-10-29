@@ -1,7 +1,7 @@
 ---
 description: >
   Parallel work run: a supervisor cuts the backlog into independent packages, has each one worked off by its
-  own lead as a run in its own tmux session, and integrates the results.
+  own lead as a run in its own tmux session, and has an integrator session integrate the results.
 type: playbook
 edit: locked
 license: MIT
@@ -10,24 +10,26 @@ license: MIT
 # Team
 
 The session in which the user invokes `team` is the supervisor. It cuts independent packages, starts one
-lead per package, integrates its results and stays available to the user. Each lead is its
-own interactive session that works off its package as an ordinary `run` with its own subagents. The supervisor
-never does the substantive implementation itself.
+lead per package and one integrator that integrates their results, and stays available to the user. Each lead
+is its own interactive session that works off its package as an ordinary `run` with its own subagents. The
+integrator is one further interactive session. The supervisor never does the substantive implementation or
+any integration itself.
 
-Within the chosen scope, the invocation authorizes starting leads through the control script,
-claiming and status upkeep in the planning system, checks, local integration and local commits. Push, pull
-request and merge are permitted only when user or project instructions require and authorize them. No
-publish, no deployment, no message to third parties and no other external or irreversible effect.
-`team` receives the permission to edit locked project documentation (`Freigabe für gesperrte
-Projektdokumentation`) under the shared contract in [the Qatlas skill](../../SKILL.md).
+Within the chosen scope, the invocation authorizes starting leads and the integrator through the control
+script, claiming and status upkeep in the planning system, checks, local integration and local commits. Push,
+pull request and merge are permitted only when user or project instructions require and authorize them. No
+publish, no deployment, no message to third parties and no other external or irreversible effect. `team`
+receives the permission to edit locked project documentation (`Freigabe für gesperrte Projektdokumentation`)
+under the shared contract in [the Qatlas skill](../../SKILL.md).
 
-The supervisor is the dispatcher and the sole integration owner in the sense of the several-leads
-section of [Parallel work in a run](../../references/git-parallel.md) (`Several leads`). Merge, task
-closing and the status `done` belong exclusively to it; project instructions that allow a `run` to merge
-apply in the team only to the supervisor. For integration via pull requests, a lead may push its own task
-branch and open its pull request, through `gh` or the broker connection the project requires; without such a
-requirement a lead pushes nothing. Leads claim their tasks in the planning system as that several-leads
-section prescribes, but never set `done`.
+The integrator is the sole integration owner in the sense of the several-leads section of [Parallel work in
+a run](../../references/git-parallel.md) (`Several leads`). Merge, task closing and the status `done` belong
+exclusively to it; project instructions that allow a `run` to merge apply in the team only to the integrator.
+The supervisor is the dispatcher: it cuts packages, writes `plan`, replenishes, monitors, answers questions
+(also those of the integrator) and never integrates. For integration via pull requests, a lead may push its
+own task branch and open its pull request, through `gh` or the broker connection the project requires;
+without such a requirement a lead pushes nothing. Leads claim their tasks in the planning system as that
+several-leads section prescribes, but never set `done`.
 
 The control script is `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tmux.js`;
 `<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. The helper commands `probe`,
@@ -59,9 +61,10 @@ Read each one completely at the stated time:
    team](../../references/playbook-team.md).
 3. **If user or project instructions require pull requests, before the first lead:** [integration via
    pull requests](../../references/playbook-git-pr.md).
-4. **Before the first integration:** [accepting and integrating](../../references/playbook-acceptance.md),
-   [the commit boundary](../../../qatlas-core-git/references/commit-boundaries.md) and [the
-   worktree contract](../../../qatlas-work/references/worktree-contract.md).
+4. **For the integrator, before its first integration (the supervisor does not read them):** [accepting and
+   integrating](../../references/playbook-acceptance.md), [the commit
+   boundary](../../../qatlas-core-git/references/commit-boundaries.md) and [the worktree
+   contract](../../../qatlas-work/references/worktree-contract.md).
 5. **Before the final report:** [the closing block](../../references/playbook-closing-block.md).
 
 ## Prepare
@@ -79,12 +82,13 @@ Read each one completely at the stated time:
    live pane without `FERTIG` belongs to a running supervisor or to the user; do not start then, and clarify
    it with the user. Exception: if `list` shows live panes without `FERTIG` and `report` shows a run of this
    repo, a new session takes it over only on the user's explicit order to continue it. The successor cuts no
-   packages beyond the remaining run budget, adopts the running leads, reconstructs the state from
+   packages beyond the remaining run budget, adopts the running leads and a live integrator pane (without
+   one, it starts an integrator as described in "Starting the integrator"), reconstructs the state from
    `list`, `report` (including `plan`) and the planning system and continues `wait` from the `cursor` of
    `list`. Without such an order, the rule above applies.
-3. For each intended host, check its section in `team.yaml` with a valid `lead` entry and its CLI
-   on the `PATH`: `claude` for Claude Code, `codex` for Codex. The default is your own host; a run directive
-   may assign packages to another host.
+3. For each intended host, check its section in `team.yaml` with valid `lead` and `integrator` entries and its
+   CLI on the `PATH`: `claude` for Claude Code, `codex` for Codex. The default is your own host; a run
+   directive may assign packages to another host.
 4. Recognize from user and project instructions whether they require integration via pull requests; if so,
    [integration via pull requests](../../references/playbook-git-pr.md) applies. In that case, check whether
    a merge queue is active in the target repo, whether branch protection requires an up-to-date state before
@@ -94,7 +98,7 @@ Read each one completely at the stated time:
    require pull request operations through a Qatlas broker connection, check with `qatlas.search` and
    `qatlas.describe` before the first lead that the connection exists and offers creating and merging
    pull requests; otherwise do not start. In that case the leads open their pull requests through it, and
-   the supervisor performs the steps of `land` through the broker instead of calling `land`.
+   the integrator performs the steps of `land` through the broker instead of calling `land`.
 
 The integration base `<basis>` is `origin/<control-branch>` for integration via pull requests, otherwise the
 local `<control-branch>`.
@@ -113,7 +117,7 @@ several tasks change the same central file, such as a registry, a shared test fi
 documentation, put them in one package instead of spreading them over packages: every integration at that
 spot forces every other package that touches it to catch up with the base.
 
-The supervisor integrates serially. Supplement a package that consists only of a dependency chain with
+The integrator integrates serially. Supplement a package that consists only of a dependency chain with
 independent tasks, so that its lead can keep working while it waits for an integration. A
 cross-cutting task that touches many areas forms its own package and starts first.
 
@@ -148,17 +152,17 @@ Quote the prompt simply in the shell so that `$qatlas` is not expanded. Set `--l
 it exceeds five. Never pass on `--fly`: a lead always asks you, and whether you ask the user is
 decided by your own `--fly`. The run directive reads in essence:
 
-> Package <package> of a team. Other leads work in parallel in the same repo; the supervisor is the
+> Package <package> of a team. Other leads work in parallel in the same repo; the integrator is the
 > integration owner. Work as described in the several-leads section of [parallel work in a
 > run](../../references/git-parallel.md) and claim only tasks of this package. Merge, task closing and
-> `done` are taken over exclusively by the supervisor, even if project instructions allow them to a run.
+> `done` are taken over exclusively by the integrator, even if project instructions allow them to a run.
 > Without pull request integration you push nothing. In the primary working tree you do not pull, switch or
 > commit anything.
 >
 > If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
 > per task from `<basis>`. You do not merge the current `<basis>` into the task branch before a handover; the
 > state you hand over is the one on which the complete check, with full tests via `node <tools> slot --
-> <test command>`, was green. A conflict with the base comes back from the supervisor as `rework`.
+> <test command>`, was green. A conflict with the base comes back from the integrator as `rework`.
 > Start every worker with a profile from `team.yaml` and with model and effort set explicitly. Before
 > every commit, run the protection check as its own command and evaluate its exit code before you commit.
 >
@@ -184,7 +188,7 @@ decided by your own `--fly`. The run directive reads in essence:
 > `pushed` (CI fixes after it are allowed; exit 2, nothing raised) unless the frontmatter carries
 > `cut-exception: <reason>`. The answer is `integrated <sha>` or `rework <reason>`; without an answer, call
 > the same command again with the report unchanged. Until the answer arrives, task, branches and worktree
-> belong to the supervisor; do not touch them. `rework` gives them back to you: work on the reason and hand
+> belong to the integrator; do not touch them. `rework` gives them back to you: work on the reason and hand
 > over again. `integrated` on a handover that is not the last gives you the task back to continue.
 >
 > If the next task depends on the handed-over one, wait for `integrated` and start it from the new `<basis>`.
@@ -194,11 +198,11 @@ decided by your own `--fly`. The run directive reads in essence:
 > afterwards. A `rework` takes precedence: secure the running task at the next checked milestone as a
 > checkpoint, work on the reason, hand over again and continue afterwards.
 >
-> Whatever you would otherwise ask the user, you ask exclusively with `node <script> ask --repo <repo-root>
-> --package <package> --question "<question with context, options and recommendation>"`; the output is the
-> answer. Without an answer, call the same command again. While a handover is open, no question is possible;
-> first wait for its answer with `handover`. After your closing block, set the pane title with `node <script>
-> title --repo <repo-root> --package <package> --title "FERTIG · <title>"`.
+> Whatever you would otherwise ask the user, you ask the supervisor exclusively with `node <script> ask --repo
+> <repo-root> --package <package> --question "<question with context, options and recommendation>"`; the
+> output is the answer. Without an answer, call the same command again. While a handover is open, no question
+> is possible; first wait for its answer with `handover`. After your closing block, set the pane title with
+> `node <script> title --repo <repo-root> --package <package> --title "FERTIG · <title>"`.
 
 Insert `<script>`, `<tools>`, `<repo-root>`, `<package>` and `<basis>` as fixed values: `<script>` is the
 control script, `<tools>` is `qatlas-run-tools.js`, each with an absolute path. Do not rely on environment
@@ -207,14 +211,52 @@ variables of the pane, because not every host runs commands with them.
 Add the part of the user's run directive that concerns this package. Add no option that loosens permissions,
 sandbox or approvals of the host.
 
+## Starting the integrator
+
+After the leads, start exactly one integrator in the repo root. It takes no package:
+
+```text
+add --repo <repo-root> --role integrator --label "<project>·integrator" --title "<project>·integrator · <host>" --cwd <repo-root> -- <cli>
+```
+
+- Claude Code: `claude --model <integrator> '<integrator directive>'`
+- Codex: `codex -m <integrator> '<integrator directive>'`
+
+`<integrator>` is the `integrator` model of `team.yaml`. Quote and insert fixed values as for the leads. The
+integrator directive reads in essence:
+
+> You are the integrator of a team and its sole integration owner. The leads hand their checked tasks over to
+> you; you accept them independently, probe conflicts, merge, close tasks and set `done`, as described in
+> "Integrator" of [the team playbook](team.md) and in the several-leads section of [parallel work in a
+> run](../../references/git-parallel.md). Read [accepting and
+> integrating](../../references/playbook-acceptance.md), [the commit
+> boundary](../../../qatlas-core-git/references/commit-boundaries.md) and [the worktree
+> contract](../../../qatlas-work/references/worktree-contract.md) before the first integration, and for
+> integration via pull requests [integration via pull requests](../../references/playbook-git-pr.md). You
+> implement nothing and touch no lead pane. Integration base is `<basis>`.
+>
+> Wait for handovers with `node <script> wait --repo <repo-root> --role integrator --since <cursor>`. Begin
+> with `--since 0` and afterwards pass the `cursor` of the last output each time. Answer a handover with
+> `node <script> answer --repo <repo-root> --package <package> --answer "integrated <sha>"` or `"rework
+> <reason>"`. Whatever you would otherwise ask the user, you ask the supervisor exclusively with `node
+> <script> ask --repo <repo-root> --role integrator --question "<question with context, options and
+> recommendation>"`; the output is the answer. Without an answer, call the same command again. Log what
+> belongs in the closing as the supervisor does (`annahme`, `abweichung`, `risiko`, `erfasst`, `entscheiden`)
+> with `log`. When every lead pane shows `FERTIG` or has ended and every handed-over task is integrated or
+> secured as a handover, set the pane title with `node <script> title --repo <repo-root> --role integrator
+> --title "FERTIG · <title>"` and continue to wait; a replenished lead can still hand over.
+
+Insert `<script>`, `<repo-root>` and `<basis>` as fixed values and the links as absolute paths under
+`<plugin-root>`, because the integrator loads no skill of its own. Add the part of the user's run directive
+that concerns integration.
+
 ## Monitoring
 
 Wait with `wait --repo <repo-root> --since <cursor>`. Begin with `--since 0` and afterwards pass the `cursor`
-of the last output each time, so that no event is lost. It returns on one of the events `question`,
-`handover`, `done`, `exited`, `stale` or `disk`, or after a timeout. `wait` is the only monitoring: build no
-monitors, crons or wait loops of your own. If the host can run commands in the background, do so, so
-that you stay available to the user. A `handover` names only the path of its report; read it only at
-integration.
+of the last output each time, so that no event is lost. It returns on one of the events `question`, `done`,
+`exited`, `stale` or `disk`, or after a timeout; handovers go to the integrator and wake you never. `wait` is
+the only monitoring: build no monitors, crons or wait loops of your own. If the host can run commands in the
+background, do so, so that you stay available to the user.
 
 Keep your context lean: read diffs first as `--stat` and then only the affected spots. What you carry into
 the closing you log immediately with `log` instead of holding it in memory: assumptions as `annahme`,
@@ -226,27 +268,30 @@ not from memory; a new session continues as described in "Prepare" step 2.
 Handle each event:
 
 - **`question`:** If project knowledge supports the answer, reply with `answer --repo <repo-root> --package
-  <package> --answer "<answer with source>"`. Otherwise ask the user briefly with package, question and
-  recommendation and pass on their answer; with `--fly` you instead answer as the flag file prescribes.
-- **`handover`:** Integrate as described in the following section.
+  <package> --answer "<answer with source>"`, for a question of the integrator with `answer --repo <repo-root>
+  --role integrator --answer "<answer with source>"`. Otherwise ask the user briefly with package (or
+  integrator), question and recommendation and pass on their answer; with `--fly` you instead answer as the
+  flag file prescribes.
 - **`done` and `exited`:** Proceed as described in "Finish".
 - **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20), or for three
   times that while the host shows that it waits for its own background agent (Claude Code: "Waiting for N
   background agents"; no equivalent is detected for Codex). The event shows the last lines, so a usage limit
-  is recognizable. Nudge with `nudge --repo <repo-root> --package <package> --text "<text>"` only after
-  `stale`, with no open signal, no running test of the package worktree per `slot status`, and at most once
-  per standstill phase. A second `stale` after a nudge you report to the user; with `--fly` you secure the
-  package's open tasks as for `exited`.
+  is recognizable. An integrator waiting idly for handovers can appear as `stale`; that is no standstill as
+  long as `list` shows no open handover. Nudge with `nudge --repo <repo-root> --package <package> --text
+  "<text>"` (for the integrator `--role integrator` instead of `--package`) only after `stale`, with no open
+  signal, no running test of the package worktree per `slot status`, and at most once per standstill phase.
+  A second `stale` after a nudge you report to the user; with `--fly` you secure the package's open tasks as
+  for `exited`.
 - **`disk`:** Free space fell below `--min-free` GB (default 5). Run the cleanup step the project names for
   low space, otherwise report it to the user.
 - If the user writes into a pane themselves, that session belongs to them; do not touch it.
 
-## Integrate
+## Integrator
 
-With the handover, task and namespace belong to you until a `rework`, and for a handover that is not the last
-until your `integrated`. Integrate handovers one at a time and log every integration step with `log --repo
-<repo-root> --type <type> --package <package> --task <id> --text <text>`, with the types `push`, `pr`,
-`merge`, `rerun`, `conflict` and `close`.
+The integrator works off this section. With the handover, task and namespace belong to it until a `rework`,
+and for a handover that is not the last until its `integrated`. It integrates handovers one at a time and logs
+every integration step with `log --repo <repo-root> --type <type> --package <package> --task <id> --text
+<text>`, with the types `push`, `pr`, `merge`, `rerun`, `conflict` and `close`.
 
 1. Check diff, evidence and acceptance yourself as described in [accepting and
    integrating](../../references/playbook-acceptance.md). A substantive need for correction goes back as
@@ -280,9 +325,8 @@ none yourself. If a merge queue is active, enqueue it immediately; the queue man
 a merge queue, you merge individually. If the base has changed since the CI run and branch protection
 requires an up-to-date state, catch up with the base yourself without conflict, for example via GitHub's
 branch update, and wait for CI again; `land` then accepts the remote head. You return a conflict as in
-step 2. In this case integration stays serially bound to the CI duration; name that as a bottleneck in the
-report. Without pull requests, integration stays with you as before, and a conflict likewise goes back as
-`rework`.
+step 2. In this case integration stays serially bound to the CI duration; name that as a bottleneck with
+`log --type risiko`. Without pull requests, a conflict likewise goes back as `rework`.
 
 `land` deletes the remote branch itself once it has proven the squash; the authorization for push and merge
 covers it. Clean up local worktrees and branches per the worktree contract, with the `proof` result of `land`
@@ -297,10 +341,16 @@ otherwise `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` or `gi
   handover to `review`, save the pane with `capture --repo <repo-root> --package <package>` and close it with
   `close` with the same arguments. It stays open only if an open point such as an abort or an unresolved
   conflict cannot be secured, or if the user has written into the pane. With the last pane, the session ends.
+  A `done` of the integrator closes it the same way with `--role integrator`, once every package is
+  integrated or secured and no replenishment is possible.
 - **`exited` without `done`:** Secure the package's open tasks per the git workflow as a handover to
-  `review`, save the pane with `capture` and close it with `close`.
-- Clean up integrated worktrees and branches per the worktree contract, after a squash merge via the squash
-  evidence.
+  `review`, save the pane with `capture` and close it with `close`. If the integrator exited, save and close
+  its pane and start a new one with `add --role integrator` as described in "Starting the integrator"; add to
+  its directive that it reconstructs the state from `list`, `report` and the planning system, takes up the
+  handovers that `list` shows as open and starts `wait` with the `cursor` of `list` instead of `--since 0`.
+  Integration rests until it runs.
+- The integrator cleans up integrated worktrees and branches per the worktree contract, after a squash merge
+  via the squash evidence.
 - At the end of the team run, run the cleanup steps that native project instructions or project memory name
   for the end of a run, and name them in the final report.
 
@@ -311,9 +361,10 @@ described in "Starting leads". Never more leads run at the same time than "Cutti
 permits. Log it with `plan` and the unchanged run budget, as at the cut. Tell the user the package with its
 tasks in one line.
 
-The run ends when no more replenishment is possible, every remaining pane shows `FERTIG` or has ended, and
-all handed-over tasks are integrated or secured as a handover. In the report, state the metrics from `report
---repo <repo-root>` briefly and the remaining remote branches of this run collected together. Close with
-exactly one closing block (`Für dich`, see [the closing block](../../references/playbook-closing-block.md))
-across all packages; you take its entries from the `notes` in `report`, and unpushed commits appear there
-under `Nicht gepusht`.
+The run ends when no more replenishment is possible, every remaining pane shows `FERTIG` or has ended, and all
+handed-over tasks are integrated or secured as a handover. The notes of the integrator reach you like those of
+the leads through `log`, `report` and the closing block. In the report, state the metrics from `report --repo
+<repo-root>` briefly and the remaining remote branches of this run collected together. Close with exactly one
+closing block (`Für dich`, see [the closing block](../../references/playbook-closing-block.md)) across all
+packages; you take its entries from the `notes` in `report`, and unpushed commits appear there under `Nicht
+gepusht`.

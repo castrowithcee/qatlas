@@ -13,8 +13,8 @@ profiles:
 
 # Roles per host:
 #   lead        starts the leads of qatlas run and qatlas team.
-#   supervisor  assignment for a later role.
-#   integrator  assignment for a later role.
+#   supervisor  the session of the user; qatlas team does not start it.
+#   integrator  starts the integrator of qatlas team.
 #   worker      model and effort per profile.
 # Worker effort is set when the model supports it.
 # The lead model must already be correct when the run starts.

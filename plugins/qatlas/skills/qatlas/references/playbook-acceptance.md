@@ -10,7 +10,7 @@ license: MIT
 # Accept and integrate
 
 This procedure applies to anyone who accepts and integrates a task result: the lead of a run and the
-supervisor.
+integrator of a team.
 
 ## Verify acceptance
 

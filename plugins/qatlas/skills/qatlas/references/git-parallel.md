@@ -46,7 +46,7 @@ license: MIT
 - If several leads, for example from different hosts, work in the same repo or planning system, each edits
   only its own, visibly claimed tasks and writes only in their namespaces. The authoritative planning system
   remains the source for status and ownership. Exactly one integration owner serializes changes to the
-  control branch.
+  control branch; in a `team` that is its integrator session.
 - Only a signal that all participants can see and that can succeed for only one lead suffices as a claim. A
   status set locally, not integrated, or visible only in a lead's own worktree is not a claim. If no such
   signal exists, the user or a dispatcher designated by the user assigns each lead disjoint tasks and
