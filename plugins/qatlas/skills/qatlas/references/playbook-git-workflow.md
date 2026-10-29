@@ -1,103 +1,98 @@
 ---
 description: >
-  Git-Ablauf für Qatlas Run mit einem Orchestrator und seriellen Schreibern: Eigentum, Isolation,
-  Beanspruchung, Commits und Checkpoints, Integration und Übergabe.
+  Git workflow for Qatlas Run with one lead and serial writers: ownership, isolation, claiming, commits and
+  checkpoints, integration, and handover.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Git-Ablauf von Qatlas Run
+# Git workflow of Qatlas Run
 
-Lies diese Referenz nur bei schreibender Arbeit in einem Git-Repo. Qatlas' Git-Norm gilt zusätzlich; ihre
-Commitgrenze sowie ihre Regeln zu Checkpoints, Bereinigung und Historie wendet dieser Ablauf nur auf den Run
-an. Schreiben mehrere Subagents gleichzeitig, wird ein Task übernommen oder wieder aufgenommen oder
-arbeiten weitere Orchestratoren im selben Repo oder Planungssystem, gilt zusätzlich „Parallele Arbeit im
-Run“.
+Read this reference only for writing work in a git repo. Qatlas' git norm applies in addition; this workflow
+applies its commit boundary and its rules on checkpoints, cleanup, and history only to the run. If several
+subagents write concurrently, a task is taken over or resumed, or further leads work in the same repo or
+planning system, "Parallel work in a run" applies in addition.
 
-## Eigentum
+## Ownership
 
-- **Steuerbranch:** der im Preflight geprüfte Branch, auf dem Beanspruchung, Spine und integrierte
-  Ergebnisse landen. Sein Arbeitsbaum, normalerweise der primäre, dient Beanspruchung, Statuspflege,
-  Integration und gemeinsamen Prüfungen, nie als paralleler Implementierungsarbeitsplatz.
-- **Task-Branch:** die Integrationslinie genau eines Tasks. Er gehört dem Orchestrator, der den Task
-  beansprucht hat.
-- Ein Arbeitsbaum hat nie zwei gleichzeitige Schreiber, und ein Branch ist nie in zwei Worktrees ausgecheckt.
-  Ein Test-, Build- oder Formatierungslauf, der Dateien, Caches oder Ausgaben erzeugt, ist schreibend.
-- Status, Abschlussbericht, Spine und Refs ändert nur der Orchestrator. Kein Subagent legt Branches oder
-  Worktrees an, wechselt sie oder ändert Repo-Konfiguration und Hooks. Staging und Commits führt ebenfalls
-  nur der Orchestrator aus.
+- **Control branch:** the branch checked in the preflight, on which claim, spine, and integrated results
+  land. Its working tree, normally the primary one, serves claiming, status upkeep, integration, and shared
+  checks, never as a parallel implementation workplace.
+- **Task branch:** the integration line of exactly one task. It belongs to the lead that claimed the task.
+- A working tree never has two concurrent writers, and a branch is never checked out in two worktrees. A
+  test, build, or formatting run that produces files, caches, or outputs is writing.
+- Only the lead changes status, completion report, spine, and refs. No subagent creates or switches
+  branches or worktrees or changes repo configuration and hooks. Only the lead also performs staging and
+  commits.
 
-## Isolation entscheiden
+## Deciding isolation
 
-Arbeitet genau ein Schreiber zur Zeit und ist der Arbeitsbaum sauber, gilt der **leichte Pfad**: Der
-Subagent oder bei einem Kleinsttask der Orchestrator arbeitet direkt im Arbeitsbaum des Steuerbranches, und
-der Orchestrator committet dort nach der Prüfung. Die Beanspruchung erhält dabei keinen eigenen Commit; der
-Ergebnis- oder Checkpointcommit nimmt den Status mit. Arbeiten weitere Orchestratoren im selben Repo oder
-Planungssystem oder entsteht ein Task-Branch, committe die Beanspruchung zuerst auf dem sauberen
-Steuerbranch. Einen eigenen Task-Branch mit
-Worktree braucht es, wenn
+If exactly one writer works at a time and the working tree is clean, the **light path** applies: the
+subagent, or for a tiny task the lead, works directly in the working tree of the control branch, and the
+lead commits there after the check. The claim gets no commit of its own; the result or checkpoint commit
+carries the status. If further leads work in the same repo or planning system, or a task branch comes into
+being, commit the claim first on the clean control branch. A task branch of its own with a worktree is
+needed when
 
-- mehrere Schreiber gleichzeitig arbeiten,
-- der Arbeitsbaum fremde oder nicht zuordenbare Änderungen enthält oder
-- Nutzer- beziehungsweise Projektvorgaben ihn verlangen.
+- several writers work concurrently,
+- the working tree contains foreign or unattributable changes, or
+- user or project requirements demand it.
 
-Endet ein Task im leichten Pfad unfertig in `review` oder `waiting`, verschiebe seinen Stand mit
-`git switch -c <task-branch>` auf einen eigenen Branch und sichere dort nur die Arbeitsdateien als
-Checkpoint. Status, Abschlussbericht und Spine bleiben ungestagt, kehren mit `git switch <steuerbranch>`
-zurück und werden dort nach „Übergeben“ committet. So bleibt der Steuerbranch frei von unfertiger Arbeit und
-der Task-Branch frei von Spine-Änderungen, die bei seiner späteren Integration kollidieren würden.
+If a task in the light path ends unfinished in `review` or `waiting`, move its state onto a branch of its
+own with `git switch -c <task-branch>` and secure only the working files there as a checkpoint. Status,
+completion report, and spine stay unstaged, return with `git switch <control-branch>`, and are committed
+there after "Handing over". This keeps the control branch free of unfinished work and the task branch free
+of spine changes that would collide on its later integration.
 
-Für Task-Branches und Worktrees gilt der Worktree-Vertrag; die Laufautorisierung deckt ihre Anlage ab. Ohne
-sichere Isolation läuft höchstens ein schreibender Subagent. Trennst du fremde Änderungen nicht sicher,
-übergib den Task mit Befund an den Nutzer.
+For task branches and worktrees, the worktree contract applies; the run authorization covers creating them.
+Without safe isolation, at most one writing subagent runs. If you cannot safely separate foreign changes,
+hand the task over to the user with the finding.
 
-## Commits und Checkpoints
+## Commits and checkpoints
 
-- Ein Task erhält so viele Commits, wie die Commitgrenze verlangt. Die Taskgrenze des Runs zählt Tasks,
-  keine Commits.
-- Der Subagent erstellt keine Commits. Der Orchestrator committet in einem Worktree nur, solange dort kein
-  Subagent arbeitet, also nach dessen Rückgabe oder Stopp. Lass eine größere Umsetzung an kohärenten
-  Meilensteinen zurückgeben, damit jeder geprüfte Meilenstein als Commit gesichert ist, bevor die Arbeit
-  weitergeht.
-- Unfertige Arbeit sichert der Orchestrator vor Pause, `review` oder Laufende als ausgewiesenen Checkpoint
-  auf dem privaten Branch, auf dem sie entstand. Ein Checkpoint ist nicht integrationsreif.
-- Jeder Commit, auch ein Checkpoint, folgt dem Commit-Ablauf der Git-Norm einschließlich ihrer
-  Schutzprüfung.
-- Vor jeder Integration in den Steuerbranch gilt für jeden Checkpoint die Bereinigung der Git-Norm.
+- A task gets as many commits as the commit boundary requires. The run's task limit counts tasks, not
+  commits.
+- The subagent creates no commits. The lead commits in a worktree only while no subagent works there, that
+  is, after its return or stop. Have a larger implementation return at coherent milestones so that every
+  checked milestone is secured as a commit before work continues.
+- Before a pause, `review`, or the end of the run, the lead secures unfinished work as a marked checkpoint
+  on the private branch where it arose. A checkpoint is not ready for integration.
+- Every commit, including a checkpoint, follows the git norm's commit procedure including its protection
+  check.
+- Before any integration into the control branch, the git norm's cleanup applies to every checkpoint.
 
-## Integrieren
+## Integrating
 
-- Wer integriert, prüft jede Zulieferung selbst: den vollständigen Commit- und Diffbereich gegen das
-  Integrationsziel, die vereinbarten Nachweise und die Zuordnung jeder Änderung zum Auftrag. Eine
-  Erfolgsmeldung ersetzt diese Prüfung nicht. Nicht zuordenbare Arbeit wird nicht integriert. Im leichten
-  Pfad ist das Committen nach dieser Prüfung die Integration.
-- Der Orchestrator ist Integrationsbesitzer des Steuerbranches. Er integriert Task-Branches einzeln und
-  prüft vor jeder Integration erneut, dass die Spitze des Steuerbranches seinem zuletzt geprüften Stand
-  entspricht. Ein fremd veränderter Steuerbranch stoppt die automatische Integration; Aktualisierung und
-  Konfliktbehandlung sind ein eigener bewusster Schritt.
-- Schreibe keine geteilte Historie um und löse Konflikte nicht automatisch. Delegiere einen Konflikt als
-  eigenen Integrationsauftrag und prüfe die Lösung vor der Übernahme.
+- Whoever integrates checks every delivery personally: the complete commit and diff range against the
+  integration target, the agreed evidence, and the attribution of every change to the assignment. A success
+  message does not replace this check. Unattributable work is not integrated. In the light path, committing
+  after this check is the integration.
+- The lead is the integration owner of the control branch. It integrates task branches individually and,
+  before each integration, re-checks that the tip of the control branch matches its last checked state. A
+  control branch changed by someone else stops automatic integration; updating and conflict handling are a
+  separate, deliberate step.
+- Do not rewrite shared history and do not resolve conflicts automatically. Delegate a conflict as an
+  integration assignment of its own and check the resolution before accepting it.
 
-## Übergeben
+## Handing over
 
-- Vor `review`, `waiting` oder dem Laufende sichert der Orchestrator jeden noch nicht integrierten Stand des
-  Tasks nach den Checkpoint-Regeln oben. Danach committet er Status, Abschlussbericht und Spine auf dem
-  Steuerbranch. Der Task nennt Task-Branch und Worktree-Pfad samt Stand: integrationsreif oder Checkpoint.
-- Task-Branch und Worktree bleiben bis zur bestätigten Integration oder zur bewussten Aufgabe durch den
-  Nutzer erhalten.
-- Entferne nach dem Worktree-Vertrag nur vom aktuellen Lauf erzeugte, saubere und
-  vollständig integrierte Worktrees und Branches.
+- Before `review`, `waiting`, or the end of the run, the lead secures every not yet integrated state of the
+  task according to the checkpoint rules above. It then commits status, completion report, and spine on the
+  control branch. The task names task branch and worktree path including state: ready for integration or
+  checkpoint.
+- Task branch and worktree are kept until integration is confirmed or the user deliberately abandons them.
+- Following the worktree contract, remove only worktrees and branches created by the current run that are
+  clean and fully integrated.
 
-## Tasks über mehrere Repos
+## Tasks across several repos
 
-Integriere zuerst das Repo mit Pull-Request-Pflicht, danach den Anteil desselben Tasks im anderen Repo, per
-Fast-Forward, sonst per Merge-Commit; rebase keine fremden Branches. Nicht gepushte Commits erscheinen
-gebündelt unter „Nicht gepusht“ im Abschlussblock.
+Integrate the repo with the pull request requirement first, then the same task's share in the other repo, by
+fast-forward, otherwise by merge commit; do not rebase foreign branches. Unpushed commits appear bundled
+under "Not pushed" in the closing block.
 
 ## Scope-out
 
-Erstelle lokale Commits nur aus vollständig gelesenen Diffs und berichte Nachrichten und IDs nach dem Lauf.
-Ohne Autorisierung kein Push; mit ihr nur nach „Integration über Pull Requests“; nie Force-Push. Kein
-automatischer Stash oder fremdes Staging. Eine Beanspruchung ohne Hostsignal beweist nicht, dass ein
-früherer Subagent beendet ist.
+Create local commits only from fully read diffs and report messages and IDs after the run. No push without
+authorization; with it only according to "Integration via pull requests"; never force-push. No automatic
+stash or foreign staging. A claim without a host signal does not prove that an earlier subagent has ended.
