@@ -156,8 +156,10 @@ if (statuslineState.exists && !statuslineState.valid) {
 if (readConfig().config.brains.qatlas.enabled) {
   const libraryBundle = path.join(bundle, 'library');
   const library = path.join(os.homedir(), 'qatlas');
+  // A library that still has rules/ is moved to policies/ by qatlas-core update, not given a second folder.
+  const legacyRules = fs.existsSync(path.join(library, 'rules'));
   const absentLibrary = walk(libraryBundle).filter(rel => path.basename(rel) === '.gitkeep'
-    ? !fs.existsSync(path.join(library, path.dirname(rel)))
+    ? !fs.existsSync(path.join(library, path.dirname(rel))) && !(legacyRules && path.dirname(rel) === 'policies')
     : !fs.existsSync(path.join(library, rel)));
   for (const rel of absentLibrary) {
     const shown = '~/qatlas/' + (path.basename(rel) === '.gitkeep' ? path.dirname(rel) + '/' : rel);

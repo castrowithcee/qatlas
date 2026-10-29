@@ -1,43 +1,40 @@
 ---
 description: >
-  Einstieg und Suchweg für die nutzereigene Qatlas-Bibliothek mit Konventionen, Regeln, Playbooks und Wissen.
+  Entry and search path for the user's own Qatlas library with conventions, policies, playbooks and knowledge.
 type: meta
 edit: shared
 ---
 
-# Qatlas-Bibliothek
+# Qatlas library
 
-Dies ist die nutzereigene Bibliothek für wiederverwendbare Konventionen, Regeln, Playbooks und Wissen. Sie
-ist eine gezielte Auswahl, kein vollständiges Wiki. Projektbezogene Entscheidungen und Laufberichte bleiben
-beim jeweiligen Projekt.
+This is the user's own library of reusable conventions, policies, playbooks and knowledge. It is a deliberate
+selection, not a complete wiki. Project-specific policies and run reports stay with their project.
 
-Ein Eintrag gilt für eine Aufgabe, wenn sein Thema passt und keine ausdrückliche Nutzeranweisung oder
-Projektentscheidung widerspricht. Sein Ablageort allein macht ihn nicht für jedes Projekt verbindlich. Soll
-ein Projekt dauerhaft einer Konvention folgen, verweist seine Agentendatei ausdrücklich auf den Eintrag.
+An entry applies to a task when its subject fits and no explicit user instruction or project policy
+contradicts it. Its location alone does not make it binding for every project. If a project is to follow a
+convention permanently, its agent file refers to the entry explicitly.
 
-## Ordner
+## Folders
 
-- `conventions/` enthält übertragbare Konventionen dazu, wie Arbeit gestaltet wird.
-- `playbooks/` enthält Abläufe für wiederkehrende Tätigkeiten.
-- `rules/` enthält konkrete Verhaltens- und Schutzregeln, die unabhängig von einem einzelnen Ablauf gelten.
-- `knowledge/` enthält Hintergrundwissen und Referenzen für passende Aufgaben.
+- `conventions/` holds transferable conventions on how work is shaped.
+- `playbooks/` holds procedures for recurring activities.
+- `policies/` holds binding behaviour and safety policies that apply independently of a single procedure.
+- `knowledge/` holds background knowledge and references for fitting tasks.
 
-Soll eine Information global festgehalten werden, prüfe zuerst, ob eine vorhandene Datei oder ein Ordner
-inhaltlich passt, und ergänze den maßgeblichen Eintrag statt einer Dublette. Ist die Zuordnung unklar,
-schlage einen konkreten Ort vor und frage. Ein klar eigenständiges Thema erhält mit seinem ersten Eintrag
-einen Unterordner im passenden Bereich.
+Before recording something globally, check whether an existing file or folder fits its content and extend
+the authoritative entry instead of creating a duplicate. If the place is unclear, propose a concrete one and
+ask. A clearly separate subject gets a subfolder in the fitting area with its first entry.
 
-## Suchen
+## Search
 
-1. Prüfe zuerst die Angaben und Entscheidungen des aktuellen Projekts. Öffne diese Bibliothek, wenn eine
-   wiederkehrende Nutzerkonvention, eine Regel, ein Playbook oder allgemeines Wissen zur Aufgabe passt.
-2. Grenze den Bereich über Ordner- und Dateinamen ein; ein vollständiger Verzeichnisbaum ist kein
-   Standardschritt.
-3. Suche in den Kandidaten zuerst nach `description`, dann nach `tags`, `type` und `status` im Frontmatter.
-   Lies erst danach die Bodies der passenden Dateien.
-4. Nenne bei der Verwendung den maßgeblichen Eintrag.
+1. Check the statements and policies of the current project first. Open this library when a recurring user
+   convention, a policy, a playbook or general knowledge fits the task.
+2. Narrow the area by folder and file names; a complete directory tree is not a default step.
+3. Search the candidates first by `description`, then by `tags`, `type` and `status` in the frontmatter.
+   Read the bodies of the fitting files only afterwards.
+4. Name the authoritative entry when you use it.
 
-## Pflege
+## Maintenance
 
-Die Bibliothek gehört dem Nutzer; Qatlas-Updates ersetzen vorhandene Dateien nicht. Inhaltliche Änderungen
-erfolgen auf Nutzerauftrag.
+The library belongs to the user; Qatlas updates do not replace existing files. Content changes happen on the
+user's request.

@@ -223,25 +223,27 @@ function invocation() {
 }
 
 function banner(plugins) {
-  const width = Math.max(...plugins.map(p => p.name.length));
-  const lines = [
-    'Qatlas plugins were updated. This repo still needs a project check.',
+  const width = Math.max(0, ...plugins.map(p => p.name.length));
+  const lines = plugins.length ? [
+    'Qatlas plugins were updated. This repo still needs a project update.',
     '',
     ...plugins.map(p => `  ${p.name.padEnd(width)}  ${p.checked} -> ${p.version}`),
-    '',
-    'Run: ' + invocation(),
-  ];
+  ] : ['This repo has an old Qatlas project root that needs a migration.'];
+  lines.push('', 'Run: ' + invocation());
   const inner = Math.max(...lines.map(line => line.length));
   const rule = '+' + '-'.repeat(inner + 4) + '+';
   return [rule, ...lines.map(line => '|  ' + line.padEnd(inner) + '  |'), rule].join('\n');
 }
 
 function emitNotice(plugins) {
-  const summary = plugins.map(p => `${p.name} ${p.checked} -> ${p.version}`).join(', ');
-  const line = `> Qatlas project check pending: run ${invocation()}`;
+  const summary = plugins.length
+    ? 'Installed plugins changed since this repo was last checked: '
+      + plugins.map(p => `${p.name} ${p.checked} -> ${p.version}`).join(', ') + '.'
+    : 'The project root of this repo needs a migration.';
+  const line = `> Qatlas project update pending: run ${invocation()}`;
   const context = [
-    `QATLAS-UPDATE: Installed plugins changed since this repo was last checked: ${summary}.`,
-    `The user already sees a notice to run ${invocation()}. Do not run the check yourself, never during a`
+    `QATLAS-UPDATE: ${summary}`,
+    `The user already sees a notice to run ${invocation()}. Do not run the update yourself, never during a`
       + ' started mode or run, and do not read the update instructions now.',
     `Begin the reply that ends your first turn in this session with exactly this line, once: ${line}`,
   ].join('\n');
@@ -274,11 +276,13 @@ function main() {
 
   if (migration.unresolved) {
     if (command === 'status') {
-      process.stdout.write('Project migration pending: the review state stays unchanged until the project '
-        + 'is inventoried and explicitly migrated.\n');
+      process.stdout.write('Project migration pending: migrate the project root first; the review state stays '
+        + 'unchanged until then.\n');
     } else if (command === 'ack') {
       process.stderr.write('Project migration pending. The review state was not confirmed.\n');
       process.exitCode = 1;
+    } else {
+      emitNotice([]);
     }
     return;
   }

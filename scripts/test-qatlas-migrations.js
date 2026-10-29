@@ -545,12 +545,15 @@ function testLibraryAndSubagent() {
   const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
   const agentsFile = path.join(f.home, 'qatlas', 'AGENTS.qatlas.md');
   write(path.join(f.home, 'qatlas', 'rules', 'eigene-regel.md'), '# Eigene Regel\n');
+  write(path.join(f.home, 'qatlas', 'playbooks', 'eigener-ablauf.md'), '# Eigener Ablauf\n');
   const report = runNode(doctor, ['--target', f.project], { cwd: f.project, home: f.home }).stdout;
   assert.ok(report.includes('~/qatlas/AGENTS.qatlas.md fehlt') && report.includes('~/qatlas/knowledge/ fehlt'));
-  assert.ok(!report.includes('~/qatlas/rules/ fehlt'));
+  assert.ok(!report.includes('~/qatlas/policies/ fehlt'), 'rules/ wird von update umgezogen, nicht ergänzt.');
+  assert.ok(!report.includes('~/qatlas/playbooks/ fehlt'));
   assert.strictEqual(runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home }).status, 0);
   assert.ok(fs.existsSync(path.join(f.home, 'qatlas', 'knowledge', '.gitkeep')));
-  assert.ok(!fs.existsSync(path.join(f.home, 'qatlas', 'rules', '.gitkeep')), 'Vorhandener Ordner bleibt ohne Platzhalter.');
+  assert.ok(!fs.existsSync(path.join(f.home, 'qatlas', 'playbooks', '.gitkeep')), 'Vorhandener Ordner bleibt ohne Platzhalter.');
+  assert.ok(!fs.existsSync(path.join(f.home, 'qatlas', 'policies')), 'Neben rules/ entsteht kein zweiter Ordner.');
   assert.ok(fs.existsSync(agentsFile));
   assert.ok(fs.existsSync(path.join(f.home, 'qatlas', 'README.md')));
   fs.writeFileSync(agentsFile, '# Eigene Fassung\n');
@@ -637,6 +640,8 @@ function testWritingConsumersRespectMigration() {
   const ack = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(ack.status, 1);
   assert.ok(ack.stderr.includes('Project migration pending'));
+  const notice = runNode(update, ['notice', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.ok(JSON.parse(notice.stdout).systemMessage.includes('old Qatlas project root'));
   assert.strictEqual(fs.existsSync(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json')), false);
 }
 

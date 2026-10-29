@@ -1,26 +1,17 @@
 ---
 description: >
-  Procedure for qatlas-core migrate: inventory a project knowledge space, map every file to its fixed
-  folder, type and name, get approval, convert in place with references and verify the result.
+  Block of qatlas-core update for migrating a project knowledge space: inventory, map every file to its fixed
+  folder, type and name, convert in place with references and verify the result.
 license: MIT
 type: playbook
 edit: locked
 ---
 
-# Migrate
+# Migrate the knowledge space
 
-Brings an existing `.qatlas-project/` onto the current
-[layout](../../qatlas-core-filing/references/structure.md) and
-[frontmatter schema](../../qatlas-core-filing/references/frontmatter.md). Repeating it on a converted project
-finds nothing to do.
-
-Out of scope are both zones, the content of `templates/`, embedded Git repos and worktrees, the user library
-and every file outside the knowledge space; outside it you only adjust references to moved files.
-
-## Preconditions
-
-Check the repo state by `qatlas-core-git`. Uncommitted changes under `.qatlas-project/` or an open project
-migration finding stop the run; report them and continue only after they are resolved.
+Brings an existing `.qatlas-project/` onto the current layout and frontmatter schema of `qatlas-core-filing`.
+Out of scope are both zones, the content of `templates/`, embedded Git repos and worktrees and every file
+outside the knowledge space; outside it you only adjust references to moved files.
 
 ## 1. Inventory
 
@@ -58,9 +49,9 @@ whose type stays unclear or whose slug collides is a question to the user, never
 
 ## 3. Approve
 
-Present the mapping as one table: old path, new path, type, frontmatter delta. List separately every
-deletion, every merge and every file with `edit: locked`. The user's approval of this table covers moving
-and renaming locked files; it does not cover content changes to them.
+The mapping goes into the single approval of the update as one table: old path, new path, type, frontmatter
+delta. List separately every deletion, every merge and every file with `edit: locked`. The user's approval
+of this table covers moving and renaming locked files; it does not cover content changes to them.
 
 ## 4. Convert
 
@@ -76,4 +67,4 @@ and renaming locked files; it does not cover content changes to them.
 
 Check that no folder exists outside the fixed set, every file name starts with its type, every frontmatter
 matches the schema and no reference points to an old path. Report counts per change kind, open questions and
-remaining findings, and offer a separate commit for the migration.
+remaining findings.

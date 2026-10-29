@@ -86,6 +86,6 @@ Choose one more than the highest value and pad to at least four digits; without 
 entry not yet integrated takes the next free ID together with adjusted references. IDs are never reused and
 never renumbered for cosmetics. Task IDs of another form count for nothing and stay unchanged.
 
-Files with an older name or folder stay valid and unchanged until `qatlas-core migrate` converts
+Files with an older name or folder stay valid and unchanged until `qatlas-core update` migrates
 them. Function files, technical formats and raw zone artefacts follow their fixed names or own formats.
 Name the scope when a function name is ambiguous.
