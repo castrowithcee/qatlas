@@ -94,5 +94,6 @@ under "Not pushed" in the closing block.
 ## Scope-out
 
 Create local commits only from fully read diffs and report messages and IDs after the run. No push without
-authorization; with it only according to "Integration via pull requests"; never force-push. No automatic
+authorization; with it only according to "Integration via pull requests", for a lead of a team also its
+push of its own task branch there; never force-push. No automatic
 stash or foreign staging. A claim without a host signal does not prove that an earlier subagent has ended.

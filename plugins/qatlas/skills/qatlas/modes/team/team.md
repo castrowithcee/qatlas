@@ -22,10 +22,12 @@ publish, no deployment, no message to third parties and no other external or irr
 Projektdokumentation`) under the shared contract in [the Qatlas skill](../../SKILL.md).
 
 The supervisor is the dispatcher and the sole integration owner in the sense of the several-leads
-section of [Parallel work in a run](../../references/git-parallel.md) (`Several leads`). Push, pull
-request, merge, task closing and the status `done` belong exclusively to it; project instructions that allow
-a `run` to push, open a pull request or merge apply in the supervisor only to the supervisor. Leads claim
-their tasks in the planning system as that several-leads section prescribes, but never set `done`.
+section of [Parallel work in a run](../../references/git-parallel.md) (`Several leads`). Merge, task
+closing and the status `done` belong exclusively to it; project instructions that allow a `run` to merge
+apply in the team only to the supervisor. For integration via pull requests, a lead may push its own task
+branch and open its pull request, through `gh` or the broker connection the project requires; without such a
+requirement a lead pushes nothing. Leads claim their tasks in the planning system as that several-leads
+section prescribes, but never set `done`.
 
 The control script is `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tmux.js`;
 `<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. The helper commands `probe`,
@@ -86,12 +88,13 @@ Read each one completely at the stated time:
 4. Recognize from user and project instructions whether they require integration via pull requests; if so,
    [integration via pull requests](../../references/playbook-git-pr.md) applies. In that case, check whether
    a merge queue is active in the target repo, whether branch protection requires an up-to-date state before
-   the merge, and whether `gh` is available and logged in. If `gh`, its login or the authorization for push,
-   pull request and merge is missing, do not start and clarify it with the user. If project instructions
+   the merge, whether `gh` is available and logged in, and whether the leads can push their task branches
+   and open pull requests with that login. If `gh`, its login or the authorization for push, pull request
+   and merge is missing, do not start and clarify it with the user. If project instructions
    require pull request operations through a Qatlas broker connection, check with `qatlas.search` and
    `qatlas.describe` before the first lead that the connection exists and offers creating and merging
-   pull requests; otherwise do not start. In that case perform the steps of `land` through the broker instead
-   of calling `land`.
+   pull requests; otherwise do not start. In that case the leads open their pull requests through it, and
+   the supervisor performs the steps of `land` through the broker instead of calling `land`.
 
 The integration base `<basis>` is `origin/<control-branch>` for integration via pull requests, otherwise the
 local `<control-branch>`.
@@ -147,33 +150,42 @@ decided by your own `--fly`. The run directive reads in essence:
 
 > Package <package> of a team. Other leads work in parallel in the same repo; the supervisor is the
 > integration owner. Work as described in the several-leads section of [parallel work in a
-> run](../../references/git-parallel.md) and claim only tasks of this package. Push, pull request, merge,
-> task closing and `done` are taken over exclusively by the supervisor, even if project instructions allow them
-> to a run. In the primary working tree you do not pull, switch or commit anything.
+> run](../../references/git-parallel.md) and claim only tasks of this package. Merge, task closing and
+> `done` are taken over exclusively by the supervisor, even if project instructions allow them to a run.
+> Without pull request integration you push nothing. In the primary working tree you do not pull, switch or
+> commit anything.
 >
 > If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
-> per task from `<basis>`. Before every handover, merge the current `<basis>` into the task branch, resolve
-> conflicts yourself and then check completely; full tests run via `node <tools> slot -- <test command>`.
+> per task from `<basis>`. You do not merge the current `<basis>` into the task branch before a handover; the
+> state you hand over is the one on which the complete check, with full tests via `node <tools> slot --
+> <test command>`, was green. A conflict with the base comes back from the supervisor as `rework`.
 > Start every worker with a profile from `team.yaml` and with model and effort set explicitly. Before
 > every commit, run the protection check as its own command and evaluate its exit code before you commit.
+>
+> For integration via pull requests you take the lead's part of [integration via pull
+> requests](../../references/playbook-git-pr.md): run `cut` before the first push, push only your own task
+> branch (never force), open the pull request, wait with `ci-wait`, fix a red CI yourself with follow-up
+> commits and hand over only after green CI. Where the project has no CI (`ci-wait` exit 8), the green
+> complete local test is the evidence.
 >
 > Hand over every checked task with `node <script> handover --repo <repo-root> --package <package> --task <id>
 > --report <file>`; if the code lies in a repo other than the control root, add `--code-repo <absolute path>`
 > so that `branch` and `base` are checked there. The report file lies outside every worktree. For integration
-> via pull requests with squash merge, you hand over each pull request of a task individually as described in
-> [integration via pull requests](../../references/playbook-git-pr.md) and start the next one only from the
-> `<basis>` integrated afterwards. The report follows the return format of [executing work](../run/run.md),
-> including the worker profiles with model and effort, and additionally names branches and commits and whether
-> this handover is the last one of the task. For integration via pull requests, the report starts with YAML
-> frontmatter (`---` on the first line) with the fields `pr-title` (one non-empty line), `pr-body` (non-empty,
-> usually a `|` block scalar), `branch`, `base` and `last` (`true` or `false`); the rest of the report follows
-> after it. A pull request is one unit of the commit boundary: independent milestones become separate pull
-> requests before you hand over. `handover` rejects a branch with more than one non-merge commit over `base`
-> (exit 2, nothing raised) unless the frontmatter carries `cut-exception: <reason>`. The answer is `integrated
-> <sha>` or `rework <reason>`; without an answer, call the same command again with the report unchanged. Until
-> the answer arrives, task, branches and worktree belong to the supervisor; do not touch them. `rework` gives
-> them back to you: work on the reason and hand over again. `integrated` on a handover that is not the last
-> gives you the task back to continue.
+> via pull requests with squash merge, you hand over each pull request of a task individually and start the
+> next one only from the `<basis>` integrated afterwards. The report follows the return format of [executing
+> work](../run/run.md), including the worker profiles with model and effort, and additionally names branches
+> and commits and whether this handover is the last one of the task. For integration via pull requests, the
+> report starts with YAML frontmatter (`---` on the first line) with the fields `pr-title` (one non-empty
+> line), `pr-body` (non-empty, usually a `|` block scalar), `branch`, `base`, `last` (`true` or `false`), `pr`
+> (number of the open pull request), `head` (SHA of the handed-over pull request tip) and `pushed` (SHA at the
+> first push), the SHAs in quotation marks; the rest of the report follows after it. A pull request is one
+> unit of the commit boundary: independent milestones become separate pull requests before you hand over.
+> `handover` rejects a branch with more than one non-merge commit over `base`, for a pull request up to
+> `pushed` (CI fixes after it are allowed; exit 2, nothing raised) unless the frontmatter carries
+> `cut-exception: <reason>`. The answer is `integrated <sha>` or `rework <reason>`; without an answer, call
+> the same command again with the report unchanged. Until the answer arrives, task, branches and worktree
+> belong to the supervisor; do not touch them. `rework` gives them back to you: work on the reason and hand
+> over again. `integrated` on a handover that is not the last gives you the task back to continue.
 >
 > If the next task depends on the handed-over one, wait for `integrated` and start it from the new `<basis>`.
 > You may begin a demonstrably independent task of this package during the wait from the current `<basis>`;
@@ -250,25 +262,27 @@ until your `integrated`. Integrate handovers one at a time and log every integra
    return as `rework <reason with files>`; it does not count as a correction attempt. Never resolve conflicts
    yourself. Only if the lead is no longer available do you secure the task as a handover to `review`
    per the git workflow.
-3. Without a conflict, integrate per the git workflow, and for integration via pull requests per
-   [integration via pull requests](../../references/playbook-git-pr.md) with `land --pr <n> --report <file>`
-   of `qatlas-run-tools.js`; PR title and PR body come from the frontmatter of the report (`pr-title`,
-   `pr-body`). `land` checks the head, waits for CI like `ci-wait`, squash-merges, proves the squash and
-   deletes the remote branch. In doing so, check locally only the affected areas via `slot --priority` and
-   leave the full breadth to CI. You treat a known or new flake by its rule in [accepting and
+3. Without a conflict, integrate per the git workflow, and for integration via pull requests per [integration
+   via pull requests](../../references/playbook-git-pr.md) with `land --pr <n> --report <file>` of
+   `qatlas-run-tools.js`; the lead opened the pull request. `land` checks the head, waits for CI like
+   `ci-wait`, squash-merges, proves the squash and deletes the remote branch. In doing so, check locally only
+   the affected areas via `slot --priority` and leave the full breadth to CI. If `land` ends with exit 8
+   (`no-ci`), test the merged state yourself with the project tests via `slot` and call `land … --no-ci`. You
+   treat a known or new flake by its rule in [accepting and
    integrating](../../references/playbook-acceptance.md). Without pull requests, you run the shared checks
    yourself. You integrate tasks spanning several repos per the git workflow.
 4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.
    Reply with `answer … --answer "integrated <sha>"`, where `<sha>` is the integration commit on the control
    branch.
 
-When you integrate via pull requests, do not wait for CI handover by handover. Open every checked,
-conflict-free pull request immediately so that its CI runs alongside the others, and handle further events
-in the meantime. If a merge queue is active, enqueue it immediately; the queue manages base and order.
-Without a merge queue, you merge individually as soon as its CI is green. If the base has changed since the
-CI run and branch protection requires an up-to-date state, catch up with the base yourself without conflict,
-for example via GitHub's branch update, and wait for CI again; you return a conflict as in step 2. In this
-case integration stays serially bound to the CI duration; name that as a bottleneck in the report.
+When you integrate via pull requests, the handed-over pull request is already open with green CI; you open
+none yourself. If a merge queue is active, enqueue it immediately; the queue manages base and order. Without
+a merge queue, you merge individually. If the base has changed since the CI run and branch protection
+requires an up-to-date state, catch up with the base yourself without conflict, for example via GitHub's
+branch update, and wait for CI again; `land` then accepts the remote head. You return a conflict as in
+step 2. In this case integration stays serially bound to the CI duration; name that as a bottleneck in the
+report. Without pull requests, integration stays with you as before, and a conflict likewise goes back as
+`rework`.
 
 `land` deletes the remote branch itself once it has proven the squash; the authorization for push and merge
 covers it. Clean up local worktrees and branches per the worktree contract, with the `proof` result of `land`
