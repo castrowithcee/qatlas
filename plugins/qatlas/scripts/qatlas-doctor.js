@@ -10,6 +10,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { scaffoldTopUp, walk } = require('./qatlas-scaffold-topup.js');
 const { legacyTeamFile, projectMigrationInventory } = require('./qatlas-migrations.js');
+const { installedPlugins } = require('./qatlas-update.js');
 const {
   createConfig,
   parseYamlText,
@@ -185,15 +186,14 @@ if (!apply) {
   created.push(...scaffoldCreated);
   if (!hadScaffold) {
     try {
-      const manifest = JSON.parse(fs.readFileSync(
-        path.join(pluginRoot, '.claude-plugin', 'plugin.json'), 'utf8'));
-      const version = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
-      if (manifest.name && /^\d+\.\d+\.\d+$/.test(version)) {
+      // A fresh scaffold has nothing to merge from any installed plugin of this marketplace.
+      const plugins = installedPlugins(target);
+      if (plugins.length) {
         const updateState = path.join(target, '.qatlas', 'plugins', 'updates', 'state.json');
         fs.mkdirSync(path.dirname(updateState), { recursive: true });
         fs.writeFileSync(updateState, JSON.stringify({
           format: 1,
-          plugins: { [manifest.name]: version },
+          plugins: Object.fromEntries(plugins.map(plugin => [plugin.name, plugin.version])),
         }, null, 2) + '\n', { flag: 'wx', mode: 0o644 });
         created.push('.qatlas/plugins/updates/state.json');
       }

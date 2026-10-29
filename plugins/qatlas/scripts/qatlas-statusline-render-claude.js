@@ -4,6 +4,7 @@
 // Setup copies renderer and runtime to ~/.qatlas/plugins/.
 
 const { execSync } = require('child_process');
+const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -241,7 +242,19 @@ const WIDGETS = {
     method: (d) => lv('method', 'Methode', d.rate_limits ? 'Abo' : 'API', C.dim, '')
 };
 
+// qatlas-update.js keeps this marker while a project check is pending; it is not a configurable widget.
+function updateAlert(d) {
+    const dir = (d.workspace && (d.workspace.project_dir || d.workspace.current_dir)) || d.cwd;
+    if (!dir) return null;
+    let real = dir;
+    try { real = fs.realpathSync(dir); } catch { }
+    const id = crypto.createHash('sha256').update(real).digest('hex').slice(0, 16);
+    if (!fs.existsSync(path.join(os.homedir(), '.qatlas', 'state', 'update-pending', id))) return null;
+    return build('update', [{ text: '⟳ /qatlas-core update', part: 'value', def: C.yellow, fixedFg: true }]);
+}
+
 const git = gitInfo(data);
+const alert = updateAlert(data);
 const render = (type) => (WIDGETS[type] ? WIDGETS[type](data, git) : null);
 const SEP = cfg.separator.text;
 const SEP_COLORED = noColor ? SEP : paint(SEP,
@@ -260,10 +273,11 @@ if (cfg.layout === 'fixed') {
     out = ROWS
         .map(row => row.filter(t => active.has(t)).map(render).filter(Boolean))
         .filter(segs => segs.length)
-        .map(rowText)
-        .join('\n');
+        .map(rowText);
+    if (alert) out.unshift(alert.colored);
+    out = out.join('\n');
 } else {
-    const segs = cfg.order.map(render).filter(Boolean);
+    const segs = [alert, ...cfg.order.map(render)].filter(Boolean);
     const avail = cols - 2;
     const width = (list) => list.reduce((n, s, i) => n + s.plain.length + (i > 0 ? SEP.length : 0), 0);
     const lines = [];

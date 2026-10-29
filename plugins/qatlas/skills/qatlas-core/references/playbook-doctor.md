@@ -30,17 +30,12 @@ which it names for explicit cleanup), the project knowledge space including root
 library parts as a suggestion for `qatlas-core setup`. A missing `team.yaml` is a hint for `run`, not a setup
 blocker; Doctor does not create it even with `--apply` without confirmed model values. Model and effort
 availability is checked only by `run` in the current host. With an old or parallel project root, every
-writing repair run stays blocked and names the inventory command. The second command compares the Qatlas
-review state stored for this repo under `.qatlas/plugins/updates/state.json` with the installed Qatlas
-version. The optional packs check their own version through their SessionStart hook; derive no overall state
-of all plugins from the Qatlas command.
+writing repair run stays blocked and names the inventory command. The second command compares, for every
+installed plugin of the Qatlas marketplace, the review state stored for this repo under
+`.qatlas/plugins/updates/state.json` with the installed version and lists the pending update instructions.
 
-If update instructions are open, read only the files printed and check their points against the current repo.
-Existing repo files take precedence. Report whether and what is applicable, but do not confirm the review
-state in the diagnosis run. If something is applicable, state per point briefly the concrete finding, the
-proposed change and its practical consequence or reason. A mere list of file names, counts or keywords is not
-enough. Only after the user then explicitly decides on full, partial or no adoption may you make changes and
-run `ack`.
+Read no update instruction in the diagnosis run and confirm nothing. If instructions are pending, report
+which plugins they concern and name `qatlas-core update` as the procedure that checks and merges them.
 
 ## Report
 

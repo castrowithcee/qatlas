@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 
-// Detects repo-specific plugin updates and confirms them after the user decides.
+// Detects repo-specific updates of every installed plugin of this marketplace and confirms them after the
+// user decides. Packs ship only updates/<version>.md; this script is their only channel.
 
+const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { projectMigrationInventory } = require('./qatlas-migrations.js');
 
@@ -34,15 +37,6 @@ function resolveRoot() {
   return process.cwd();
 }
 
-function pluginIdentity() {
-  try {
-    const manifest = JSON.parse(fs.readFileSync(path.join(pluginRoot, '.claude-plugin', 'plugin.json'), 'utf8'));
-    const version = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
-    if (manifest.name && /^\d+\.\d+\.\d+$/.test(version)) return { name: manifest.name, version };
-  } catch { /* an invalid plugin yields no update notice */ }
-  return null;
-}
-
 function semver(value) {
   const match = String(value || '').match(/^(\d+)\.(\d+)\.(\d+)$/);
   return match ? match.slice(1).map(Number) : null;
@@ -56,6 +50,106 @@ function compare(left, right) {
     if (a[index] !== b[index]) return a[index] - b[index];
   }
   return 0;
+}
+
+function realpath(file) {
+  try { return fs.realpathSync(file); } catch { return path.resolve(file); }
+}
+
+function readJson(file) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
+}
+
+function pluginVersion(root) {
+  try {
+    const version = fs.readFileSync(path.join(root, 'VERSION'), 'utf8').trim();
+    return semver(version) ? version : null;
+  } catch { return null; }
+}
+
+function pluginIdentity() {
+  const manifest = readJson(path.join(pluginRoot, '.claude-plugin', 'plugin.json'));
+  const version = pluginVersion(pluginRoot);
+  return manifest && manifest.name && version ? { name: manifest.name, version } : null;
+}
+
+// Claude keeps old versions in its cache, so only installed_plugins.json names the active one.
+function claudePlugins(root) {
+  const home = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+  const registry = readJson(path.join(home, 'plugins', 'installed_plugins.json'));
+  if (!registry || !registry.plugins || typeof registry.plugins !== 'object') return [];
+  const entries = Object.entries(registry.plugins)
+    .map(([key, list]) => [key, Array.isArray(list) ? list.filter(e => e && typeof e.installPath === 'string') : []]);
+  const self = realpath(pluginRoot);
+  const own = entries.find(([, list]) => list.some(e => realpath(e.installPath) === self));
+  if (!own || !own[0].includes('@')) return [];
+  const market = own[0].slice(own[0].lastIndexOf('@'));
+
+  const enabled = {};
+  for (const file of [path.join(home, 'settings.json'), path.join(root, '.claude', 'settings.json'),
+    path.join(root, '.claude', 'settings.local.json')]) {
+    const settings = readJson(file);
+    if (settings && settings.enabledPlugins && typeof settings.enabledPlugins === 'object') {
+      Object.assign(enabled, settings.enabledPlugins);
+    }
+  }
+
+  const project = realpath(root);
+  const found = [];
+  for (const [key, list] of entries) {
+    if (!key.endsWith(market) || enabled[key] === false) continue;
+    const entry = list.find(e => e.scope !== 'user' && e.projectPath && realpath(e.projectPath) === project)
+      || list.find(e => e.scope === 'user');
+    if (entry) found.push({ name: key.slice(0, -market.length), root: entry.installPath });
+  }
+  return found;
+}
+
+function latestVersionDir(directory) {
+  let names = [];
+  try { names = fs.readdirSync(directory); } catch { return null; }
+  const latest = names.filter(name => semver(name) && pluginVersion(path.join(directory, name)))
+    .sort(compare).pop();
+  return latest ? path.join(directory, latest) : null;
+}
+
+function codexPlugins() {
+  const home = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
+  const cache = realpath(path.join(home, 'plugins', 'cache'));
+  const parts = path.relative(cache, realpath(pluginRoot)).split(path.sep);
+  if (parts.length !== 3 || parts[0] === '..') return [];
+  const market = parts[0];
+  let config = '';
+  try { config = fs.readFileSync(path.join(home, 'config.toml'), 'utf8'); } catch { return []; }
+
+  const found = [];
+  let current = null;
+  for (const line of config.split(/\r?\n/)) {
+    const header = line.match(/^\s*\[([^\]]*)\]/);
+    if (header) {
+      const table = header[1].trim().match(/^plugins\."([^"@]+)@([^"]+)"$/);
+      current = table && table[2] === market ? table[1] : null;
+      continue;
+    }
+    const enabled = current && line.match(/^\s*enabled\s*=\s*(true|false)\b/);
+    if (enabled && enabled[1] === 'true') {
+      const root = latestVersionDir(path.join(cache, market, current));
+      if (root) found.push({ name: current, root });
+    }
+  }
+  return found;
+}
+
+// Qatlas itself always counts, even when no host registry names it (development checkout).
+function installedPlugins(root) {
+  const self = pluginIdentity();
+  if (!self) return [];
+  const others = (isCodex ? codexPlugins() : claudePlugins(root))
+    .filter(plugin => plugin.name !== self.name)
+    .map(plugin => ({ ...plugin, version: pluginVersion(plugin.root) }))
+    .filter(plugin => plugin.version)
+    .sort((left, right) => left.name.localeCompare(right.name));
+  return [{ ...self, root: pluginRoot }, ...others];
 }
 
 function statePath(root) {
@@ -88,7 +182,7 @@ function readState(root) {
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)
       || !parsed.plugins || typeof parsed.plugins !== 'object' || Array.isArray(parsed.plugins)) {
-      throw new Error(file + ': Der Prüfstand muss ein JSON-Objekt mit einer plugins-Map sein.');
+      throw new Error(file + ': the review state must be a JSON object with a plugins map.');
     }
     return { ...parsed, format: 1, plugins: parsed.plugins };
   }
@@ -109,20 +203,63 @@ function pendingUpdates(root, identity, sourceRoot = pluginRoot) {
   return { checked, pending };
 }
 
-function emitNotice(text) {
-  if (isCodex) {
-    process.stdout.write(JSON.stringify({
-      hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: text },
-    }));
-  } else {
-    process.stdout.write(text + '\n');
-  }
+// Device-local marker for the status line; it lives outside the repo so no project gets an untracked file.
+function markerPath(root) {
+  const id = crypto.createHash('sha256').update(realpath(root)).digest('hex').slice(0, 16);
+  return path.join(os.homedir(), '.qatlas', 'state', 'update-pending', id);
 }
 
-function writeState(root, identity) {
+function setMarker(root, plugins) {
+  const file = markerPath(root);
+  try {
+    if (!plugins.length) { fs.rmSync(file, { force: true }); return; }
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, plugins.map(p => `${p.name} ${p.checked} -> ${p.version}`).join('\n') + '\n');
+  } catch { /* the marker is a convenience and never blocks the session */ }
+}
+
+function invocation() {
+  return (isCodex ? '$' : '/') + 'qatlas-core update';
+}
+
+function banner(plugins) {
+  const width = Math.max(...plugins.map(p => p.name.length));
+  const lines = [
+    'Qatlas plugins were updated. This repo still needs a project check.',
+    '',
+    ...plugins.map(p => `  ${p.name.padEnd(width)}  ${p.checked} -> ${p.version}`),
+    '',
+    'Run: ' + invocation(),
+  ];
+  const inner = Math.max(...lines.map(line => line.length));
+  const rule = '+' + '-'.repeat(inner + 4) + '+';
+  return [rule, ...lines.map(line => '|  ' + line.padEnd(inner) + '  |'), rule].join('\n');
+}
+
+function emitNotice(plugins) {
+  const summary = plugins.map(p => `${p.name} ${p.checked} -> ${p.version}`).join(', ');
+  const line = `> Qatlas project check pending: run ${invocation()}`;
+  const context = [
+    `QATLAS-UPDATE: Installed plugins changed since this repo was last checked: ${summary}.`,
+    `The user already sees a notice to run ${invocation()}. Do not run the check yourself, never during a`
+      + ' started mode or run, and do not read the update instructions now.',
+    `Begin the reply that ends your first turn in this session with exactly this line, once: ${line}`,
+  ].join('\n');
+  process.stdout.write(JSON.stringify({
+    systemMessage: banner(plugins),
+    hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: context },
+  }));
+}
+
+function pendingPlugins(root) {
+  return installedPlugins(root)
+    .map(plugin => ({ ...plugin, ...pendingUpdates(root, plugin, plugin.root) }));
+}
+
+function writeState(root, plugins) {
   const target = statePath(root);
   const state = readState(root);
-  state.plugins[identity.name] = identity.version;
+  for (const plugin of plugins) state.plugins[plugin.name] = plugin.version;
   fs.mkdirSync(path.dirname(target), { recursive: true });
   const temporary = target + '.tmp-' + process.pid;
   fs.writeFileSync(temporary, JSON.stringify(state, null, 2) + '\n', { mode: 0o644 });
@@ -132,18 +269,15 @@ function writeState(root, identity) {
 function main() {
   const root = resolveRoot();
   if (command === 'notice' && !readConfig(root).config['session-start'].enabled) return;
-  const identity = pluginIdentity();
+  if (!pluginIdentity()) return;
   const migration = projectMigrationInventory(root, { detailed: false });
-  const scaffold = hasScaffold(root);
-
-  if (!identity) return;
 
   if (migration.unresolved) {
     if (command === 'status') {
-      process.stdout.write('Projektmigration offen: Prüfstand bleibt bis zur Inventarisierung und '
-        + 'ausdrücklichen Migration unverändert.\n');
+      process.stdout.write('Project migration pending: the review state stays unchanged until the project '
+        + 'is inventoried and explicitly migrated.\n');
     } else if (command === 'ack') {
-      process.stderr.write('Projektmigration offen. Der Update-Stand wurde nicht bestätigt.\n');
+      process.stderr.write('Project migration pending. The review state was not confirmed.\n');
       process.exitCode = 1;
     }
     return;
@@ -151,57 +285,54 @@ function main() {
 
   if (command === 'ack') {
     if (!hasCurrentScaffold(root)) {
-      process.stderr.write('Kein .qatlas-project/-Scaffold im Zielrepo. Richte Qatlas zuerst ein.\n');
+      process.stderr.write('No .qatlas-project/ scaffold in the target repo. Set up Qatlas first.\n');
       process.exitCode = 1;
       return;
     }
-    try { writeState(root, identity); }
+    const only = flag('--plugin');
+    const plugins = installedPlugins(root).filter(plugin => !only || plugin.name === only);
+    if (!plugins.length) {
+      process.stderr.write(`Plugin ${only} is not installed. The review state was not changed.\n`);
+      process.exitCode = 1;
+      return;
+    }
+    try { writeState(root, plugins); }
     catch (error) {
-      process.stderr.write('Prüfstand bleibt unverändert: ' + error.message + '\n');
+      process.stderr.write('Review state unchanged: ' + error.message + '\n');
       process.exitCode = 1;
       return;
     }
-    process.stdout.write(`✓ ${identity.name} ${identity.version} für dieses Repo als geprüft gespeichert.\n`);
+    try { setMarker(root, pendingPlugins(root).filter(p => p.pending.length)); } catch { /* best effort */ }
+    for (const plugin of plugins) {
+      process.stdout.write(`✓ ${plugin.name} ${plugin.version} saved as checked for this repo.\n`);
+    }
     return;
   }
 
-  if (!scaffold) return;
+  if (!hasScaffold(root)) return;
 
-  let checked;
-  let pending;
-  try { ({ checked, pending } = pendingUpdates(root, identity)); }
+  let plugins;
+  try { plugins = pendingPlugins(root); }
   catch (error) {
-    process.stderr.write('Prüfstand konnte nicht gelesen werden: ' + error.message + '\n');
+    process.stderr.write('Review state could not be read: ' + error.message + '\n');
     process.exitCode = 1;
     return;
   }
 
   if (command === 'status') {
-    process.stdout.write(`${identity.name}: geprüft ${checked}, installiert ${identity.version}, `
-      + `${pending.length} relevante Update-Anweisung(en).\n`);
-    for (const file of pending) process.stdout.write('- ' + JSON.stringify(file) + '\n');
+    for (const plugin of plugins) {
+      process.stdout.write(`${plugin.name}: checked ${plugin.checked}, installed ${plugin.version}, `
+        + `${plugin.pending.length} relevant update instruction(s).\n`);
+      for (const file of plugin.pending) process.stdout.write('- ' + JSON.stringify(file) + '\n');
+    }
     return;
   }
 
-  if (command !== 'notice' || !pending.length) return;
-
-  emitNotice([
-    `QATLAS-UPDATE: ${identity.name} wurde für dieses Repo zuletzt bis ${checked} geprüft; installiert ist ${identity.version}.`,
-    'Reihenfolge: Hat der Nutzer in dieser Session einen Auftrag oder Modus gestartet, erledige ihn zuerst vollständig und biete diese Prüfung erst danach knapp an; bestätige den Prüfstand nie mitten in einem Lauf. Ohne Auftrag beginne mit der Prüfung.',
-    'Lies diese Update-Anweisungen vollständig und prüfe ausschließlich das aktuelle Repo:',
-    ...pending.map(file => '- ' + JSON.stringify(file)),
-    'Behandle vorhandene Repo-Dateien als primär und überschreibe sie nie pauschal mit Plugin-Vorlagen.',
-    'Sind keine Änderungen anwendbar, aktualisiere den Prüfstand ohne Rückfrage.',
-    'Andernfalls nenne für jeden anwendbaren Punkt knapp den konkreten Befund im Repo, die vorgeschlagene Änderung und ihre praktische Folge oder ihren Grund. Eine bloße Liste aus Dateinamen, Mengen oder Schlagwörtern reicht nicht; nenne bei Sammelbefunden ein repräsentatives Beispiel.',
-    'Frage erst danach, was vollständig, teilweise oder nicht übernommen werden soll.',
-    'Ausnahme: Einen Punkt, den die Anweisung ausdrücklich als rein ergänzend ohne Rückfrage kennzeichnet, führe ohne Rückfrage aus und nenne danach Ergebnis und ein Beispiel.',
-    'Halte abgelehnte Änderungen nicht im Repo fest, außer der Nutzer verlangt dies ausdrücklich.',
-    'Aktualisiere nach der Prüfung oder Nutzerentscheidung in jedem Fall den Prüfstand, indem du das folgende Script mit den Argumenten ack --target <PROJEKT-ROOT> ausführst:',
-    'UPDATE-SCRIPT: ' + JSON.stringify(path.join(pluginRoot, 'scripts', 'qatlas-update.js')),
-    'PROJEKT-ROOT: ' + JSON.stringify(root),
-  ].join('\n'));
+  const pending = plugins.filter(plugin => plugin.pending.length);
+  setMarker(root, pending);
+  if (pending.length) emitNotice(pending);
 }
 
 if (require.main === module) main();
 
-module.exports = { compare, pendingUpdates, semver };
+module.exports = { compare, installedPlugins, pendingUpdates, semver };

@@ -636,7 +636,7 @@ function testWritingConsumersRespectMigration() {
   const update = path.join(pluginRoot, 'scripts', 'qatlas-update.js');
   const ack = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(ack.status, 1);
-  assert.ok(ack.stderr.includes('Projektmigration offen'));
+  assert.ok(ack.stderr.includes('Project migration pending'));
   assert.strictEqual(fs.existsSync(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json')), false);
 }
 
@@ -668,26 +668,109 @@ function testUpdateCommandsAcrossVersions() {
   const update = path.join(pluginRoot, 'scripts', 'qatlas-update.js');
   const notice = runNode(update, ['notice', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(notice.status, 0, notice.stderr);
+  const payload = JSON.parse(notice.stdout);
+  assert.ok(payload.systemMessage.includes('/qatlas-core update'));
+  assert.ok(payload.systemMessage.includes('qatlas  0.0.0 -> '));
+  assert.ok(payload.hookSpecificOutput.additionalContext.startsWith('QATLAS-UPDATE:'));
+  assert.ok(!notice.stdout.includes('.md'), 'The notice names no instruction file; the update mode reads them.');
+  const markers = path.join(f.home, '.qatlas', 'state', 'update-pending');
+  assert.strictEqual(fs.readdirSync(markers).length, 1);
   const expectedUpdates = fs.readdirSync(path.join(pluginRoot, 'updates'))
     .filter(name => /^\d+\.\d+\.\d+\.md$/.test(name));
-  for (const name of expectedUpdates) assert.ok(notice.stdout.includes(name));
   const status = runNode(update, ['status', '--target', f.project], { cwd: f.project, home: f.home });
-  assert.ok(status.stdout.includes(`${expectedUpdates.length} relevante Update-Anweisung(en)`));
+  assert.ok(status.stdout.includes(`${expectedUpdates.length} relevant update instruction(s)`));
+  for (const name of expectedUpdates) assert.ok(status.stdout.includes(name));
   const ack = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(ack.status, 0, ack.stderr);
+  assert.strictEqual(fs.readdirSync(markers).length, 0);
   const currentVersion = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
   const state = JSON.parse(fs.readFileSync(
     path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), 'utf8'));
   assert.strictEqual(state.plugins.qatlas, currentVersion);
   const after = runNode(update, ['status', '--target', f.project], { cwd: f.project, home: f.home });
-  assert.ok(after.stdout.includes('0 relevante Update-Anweisung(en)'));
+  assert.ok(after.stdout.includes('0 relevant update instruction(s)'));
 
   write(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), '{defekt}\n');
   const invalid = runNode(update, ['ack', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(invalid.status, 1);
-  assert.ok(invalid.stderr.includes('Prüfstand bleibt unverändert'));
+  assert.ok(invalid.stderr.includes('Review state unchanged'));
   assert.strictEqual(fs.readFileSync(
     path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), 'utf8'), '{defekt}\n');
+}
+
+function fakePlugin(directory, name, version, updates = []) {
+  write(path.join(directory, '.claude-plugin', 'plugin.json'), { name });
+  write(path.join(directory, 'VERSION'), version + '\n');
+  for (const update of updates) write(path.join(directory, 'updates', update + '.md'), '# ' + update + '\n');
+  return directory;
+}
+
+function testMarketplacePluginsInClaude() {
+  const f = fixture('marketplace-claude');
+  fs.mkdirSync(path.join(f.project, '.qatlas-project'), { recursive: true });
+  const ownVersion = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
+  write(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), {
+    format: 1, plugins: { qatlas: ownVersion, 'qatlas-pack': '0.1.0' },
+  });
+  const entry = installPath => [{ scope: 'user', installPath, version: '0' }];
+  write(path.join(f.home, '.claude', 'plugins', 'installed_plugins.json'), {
+    version: 2,
+    plugins: {
+      'qatlas@qatlas': entry(pluginRoot),
+      'qatlas-pack@qatlas': entry(fakePlugin(path.join(f.root, 'pack'), 'qatlas-pack', '0.3.0', ['0.2.0', '0.4.0'])),
+      'qatlas-off@qatlas': entry(fakePlugin(path.join(f.root, 'off'), 'qatlas-off', '0.2.0', ['0.2.0'])),
+      'foreign@other': entry(fakePlugin(path.join(f.root, 'foreign'), 'foreign', '1.0.0', ['1.0.0'])),
+    },
+  });
+  write(path.join(f.home, '.claude', 'settings.json'), { enabledPlugins: { 'qatlas-off@qatlas': false } });
+
+  const update = path.join(pluginRoot, 'scripts', 'qatlas-update.js');
+  const notice = runNode(update, ['notice', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(notice.status, 0, notice.stderr);
+  const banner = JSON.parse(notice.stdout).systemMessage;
+  assert.ok(banner.includes('qatlas-pack  0.1.0 -> 0.3.0'), banner);
+  assert.ok(!banner.includes('qatlas-off') && !banner.includes('foreign'), banner);
+
+  const status = runNode(update, ['status', '--target', f.project], { cwd: f.project, home: f.home }).stdout;
+  assert.ok(status.includes('qatlas-pack: checked 0.1.0, installed 0.3.0, 1 relevant update instruction(s).'));
+  assert.ok(status.includes('0.2.0.md') && !status.includes('0.4.0.md'));
+
+  const ack = runNode(update, ['ack', '--plugin', 'qatlas-pack', '--target', f.project],
+    { cwd: f.project, home: f.home });
+  assert.strictEqual(ack.status, 0, ack.stderr);
+  const state = JSON.parse(fs.readFileSync(
+    path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), 'utf8'));
+  assert.deepStrictEqual(state.plugins, { qatlas: ownVersion, 'qatlas-pack': '0.3.0' });
+  const quiet = runNode(update, ['notice', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(quiet.stdout, '');
+}
+
+function testMarketplacePluginsInCodex() {
+  const f = fixture('marketplace-codex');
+  fs.mkdirSync(path.join(f.project, '.qatlas-project'), { recursive: true });
+  const ownVersion = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
+  write(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json'), {
+    format: 1, plugins: { qatlas: ownVersion },
+  });
+  const cache = path.join(f.home, '.codex', 'plugins', 'cache', 'qatlas');
+  const installed = path.join(cache, 'qatlas', ownVersion);
+  fs.cpSync(pluginRoot, installed, { recursive: true });
+  fakePlugin(path.join(cache, 'qatlas-pack', '0.1.0'), 'qatlas-pack', '0.1.0', ['0.1.0']);
+  fakePlugin(path.join(cache, 'qatlas-pack', '0.2.0'), 'qatlas-pack', '0.2.0', ['0.1.0', '0.2.0']);
+  fakePlugin(path.join(cache, 'qatlas-off', '0.1.0'), 'qatlas-off', '0.1.0', ['0.1.0']);
+  write(path.join(f.home, '.codex', 'config.toml'), [
+    '[plugins."qatlas@qatlas"]', 'enabled = true', '',
+    '[plugins."qatlas-pack@qatlas"]', 'enabled = true', '',
+    '[plugins."qatlas-off@qatlas"]', 'enabled = false', '',
+  ].join('\n'));
+
+  const notice = runNode(path.join(installed, 'scripts', 'qatlas-update.js'), ['notice', '--target', f.project],
+    { cwd: f.project, home: f.home, env: { PLUGIN_ROOT: installed, CODEX_HOME: path.join(f.home, '.codex') } });
+  assert.strictEqual(notice.status, 0, notice.stderr);
+  const payload = JSON.parse(notice.stdout);
+  assert.ok(payload.systemMessage.includes('qatlas-pack  0.0.0 -> 0.2.0'), payload.systemMessage);
+  assert.ok(payload.systemMessage.includes('$qatlas-core update'));
+  assert.ok(!payload.systemMessage.includes('qatlas-off'));
 }
 
 try {
@@ -709,7 +792,9 @@ try {
   testWritingConsumersRespectMigration();
   testSkippedUpdateVersions();
   testUpdateCommandsAcrossVersions();
-  process.stdout.write('✓ Qatlas-Migrationen: 18 Szenarien erfolgreich.\n');
+  testMarketplacePluginsInClaude();
+  testMarketplacePluginsInCodex();
+  process.stdout.write('✓ Qatlas-Migrationen: 20 Szenarien erfolgreich.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

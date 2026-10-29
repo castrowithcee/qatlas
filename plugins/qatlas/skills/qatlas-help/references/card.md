@@ -20,6 +20,7 @@ license: MIT
 | **qatlas-work tree** | Shows Git worktrees, creates one with `new` or cleans up safely. |
 | **qatlas-core setup** | Sets up project state, project instructions, library and settings. |
 | **qatlas-core doctor** | Checks dependencies, scaffold, library and update state without repairing anything. |
+| **qatlas-core update** | Merges what installed plugin updates require in this project. |
 | **qatlas-core statusline** | Configures the status line of the current host. |
 | **qatlas-core backlog-system** | Switches or migrates the authoritative planning system. |
 | **qatlas-core migrate** | Brings an existing project knowledge space onto the fixed folders, types and names. |
