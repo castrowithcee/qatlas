@@ -54,8 +54,10 @@ license: MIT
   assignment.
 - If the spine lives in the repo, only the integration owner writes claim, status, and spine to the control
   branch. Every other lead then works only on assigned tasks and hands over, per task, its checked task
-  branch with a report in the return format. With the handover, ownership of the task passes to the
-  integration owner; the owner sets `done` only after integration and evidence on the control branch.
+  branch with a report in the return format. With pull request integration, the handed-over state is the
+  open pull request with green CI, or without CI one with a green complete test. With the handover, ownership
+  of the task passes to the integration owner; the owner sets `done` only after integration and evidence on
+  the control branch. The integration owner serializes the merges; a lead pushes only its own task branches.
 - For the other leads, a change to the control branch by the designated integration owner is not a foreign
   modification. Any other change there stops every participant before its next claim or integration.
 - If a claim is unclear, a task is claimed by an unknown lead, or integration ownership is not established,

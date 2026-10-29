@@ -16,9 +16,13 @@ instructions do. If they are missing, the task ends with an integration-ready, l
 a handover, as described in the handover section (`Übergeben`) of [the git workflow](playbook-git-workflow.md),
 without a push.
 
+In a simple `run`, the run itself pushes, opens the pull request, waits for CI and merges. In `team`, the lead
+pushes its own task branch, opens the pull request and fixes a red CI; the supervisor merges with `land`. The
+bullets below apply to the `run` unless "In a team" names the difference.
+
 - **Working base:** Work in the task worktree from a freshly fetched `origin/<control-branch>`. The primary
   working tree stays untouched: no pull, switch or commit there by the run.
-- **Before opening or updating a pull request:** Run `git fetch`, probe conflicts with
+- **Before opening or updating a pull request (`run`):** Run `git fetch`, probe conflicts with
   `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js probe`, merge the current
   `origin/<control-branch>` into the task branch, resolve conflicts per the conflict rules of [the git
   workflow](playbook-git-workflow.md), check again and only then push. Never rebase a branch that has
@@ -26,6 +30,18 @@ without a push.
   `ci-wait` of the same script.
 - **Merge queue:** If a GitHub merge queue is active in the target repo, integrate the pull request through
   it instead of catching up with the base yourself.
+- **In a team:** The lead merges no current `origin/<control-branch>` into the task branch; the handover
+  carries the state on which the complete check was green. Before the first push it runs `cut` (`node
+  <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tmux.js cut --repo <repo-root> --branch
+  <task-branch> --base <basis>`, with `--code-repo` for code outside the control root), which applies the
+  cut rule below. It pushes only its own task branch, never forcibly, opens the pull request, waits with
+  `ci-wait` and fixes a red CI itself with follow-up commits; it never rewrites pushed history. Such
+  fixes after the first push do not count against the cut rule. It hands over the open pull request only with
+  green CI. If the project has no CI (`ci-wait` exit 8), the green complete local test is the evidence. A
+  conflict with the base comes back from the supervisor as `rework`. The supervisor opens no pull request; it
+  merges with `land --pr <n> --report <file>`. If branch protection requires an up-to-date state, it catches
+  up with the base without conflict and waits for CI again; `land` then accepts the remote head. On `land`
+  exit 8 (`no-ci`) it tests the merged state with the project tests via `slot` and calls `land … --no-ci`.
 - **Cut for squash merge:** A task yields as many pull requests as the commit boundary of the git norm
   ([commit boundaries](../../qatlas-core-git/references/commit-boundaries.md)) requires for a squashed
   review; a pull request never bundles independent milestones. Each pull request gets its own task branch of

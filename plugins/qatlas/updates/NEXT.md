@@ -1,7 +1,8 @@
 ---
 description: >
   Check instruction for existing projects after the device-wide role configuration was renamed to team.yaml
-  with format 2 and the parallel mode was renamed to qatlas team with the roles supervisor, lead and worker.
+  with format 2, the parallel mode was renamed to qatlas team with the roles supervisor, lead and worker, and
+  team leads now push and open pull requests themselves.
 license: MIT
 type: rule
 edit: locked
@@ -32,3 +33,13 @@ mode; behavior is otherwise unchanged.
   delete it yourself.
 - If project instructions or memory of this repo mention `qatlas sentinel`, "sentinel" or "orchestrator",
   check them against `qatlas team`, supervisor and lead and propose the concrete change to the user.
+
+# Team leads push and open pull requests
+
+With integration via pull requests, each `qatlas team` lead now pushes its own task branch, opens the pull
+request and fixes a red CI itself; it hands over the open pull request with green CI, or without CI with a
+green complete local test, and no longer has to merge the current base before a handover. The supervisor still
+merges, closes tasks and sets `done`.
+
+- If project instructions allow push or pull request creation to only one role, check them against this and
+  propose the concrete change to the user.
