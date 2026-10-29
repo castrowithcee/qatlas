@@ -4,8 +4,8 @@ description: >
   Create, name, file, rename, move, merge, promote, archive or delete files according to the rules, change
   Markdown content, insert references and process raw material from .qatlas-project/zone-import/ once the
   user announces it or names the path: sets place, name, type and frontmatter and keeps navigation and
-  references consistent. Also tidies an existing project structure with qatlas-core-filing migrate. Not for
-  pure reading, for code changes inside existing files or for conversions outside the import zone.
+  references consistent. Not for pure reading, for code changes inside existing files or for conversions
+  outside the import zone.
 license: MIT
 ---
 
@@ -56,5 +56,3 @@ the operation:
 - Set or change frontmatter, including by any content change to a file with `version`:
   [Frontmatter](references/frontmatter.md)
 - Determine folder, name or task ID in the knowledge space: [Project knowledge space](references/structure.md)
-- `qatlas-core-filing migrate`, or the user asks to tidy the project structure:
-  [Migrate](references/playbook-migrate.md)

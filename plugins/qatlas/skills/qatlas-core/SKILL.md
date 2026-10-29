@@ -1,51 +1,49 @@
 ---
 name: qatlas-core
 description: >
-  Bündelt ausdrücklich aufgerufene Qatlas-Kernverwaltung: ein Projekt einrichten, Projektzustand
-  diagnostizieren, Statusline konfigurieren oder das maßgebliche Planungssystem wechseln.
-  Ohne Argument eine kompakte Karte der verfügbaren Modi zeigen und nichts ausführen.
+  Bundles explicitly called Qatlas core administration: set up a project, diagnose project state, configure
+  the status line, switch the authoritative planning system or migrate an existing project knowledge space.
+  Without an argument, show a compact card of the available modes and run nothing.
 disable-model-invocation: true
-argument-hint: "[setup|doctor|statusline|backlog-system] [Argumente]"
+argument-hint: "[setup|doctor|statusline|backlog-system|migrate] [arguments]"
 license: MIT
 ---
 
 # Qatlas-Core
 
-Dieser Router bündelt ausdrücklich gestartete Verwaltungswerkzeuge des `qatlas`-Plugins. Er ist keine
-passive Infrastruktur und startet ohne eindeutigen Modus keine Änderung.
+This router bundles explicitly started administration tools of the `qatlas` plugin. It is no passive
+infrastructure and starts no change without an unambiguous mode.
 
-## Ohne Argument
+## Without an argument
 
-Antworte ausschließlich mit der folgenden Karte als gerendertes Markdown. Lies keine Modusreferenz und
-ändere keinen Zustand.
+Reply only with the following card as rendered Markdown. Read no mode reference and change no state.
 
 ### Qatlas Core
 
-| Argument | Aufgabe |
+| Argument | Task |
 |---|---|
-| `setup` | Richtet Qatlas und seinen Projektzustand ein. |
-| `doctor` | Prüft Qatlas, Scaffold, Abhängigkeiten und den Projektupdate-Stand ohne Reparatur. |
-| `statusline` | Richtet die Statusline des aktuellen Hosts ein oder passt sie an. |
-| `backlog-system` | Wechselt oder migriert das maßgebliche Planungssystem eines Projekts. |
+| `setup` | Sets up Qatlas and its project state. |
+| `doctor` | Checks Qatlas, scaffold, dependencies and the project update state without repairing. |
+| `statusline` | Sets up or adjusts the status line of the current host. |
+| `backlog-system` | Switches or migrates the authoritative planning system of a project. |
+| `migrate` | Brings an existing project knowledge space onto the fixed folders, types and names. |
 
-Aufruf: `qatlas-core <argument>`
+Call: `qatlas-core <argument>`
 
-## Modus wählen
+## Choose the mode
 
-`<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`; ohne Hook liegt er zwei Ebenen
-über dieser `SKILL.md`. Setze in der gewählten Referenz immer diesen aufgelösten Root ein.
+`<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context; without a hook it lies two levels
+above this `SKILL.md`. Always insert this resolved root in the chosen reference.
 
-- **`setup`:** Lies vollständig [Qatlas einrichten](references/playbook-setup.md) und führe nur dieses
-  Verfahren aus.
-- **`doctor`:** Lies vollständig [Qatlas diagnostizieren](references/playbook-doctor.md) und führe nur dieses
-  Verfahren aus.
-- **`statusline [Argumente]`:** Lies vollständig [Statusline konfigurieren](references/playbook-statusline.md)
-  und führe nur dieses Verfahren mit den restlichen Argumenten aus.
-- **`backlog-system [Quelle] [Ziel]`:** Lies vollständig [Planungssystem
-  wechseln](references/playbook-backlog-system.md) und führe nur dieses Verfahren mit den restlichen
-  Argumenten aus.
+- **`setup`:** Read [Set up Qatlas](references/playbook-setup.md) fully and run only this procedure.
+- **`doctor`:** Read [Diagnose Qatlas](references/playbook-doctor.md) fully and run only this procedure.
+- **`statusline [arguments]`:** Read [Configure the status line](references/playbook-statusline.md) fully
+  and run only this procedure with the remaining arguments.
+- **`backlog-system [source] [target]`:** Read [Switch the planning
+  system](references/playbook-backlog-system.md) fully and run only this procedure with the remaining
+  arguments.
+- **`migrate`:** Read [Migrate](references/playbook-migrate.md) fully and run only this procedure.
 
-Ist ein vorhandenes Argument nicht eindeutig, nenne die passenden Möglichkeiten jeweils in einem kurzen
-Satz und frage nach genau einem. Ist es unbekannt, zeige die kompakte Karte und nenne das unbekannte
-Argument in einem Satz. Deute eine allgemeine Diagnose- oder Statusline-Unterhaltung nie als
-Aufruf dieses Skills.
+If a given argument is ambiguous, name the fitting options in one short sentence each and ask for exactly
+one. If it is unknown, show the compact card and name the unknown argument in one sentence. Never take a
+general conversation about diagnosis or the status line as a call of this skill.

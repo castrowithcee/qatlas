@@ -1,6 +1,6 @@
 ---
 description: >
-  Procedure for qatlas-core-filing migrate: inventory a project knowledge space, map every file to its fixed
+  Procedure for qatlas-core migrate: inventory a project knowledge space, map every file to its fixed
   folder, type and name, get approval, convert in place with references and verify the result.
 license: MIT
 type: playbook
@@ -9,9 +9,9 @@ edit: locked
 
 # Migrate
 
-Brings an existing `.qatlas-project/` onto the current [layout](structure.md) and
-[frontmatter schema](frontmatter.md). Run it only when the user calls `qatlas-core-filing migrate`, asks to
-tidy the project structure, or a confirmed project update asks for it. Repeating it on a converted project
+Brings an existing `.qatlas-project/` onto the current
+[layout](../../qatlas-core-filing/references/structure.md) and
+[frontmatter schema](../../qatlas-core-filing/references/frontmatter.md). Repeating it on a converted project
 finds nothing to do.
 
 Out of scope are both zones, the content of `templates/`, embedded Git repos and worktrees, the user library

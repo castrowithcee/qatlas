@@ -22,6 +22,7 @@ license: MIT
 | **qatlas-core doctor** | Checks dependencies, scaffold, library and update state without repairing anything. |
 | **qatlas-core statusline** | Configures the status line of the current host. |
 | **qatlas-core backlog-system** | Switches or migrates the authoritative planning system. |
+| **qatlas-core migrate** | Brings an existing project knowledge space onto the fixed folders, types and names. |
 | **qatlas-mode adhd** | Shapes the collaboration for the rest of the session so a reader with ADHD can act on it. |
 | **qatlas-help [topic]** | Guides through Qatlas like a handbook. |
 | **qatlas-dev [lite\|full\|ultra\|off]** | Sets the level of the code method for the session or turns it off. |
