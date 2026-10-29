@@ -6,8 +6,6 @@ description: >
 disable-model-invocation: true
 argument-hint: "[arch] [Idee oder Entscheidungsfrage]"
 license: MIT
-type: skill
-edit: locked
 ---
 
 # Qatlas Council
