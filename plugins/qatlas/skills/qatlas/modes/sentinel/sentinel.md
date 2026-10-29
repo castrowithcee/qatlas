@@ -53,7 +53,7 @@ Read each one completely at the stated time:
    run](../../references/git-parallel.md), [the git norm](../../../qatlas-core-git/SKILL.md) and its
    [commit reference](../../../qatlas-core-git/references/playbook-commit.md). With `--fly`, additionally the
    flag file from "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
-2. **When `orchestra.yaml` is missing, invalid or a model looks doubtful:** [setting up the
+2. **When `team.yaml` is missing, invalid or a model looks doubtful:** [setting up the
    orchestration](../../references/playbook-orchestra.md).
 3. **If user or project instructions require pull requests, before the first orchestrator:** [integration via
    pull requests](../../references/playbook-git-pr.md).
@@ -80,7 +80,7 @@ Read each one completely at the stated time:
    packages beyond the remaining run budget, adopts the running orchestrators, reconstructs the state from
    `list`, `report` (including `plan`) and the planning system and continues `wait` from the `cursor` of
    `list`. Without such an order, the rule above applies.
-3. For each intended host, check its section in `orchestra.yaml` with a valid orchestrator model and its CLI
+3. For each intended host, check its section in `team.yaml` with a valid `lead` entry and its CLI
    on the `PATH`: `claude` for Claude Code, `codex` for Codex. The default is your own host; a run directive
    may assign packages to another host.
 4. Recognize from user and project instructions whether they require integration via pull requests; if so,
@@ -138,8 +138,8 @@ Start each package in the repo root; the script distributes the panes over windo
 add --repo <repo-root> --package <package> --label "<project>·orchestrator" --title "<project>·<package> · <host>" --cwd <repo-root> -- <cli>
 ```
 
-- Claude Code: `claude --model <orchestrator> '/qatlas run <tasks> [--limit <n>] <run directive>'`
-- Codex: `codex -m <orchestrator> '$qatlas run <tasks> [--limit <n>] <run directive>'`
+- Claude Code: `claude --model <lead> '/qatlas run <tasks> [--limit <n>] <run directive>'`
+- Codex: `codex -m <lead> '$qatlas run <tasks> [--limit <n>] <run directive>'`
 
 Quote the prompt simply in the shell so that `$qatlas` is not expanded. Set `--limit` to the package size if
 it exceeds five. Never pass on `--fly`: an orchestrator always asks you, and whether you ask the user is
@@ -154,7 +154,7 @@ decided by your own `--fly`. The run directive reads in essence:
 > If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
 > per task from `<basis>`. Before every handover, merge the current `<basis>` into the task branch, resolve
 > conflicts yourself and then check completely; full tests run via `node <tools> slot -- <test command>`.
-> Start every worker with a profile from `orchestra.yaml` and with model and effort set explicitly. Before
+> Start every worker with a profile from `team.yaml` and with model and effort set explicitly. Before
 > every commit, run the protection check as its own command and evaluate its exit code before you commit.
 >
 > Hand over every checked task with `node <script> handover --repo <repo-root> --package <package> --task
@@ -241,7 +241,7 @@ until your `integrated`. Integrate handovers one at a time and log every integra
    rule](../../references/playbook-acceptance.md). With pull requests, `handover` has already checked that
    the branch carries one non-merge commit, or a `cut-exception`. If that exception does not hold in the
    sense of the commit boundary, return the handover as `rework <cut>` with the required cut; that does not
-   count as a correction attempt. If a worker ran without a profile from `orchestra.yaml` or with inherited
+   count as a correction attempt. If a worker ran without a profile from `team.yaml` or with inherited
    instead of explicitly set effort, log that as `abweichung`; it is not a reason for correction.
 2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. A conflict, including one that arises
    when catching up with the base later, you return as `rework <reason with files>`; it does not count as a
