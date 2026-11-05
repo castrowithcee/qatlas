@@ -603,6 +603,37 @@ try {
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /is not an ancestor of "head"/);
 
+  // checks evidence: tree bound to the handed-over state.
+  c = setup('checks');
+  const tree = git(c.repo, 'rev-parse', 'task^{tree}');
+  const wrongTree = '1'.repeat(40);
+  const entry = (t, exit = 0) => `  - command: node test\n    exit: ${exit}\n    tree: "${t}"\n`;
+  const handChecks = fm => { write(c.report, `---\n${fm}---\nbody\n`); return spawnSync(process.execPath, [team, 'handover', '--repo', c.repo,
+    '--package', 'p', '--task', 't', '--report', c.report, '--timeout', '0.1'], { encoding: 'utf8', env: env(c.stubDir) }); };
+  r = handChecks(`branch: task\nchecks:\n${entry(tree, 1)}`);
+  assert.notStrictEqual(r.status, 2, r.stderr);
+  r = handChecks(`branch: task\nchecks:\n${entry(wrongTree)}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, new RegExp(`checks\\[0\\].*${wrongTree}.*${tree}`));
+  r = handChecks(`checks:\n${entry(tree)}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"branch" must be a non-empty string/);
+  for (const bad of ['checks: []\n', `checks:\n  - command: x\n    tree: "${tree}"\n`, 'checks:\n  - command: x\n    exit: 0\n    tree: zz\n']) {
+    r = handChecks(`branch: task\n${bad}`);
+    assert.strictEqual(r.status, 2, bad);
+    assert.match(r.stderr, /Handover rejected/);
+  }
+  r = handChecks('branch: task\n');
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"checks" is required/);
+  // PR mode: checks bind to head^{tree}.
+  const prFm = t => `pr-title: t\npr-body: b\nbranch: task\nbase: main\nlast: true\npr: 16\nhead: ${c.sha}\npushed: ${c.sha}\nchecks:\n${entry(t)}`;
+  r = handChecks(prFm(tree));
+  assert.notStrictEqual(r.status, 2, r.stderr);
+  r = handChecks(prFm(wrongTree));
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /has tree 1{40}/);
+
   // Two milestones at the first push: cut rejects before the push, a handover with pushed = second milestone too.
   c = setup('cut', { extra: ['d.txt'] });
   const cutRun = (cc, branch = 'task') => spawnSync(process.execPath, [team, 'cut', '--repo', cc.repo, '--branch', branch,
