@@ -4,8 +4,6 @@ description: >
 type: task
 edit: shared
 status: draft         # draft | ready | next | in-progress | review | waiting | done
-created: YYYY-MM-DD
-updated: YYYY-MM-DD
 ---
 
 # Aufgabe: <Titel>

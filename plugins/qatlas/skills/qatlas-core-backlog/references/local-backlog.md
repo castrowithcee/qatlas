@@ -43,8 +43,8 @@ Never cut by a hard token, line or character limit. If even the still valid task
 executed in one session, cut the remaining work anew deliberately; remove no binding decision or necessary
 reason just for a smaller file.
 
-Before a new task read [the canonical task template](../../../store/backlog/task.md) fully, before a new
-project head also [the canonical project template](../../../store/backlog/project-readme.md). These
+Before a new task read [the canonical task template](../assets/task.md) fully, before a new
+project head also [the canonical project template](../assets/project-readme.md). These
 templates apply even without the planning skill; user templates under `.qatlas-project/templates/` do not
 replace them.
 

@@ -17,8 +17,7 @@ edit: locked
    whether an existing file of the same type and context should grow instead; a policy file per context
    collects further policies of that context.
 4. **Template:** Before a recurring user-owned structure, check `.qatlas-project/templates/`. If the task
-   requires existing assets or templates of Qatlas, read the [Store index](../../../store/STORE.md), choose
-   the fitting entry and open only its files.
+   requires a template of Qatlas, use the one the responsible skill ships in its `assets/`.
 5. **Name:** Name it `<type>-<slug>.md`, a task `task-<id>-<slug>.md`.
 6. **Frontmatter:** Set it for Markdown by the frontmatter schema.
 7. **Navigation:** If the new content must be read for specific work, add an unambiguous read condition to

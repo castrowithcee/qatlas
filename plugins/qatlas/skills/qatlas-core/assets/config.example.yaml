@@ -1,0 +1,9 @@
+# Global Qatlas plugin configuration at ~/.qatlas/plugins/config.yaml. A project configuration at
+# <repo>/.qatlas/plugins/config.yaml may override protection; a missing project value inherits.
+format: 1
+
+protection:
+  # block | allow
+  secrets: block
+  # block | ask | warn | allow
+  personal-data: ask
