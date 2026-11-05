@@ -194,8 +194,9 @@ integrator loads no skill of its own. Add the part of the user's run directive t
 ## Monitoring
 
 Wait with `wait --repo <repo-root> --since <cursor>`. Begin with `--since 0` and afterwards pass the `cursor`
-of the last output each time, so that no event is lost. It returns on one of the events `question`, `done`,
-`exited`, `stale`, `disk` or `erfasst`, or after a timeout; handovers go to the integrator and wake you
+of the last output each time, so that no event is lost. Pass `--code-repo <path>` where the code lies in another
+repo, so that `health` sees its test slots. It returns on one of the events `question`, `done`,
+`exited`, `stale`, `disk`, `health` or `erfasst`, or after a timeout; handovers go to the integrator and wake you
 never. `wait` is the only monitoring: build no monitors, crons or wait loops of your own. If the host can run
 commands in the background, do so, so that you stay available to the user.
 
@@ -223,6 +224,13 @@ Handle each event:
   of the package worktree running or waiting in a slot or resource per `slot status`, and at most once per
   standstill phase. A second `stale` after a nudge you report to the user; with `--fly` you secure the
   package's open tasks as for `exited`.
+- **`health`:** Fact-based check, at most once per `--health` minutes (default 30) per pane, in addition to
+  the screen-based `stale`. It reports a pane whose process is gone although the pane lives, or whose host
+  status is busy or waiting although neither its transcript, a running subagent nor any test slot or resource
+  of the code repo showed activity for a full interval. The event names the finding and the idle times; where
+  the host data is not readable (always for Codex) it stays silent and `list` shows `health: unknown`. Check
+  the pane with `capture` or `list`, nudge once with `nudge` while no signal is open, and treat a repeated
+  `health` for the same pane like `stale` after a nudge.
 - **`disk`:** Free space fell below `--min-free` GB (default 5). Run the cleanup step the project names for
   low space, otherwise report it to the user.
 - **`erfasst`:** A lead or the integrator recorded a draft; proceed as described in "Shaping new drafts".

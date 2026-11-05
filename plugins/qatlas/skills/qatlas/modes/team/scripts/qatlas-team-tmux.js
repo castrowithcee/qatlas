@@ -15,7 +15,7 @@
 // supervisor starts it after the leads. list shows the role of every pane; report counts no package for it.
 // Events are JSON lines in <repo>/.qatlas/local/team/events.jsonl and the single source of truth for
 // answers. `seq` is the 0-based line index, derived on read, not stored. Waking types: question,
-// handover, done, exited, stale, disk; start, plan, answer, picked, nudge and all types written via log
+// handover, done, exited, stale, disk, health; start, plan, answer, picked, nudge and all types written via log
 // except erfasst do not wake.
 // `wait --role supervisor|integrator` (default supervisor) routes them: the integrator receives only
 // handover; the supervisor receives all other waking types, also those of the integrator pane (its question,
@@ -37,7 +37,7 @@
 // Refs resolve in --code-repo (default --repo), so code may live in a repo embedded in the control repo;
 // run files always stay in --repo.
 // The supervisor's `wait` also watches itself, so the supervisor needs no monitor of its own; only it detects
-// and writes exited, stale and disk, under an exclusive lock directory (detect.lock, stale after
+// and writes exited, stale, disk and health, under an exclusive lock directory (detect.lock, stale after
 // LOCK_STALE_MS) so concurrent supervisor calls never write one event twice. stale: a live pane without
 // open signal whose conversation part has not changed for --stale minutes (once per standstill phase;
 // the state lives in pane options and so survives across wait calls). While the host shows that the
@@ -45,7 +45,19 @@
 // limit is WAITING_FACTOR times --stale, so a hung worker is still reported; the same holds while a `slot`
 // command of qatlas-run-tools.js (waiting for a test slot or resource, or running under one) is a descendant of
 // the pane process, since it prints once and then stays silent. disk: free space of the repo
-// filesystem fell below --min-free GB (once per undershoot). nudge is the only way to write into a pane.
+// filesystem fell below --min-free GB (once per undershoot). health: fact-based look at every live pane,
+// at most once per --health minutes (default 30; fractions allowed) per pane; unlike stale it reads
+// host facts, not the screen. Anomaly: the pane process is gone while the pane lives (pane pid or the pid
+// of its Claude Code session file), or the host status is busy/working/waiting without any activity for a
+// full interval: no write to the main transcript, none to a not finished subagent transcript, no busy or
+// queued test slot or resource of the code repo (--code-repo, default --repo; `slot status`; any of that
+// repo counts, not only the pane's worktree).
+// A pane with an open signal never counts as waiting. Written once per anomaly phase; a healthy check
+// re-arms it. Host data is read through ~/.claude/sessions/<pid>.json (field tmux names the pane) and
+// ~/.claude/projects/*/<sessionId>.jsonl plus <sessionId>/subagents/ (only mtimes and the finished flag
+// of agent-<id>.meta.json); if it is missing or unreadable (Codex panes always) the result is unknown
+// and no event is written. State lives in pane options @qatlas-health (ok|anomaly|unknown, shown by list as
+// health) and @qatlas-health-at (ms of the last check). nudge is the only way to write into a pane.
 // If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
 // Context fill of Claude Code sessions is measured, not estimated: add starts a Claude command with a fixed
 // --session-id (an existing one in the command is reused) and stores it as pane option @qatlas-session; other
@@ -62,7 +74,7 @@
 //   qatlas-team-tmux.js add --repo <root> (--package <package> | --role integrator) --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-team-tmux.js list --repo <root>
 //   qatlas-team-tmux.js context (--repo <root> [--package <package> | --role integrator] | --self)   (without selector: all panes)
-//   qatlas-team-tmux.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>]
+//   qatlas-team-tmux.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>] [--health <minutes, default 30>] [--code-repo <path>]
 //   qatlas-team-tmux.js nudge --repo <root> (--package <package> | --role integrator) --text <text>   (refused while the pane has an open signal)
 //   qatlas-team-tmux.js title --repo <root> (--package <package> | --role integrator) --title <title>
 //   qatlas-team-tmux.js ask --repo <root> (--package <package> | --role integrator) --question <question> [--timeout <seconds>]
@@ -86,7 +98,7 @@ const MAX_PANES = 4;
 const NARROW = 80;
 const MARK = '@qatlas-team';
 const SOCKET = 'qatlas-team';
-const WAKING = new Set(['question', 'handover', 'done', 'exited', 'stale', 'disk']);
+const WAKING = new Set(['question', 'handover', 'done', 'exited', 'stale', 'disk', 'health']);
 const SUPERVISOR_WAKING = new Set([...[...WAKING].filter(type => type !== 'handover'), 'erfasst']);
 const LOCK_STALE_MS = 30000;
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
@@ -158,9 +170,10 @@ function panes(win) {
       const kind = option(pane, '@qatlas-kind');
       const text = option(pane, '@qatlas-text');
       const task = option(pane, '@qatlas-task');
+      const health = option(pane, '@qatlas-health');
       const detail = kind === 'handover' ? { report: option(pane, '@qatlas-report') } : kind && text ? { question: text } : {};
       return { pane, package: option(pane, '@qatlas-package'), role: option(pane, '@qatlas-role') || 'lead', title, dead: dead === '1',
-        ...(kind ? { kind } : {}), ...(kind && task ? { task } : {}), ...detail };
+        ...(health ? { health } : {}), ...(kind ? { kind } : {}), ...(kind && task ? { task } : {}), ...detail };
     });
 }
 
@@ -498,6 +511,117 @@ function recordStale(repo, minutes) {
   }
 }
 
+const SAFE_ID = /^[A-Za-z0-9-]{8,64}$/;
+const BUSY = new Set(['busy', 'working', 'waiting']);
+const MAX_HOST_FILE = 65536;
+
+const aliveProcess = pid => {
+  try { process.kill(pid, 0); return true; } catch (error) { return error.code === 'EPERM'; }
+};
+const mtime = file => { try { return fs.statSync(file).mtimeMs; } catch { return null; } };
+
+// Session files of the host that name a tmux pane: pane id -> numeric/status fields only.
+function hostSessions() {
+  const dir = path.join(os.homedir(), '.claude', 'sessions');
+  const found = new Map();
+  let names;
+  try { names = fs.readdirSync(dir).filter(n => /^\d+\.json$/.test(n)); } catch { return found; }
+  for (const name of names) {
+    try {
+      const file = path.join(dir, name);
+      if (fs.statSync(file).size > MAX_HOST_FILE) continue;
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (!Number.isInteger(data.pid) || data.pid <= 0 || typeof data.tmux !== 'string' || typeof data.status !== 'string'
+        || !SAFE_ID.test(data.sessionId) || !Number.isFinite(data.statusUpdatedAt)) continue;
+      const pane = data.tmux.slice(data.tmux.lastIndexOf('.') + 1);
+      const entry = { pid: data.pid, sessionId: data.sessionId, status: data.status, statusAt: data.statusUpdatedAt };
+      const known = found.get(pane);
+      // A dead leftover file must not hide the live session of the same pane.
+      if (!known || (aliveProcess(entry.pid) && !aliveProcess(known.pid)) || (aliveProcess(entry.pid) === aliveProcess(known.pid) && entry.statusAt > known.statusAt)) found.set(pane, entry);
+    } catch { /* unreadable: unknown */ }
+  }
+  return found;
+}
+
+// Newest write to the main transcript and to not finished subagent transcripts of a session; null if the
+// main transcript is not found.
+function transcriptActivity(sessionId) {
+  const root = path.join(os.homedir(), '.claude', 'projects');
+  let slugs;
+  try { slugs = fs.readdirSync(root); } catch { return null; }
+  let main = null;
+  let sub = null;
+  for (const slug of slugs) {
+    const m = mtime(path.join(root, slug, sessionId + '.jsonl'));
+    if (m !== null) main = Math.max(main ?? 0, m);
+    const dir = path.join(root, slug, sessionId, 'subagents');
+    let names = [];
+    try { names = fs.readdirSync(dir).filter(n => /^agent-[A-Za-z0-9-]+\.jsonl$/.test(n)); } catch { /* none */ }
+    for (const name of names) {
+      let finished = false;
+      try { finished = JSON.parse(fs.readFileSync(path.join(dir, name.replace(/\.jsonl$/, '.meta.json')), 'utf8')).finished === true; } catch { /* running */ }
+      const t = mtime(path.join(dir, name));
+      if (!finished && t !== null) sub = Math.max(sub ?? 0, t);
+    }
+  }
+  return main === null ? null : { main, sub };
+}
+
+// True if the code repo has a busy or queued test slot or resource; null if slot status is not available.
+function testActive(repo) {
+  try {
+    const status = JSON.parse(execFileSync(process.execPath, [path.join(__dirname, '..', '..', '..', 'scripts', 'qatlas-run-tools.js'), 'slot', '--repo', repo, 'status'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 10000 }));
+    const lists = [status.busy, status.waiting, ...(Array.isArray(status.resources) ? status.resources.flatMap(r => [r?.busy, r?.waiting]) : [])];
+    return lists.some(list => Array.isArray(list) && list.length > 0);
+  } catch { return null; }
+}
+
+// Facts for one live pane: { state: ok|anomaly|unknown, finding?, text? }. Never reads transcript content.
+function paneHealth(p, session, test, now, minutes) {
+  const panePid = Number(option(p.pane, 'pane_pid'));
+  if (Number.isInteger(panePid) && panePid > 0 && !aliveProcess(panePid)) return { state: 'anomaly', finding: 'pane process is gone while the pane is alive' };
+  if (!session) return { state: 'unknown' };
+  if (!aliveProcess(session.pid)) return { state: 'anomaly', finding: 'host session process is gone while the pane is alive' };
+  if (p.kind || !BUSY.has(session.status)) return { state: 'ok' };
+  const activity = transcriptActivity(session.sessionId);
+  if (!activity) return { state: 'unknown' };
+  const newest = Math.max(activity.main, activity.sub ?? 0);
+  const minutesAgo = t => ((now - t) / 6e4).toFixed(1);
+  if (now - newest < minutes * 60000) return { state: 'ok' };
+  const running = test();
+  if (running === null) return { state: 'unknown' };
+  if (running) return { state: 'ok' };
+  return { state: 'anomaly', finding: `host status ${session.status} without activity`,
+    text: `status ${session.status} since ${minutesAgo(session.statusAt)} min; main transcript idle ${minutesAgo(activity.main)} min; ` +
+      `${activity.sub === null ? 'no running subagent' : `subagent transcript idle ${minutesAgo(activity.sub)} min`}; no running test` };
+}
+
+// Phase state in pane options: @qatlas-health (last result) and @qatlas-health-at (ms). An event is written
+// when a pane turns anomalous; any other result re-arms it.
+function recordHealth(repo, minutes, code) {
+  const now = Date.now();
+  const due = allPanes(repo).filter(p => {
+    if (p.dead) { for (const name of ['@qatlas-health', '@qatlas-health-at']) tmux(['set', '-p', '-u', '-t', p.pane, name]); return false; }
+    const at = Number(option(p.pane, '@qatlas-health-at'));
+    return !at || now - at >= minutes * 60000;
+  });
+  if (!due.length) return;
+  const sessions = hostSessions();
+  let active;
+  const test = () => (active === undefined ? (active = testActive(code)) : active);
+  for (const p of due) {
+    const result = paneHealth(p, sessions.get(p.pane), test, now, minutes);
+    const before = option(p.pane, '@qatlas-health');
+    setOption(p.pane, '@qatlas-health-at', String(now));
+    setOption(p.pane, '@qatlas-health', result.state);
+    if (result.state === 'anomaly' && before !== 'anomaly') {
+      record(repo, 'health', { package: p.package, role: p.role === 'integrator' ? p.role : null, pane: p.pane,
+        text: `Health check: ${result.finding}${result.text ? '; ' + result.text : ''}.` });
+    }
+  }
+}
+
 // The marker file re-arms disk after recovery; add clears it together with the old log.
 function recordDisk(repo, minFree) {
   const stat = fs.statfsSync(repo);
@@ -522,7 +646,7 @@ function nudge() {
   out({ pane, nudged: true });
 }
 
-// Exclusive section for the detection of exited, stale and disk: mkdir is atomic. A lock older than
+// Exclusive section for the detection of exited, stale, disk and health: mkdir is atomic. A lock older than
 // LOCK_STALE_MS (crashed holder) is taken over. A caller that loses the race skips detection for this
 // round; the holder writes the events, the next round reads them.
 function detectLocked(repo, fn) {
@@ -556,9 +680,11 @@ async function wait() {
   };
   const stale = positive('--stale') ?? 20;
   const minFree = positive('--min-free') ?? 5;
+  const health = positive('--health') ?? 30;
+  const code = codeRepo(repo);
   for (;;) {
     if (role === 'supervisor') {
-      detectLocked(repo, () => { recordExits(repo); recordStale(repo, stale); recordDisk(repo, minFree); });
+      detectLocked(repo, () => { recordExits(repo); recordStale(repo, stale); recordDisk(repo, minFree); recordHealth(repo, health, code); });
     }
     const all = events(repo);
     const hits = all.filter(e => e.seq >= since && wakes.has(e.type));
