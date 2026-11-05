@@ -27,8 +27,9 @@ state you hand over is the one on which the complete check, with full tests via 
 <test command>`, was green. Every command that the project instructions assign to an exclusive resource runs
 via `node <tools> slot --resource <name> -- <command>`. A conflict with the base comes back from the
 integrator as `rework`.
-Start every worker with a profile from `team.yaml` and with model and effort set explicitly. Before
-every commit, run the protection check as its own command and evaluate its exit code before you commit.
+Start every worker with a profile as [checking the team](../../references/playbook-team-config.md)
+describes. Before every commit, run the protection check as its own command and evaluate its exit code
+before you commit.
 
 For integration via pull requests you take the lead's part of [integration via pull
 requests](../../references/playbook-git-pr.md): run `cut` before the first push, push only your own task

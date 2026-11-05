@@ -45,7 +45,7 @@ Read each one completely at the stated time:
    team](../../references/playbook-team-config.md) and [selecting
    tasks](../../references/playbook-task-selection.md). With `--fly`, additionally the flag file from
    "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
-2. **When `team.yaml` is missing, invalid or a model looks doubtful:** [setting up the
+2. **When `team.yaml` is invalid, a model looks doubtful or the user wants to set it up:** [setting up the
    team](../../references/playbook-team.md).
 3. **Before the first writing git step:** [the git workflow](../../references/playbook-git-workflow.md),
    [the git norm](../../../qatlas-core-git/SKILL.md) and its

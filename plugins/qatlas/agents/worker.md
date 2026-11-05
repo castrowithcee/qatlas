@@ -1,11 +1,10 @@
 ---
-name: run-low
+name: worker
 description: >-
-  Executes only one scoped worker assignment from an explicitly started Qatlas run or team at effort low.
-effort: low
+  Executes only one scoped worker assignment from an explicitly started Qatlas run or team.
 ---
 
-# Qatlas worker at effort low
+# Qatlas worker
 
 Work only on the assignment you were given, within its scope. Do not start further subagents, do not manage
 branches, and do not create commits. Manage the backlog only when a team supervisor assigns you a shape

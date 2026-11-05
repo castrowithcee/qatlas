@@ -1,5 +1,6 @@
-# Only qatlas run and qatlas team read the user-owned copy at ~/.qatlas/plugins/team.yaml.
-# This file changes no host settings and controls no other subagent calls.
+# Optional. Only qatlas run and qatlas team read the user-owned copy at ~/.qatlas/plugins/team.yaml;
+# without it every role uses the host default. It changes no host settings and no other subagent calls.
+# A null model inherits the host default.
 format: 2
 
 # Optional: number of concurrent full test runs per repo for qatlas-run-tools.js slot (default 2).
@@ -36,10 +37,8 @@ hosts:
     lead: null
     worker:
       # Suggestion: Haiku for light, Sonnet for standard, Opus for demanding.
-      # Qatlas ships agents for low, medium, high, xhigh and max.
-      # Which of them run depends on the chosen Claude model and host limits.
-      # Models without effort, such as Haiku 4.5, need effort: null.
-      # Their extended thinking follows the Claude Code session and cannot be set here.
+      # Model values here are aliases such as haiku, sonnet or opus; effort is low, medium, high, xhigh or max
+      # as the chosen model supports it (Claude Code 2.1.292 or later). Models without effort need effort: null.
       light:     { model: haiku,  effort: null }
       standard:  { model: sonnet, effort: high }
       demanding: { model: opus,   effort: high }

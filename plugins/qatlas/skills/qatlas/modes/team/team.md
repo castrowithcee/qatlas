@@ -64,7 +64,7 @@ Read each one completely at the stated time:
    run](../../references/git-parallel.md), [the git norm](../../../qatlas-core-git/SKILL.md) and its
    [commit reference](../../../qatlas-core-git/references/playbook-commit.md). With `--fly`, additionally the
    flag file from "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
-2. **When `team.yaml` is missing, invalid or a model looks doubtful:** [setting up the
+2. **When `team.yaml` is invalid, a model looks doubtful or the user wants to set it up:** [setting up the
    team](../../references/playbook-team.md).
 3. **If user or project instructions require pull requests, before the first lead:** [integration via
    pull requests](../../references/playbook-git-pr.md).
@@ -93,9 +93,9 @@ Read each one completely at the stated time:
    one, it starts an integrator as described in "Starting the integrator"), reconstructs the state from
    `list`, `report` (including `plan`) and the planning system and continues `wait` from the `cursor` of
    `list`. Without such an order, the rule above applies.
-3. For each intended host, check its section in `team.yaml` with valid `lead` and `integrator` entries and its
-   CLI on the `PATH`: `claude` for Claude Code, `codex` for Codex. The default is your own host; a run
-   directive may assign packages to another host.
+3. For each intended host, check its section in `team.yaml`, if there is one, and its CLI on the `PATH`:
+   `claude` for Claude Code, `codex` for Codex. The default is your own host; a run directive may assign
+   packages to another host.
 4. Recognize from user and project instructions whether they require integration via pull requests; if so,
    [integration via pull requests](../../references/playbook-git-pr.md) applies. In that case, check whether
    a merge queue is active in the target repo, whether branch protection requires an up-to-date state before
@@ -181,8 +181,8 @@ add --repo <repo-root> --role integrator --label "<project>·integrator" --title
 - Claude Code: `claude --model <integrator> '<integrator directive>'`
 - Codex: `codex -m <integrator> '<integrator directive>'`
 
-`<integrator>` is the `integrator` model of `team.yaml`. Quote as for the leads. The integrator directive
-reads in essence:
+`<lead>` and `<integrator>` are the models of `team.yaml`; without one, leave out `--model` or `-m`. Quote
+as for the leads. The integrator directive reads in essence:
 
 > You are the integrator of a team. Read `<plugin-root>/skills/qatlas/modes/team/integrator.md` completely
 > and work by it. `<repo-root>` is the repo root, `<script>` the control script and `<basis>` the integration
@@ -252,7 +252,7 @@ Handle each event:
 If the authoritative planning system is external, have every draft logged as `erfasst` shaped by its own
 subagent in the background, so that your context stays lean. With the local backlog, only the integration
 owner writes the spine; the draft then waits for a later `shape`. Start the subagent with the `standard` or
-`demanding` profile from `team.yaml` as [checking the team](../../references/playbook-team-config.md)
+`demanding` profile as [checking the team](../../references/playbook-team-config.md)
 describes. Its assignment reads in essence:
 
 > Read `<plugin-root>/skills/qatlas/SKILL.md` completely and work the mode `shape <task> --fly`. You shape

@@ -38,19 +38,6 @@ If Doctor newly created `AGENTS.md` from `scaffold/agents-template.md`, make it 
    materially changes a pending action.
 4. Leave no placeholders or setup comments behind.
 
-## Set up the run configuration
-
-If `~/.qatlas/plugins/team.yaml` is missing, read the commented template at
-`<plugin-root>/store/config/team.example.yaml`. Determine the model IDs or native aliases available for the
-current host and the effort levels supported by the respective model. For Claude Code, the template proposes
-Haiku, Sonnet and Opus for `light`, `standard` and `demanding`; check these combinations against the provider
-actually used and do not adopt them unchecked. Fill in only the section of the current host with concrete
-values and remove unused host sections. For a model without effort support, such as Haiku 4.5, set
-`effort: null`. Fill `supervisor`, `integrator` and `lead` with a concrete model. Show the user the finished
-version and ask whether to create it as the user's own file. Write no placeholders and never replace an
-existing file wholesale. Without confirmed model values, `run` stays blocked until a later setup; the rest of
-the setup is complete.
-
 ## Clarify git
 
 If Doctor reports a missing git repo, briefly ask whether to run `git init`. Act only after the answer.
@@ -78,8 +65,6 @@ suffice:
 - `~/.qatlas/plugins/config.yaml` carries the user-wide plugin configuration.
 - `~/qatlas/` is the user's own library. `AGENTS.qatlas.md` in it contains the global working agreement and
   belongs to the user from the moment it is created.
-- `~/.qatlas/plugins/team.yaml` sets the roles, models and effort levels for `qatlas run` only, if it was
-  created with the user in this setup.
 
 Always close with `More: qatlas-help`. If there was nothing to do, answer only:
 

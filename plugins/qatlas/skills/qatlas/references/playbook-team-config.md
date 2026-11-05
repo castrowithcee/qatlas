@@ -1,7 +1,7 @@
 ---
 description: >
-  Check the user's own team.yaml for run and team and map worker profiles with explicitly set model and
-  effort to the host's subagents.
+  Read the optional team.yaml for run and team, fall back to the host defaults without it and start workers
+  with the model and effort of their profile.
 type: playbook
 edit: locked
 license: MIT
@@ -9,25 +9,33 @@ license: MIT
 
 # Check the team
 
-Before task selection, read `~/.qatlas/plugins/team.yaml`. This user-owned file applies only to `run` and
-`team` and is the only source for the chosen models and effort levels. The leads of `run` and `team` start
-with the model from `lead`; `team` starts its integrator with the model from `integrator`; worker profiles
-come from `worker`. `supervisor` is the user's own session, which `run` and `team` do not start. Check that
-the format, the section of the current host, the `lead` model, for `team` the `integrator` model and the
-required worker profiles are present and valid. If the file or its host section is missing, an entry is
-invalid or a model looks outdated or doubtful, set it up following "Set up the team" and start no task until
+`~/.qatlas/plugins/team.yaml` is optional and belongs to the user; it applies only to `run` and `team`.
+Without the file, or without a section for the current host, every role runs on the host default: leads and
+the integrator start without an explicit model, and every worker inherits model and effort of its lead. The
+profiles keep their meaning for cutting the work:
+
+- `light`: narrow task with a clear approach and a direct check.
+- `standard`: several dependent steps or technical trade-offs within the task.
+- `demanding`: hard diagnosis or tightly coupled implementation that cannot sensibly be cut smaller.
+
+If the file exists, read it before task selection; its `profiles` replace these descriptions. The leads of
+`run` and `team` start with the model from `lead`, the integrator of `team` with the model from
+`integrator`, and workers with their profile from `worker`. `supervisor` is the user's own session, which
+`run` and `team` do not start. A `null` model inherits. If the file is invalid, an entered model looks
+outdated or doubtful, or the user asks for it, set it up following "Set up the team" and start no task until
 it is clarified.
 
-The profiles are an allowlist: use neither a model that is not entered nor a different effort setting. Set
-`effort: null` only for a model that supports no effort; for all other workers, effort is set explicitly and
-not inherited from the lead.
+Entered profiles are an allowlist: use neither another model nor another effort setting than the one
+entered. `effort: null` marks a model without effort support.
 
-Codex sets model and reasoning effort explicitly on spawn. For the effort levels `low`, `medium`, `high`,
-`xhigh` and `max`, Claude Code uses the plugin subagent `qatlas:run-low`, `qatlas:run-medium`,
-`qatlas:run-high`, `qatlas:run-xhigh` or `qatlas:run-max` respectively and passes the model explicitly on the
-call. Any other subagent type inherits effort and possibly model from the lead and is not allowed
-for workers. Choose only a level supported by the respective host and model; `ultra` is not a Claude Code
-effort level. For `effort: null`, use `qatlas:run-no-effort` without effort frontmatter, and only for a model
-without effort support. Its extended thinking follows the Claude Code session and is not controlled by
-`team.yaml`. If the matching subagent is not available or the host replaces the model or a chosen effort
-level with other values, do not start with this profile. Do not fall back to a different effort level.
+Start every worker like this:
+
+- **Claude Code:** subagent type `qatlas:worker`, with the profile's `model` and `effort` as parameters of
+  the call; leave out a parameter the profile does not set or sets to `null`. The call accepts model aliases
+  such as `haiku`, `sonnet` or `opus`, not full model IDs. The effort parameter needs Claude Code 2.1.292 or
+  later; on an older version, start no profile that sets effort and name the update as the prerequisite.
+- **Codex:** set model and reasoning effort explicitly on spawn.
+
+Choose only a level the host and model support; `ultra` is not a Claude Code effort level. If the host
+replaces the model or the chosen effort with other values, do not start with this profile, and do not fall
+back to another effort level.

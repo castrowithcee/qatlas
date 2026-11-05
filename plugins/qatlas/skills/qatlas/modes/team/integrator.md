@@ -62,8 +62,8 @@ until its `integrated`. Integrate handovers one at a time and log every integrat
    rule](../../references/playbook-acceptance.md). With pull requests, `handover` has already checked that
    the branch carries one non-merge commit, or a `cut-exception`. If that exception does not hold in the
    sense of the commit boundary, return the handover as `rework <cut>` with the required cut; that does not
-   count as a correction attempt. If a worker ran without a profile from `team.yaml` or with inherited
-   instead of explicitly set effort, log that as `abweichung`; it is not a reason for correction.
+   count as a correction attempt. If a worker ran with another model or effort than its profile in
+   `team.yaml`, log that as `abweichung`; it is not a reason for correction.
 2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. If the code lies in a repo other than
    the control root, pass it with `--repo <code-repo>` here and to `land`; `<basis>` and the control branch
    then refer to that repo. A conflict, including one that arises when catching up with the base later, you
