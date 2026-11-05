@@ -110,7 +110,7 @@ shared checks as step 3 says and skip none.
   skipped check with `log --type skipped --task <id> --text "<check and reason>"`.
 - **Final check:** after the last integration of the run and before the integrator's `done`, run once via
   `slot` on the final state every expensive check that was skipped at least once in this run. If it is red,
-  log it with `log --type risiko` and name it in the closing under `Entscheiden`; the supervisor records a
+  log it with `log --type risiko` and name it in the closing under `Decide`; the supervisor records a
   draft for it. Tasks already integrated stay as they are.
 
 `land` deletes the remote branch itself once it has proven the squash; the authorization for push and merge

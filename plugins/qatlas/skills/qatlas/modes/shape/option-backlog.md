@@ -1,82 +1,59 @@
 ---
 description: >
-  Shape-Variante für einen bestehenden Task oder einen Backlog-Ausschnitt: Bestand bilden, Drafts einzeln
-  reifen, ruhende Arbeit prüfen und den nächsten Horizont disponieren.
+  Shape variant for an existing task or a backlog section: build the inventory, mature drafts one by one,
+  check dormant work and schedule the next horizon.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Vorhandene Arbeit ausarbeiten
+# Shape existing work
 
-Aus vorhandenen Tasks entsteht wieder ein verständlicher, ausführbarer und bewusst geordneter
-Arbeitsvorrat. Dieses Verfahren ist ein optionaler Wiedereinstieg bei unklaren, manuell angelegten oder
-durch neue Ergebnisse überholten Aufgaben. Er verändert Planung und Taskverträge, führt aber keine
-fachliche Arbeit aus. Nach der Ausarbeitung einer neuen Idee ist er kein Pflichtschritt vor `run`.
+Existing tasks become an understandable, executable and deliberately ordered work supply again. The variant
+changes planning and task contracts but does no substantive work; after an idea has been shaped, it is no
+mandatory step before `run`.
 
-`shape <eindeutiger Task>` wählt genau diesen bestehenden Task. `shape backlog [Scope]` wählt die
-angegebene Teilmenge; ohne weiteren Scope ist der gesamte maßgebliche offene Backlog gewählt. Das
-Hauptziel bei einem Backlog-Scope ist, die offenen Vertragsfragen seiner Drafts einzeln zu besprechen und
-jeden geklärten Task auf `ready` zu setzen. Ein angegebener Backlog-Scope begrenzt die Bearbeitung auf
-einen Task, ein Projekt oder eine andere im Planungssystem eindeutig bestimmbare Teilmenge. Frage nicht
-nach einem Scope, nur weil der Nutzer `shape backlog` ohne weiteren Scope aufgerufen hat.
+`shape <unambiguous task>` selects exactly this task. `shape backlog [scope]` selects a task, a project or
+another subset the planning system determines unambiguously, without scope the entire open backlog; do not
+ask for a scope only because none was given. The main goal is to settle the open contract questions of its
+drafts one by one and to set every clarified task to `ready`. This variant also checks dormant work,
+prioritises scopes against each other and deliberately changes an existing `next` set. A draft that needs a
+new examination and cut is worked on here at its existing place.
 
-Verwende diesen Zweig außerdem, wenn ruhende Arbeit geprüft, mehrere Scopes gegeneinander priorisiert oder
-eine bestehende `next`-Menge bewusst geändert werden soll. Ein vorhandener Draft kann eine erneute
-Untersuchung und denselben fachlichen Zuschnitt wie bei `shape` brauchen; bearbeite ihn hier am bestehenden
-Ort, statt für die Klärung einen anderen Einstieg zu verlangen.
+## Build the inventory
 
-## Bestand bilden
+1. Resolve the scope in the authoritative planning system. If `.qatlas-project/README.md` exists, follow only
+   the read conditions relevant to the scope and its open contract questions.
+2. Read only roster or external metadata first: status, short state, order, dependencies, ownership and
+   existing follow-ups.
+3. Form separate candidate sets for `review`, `draft`, `waiting`, `ready` and `next`, and from the drafts, in
+   substantively sensible order, the conversation queue. Read a task fully only when it is its turn; with a
+   large inventory hold only a sensible section and the current task in context. Its size is no reason to
+   stop after the overview or to skip drafts unchecked.
+4. Change no `in-progress` task with a running or unknown worker.
 
-1. Löse einen angegebenen Scope im maßgeblichen Planungssystem auf; ohne Angabe gilt der gesamte offene
-   Backlog.
-2. Ist `.qatlas-project/README.md` vorhanden, folge von dort nur den Lesebedingungen, die für den gewählten
-   Scope und seine offenen Vertragsfragen relevant sind. Fachliche Quellen außerhalb des Wissensraums
-   bleiben für ihren Gegenstand maßgeblich; bloßes Lesen oder automatische Bereitstellung erhöht ihren Rang
-   nicht.
-3. Lies zuerst nur Roster beziehungsweise externe Metadaten: Status, Kurzstand, Reihenfolge,
-   Abhängigkeiten, Eigentümerschaft und vorhandene Wiedervorlagen.
-4. Bilde daraus getrennte Kandidatenmengen für `review`, `draft`, `waiting`, `ready` und `next`.
-   Bilde aus den Drafts in fachlich sinnvoller Reihenfolge die Gesprächsschlange. Lies jeden Task erst
-   vollständig, wenn er an der Reihe ist.
-5. Verändere keinen `in-progress`-Task mit laufendem oder unbekanntem Worker.
+## Schedule
 
-Braucht mindestens ein Task der Gesprächsschlange eine echte Nutzerentscheidung, nenne und führe die
-Entscheidungsschlange nach dem gemeinsamen Entscheidungsdialog.
+Work in this order, as far as the scope contains the group:
 
-Bei großen Beständen halte immer nur einen sinnvollen Ausschnitt und den gerade besprochenen Task vollständig
-im Kontext. Die Größe des Bestands ist kein Grund, nach der Übersicht zu stoppen oder Drafts ungeprüft zu
-überspringen.
+1. **Mature drafts one by one.** Name the current task's concrete open contract question about result,
+   scope-in, scope-out, approach, acceptance or execution basis, and answer it yourself from the current
+   project state where it can be evidenced. Work the decisions, conventions and requirements that apply to
+   the task concretely into goal, approach and verifiable acceptance; a source list alone is not enough. A
+   question that needs the user goes to them as the next card; remove superseded variants when you work the
+   answer in. Split a task that is not viable as a bounded assignment or holds independently acceptable
+   results per the cutting block.
+2. **Evidence maturity.** Set a task to `ready` once it reaches the backlog norm's execution maturity. If a
+   question can only be answered by a work result that does not exist yet, leave it `draft` with the exact
+   missing information; order or dependency alone does not evidence that immaturity.
+3. **Human gates.** Settle real `review` handoffs here only if the user includes them explicitly in the same
+   invocation.
+4. **Dormant work.** Lift `waiting` only once its resumption signal has evidently occurred.
+5. **Next horizon.** Preserve, form or consolidate the `next` queue per the horizon block.
 
-## Disponieren
+## Close
 
-Arbeite in dieser Reihenfolge, soweit der gewählte Scope die Gruppe enthält:
-
-1. **Drafts einzeln reifen.** Öffne den ersten Task der Gesprächsschlange und benenne seine konkrete offene
-   Vertragsfrage zu Ergebnis, Scope-in, Scope-out, Vorgehen, Abnahme oder Ausführungsgrundlage. Ermittle eine
-   belegbare Antwort selbst aus dem aktuellen Projektstand. Arbeite die für den Task geltenden
-   Entscheidungen, Konventionen und Anforderungen konkret in Ziel, Vorgehen und überprüfbare Abnahme ein;
-   eine Quellenliste allein reicht nicht. Braucht es eine Nutzerentscheidung, stelle genau die nächste
-   Entscheidung nach dem gemeinsamen Dialog vor und warte auf die Antwort. Arbeite jede geklärte Antwort
-   sofort am fachlich passenden Ort in den aktuellen Taskvertrag ein und entferne überholte Varianten. Ist
-   ein manuell angelegter oder gewachsener Task als abgegrenzter Auftrag nicht tragfähig oder enthält er
-   eigenständig abnehmbare Ergebnisse, teile ihn nach dem Zuschnittblock. Fahre danach mit der nächsten
-   offenen Frage oder dem nächsten Draft fort.
-2. **Reife belegen.** Setze einen Task nach dem Statusmodell des maßgeblichen Planungssystems auf `ready`,
-   sobald er die Ausführungsreife der Backlog-Norm erreicht. Ist eine Frage erst durch ein noch nicht
-   vorhandenes Arbeitsergebnis beantwortbar, belasse den Task als `draft` und halte die genaue fehlende
-   Information fest. Eine Reihenfolge oder Abhängigkeit allein belegt diese Unreife nicht. Beende den Lauf
-   nicht nach der Bestandsaufnahme: Jeder anfangs gewählte Draft wird besprochen oder vom Nutzer
-   ausdrücklich zurückgestellt.
-3. **Menschliche Gates sichtbar machen.** Kläre echte `review`-Übergaben in diesem Modus nur, wenn der Nutzer
-   das ausdrücklich in denselben Aufruf einbezieht.
-4. **Ruhende Arbeit prüfen.** Hebe `waiting` nur auf, wenn das Wiederaufnahmesignal belegt eingetreten ist.
-5. **Nächsten Horizont bilden.** Bewahre, bilde oder konsolidiere die `next`-Queue nach dem
-   Horizontblock.
-
-## Abschluss
-
-Beende erst, wenn jeder anfangs gewählte Draft entweder `ready` ist, mit seiner konkreten derzeit nicht
-klärbaren Frage als `draft` verbleibt oder vom Nutzer ausdrücklich zurückgestellt wurde. Nenne dann die
-Anzahl der weiterhin `draft`, `waiting`, `review` und neu oder weiterhin `next` liegenden Tasks sowie den
-ersten ausführbaren Scope. Starte ihn nicht.
+Finish only when every initially selected draft is `ready`, stays `draft` with its concrete currently
+unanswerable question, or was explicitly deferred by the user. The result of the closing block names how
+many tasks are now `ready`, `next`, `draft`, `waiting` and `review`; its last line names the first executable
+scope.

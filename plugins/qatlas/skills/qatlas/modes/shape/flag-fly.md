@@ -15,11 +15,10 @@ question that would otherwise need the user by [deciding without the user](../..
 with one difference: what it would hand over to the user stays in the draft as a prepared decision instead of
 going to `review`.
 
-Record each prepared decision as a card per [presenting decisions
-briefly](../../references/playbook-decision-card.md), in the language of the task and in its substantively
+Record each prepared decision as a card per [presenting
+decisions](../../references/playbook-decision-card.md), in the language of the task and in its substantively
 fitting section: evidenced state, decision question, options and recommendation. A later `shape` presents it
 from there. The task stays `draft`. Set `ready` only when execution maturity needs no user decision. Record
 every assumption in the task.
 
-In the closing, name instead of the dialogue the tasks with prepared decisions, each with its decision
-question in one line, and the assumptions made.
+In the closing block, the prepared decisions stand under `Decide` and the assumptions under `Assumed`.

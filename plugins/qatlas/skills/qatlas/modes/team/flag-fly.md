@@ -15,7 +15,7 @@ The flag applies to you alone: the leads and the integrator keep asking you and 
 
 Answer a `question` that project knowledge does not settle by the same decision ladder:
 
-- **Assumption:** Pass it on as the answer, record it with `log --type annahme`, and list it under the
-  assumption category (`Angenommen`) of [the closing block](../../references/playbook-closing-block.md).
+- **Assumption:** Pass it on as the answer, record it with `log --type annahme`, and list it under
+  `Assumed` in [the closing block](../../references/playbook-closing-block.md).
 - **Human handoff:** Answer with the instruction to hand the task to `review` and to continue with the
   package's next task.

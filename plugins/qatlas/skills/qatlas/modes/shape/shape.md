@@ -37,9 +37,11 @@ Read each one completely at the stated time:
 2. **Before the first cut, split or working-in of a task:** [cutting tasks](playbook-task-cut.md).
 3. **Before maintaining the `next` queue:** [scheduling the next horizon](playbook-horizon.md).
 4. **Before the first presentation of a real user decision, with `--fly` before recording the first one:**
-   [presenting decisions briefly](../../references/playbook-decision-card.md).
+   [presenting decisions](../../references/playbook-decision-card.md).
 5. **Before the collective commit:** [the git norm](../../../qatlas-core-git/SKILL.md) and its [commit
    reference](../../../qatlas-core-git/references/playbook-commit.md).
+6. **Before the closing:** [the closing block](../../references/playbook-closing-block.md), and presenting
+   decisions if not read yet.
 
 ## Planning system
 
@@ -53,9 +55,7 @@ Only without another directive does the local Qatlas backlog apply. If its scaff
 
 ## Decisions and analysis
 
-If a real user decision on an existing or emerging task remains open after your own examination, guide the
-user through the shared decision dialogue without assuming that they read the tasks in parallel. Free
-questions with which the user first describes an intent not yet formulated are not affected by this.
+Only a decision that stays open after your own examination goes to the user.
 
 The explicit invocation authorizes subagents for separate analysis of the existing state, gathering of
 evidence, risk checks and an independent completeness check. Delegate only independent questions with real
@@ -72,6 +72,5 @@ In this mode, never set `in-progress` or `done`, begin no implementation and exe
 prepares the coming horizon but authorizes no execution.
 
 In every variant, `shape` ends with exactly one local collective commit per affected repo over the files
-changed in this run, so that a following `run` starts from a clean state. The explicit invocation replaces
-the individual approval of the message for this; show message and ID afterwards and push nothing. You do not
-start the run yourself.
+changed in this run, so that a following `run` starts from a clean state; the explicit invocation replaces
+the individual approval of its message. Push nothing. Then close with the closing block.

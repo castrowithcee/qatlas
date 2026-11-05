@@ -40,16 +40,10 @@ send keystrokes by other means.
 `wait`, `ask` and `handover` block until their `--timeout`; set the host's command timeout above it.
 
 The context fill of a Claude Code pane is measured, not estimated: `context --repo <repo-root> [--package
-<package> | --role integrator]` (all panes without a selector) and `context --self` for your own session return
-`tokens`, `window`, `percent`, `source` (`statusline` or `transcript`) and `age` in seconds; `list` shows the same
-object per pane as `context`. `percent` is `null` when only the transcript is available, because it carries no
-window size. `compacted` marks a compaction after the last measured answer. State `unknown` means there is no
-measurement (Codex pane, session not started yet, no statusline).
-`add` starts a Claude command with a fixed `--session-id` and stores it on the pane.
-`context` also decides: `stop` is true when `percent` reaches `--threshold` (reason `threshold`) or is `null`
-after a compaction (reason `compacted`); otherwise `reason` is `below`, or `unknown` without a usable
-measurement, where the caller falls back to its estimate. The threshold is 60 percent for leads and integrator;
-only the user's run directive changes it. `list` carries no decision.
+<package> | --role integrator]` (all panes without a selector) or `context --self` for your own session. Its
+`stop` is true when `percent` reaches `--threshold` or is `null` after a compaction; `reason: unknown` means
+no measurement (Codex pane, session not started, no statusline), and the caller falls back to its estimate.
+The threshold is 60 percent for leads and integrator; only the user's run directive changes it.
 
 ## Invocation
 
@@ -76,7 +70,9 @@ Read each one completely at the stated time:
    pull requests](../../references/playbook-git-pr.md).
 4. **When the integrator has to be restarted, replaced or taken over (the supervisor does not read it
    otherwise):** [the integrator playbook](integrator.md).
-5. **Before the final report:** [the closing block](../../references/playbook-closing-block.md).
+5. **Before the first question to the user or the final report:** [presenting
+   decisions](../../references/playbook-decision-card.md) and [the closing
+   block](../../references/playbook-closing-block.md).
 
 ## Prepare
 
@@ -84,10 +80,10 @@ Read each one completely at the stated time:
    git workflow and the reachability of the authoritative planning system; if it is unreachable, do not start.
    If the supervisor runs inside tmux, the script creates its own session `team--<repo>` in the user's server;
    tell the user the printed way to switch to it. Outside tmux it creates its own server; then tell the user
-   the printed attach command. One window holds four leads; the script opens more in additional windows of the
-   same session. Before the first lead, check the free space of the file system holding the repo against the
-   threshold named in the project instructions, else 5 GB. Below it, run the cleanup step for low space named
-   there; if that does not suffice or none is named, do not start and name the concrete obstacle.
+   the printed attach command. Before the first lead, check the free space of the file system holding the
+   repo against the threshold named in the project instructions, else 5 GB. Below it, run the cleanup step
+   for low space named there; if that does not suffice or none is named, do not start and name the concrete
+   obstacle.
 2. If `list --repo <repo-root>` already shows panes, check each one. If its title carries `FERTIG` or it has
    ended (`dead`), it is a leftover of an earlier run: save it with `capture` and close it with `close`. A
    live pane without `FERTIG` belongs to a running supervisor or to the user; do not start then, and clarify
@@ -148,8 +144,7 @@ handed over to `review` in a secured state consumes one slot of it.
 After the cut, log each package with the run budget fixed at the start: `plan --repo <repo-root> --budget <n>
 --package <package> --tasks <id,id,...>`, so that a successor can reconstruct them.
 
-Tell the user the packages with their tasks, the reason for the cut and the run budget in a few lines, and
-start directly.
+Tell the user in one line how many tasks and leads start and the run budget, and start directly.
 
 ## Starting leads
 
@@ -216,16 +211,17 @@ replacement described in "Finish". The leads measure themselves.
 Keep your context lean: read diffs first as `--stat` and then only the affected spots. What you carry into
 the closing you log immediately with `log` instead of holding it in memory: assumptions as `annahme`,
 deviations from the procedure as `abweichung`, risks not recorded publicly as `risiko`, newly recorded tasks
-as `erfasst` and open user decisions as `entscheiden`, each with package and task. After a compaction of your
+as `erfasst` and open user decisions as `entscheiden`, each with package and task and worded as it will stand
+in the closing block: topic first, a decision with context, question and recommendation, a new task with what
+and why. After a compaction of your
 context or a restart, reconstruct the state as described in "Prepare" step 2, not from memory.
 
 Handle each event:
 
 - **`question`:** If project knowledge supports the answer, reply with `answer --repo <repo-root> --package
   <package> --answer "<answer with source>"`, for a question of the integrator with `answer --repo <repo-root>
-  --role integrator --answer "<answer with source>"`. Otherwise ask the user briefly with package (or
-  integrator), question and recommendation and pass on their answer; with `--fly` you instead answer as the
-  flag file prescribes.
+  --role integrator --answer "<answer with source>"`. Otherwise ask the user with a decision card and pass on
+  their answer; with `--fly` you instead answer as the flag file prescribes.
 - **`done` and `exited`:** Proceed as described in "Finish". A `done` of a lead may carry a `rest`.
 - **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20), or for three
   times that while the host shows that it waits for its own background agent (Claude Code: "Waiting for N
@@ -261,11 +257,11 @@ describes. Its assignment reads in essence:
 
 > Read `<plugin-root>/skills/qatlas/SKILL.md` completely and work the mode `shape <task> --fly`. You shape
 > for the supervisor of a running team: write only to this task and to the tasks you split from it, change
-> no file, create no commit and leave the `next` queue untouched. Return the status of every task and the
-> prepared decision questions.
+> no file, create no commit and leave the `next` queue untouched. Return the status of every task and each
+> prepared decision with context, question and recommendation.
 
-Insert `<plugin-root>` and `<task>` as fixed values. Log every task that stays `draft` with a prepared
-decision as `entscheiden` with its decision question. A task that became `ready` is available for
+Insert `<plugin-root>` and `<task>` as fixed values. Log every prepared decision of a task that stays
+`draft` as `entscheiden`. A task that became `ready` is available for
 replenishment if it lies within the scope of this run; a run over named tasks takes none. The run budget
 stays unchanged.
 
@@ -288,7 +284,7 @@ stays unchanged.
   with `add --role integrator --replace` as described in "Starting the integrator", which saves and closes
   the old pane. Integration rests until it runs.
 - At the end of the team run, run the cleanup steps that native project instructions or project memory name
-  for the end of a run, and name them in the final report.
+  for the end of a run.
 
 **Continuation:** On a `done` with `rest`, save and close the pane as above, then log the continuation with
 `plan --repo <repo-root> --budget <n> --package <new> --tasks <rest> --continues <package>`, with the unchanged
@@ -301,13 +297,11 @@ against the run budget. A `rest` can recur; the same rule applies to the new lea
 remaining executable tasks as described in "Cutting packages" that is independent of all running packages. It
 comprises at most the package size and the rest of the run budget, carries a new package name and starts as
 described in "Starting leads". Never more leads run at the same time than "Cutting packages"
-permits. Log it with `plan` and the unchanged run budget, as at the cut. Tell the user the package with its
-tasks in one line.
+permits. Log it with `plan` and the unchanged run budget, as at the cut.
 
 The run ends when no more replenishment is possible, every remaining pane shows `FERTIG` or has ended, all
-handed-over tasks are integrated or secured as a handover and no shaping subagent is still running. The notes
-of the integrator reach you like those of the leads through `log`, `report` and the closing block. In the
-report, state the metrics from `report --repo <repo-root>` briefly and the remaining remote branches of this
-run collected together. Close with exactly one closing block (`Für dich`, see [the closing
-block](../../references/playbook-closing-block.md)) across all packages; you take its entries from the
-`notes` in `report`, and unpushed commits appear there under `Nicht gepusht`.
+handed-over tasks are integrated or secured as a handover and no shaping subagent is still running. Close
+with exactly one closing block across all packages. Take its entries from the `notes` and its metrics and
+improvements from the counts of `report --repo <repo-root>`; name a remaining remote branch of this run only
+if the user has to act on it. The integrator's ownership ends with the run, so you record the user's answers
+to the block yourself.

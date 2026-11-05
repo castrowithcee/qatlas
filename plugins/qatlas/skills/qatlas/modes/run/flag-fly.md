@@ -13,5 +13,5 @@ The user is unreachable during the run; no step waits for their answer. Before t
 everything that would stall the run later, and decide every question that would otherwise need the user by
 [deciding without the user](../../references/playbook-autonomy.md). You set a human handoff to `review`
 after the acceptance block and continue with the next independent task. You record every assumption in the
-task and list it under the assumption category (`Angenommen`) of [the closing
+task and list it under `Assumed` in [the closing
 block](../../references/playbook-closing-block.md).

@@ -117,9 +117,6 @@ Then cut the work packages by the cutting block and maintain the `next` queue by
 ## Close
 
 Finish when plan and decisions are documented at their places, the necessary packages are in the planning
-system and every known open contract question is visible. Name briefly:
-
-- which plan, decisions and other project documentation were created or updated,
-- which tasks are `draft` and which are `ready`,
-- which tasks are new or still `next`,
-- which decision is still missing.
+system and every known open contract question is visible. The result of the closing block names the plan and
+the documentation created or updated and how many tasks are `ready`, `next` and `draft`; the new tasks stand
+under `New`, missing decisions under `Decide`.

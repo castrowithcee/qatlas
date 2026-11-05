@@ -1,124 +1,84 @@
 ---
 description: >
-  Human-in-the-loop-Verfahren für einen Qatlas-Lauf: führt den Nutzer zügig durch konkrete Prüfungen und
-  klärt gesicherte Entscheidungen, Abnahmen und Nutzerhandlungen, ohne die fachliche Ausführung
-  fortzusetzen.
+  Human-in-the-loop procedure for a Qatlas run: guides the user quickly through concrete checks and settles
+  secured decisions, acceptances and user actions without continuing the substantive execution.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# Übergaben klären
+# Settle handoffs
 
-Offene menschliche Übergaben gehen hinein. Geklärte, wieder ausführbare oder bewusst beendete Tasks kommen
-heraus. Der Lauf soll dem Nutzer Zeit sparen: Den offenen Stand kann er selbst im Task lesen. Der Agent
-bereitet vor, was der Nutzer sonst zusammensuchen müsste, und führt ihn auf kürzestem Weg durch das, was
-nur er beurteilen kann.
+Open human handoffs go in; settled, executable-again or deliberately ended tasks come out. The agent prepares
+what the user would otherwise gather and leads them by the shortest path through what only they can judge.
 
-## Aufruf
+## Invocation
 
-`review [Scope]` nimmt einen Task, ein Projekt oder ohne Scope alle offenen Übergaben des maßgeblichen
-Planungssystems. `review` kennt keine Flags und erhält keine Freigabe für gesperrte Projektdokumentation.
+`review [scope]` takes a task, a project or, without scope, all open handoffs of the authoritative planning
+system. `review` knows no flags and receives no permission for locked project documentation. It covers
+reading the current state, changes to spine and decisions, and one local collective commit at the complete
+end. Implementation, workers, technical tests, integration, external effects and pushes stay out.
 
-## Leseliste
+## Reading list
 
-Die Blöcke wiederholen nichts aus dieser Datei und einander; was du nicht liest, fehlt dir in diesem Lauf.
-Lies jeden vollständig zum genannten Zeitpunkt:
+The blocks repeat nothing from this file or from each other; what you do not read is missing in this run.
+Read each one completely at the stated time:
 
-1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md).
-2. **Vor der ersten Übergabe:** [Entscheidungen knapp vorlegen](../../references/playbook-decision-card.md).
-3. **Vor dem Sammelcommit:** [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre
-   [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md).
+1. **Before the first step:** [the backlog norm](../../../qatlas-core-backlog/SKILL.md).
+2. **Before the first handoff:** [presenting decisions](../../references/playbook-decision-card.md).
+3. **Before the collective commit:** [the git norm](../../../qatlas-core-git/SKILL.md) and its
+   [commit reference](../../../qatlas-core-git/references/playbook-commit.md).
 
-## Scope-in
+## Build the queue
 
-Der Aufruf umfasst die lesende Bestandsaufnahme, Änderungen an Spine und Entscheidungen sowie einen
-lokalen Sammelcommit am vollständigen Ende.
+1. Determine the planning system and the chosen scope. If `.qatlas-project/README.md` exists, follow only
+   the read conditions relevant to the chosen handoffs.
+2. Read only roster or external metadata first and build the queue from `review` and explicitly open user
+   decisions, checks or actions. Mature no drafts and change no task with a running worker.
+3. Read only the queue's tasks fully and gather current state, evidence, open question, recommendation and
+   consequences from their current record. Open history only on a contradiction, missing decision-relevant
+   reasoning or an explicit reference, and ask nothing that the current state already settles.
+4. For git, check root, branch, upstream, worktrees and status. A new review starts clean; a continuation
+   carries on only its unambiguously assigned decision diff.
+5. Classify each handoff. A **check** exists only if there is a concrete result the user must look at, run
+   or try. Tasks whose completion is fully evidenced and need only the formal acceptance form one **bulk
+   acceptance**: one line per task with topic and result, and one question whether to close all of them;
+   the user may exclude single ones. Everything else is a decision or user action.
+6. State only the number of tasks in the queue, then begin with the bulk acceptance, followed by one card at
+   a time.
 
-## Scope-out
+## Run a check
 
-Umsetzung, Worker, technische Tests, Integration, externe Wirkungen und Pushes bleiben außerhalb dieses
-Laufs.
+Prepare the check fully before addressing the user: from acceptance criteria, final report and diff, work
+out what changed, where it shows and how success shows. Present only what the user must see or judge; they
+do not repeat what machines evidenced.
 
-## Schlange bilden
-
-1. Bestimme Planungssystem und ausdrücklich gewählten Scope.
-2. Ist `.qatlas-project/README.md` vorhanden, folge von dort nur den Lesebedingungen, die für die gewählten
-   Übergaben relevant sind. Beziehe fachliche Quellen außerhalb des Wissensraums nach ihrem Gegenstand ein;
-   bloßes Lesen oder automatische Bereitstellung erhöht ihre Autorität nicht.
-3. Lies zunächst nur Roster beziehungsweise externe Metadaten und bilde daraus die Schlange aus `review`
-   und ausdrücklich offenen Nutzerentscheidungen, Prüfungen oder Handlungen. Reife keine Drafts und
-   verändere keinen Task mit laufendem Worker.
-4. Lies nur die Tasks der gebildeten Schlange vollständig. Sammle aus ihrem aktuellen Datensatz Ist-Stand,
-   Belege, offene Frage, Empfehlung und Folgen. Öffne Historie nur bei einem Widerspruch, fehlender
-   entscheidungsrelevanter Begründung oder ausdrücklichem Verweis und frage nichts erneut, was bereits in den
-   aktuellen Stand eingearbeitet ist.
-5. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neuer Review beginnt sauber; eine
-   Fortsetzung darf nur ihren eindeutig zugeordneten Entscheidungsdiff weiterführen.
-6. Ordne jede Übergabe ein. Eine **Prüfung** liegt nur vor, wenn ein konkretes Ergebnis existiert, das der
-   Nutzer selbst ansehen, ausführen oder ausprobieren muss. Alles andere, auch eine Abnahme ohne konkreten
-   Prüfgegenstand, ist eine Entscheidung oder Nutzerhandlung.
-7. Nenne nur die Anzahl der Aufgaben in der Schlange und beginne dann mit der ersten Karte nach dem
-   gemeinsamen Entscheidungsdialog.
-
-## Prüfung führen
-
-Bereite die Prüfung vollständig vor, bevor du den Nutzer ansprichst. Ermittle aus Abnahmekriterien,
-Abschlussbericht und zugehörigem Diff, was sich geändert hat, wo es sichtbar wird und woran Erfolg
-erkennbar ist. Lege nur vor, was der Nutzer selbst sehen oder beurteilen muss; maschinell Belegtes prüft er
-nicht erneut.
-
-Lege die Prüfung zuerst als Karte nach dem gemeinsamen Dialog vor und beginne noch nicht mit dem Ablauf. Zu
-entscheiden ist, ob sie jetzt läuft. Die Optionen sind `Jetzt prüfen` mit Anzahl und Ort der Schritte und
-`Überspringen`, nach dem der Task unverändert in `review` bleibt.
-
-Erst nach `Jetzt prüfen` führst du Schritt für Schritt und zeigst immer nur einen Schritt:
+Present the check first as a card whose decision is whether it runs now: `Check now` with number and place
+of the steps, or `Skip`, after which the task stays unchanged in `review`. After `Check now`, show one step
+at a time:
 
 ```text
-Prüfung 1/2: <was geprüft wird, in einem Satz>
+Check 1/2: <what is checked, in one sentence>
 
-Wo: <exakter Pfad, URL, Befehl oder Ansicht, direkt nutzbar>
-Tun: <die eine Handlung>
-Erwartet: <das beobachtbare Ergebnis>
+Where: <exact path, URL, command or view, directly usable>
+Do: <the one action>
+Expected: <the observable result>
 
-Antwort: ok, Abweichung beschreiben oder überspringen.
+Answer: ok, describe the deviation, or skip.
 ```
 
-- Ein Schritt ist eine Handlung mit einem beobachtbaren Ergebnis. Fasse zusammen, was der Nutzer in einem
-  Zug prüfen kann, und teile nur, was nacheinander geschehen muss.
-- Ein Schritt enthält keinen Hintergrund und keinen Rückblick auf den Lauf. Der Nutzer handelt ohne
-  Tasklektüre sofort.
-- Nach `ok` folgt ohne Zwischenbericht der nächste Schritt.
-- Der Nutzer kann jederzeit überspringen oder etwas anderes mitteilen. Nach einem Überspringen bleibt der
-  Task unverändert in `review`, und du gehst zur nächsten Aufgabe. Eine andere Mitteilung behandelst du
-  zuerst; danach setzt du die Prüfung fort oder beendest sie, wenn die Mitteilung das verlangt.
-- Halte eine Abweichung knapp mit erwartetem und beobachtetem Ergebnis fest. Frage nur nach, wenn sie sonst
-  nicht nachvollziehbar wäre. Weitere Schritte desselben Tasks führst du nur, wenn sie trotz der Abweichung
-  aussagekräftig bleiben.
+- A step is one action with one observable result; combine what the user can check in one go. It carries
+  no background and no review of the run.
+- After `ok`, the next step follows without an interim report.
+- After a skip, the task stays unchanged in `review` and you go to the next task. Handle any other message
+  first, then continue or end the check as it requires.
+- Record a deviation briefly with expected and observed result and ask only if it would otherwise not be
+  traceable. Run further steps of the task only if they stay meaningful despite it.
 
-## Antwort festhalten
+## Finish
 
-- Schreibe Entscheidung oder Prüfergebnis an den vorhandenen fachlichen Ort im Task, nicht in ein separates
-  Protokoll. Pflege Task und Übergabe als aktuellen Snapshot nach dem maßgeblichen Vertrag. Arbeite die
-  daraus geltenden Anweisungen und überprüfbaren Abnahmen konkret ein; ein Quellenlink allein reicht nicht.
-  Eine Abweichung wird dabei zur konkreten Korrektur mit eigener Abnahme.
-- Wähle den nächsten Status nach dem maßgeblichen Vertrag: `next`, wenn die Aufgabe nach einem neuen
-  ausdrücklichen Lauf fortgesetzt werden kann, `review`, solange eine Nutzerhandlung offen bleibt,
-  `waiting` bei einer externen Voraussetzung,
-  `draft` bei einer weiterhin offenen Vertragsfrage oder `done`, wenn die menschliche Abnahme den bereits
-  belegten Abschluss vervollständigt. Schließe und archiviere ihn dann im selben Schritt nach den Regeln des
-  maßgeblichen Planungssystems.
-- Aktualisiere nach jeder vollständig geklärten Aufgabe Spine und Zeitstempel nach dem maßgeblichen System.
-- Eine Antwort autorisiert keine Ausführungsarbeit. Dafür ist ein neuer ausdrücklicher Lauf nötig.
-
-Ändert die bestätigte Entscheidung eine maßgebliche Grundlage, pflege sie an deren fachlichem Ort und prüfe
-die davon betroffenen offenen Tasks gezielt auf veraltete Vorgaben. Ändere dabei keine anderen Ziele oder
-Abnahmekriterien still.
-
-## Vollständig beenden
-
-Erzeuge keinen Zwischencommit. Prüfe nach jeder Antwort, dass der Steuerbranch nicht fremd verändert wurde.
-Erst wenn jede Übergabe der anfänglichen Schlange geklärt oder vom Nutzer übersprungen ist, lies den
-vollständigen Diff und erstelle nach der Git-Norm genau einen lokalen Sammelcommit pro betroffenem Repo. Der
-ausdrückliche Skill-Aufruf ersetzt für diesen einen Commit die vorherige Einzelabnahme der Nachricht; zeige
-Nachricht und ID danach. Bei offenem Rest oder vorzeitigem Ende committe nicht. Pushe nichts.
+Record every answer and check result as presenting decisions describes. Create no intermediate commit, and
+check after each answer that the control branch was not changed by someone else. Only when every handoff of
+the initial queue is settled or skipped, read the full diff and create exactly one local collective commit
+per affected repo per the git norm; the explicit invocation replaces the prior approval of its message.
+Show message and ID afterwards. With an open rest or an early end, commit nothing. Push nothing.

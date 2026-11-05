@@ -136,6 +136,6 @@ message, branch name, pull request nor comment. What matters is the visibility o
 actually lies: an issue in a public repo is public even if the board that manages it is private, and a local
 backlog shares the visibility of its repo and its remotes. Record it as a draft only if that place is
 evidenced to be non-public, for example via the verified visibility of the repo. If it is public or its
-visibility cannot be evidenced, record nothing and report the risk exclusively in the closing under the
-security category (`Sicherheit`) of [the closing block](../../references/playbook-closing-block.md). Even in
+visibility cannot be evidenced, record nothing and report the risk exclusively under `Risks` in [the closing
+block](../../references/playbook-closing-block.md). Even in
 a non-public place, the entry contains no secrets.

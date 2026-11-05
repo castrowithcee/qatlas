@@ -93,13 +93,28 @@ in the chosen scope up to date, as far as conversation, task contract, or eviden
 support its new content. This release never covers agent instructions, rules, skills, and the user's
 policies. A broad backlog invocation unlocks no project documentation.
 
-The user is the decider, not a reader of the planning system. If a mode presupposes a real user decision,
-fetch it briefly and without presupposed task reading, always guide through only the current question, and
-give an explicit, reasoned recommendation.
-
 `ready` and `next` presuppose the execution readiness of the backlog norm. `shape` establishes it, `run` and
 `team` check it again before every claim.
 
 Use installed specialist packs when their method fits the subject. The chosen Qatlas mode keeps ownership of
 conversation and handoff and maintains durable project knowledge, spine, and status only within its
 contract. A specialist pack supplies method and review perspective, not a competing workflow.
+
+## Talking to the user
+
+The user works several projects and modes in parallel, decides almost everything in this chat and does not
+have the planning system open. Every message must therefore stand on its own:
+
+- **Anchor:** Begin every closing and every question that interrupts a run with one line naming project,
+  mode and state, such as `shop-api · team · finished, 2 decisions open`.
+- **Topic first:** Name every task, package or other object by its topic in plain words; an ID only follows
+  as a reference. Presuppose no knowledge of a task, board, package, branch or earlier message.
+- **Only what matters:** Report what needs the user's action or changes the further course. Expected
+  diligence such as green checks, leak checks, cleanup or upkeep of the planning system stays out; a
+  deviation from it does not.
+- **Do, don't report:** Settle housekeeping within your authorization yourself and report only what you
+  could not settle.
+- **The user's terms:** Describe results, risks and consequences by what the user sees and decides, not by
+  implementation details.
+- **Answerable in the chat:** Give every decision its context, question and reasoned recommendation, so that
+  a short reply settles it.

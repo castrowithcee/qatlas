@@ -40,9 +40,9 @@ Hand over every checked task with `node <script> handover --repo <repo-root> --p
 --report <file>`; if the code lies in a repo other than the control root, add `--code-repo <absolute path>`
 so that `branch` and `base` are checked there. The report file lies outside every worktree. For integration
 via pull requests with squash merge, you hand over each pull request of a task individually and start the
-next one only from the `<basis>` integrated afterwards. The report follows the return format of [executing
-work](../run/run.md), including the worker profiles with model and effort, and additionally names branches
-and commits and whether this handover is the last one of the task. Every report starts with YAML
+next one only from the `<basis>` integrated afterwards. The report carries the content of a task's final
+report in [executing work](../run/run.md#closing) and additionally names branches and commits and whether
+this handover is the last one of the task. Every report starts with YAML
 frontmatter (`---` on the first line) with `checks`: one entry per full check of the handover, each with
 `command` (as run), `exit` and `tree` (the tree of the handed-over branch tip, e.g. from `git rev-parse
 <branch>^{tree}` or `slot results --tree`); `handover` rejects a `tree` that is not the handed-over tree.
@@ -75,7 +75,8 @@ with the title call below, passing the ids of the tasks you neither completed no
 <id,id,...>`. On `reason: unknown` keep the estimate rule of [executing work](../run/run.md).
 
 Log every draft you record in the planning system right away with `node <script> log --repo <repo-root>
---type erfasst --package <package> --task <id> --text "<title>"`; the supervisor has it shaped.
+--type erfasst --package <package> --task <id> --text "<topic>: <what> - <why>"`; the supervisor has it
+shaped.
 
 Whatever you would otherwise ask the user, you ask the supervisor exclusively with `node <script> ask --repo
 <repo-root> --package <package> --question "<question with context, options and recommendation>"`; the

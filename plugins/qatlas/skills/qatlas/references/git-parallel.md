@@ -54,7 +54,7 @@ license: MIT
   assignment.
 - If the spine lives in the repo, only the integration owner writes claim, status, and spine to the control
   branch. Every other lead then works only on assigned tasks and hands over, per task, its checked task
-  branch with a report in the return format. With pull request integration, the handed-over state is the
+  branch with a report carrying its final report. With pull request integration, the handed-over state is the
   open pull request with green CI, or without CI one with a green complete test. With the handover, ownership
   of the task passes to the integration owner; the owner sets `done` only after integration and evidence on
   the control branch. The integration owner serializes the merges; a lead pushes only its own task branches.

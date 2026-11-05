@@ -61,7 +61,8 @@ Read each one completely at the stated time:
    [the commit boundary](../../../qatlas-core-git/references/commit-boundaries.md).
 9. **If user or project instructions require pull requests, before the first push:** [integration via pull
    requests](../../references/playbook-git-pr.md).
-10. **Before the final report:** [the closing block](../../references/playbook-closing-block.md).
+10. **Before the final report:** [the closing block](../../references/playbook-closing-block.md) and
+    [presenting decisions](../../references/playbook-decision-card.md).
 
 ## Define the run contract
 
@@ -111,10 +112,9 @@ End the run as soon as one of these conditions holds:
 
 ## Closing
 
-Before the end, secure the spine, final reports, side findings and permitted local commits. The user usually
-continues a run in a new session. Every handover therefore appears in the spine with its task ID, and the
-closing is understandable without the course of the run. Report the result and the decisive evidence
-briefly. For each processed task, name changed files, checks run, documentation effect, deviations from the
-expected work card and unresolved risks, as well as the worker profiles used with model and effort; raw logs
-stay out. Run the cleanup steps that native project instructions or project memory name for the end of a
-run, and name them in the report.
+Before the end, secure the spine, final reports, side findings and permitted local commits, and run the
+cleanup steps that native project instructions or project memory name for the end of a run. The user usually
+continues in a new session, so every handover appears in the spine with its task ID. Each task's final report
+briefly names changed files, checks run, documentation effect, deviations from the work card, unresolved
+risks and the worker profiles used with model and effort; raw logs stay out. Then close with the closing
+block.
