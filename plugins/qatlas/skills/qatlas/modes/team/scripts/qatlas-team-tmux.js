@@ -24,8 +24,11 @@
 // from seq on and the new `cursor` (count of all events); every consumer keeps its own cursor and passes it
 // as --since on the next call, so the events of the other role cost nothing. Handover reports are stored as
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
-// (pr-title, pr-body, branch, base, last, optional cut-exception) is validated before any tmux access:
-// the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
+// is validated before any tmux access. Checks mode (none of pr-title, pr-body, last, base, pr, head, pushed,
+// cut-exception): requires branch and checks, no cut rule. PR mode (any of those): pr-title, pr-body, branch,
+// base, last, optional cut-exception and checks. checks is a non-empty list of {command, exit, tree}; every
+// tree must equal the tree of the handed-over state (head with pr, else branch); a red exit is allowed.
+// In PR mode the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
 // For a handed-over pull request the frontmatter adds pr (positive integer), head (SHA of the handed-over
 // tip) and pushed (SHA at the first push); pr requires both. Then pushed must be an ancestor of head (or
 // equal), a local branch must point at head, and the cut rule applies to base..pushed, so later CI-fix
@@ -678,6 +681,32 @@ function validateHandover(text, repo) {
   if (!parsed) return;
   const { data } = parsed;
   const str = key => typeof data[key] === 'string' && data[key].trim() ? data[key].trim() : bad(`"${key}" must be a non-empty string.`);
+  const prMode = ['pr-title', 'pr-body', 'last', 'base', 'pr', 'head', 'pushed', 'cut-exception'].some(key => data[key] !== undefined);
+  const checkTrees = (ref, label) => {
+    if (data.checks === undefined) return;
+    if (!Array.isArray(data.checks) || !data.checks.length) bad('"checks" must be a non-empty list.');
+    data.checks.forEach((entry, i) => {
+      const name = `checks[${i}]`;
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) bad(`${name} must be a mapping.`);
+      if (typeof entry.command !== 'string' || !entry.command.trim()) bad(`${name}: "command" must be a non-empty string.`);
+      if (!Number.isInteger(entry.exit)) bad(`${name}: "exit" must be an integer.`);
+      if (typeof entry.tree !== 'string' || !/^([0-9a-f]{40}|[0-9a-f]{64})$/.test(entry.tree)) bad(`${name}: "tree" must be 40 or 64 hex characters.`);
+    });
+    let actual;
+    try {
+      actual = execFileSync('git', ['-C', repo, 'rev-parse', '--verify', '--quiet', `${ref}^{tree}`],
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    } catch { return bad(`cannot resolve the tree of ${label}.`); }
+    data.checks.forEach((entry, i) => {
+      if (entry.tree !== actual) bad(`checks[${i}] (${JSON.stringify(entry.command)}) has tree ${entry.tree}, but ${label} has tree ${actual}.`);
+    });
+  };
+  if (!prMode) {
+    const branch = str('branch');
+    resolveCommit(repo, branch, 'branch', bad);
+    if (data.checks === undefined) bad('"checks" is required without pull request fields.');
+    return checkTrees(branch, `branch ${branch}`);
+  }
   const title = str('pr-title');
   if (/[\r\n]/.test(title)) bad('"pr-title" must be a single line.');
   str('pr-body');
@@ -690,6 +719,7 @@ function validateHandover(text, repo) {
   if (data.pr === undefined) {
     resolveCommit(repo, branch, 'branch', bad);
     checkCut(repo, base, branch, `branch ${branch}`, exception, bad);
+    checkTrees(branch, `branch ${branch}`);
     return;
   }
   if (!Number.isInteger(data.pr) || data.pr <= 0) bad('"pr" must be a positive integer.');
@@ -701,6 +731,7 @@ function validateHandover(text, repo) {
     execFileSync('git', ['-C', repo, 'merge-base', '--is-ancestor', pushed, head], { stdio: 'ignore' });
   } catch { bad(`"pushed" ${pushed} is not an ancestor of "head" ${head}.`); }
   checkCut(repo, base, pushed, `branch ${branch} at first push (${pushed.slice(0, 12)})`, exception, bad);
+  checkTrees(head, `head ${head}`);
 }
 
 function answer() {

@@ -85,6 +85,10 @@ and never wait by polling processes (`pgrep`, `ps`) or lock folders. `slot statu
 and waiting slots and resources as one read-only JSON line. A command that the project instructions assign to
 an exclusive resource, such as an e2e environment with fixed names, runs via `slot --resource <name> --
 <command>` with the name from those instructions; it waits for that resource alone and occupies no test slot.
+In a clean worktree, `slot` stores a green result bound to the `HEAD` tree, directory, command and resource,
+and for 24 hours reuses it instead of running again: it prints one line naming the origin and exits 0 without
+taking a slot. A dirty worktree, a red run or a moved `HEAD` stores and reuses nothing; `--no-cache` forces
+the run. `slot results [--tree <sha>]` prints the valid records as one JSON line.
 A further task begins only when the active task is completed or securely handed over.
 
 The subagent may include an unpredicted file on its own if it demonstrably lies within the substantive

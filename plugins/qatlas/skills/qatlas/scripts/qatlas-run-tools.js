@@ -50,8 +50,23 @@
 //     Like slot, but runs the command under a named exclusive resource (capacity 1) instead of a test
 //     slot, e.g. one e2e suite at a time. Each resource has its own queue; it does not occupy a test slot
 //     and ignores --slots. <name> matches [a-z0-9][a-z0-9-]*, else exit 2.
+//   qatlas-run-tools.js slot [--no-cache] ... -- <command> [args...]
+//     Green results are reused: in a clean worktree (git status --porcelain --untracked-files=all empty,
+//     apart from the slot store itself) an
+//     exit-0 run is stored under the repo-wide slot store, keyed by the HEAD tree, the working directory
+//     relative to the worktree root, the command and the resource. The same key within 24 hours is not run
+//     again: one stderr line names the origin and the exit code is 0, without taking a slot or resource.
+//     A dirty worktree neither reads nor writes records, and neither does a run during which HEAD moved or
+//     that fails. --no-cache always runs the command (and still records a green run).
+//     Dependencies, environment and ignored files are not part of the key.
+//   qatlas-run-tools.js slot [--tree <sha>] [--repo <path>] results
+//     Read-only: the valid records (younger than 24 hours) as {"results":[{command,cwd,resource,exit,tree,
+//     time,duration}]}, filtered by --tree (full or abbreviated, at least 7 characters) if given.
+//   qatlas-run-tools.js slot [--repo <path>] results --clear
+//     Removes all records of the store. Exit 0, also without any.
 
 const fs = require('fs');
+const crypto = require('crypto');
 const os = require('os');
 const path = require('path');
 const { execFileSync, spawn, spawnSync } = require('child_process');
@@ -390,15 +405,78 @@ function slotStatus() {
   out({ slots, busy, waiting: waiters(path.join(dir, 'queue')), resources });
 }
 
+const RESULT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const resultsDir = dir => path.join(dir, 'results');
+
+// State of the worktree holding the working directory; null if it cannot be read (no repo, no commit).
+// The slot store itself does not count as dirt: in the primary working tree it lies inside the worktree.
+function worktreeState(store) {
+  try {
+    const cwd = fs.realpathSync(process.cwd());
+    const g = args => execFileSync('git', ['-C', cwd, ...args],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 1 << 28 }).trim();
+    const top = fs.realpathSync(g(['rev-parse', '--show-toplevel']));
+    let existing = store;
+    const tail = [];
+    while (!fs.existsSync(existing)) { tail.unshift(path.basename(existing)); existing = path.dirname(existing); }
+    const inside = path.relative(top, path.join(fs.realpathSync(existing), ...tail));
+    const exclude = inside && !inside.startsWith('..') && !path.isAbsolute(inside)
+      ? [`:(exclude,top)${inside.split(path.sep).join('/')}`] : [];
+    return {
+      clean: g(['status', '--porcelain', '--untracked-files=all', '--', ':/', ...exclude]) === '',
+      head: g(['rev-parse', 'HEAD']),
+      tree: g(['rev-parse', 'HEAD^{tree}']),
+      cwd: path.relative(top, cwd) || '.',
+    };
+  } catch { return null; }
+}
+const resultKey = (state, resource) => JSON.stringify({ tree: state.tree, cwd: state.cwd, command: rest, resource });
+const resultFile = (dir, key) => path.join(resultsDir(dir), crypto.createHash('sha256').update(key).digest('hex') + '.json');
+
+function readResults(dir) {
+  return listDir(resultsDir(dir)).filter(entry => entry.endsWith('.json')).flatMap(entry => {
+    try {
+      const record = JSON.parse(fs.readFileSync(path.join(resultsDir(dir), entry), 'utf8'));
+      const age = Date.now() - Date.parse(record.time);
+      return record.exit === 0 && typeof record.tree === 'string' && age <= RESULT_MAX_AGE_MS ? [record] : [];
+    } catch { return []; }
+  });
+}
+
+function slotResults() {
+  const dir = slotDir();
+  if (opts.includes('--clear')) {
+    fs.rmSync(resultsDir(dir), { recursive: true, force: true });
+    return;
+  }
+  const tree = opts.includes('--tree') ? flag('--tree') : null;
+  if (tree !== null && !/^[0-9a-f]{7,64}$/i.test(tree || '')) fail('Invalid: --tree needs a tree SHA of at least 7 hex characters', 2);
+  const results = readResults(dir).filter(record => tree === null || record.tree.startsWith(tree.toLowerCase()))
+    .sort((a, b) => a.time.localeCompare(b.time));
+  out({ results });
+}
+
 function slot() {
-  const isStatus = sep < 0 && opts.some((arg, i) => arg === 'status' && !['--slots', '--repo', '--resource'].includes(opts[i - 1]));
-  if (isStatus) return slotStatus();
+  const valued = ['--slots', '--repo', '--resource', '--tree'];
+  const word = name => sep < 0 && opts.some((arg, i) => arg === name && !valued.includes(opts[i - 1]));
+  if (word('status')) return slotStatus();
+  if (word('results')) return slotResults();
   if (!rest.length) fail('Missing: command after --', 2);
   const resource = opts.includes('--resource') ? flag('--resource') || '' : null;
   if (resource !== null && !RESOURCE_NAME.test(resource)) fail('Invalid: --resource needs a name matching [a-z0-9][a-z0-9-]*', 2);
   const slots = resource === null ? slotCount() : 1;
   const dir = slotDir();
   const paths = resource === null ? null : resourcePaths(dir, resource);
+
+  const pre = worktreeState(dir);
+  if (pre && pre.clean && !opts.includes('--no-cache')) {
+    const hit = readResults(dir).find(record => resultKey(pre, resource) ===
+      JSON.stringify({ tree: record.tree, cwd: record.cwd, command: record.command, resource: record.resource }));
+    if (hit) {
+      process.stderr.write(`Reusing green result from ${hit.time} (tree ${hit.tree.slice(0, 7)}): ${rest.join(' ')}\n`);
+      return;
+    }
+  }
   const target = paths
     ? { locks: [paths.lock], queue: paths.queue }
     : { locks: Array.from({ length: slots }, (_, i) => path.join(dir, String(i + 1))), queue: path.join(dir, 'queue') };
@@ -444,13 +522,30 @@ function slot() {
 
   let released = false;
   const release = () => { if (!released) { released = true; fs.rmSync(lock, { recursive: true, force: true }); } };
+  const before = worktreeState(dir);
+  const startedAt = Date.now();
   const child = spawn(rest[0], rest.slice(1), { stdio: 'inherit' });
   let signalled = null;
   for (const name of ['SIGINT', 'SIGTERM']) {
     process.on(name, () => { signalled = name; child.kill(name); });
   }
   child.on('error', error => { release(); fail('Command could not be started: ' + error.message, 127); });
+  const record = () => {
+    const after = worktreeState(dir);
+    if (!before || !before.clean || !after || after.head !== before.head) return;
+    const target = resultFile(dir, resultKey(before, resource));
+    const temp = `${target}.${process.pid}.tmp`;
+    try {
+      fs.mkdirSync(resultsDir(dir), { recursive: true });
+      fs.writeFileSync(temp, JSON.stringify({
+        command: rest, cwd: before.cwd, resource, exit: 0, tree: before.tree,
+        time: new Date().toISOString(), duration: Date.now() - startedAt,
+      }) + '\n');
+      fs.renameSync(temp, target);
+    } catch { fs.rmSync(temp, { force: true }); }
+  };
   child.on('exit', (code, signal) => {
+    if (code === 0) record();
     release();
     const name = signal || signalled;
     process.exit(code !== null ? code : 128 + (os.constants.signals[name] || 0));

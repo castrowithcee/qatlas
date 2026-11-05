@@ -42,16 +42,20 @@ so that `branch` and `base` are checked there. The report file lies outside ever
 via pull requests with squash merge, you hand over each pull request of a task individually and start the
 next one only from the `<basis>` integrated afterwards. The report follows the return format of [executing
 work](../run/run.md), including the worker profiles with model and effort, and additionally names branches
-and commits and whether this handover is the last one of the task. For integration via pull requests, the
-report starts with YAML frontmatter (`---` on the first line) with the fields `pr-title` (one non-empty
-line), `pr-body` (non-empty, usually a `|` block scalar), `branch`, `base`, `last` (`true` or `false`), `pr`
-(number of the open pull request), `head` (SHA of the handed-over pull request tip) and `pushed` (SHA at the
-first push), the SHAs in quotation marks; the rest of the report follows after it. A pull request is one
-unit of the commit boundary: independent milestones become separate pull requests before you hand over.
-`handover` rejects a branch with more than one non-merge commit over `base`, for a pull request up to
-`pushed` (CI fixes after it are allowed; exit 2, nothing raised) unless the frontmatter carries
-`cut-exception: <reason>`. The answer is `integrated <sha>` or `rework <reason>`; without an answer, call
-the same command again with the report unchanged. Until the answer arrives, task, branches and worktree
+and commits and whether this handover is the last one of the task. Every report starts with YAML
+frontmatter (`---` on the first line) with `checks`: one entry per full check of the handover, each with
+`command` (as run), `exit` and `tree` (the tree of the handed-over branch tip, e.g. from `git rev-parse
+<branch>^{tree}` or `slot results --tree`); `handover` rejects a `tree` that is not the handed-over tree.
+Without pull request integration the frontmatter also carries `branch`. For integration via pull requests,
+it adds the fields `pr-title` (one non-empty line), `pr-body` (non-empty, usually a `|` block scalar),
+`branch`, `base`, `last` (`true` or `false`), `pr` (number of the open pull request), `head` (SHA of the
+handed-over pull request tip) and `pushed` (SHA at the first push), the SHAs in quotation marks; the rest of
+the report follows after it. A pull request is one unit of the commit boundary: independent milestones become
+separate pull requests before you hand over. With pull request fields, `handover` rejects a branch with more
+than one non-merge commit over `base`, for a pull request up to `pushed` (CI fixes after it are allowed;
+exit 2, nothing raised) unless the frontmatter carries `cut-exception: <reason>`. The answer is
+`integrated <sha>` or `rework <reason>`; without an answer, call the same command again with the report
+unchanged. Until the answer arrives, task, branches and worktree
 belong to the integrator; do not touch them. `rework` gives them back to you: work on the reason and hand
 over again. `integrated` on a handover that is not the last gives you the task back to continue.
 
