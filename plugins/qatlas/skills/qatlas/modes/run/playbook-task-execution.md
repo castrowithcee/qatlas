@@ -82,8 +82,10 @@ writers run via `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js sl
 limits them repo-wide. `slot` blocks until the command ends and passes its exit code through: run a full
 test through `slot` in the foreground or through the host's background execution with its completion notice,
 and never wait by polling processes (`pgrep`, `ps`) or lock folders. `slot status` (without `--`) prints busy
-and waiting slots as one read-only JSON line. A further task begins only when the active task is completed or
-securely handed over.
+and waiting slots and resources as one read-only JSON line. A command that the project instructions assign to
+an exclusive resource, such as an e2e environment with fixed names, runs via `slot --resource <name> --
+<command>` with the name from those instructions; it waits for that resource alone and occupies no test slot.
+A further task begins only when the active task is completed or securely handed over.
 
 The subagent may include an unpredicted file on its own if it demonstrably lies within the substantive
 scope, and names the deviation in its return. If an effect outside the scope would be necessary, or the

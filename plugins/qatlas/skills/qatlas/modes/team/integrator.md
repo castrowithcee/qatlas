@@ -72,7 +72,8 @@ until its `integrated`. Integrate handovers one at a time and log every integrat
    (`no-ci`), test the merged state yourself with the project tests via `slot` and call `land … --no-ci`. You
    treat a known or new flake by its rule in [accepting and
    integrating](../../references/playbook-acceptance.md). Without pull requests, you run the shared checks
-   yourself. You integrate tasks spanning several repos per the git workflow.
+   yourself. Every command that the project instructions assign to an exclusive resource runs via `slot
+   --resource <name> -- <command>`. You integrate tasks spanning several repos per the git workflow.
 4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.
    Reply with `answer … --answer "integrated <sha>"`, where `<sha>` is the integration commit on the control
    branch.

@@ -24,7 +24,9 @@ commit anything.
 If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
 per task from `<basis>`. You do not merge the current `<basis>` into the task branch before a handover; the
 state you hand over is the one on which the complete check, with full tests via `node <tools> slot --
-<test command>`, was green. A conflict with the base comes back from the integrator as `rework`.
+<test command>`, was green. Every command that the project instructions assign to an exclusive resource runs
+via `node <tools> slot --resource <name> -- <command>`. A conflict with the base comes back from the
+integrator as `rework`.
 Start every worker with a profile from `team.yaml` and with model and effort set explicitly. Before
 every commit, run the protection check as its own command and evaluate its exit code before you commit.
 

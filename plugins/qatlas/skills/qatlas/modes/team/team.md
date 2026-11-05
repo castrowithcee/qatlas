@@ -204,13 +204,14 @@ Handle each event:
 - **`done` and `exited`:** Proceed as described in "Finish".
 - **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20), or for three
   times that while the host shows that it waits for its own background agent (Claude Code: "Waiting for N
-  background agents"; no equivalent is detected for Codex). The event shows the last lines, so a usage limit
-  is recognizable. An integrator waiting idly for handovers can appear as `stale`; that is no standstill as
-  long as `list` shows no open handover. Nudge with `nudge --repo <repo-root> --package <package> --text
-  "<text>"` (for the integrator `--role integrator` instead of `--package`) only after `stale`, with no open
-  signal, no running test of the package worktree per `slot status`, and at most once per standstill phase.
-  A second `stale` after a nudge you report to the user; with `--fly` you secure the package's open tasks as
-  for `exited`.
+  background agents"; no equivalent is detected for Codex) or while a `slot` command, with or without
+  `--resource`, waits or runs in the pane. The event shows the last lines, so a usage limit is recognizable.
+  An integrator waiting idly for handovers can appear as `stale`; that is no standstill as long as `list`
+  shows no open handover. Nudge with `nudge --repo <repo-root> --package <package> --text "<text>"` (for the
+  integrator `--role integrator` instead of `--package`) only after `stale`, with no open signal, no command
+  of the package worktree running or waiting in a slot or resource per `slot status`, and at most once per
+  standstill phase. A second `stale` after a nudge you report to the user; with `--fly` you secure the
+  package's open tasks as for `exited`.
 - **`disk`:** Free space fell below `--min-free` GB (default 5). Run the cleanup step the project names for
   low space, otherwise report it to the user.
 - **`erfasst`:** A lead or the integrator recorded a draft; proceed as described in "Shaping new drafts".
