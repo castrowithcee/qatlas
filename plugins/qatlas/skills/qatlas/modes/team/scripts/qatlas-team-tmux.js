@@ -42,9 +42,17 @@
 // limit is WAITING_FACTOR times --stale, so a hung worker is still reported. disk: free space of the repo
 // filesystem fell below --min-free GB (once per undershoot). nudge is the only way to write into a pane.
 // If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
+// Context fill of Claude Code sessions is measured, not estimated: add starts a Claude command with a fixed
+// --session-id (an existing one in the command is reused) and stores it as pane option @qatlas-session; other
+// CLIs get none. `context` returns tokens, window, percent, source and age per pane or, with --self, for the
+// own session (CLAUDE_CODE_SESSION_ID). The statusline state file ~/.qatlas/state/context/<id>.json comes
+// first (tokens and window); otherwise the host transcript ~/.claude/projects/*/<id>.jsonl gives tokens of
+// the last answer without a window (percent null). Without a measurement the state is "unknown". `compacted`
+// marks a compaction after the last measured answer. list carries the same object per pane as `context`.
 // Usage:
 //   qatlas-team-tmux.js add --repo <root> (--package <package> | --role integrator) --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-team-tmux.js list --repo <root>
+//   qatlas-team-tmux.js context (--repo <root> [--package <package> | --role integrator] | --self)   (without selector: all panes)
 //   qatlas-team-tmux.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>]
 //   qatlas-team-tmux.js nudge --repo <root> (--package <package> | --role integrator) --text <text>   (refused while the pane has an open signal)
 //   qatlas-team-tmux.js title --repo <root> (--package <package> | --role integrator) --title <title>
@@ -59,6 +67,7 @@
 //   qatlas-team-tmux.js close --repo <root> (--package <package> | --role integrator)
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
@@ -218,6 +227,90 @@ function extraWindow(repo, first, label, cwd) {
   return [win, pane, session];
 }
 
+// Context measurement. Ids become file names or glob parts, so only plain ids pass. Transcripts are
+// untrusted: only type, subtype and usage numbers are read, never message content.
+const SESSION_ID = /^[A-Za-z0-9-]{8,64}$/;
+const TAIL_BYTES = 1 << 20;
+const unknown = reason => ({ state: 'unknown', tokens: null, window: null, percent: null, source: null, age: null, reason });
+const measured = (tokens, window, source, ageMs, extra = {}) => ({ state: 'measured', tokens, window: window || null,
+  percent: window ? Math.round(100 * tokens / window) : null, source, age: Math.max(0, Math.round(ageMs / 1000)), ...extra });
+
+function stateFile(id) {
+  let data;
+  try { data = JSON.parse(fs.readFileSync(path.join(os.homedir(), '.qatlas', 'state', 'context', id + '.json'), 'utf8')); } catch { return null; }
+  if (!data || !Number.isFinite(data.tokens) || !Number.isFinite(data.at)) return null;
+  return measured(data.tokens, Number(data.window) > 0 ? Number(data.window) : null, 'statusline', Date.now() - data.at);
+}
+
+function transcript(id) {
+  const base = path.join(os.homedir(), '.claude', 'projects');
+  let file = null;
+  try {
+    for (const dir of fs.readdirSync(base)) {
+      const candidate = path.join(base, dir, id + '.jsonl');
+      if (fs.existsSync(candidate)) { file = candidate; break; }
+    }
+    if (!file) return null;
+    const { size, mtimeMs } = fs.statSync(file);
+    const fd = fs.openSync(file, 'r');
+    let text;
+    try {
+      const length = Math.min(size, TAIL_BYTES);
+      const buf = Buffer.alloc(length);
+      fs.readSync(fd, buf, 0, length, size - length);
+      text = buf.toString('utf8');
+    } finally { fs.closeSync(fd); }
+    const lines = text.split('\n');
+    if (size > TAIL_BYTES) lines.shift();
+    let tokens = null;
+    let compacted = false;
+    for (const line of lines) {
+      let entry;
+      try { entry = JSON.parse(line); } catch { continue; }
+      if (!entry || entry.isSidechain) continue;
+      if (entry.type === 'system' && entry.subtype === 'compact_boundary') compacted = true;
+      const u = entry.type === 'assistant' && entry.message && entry.message.usage;
+      if (!u) continue;
+      const total = (Number(u.input_tokens) || 0) + (Number(u.cache_read_input_tokens) || 0) + (Number(u.cache_creation_input_tokens) || 0);
+      if (total > 0) { tokens = total; compacted = false; }
+    }
+    return tokens === null ? null : measured(tokens, null, 'transcript', Date.now() - mtimeMs, compacted ? { compacted } : {});
+  } catch { return null; }
+}
+
+function contextOf(id) {
+  if (!id) return unknown('no session id');
+  if (!SESSION_ID.test(id)) return unknown('invalid session id');
+  return stateFile(id) || transcript(id) || unknown('no measurement');
+}
+
+const withContext = p => ({ ...p, context: contextOf(option(p.pane, '@qatlas-session')) });
+
+function contextCommand() {
+  if (opts.includes('--self')) {
+    if (flag('--package') !== null || flag('--role') !== null) fail('--self excludes --package and --role', 2);
+    return out({ self: true, context: contextOf(process.env.CLAUDE_CODE_SESSION_ID) });
+  }
+  const repo = repoKey();
+  let list = allPanes(repo);
+  if (flag('--package') !== null || flag('--role') !== null) { const pane = target(); list = list.filter(p => p.pane === pane); }
+  out({ panes: list.map(withContext).map(({ pane, package: name, role, context }) => ({ pane, package: name, role, context })) });
+}
+
+const CLAUDE_ID = 'claude';
+// A Claude command gets a fixed session id so the pane maps to its transcript; returns the id or null.
+function sessionIdFor(command) {
+  if (!command.length || path.basename(command[0]) !== CLAUDE_ID) return null;
+  const at = command.findIndex(a => a === '--session-id' || a.startsWith('--session-id='));
+  if (at >= 0) {
+    const value = command[at].includes('=') ? command[at].slice(command[at].indexOf('=') + 1) : command[at + 1];
+    return SESSION_ID.test(value || '') ? value : fail('Invalid --session-id in the command', 2);
+  }
+  const id = crypto.randomUUID();
+  command.splice(1, 0, '--session-id', id);
+  return id;
+}
+
 function add() {
   const repo = repoKey();
   const [label, title, cwd] = need('--label', '--title', '--cwd');
@@ -228,6 +321,7 @@ function add() {
   const name = integrator ? null : need('--package')[0];
   if (name === 'integrator') fail('Reserved package name: integrator', 2);
   if (!rest.length) fail('Missing: command after --', 2);
+  const sessionId = sessionIdFor(rest);
   if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Not a directory: ' + cwd);
   const wins = markedWindows(repo);
   let win = wins.find(w => panes(w).length < MAX_PANES);
@@ -249,6 +343,7 @@ function add() {
     }
   }
   if (integrator) setOption(pane, '@qatlas-role', role); else setOption(pane, '@qatlas-package', name);
+  if (sessionId) setOption(pane, '@qatlas-session', sessionId);
   setOption(pane, '@qatlas-title', title);
   setTitle(pane, title);
   layout(win);
@@ -259,7 +354,7 @@ function add() {
 
 function list() {
   const repo = repoKey();
-  out({ windows: markedWindows(repo), panes: allPanes(repo), cursor: events(repo).length });
+  out({ windows: markedWindows(repo), panes: allPanes(repo).map(withContext), cursor: events(repo).length });
 }
 
 // Writes exactly one exited per newly detected dead pane.
@@ -624,6 +719,7 @@ function close() {
 try {
   if (command === 'add') add();
   else if (command === 'list') list();
+  else if (command === 'context') contextCommand();
   else if (command === 'title') {
     const repo = repoKey();
     const pane = target();
@@ -644,7 +740,7 @@ try {
   else if (command === 'report') report();
   else if (command === 'capture') capture();
   else if (command === 'close') close();
-  else fail('Commands: add, list, title, wait, ask, handover, cut, answer, log, nudge, plan, report, capture, close', 2);
+  else fail('Commands: add, list, context, title, wait, ask, handover, cut, answer, log, nudge, plan, report, capture, close', 2);
 } catch (error) {
   fail((error.stderr ? String(error.stderr).trim() : '') || error.message);
 }

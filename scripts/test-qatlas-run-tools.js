@@ -541,6 +541,105 @@ try {
     if (socketPath2) fs.rmSync(socketPath2, { force: true });
   }
 
+  // Context measurement: temp HOME with state and transcript files; own tmux server.
+  const sock3 = `qatlas-test-ctx-${process.pid}`;
+  const tm3 = (...args) => execFileSync('tmux', ['-L', sock3, ...args], { encoding: 'utf8' }).trim();
+  let socketPath3 = null;
+  try {
+    const home = fs.realpathSync(fs.mkdtempSync(path.join(root, 'home-')));
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'context-')));
+    tm3('new-session', '-d', '-x', '80', '-y', '24', '-s', 'base', 'sleep 300');
+    socketPath3 = tm3('display', '-p', '#{socket_path}');
+    const cenv = { ...process.env, HOME: home, TMUX: `${socketPath3},1,0` };
+    delete cenv.CLAUDE_CODE_SESSION_ID;
+    const run = (extraEnv, ...args) => spawnSync(process.execPath, [team, args[0], ...(args[0] === 'context' && args.includes('--self') ? [] : ['--repo', repo]), ...args.slice(1)],
+      { encoding: 'utf8', env: { ...cenv, ...extraEnv } });
+    const ok = (extraEnv, ...args) => { const res = run(extraEnv, ...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
+    const stateDir = path.join(home, '.qatlas', 'state', 'context');
+    const idA = '11111111-1111-4111-8111-111111111111';
+    const idB = '22222222-2222-4222-8222-222222222222';
+    const idC = '33333333-3333-4333-8333-333333333333';
+    const idX = '44444444-4444-4444-8444-444444444444';
+    write(path.join(stateDir, idA + '.json'), JSON.stringify({ tokens: 50000, window: 200000, at: Date.now() - 5000 }));
+    const usage = (i, c, w) => JSON.stringify({ type: 'assistant', message: { content: 'SECRET', usage: { input_tokens: i, cache_read_input_tokens: c, cache_creation_input_tokens: w } } });
+    write(path.join(home, '.claude', 'projects', '-some-cwd', idB + '.jsonl'),
+      [usage(1, 100, 10), '{"type":"system","subtype":"compact_boundary"}', usage(2, 3000, 40), 'not json', usage(0, 0, 0)].join('\n') + '\n');
+    write(path.join(home, '.claude', 'projects', '-some-cwd', idC + '.jsonl'), [usage(5, 500, 5), '{"type":"system","subtype":"compact_boundary"}'].join('\n') + '\n');
+    const fake = path.join(root, 'fakebin', 'claude');
+    write(fake, '#!/bin/sh\nexec sleep 300\n');
+    fs.chmodSync(fake, 0o755);
+    const common = ['--label', 'w', '--title', 't', '--cwd', repo];
+    ok({}, 'add', '--package', 'a', ...common, '--', fake, '--session-id', idA);
+    ok({}, 'add', '--package', 'b', ...common, '--', fake);
+    ok({}, 'add', '--package', 'x', ...common, '--', 'sleep', '300');
+    const pa = ok({}, 'list').panes;
+    const idOfB = tm3('display', '-p', '-t', pa.find(x => x.package === 'b').pane, '#{@qatlas-session}');
+    assert.ok(/^[0-9a-f-]{36}$/.test(idOfB));
+    assert.strictEqual(tm3('display', '-p', '-t', pa.find(x => x.package === 'a').pane, '#{@qatlas-session}'), idA);
+    assert.strictEqual(tm3('display', '-p', '-t', pa.find(x => x.package === 'x').pane, '#{@qatlas-session}'), '');
+    // Command line: id added after the command exactly once; an existing one is reused.
+    assert.ok(tm3('list-panes', '-a', '-F', '#{pane_start_command}').includes(`--session-id ${idA}`));
+    assert.strictEqual(tm3('list-panes', '-a', '-F', '#{pane_start_command}').split('--session-id').length - 1, 2);
+    // State file: percent from tokens and window.
+    const a = ok({}, 'context', '--package', 'a').panes[0].context;
+    assert.deepStrictEqual([a.state, a.tokens, a.window, a.percent, a.source], ['measured', 50000, 200000, 25, 'statusline']);
+    assert.ok(a.age >= 5 && a.age < 60);
+    // Only a transcript: tokens of the last answer, percent unknown, no content echoed.
+    write(path.join(home, '.claude', 'projects', '-some-cwd', idOfB + '.jsonl'), fs.readFileSync(path.join(home, '.claude', 'projects', '-some-cwd', idB + '.jsonl')));
+    const rb = run({}, 'context', '--package', 'b');
+    assert.ok(!rb.stdout.includes('SECRET'));
+    const b = JSON.parse(rb.stdout).panes[0].context;
+    assert.deepStrictEqual([b.state, b.tokens, b.window, b.percent, b.source, b.compacted], ['measured', 3042, null, null, 'transcript', undefined]);
+    // No data, codex-like pane without session id: unknown.
+    assert.strictEqual(ok({}, 'context', '--package', 'x').panes[0].context.state, 'unknown');
+    // list carries the context per pane; context without selector lists all panes.
+    const listed = ok({}, 'list').panes;
+    assert.deepStrictEqual(listed.map(x => [x.package, x.context.state]).sort(), [['a', 'measured'], ['b', 'measured'], ['x', 'unknown']]);
+    assert.strictEqual(ok({}, 'context').panes.length, 3);
+    // --self uses the session id of the environment; compaction after the last answer is flagged.
+    const self = ok({ CLAUDE_CODE_SESSION_ID: idC }, 'context', '--self');
+    assert.deepStrictEqual([self.context.tokens, self.context.percent, self.context.compacted], [510, null, true]);
+    assert.strictEqual(ok({ CLAUDE_CODE_SESSION_ID: idA }, 'context', '--self').context.percent, 25);
+    assert.strictEqual(ok({}, 'context', '--self').context.state, 'unknown');
+    assert.strictEqual(ok({ CLAUDE_CODE_SESSION_ID: '../../etc/passwd' }, 'context', '--self').context.state, 'unknown');
+    assert.strictEqual(ok({ CLAUDE_CODE_SESSION_ID: idX }, 'context', '--self').context.state, 'unknown');
+    // A malformed state file counts as no measurement.
+    write(path.join(stateDir, idX + '.json'), '{broken');
+    assert.strictEqual(ok({ CLAUDE_CODE_SESSION_ID: idX }, 'context', '--self').context.state, 'unknown');
+  } finally {
+    try { tm3('kill-server'); } catch { /* already gone */ }
+    if (socketPath3) fs.rmSync(socketPath3, { force: true });
+  }
+
+  // Statusline renderer: stores the context state without changing its output.
+  {
+    const render = path.join(skill, '..', '..', 'scripts', 'qatlas-statusline-render-claude.js');
+    const home = fs.realpathSync(fs.mkdtempSync(path.join(root, 'sl-home-')));
+    const sid = '55555555-5555-4555-8555-555555555555';
+    const input = JSON.stringify({ session_id: sid, model: { display_name: 'm' },
+      context_window: { current_usage: { input_tokens: 10, cache_read_input_tokens: 20000, cache_creation_input_tokens: 5 }, context_window_size: 100000 } });
+    const draw = (h, stdin) => spawnSync(process.execPath, [render], { encoding: 'utf8', input: stdin, env: { ...process.env, HOME: h, NO_COLOR: '1' } });
+    const first = draw(home, input);
+    assert.strictEqual(first.status, 0, first.stderr);
+    const saved = JSON.parse(fs.readFileSync(path.join(home, '.qatlas', 'state', 'context', sid + '.json'), 'utf8'));
+    assert.deepStrictEqual([saved.tokens, saved.window], [20015, 100000]);
+    assert.ok(Math.abs(Date.now() - saved.at) < 60000);
+    assert.deepStrictEqual(fs.readdirSync(path.join(home, '.qatlas', 'state', 'context')), [sid + '.json']);
+    // Same output where the state directory cannot be created, and without a session id nothing is written.
+    const blocked = fs.realpathSync(fs.mkdtempSync(path.join(root, 'sl-blocked-')));
+    write(path.join(blocked, '.qatlas'), 'file instead of directory');
+    const second = draw(blocked, input);
+    assert.strictEqual(second.status, 0, second.stderr);
+    assert.strictEqual(second.stdout, first.stdout);
+    const home2 = fs.realpathSync(fs.mkdtempSync(path.join(root, 'sl-home2-')));
+    const third = draw(home2, JSON.stringify({ ...JSON.parse(input), session_id: undefined }));
+    assert.strictEqual(third.stdout, first.stdout);
+    assert.ok(!fs.existsSync(path.join(home2, '.qatlas', 'state', 'context')));
+    const evil = draw(home2, JSON.stringify({ ...JSON.parse(input), session_id: '../../x' }));
+    assert.strictEqual(evil.stdout, first.stdout);
+    assert.ok(!fs.existsSync(path.join(home2, '.qatlas', 'state', 'context')));
+  }
+
   process.stdout.write('✓ Qatlas-Run-Tools: land, ci-wait und Handover-Prüfung erfolgreich.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });

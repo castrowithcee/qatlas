@@ -39,6 +39,14 @@ lead panes only through the control script; writing into a pane is allowed only 
 send keystrokes by other means.
 `wait`, `ask` and `handover` block until their `--timeout`; set the host's command timeout above it.
 
+The context fill of a Claude Code pane is measured, not estimated: `context --repo <repo-root> [--package
+<package> | --role integrator]` (all panes without a selector) and `context --self` for your own session return
+`tokens`, `window`, `percent`, `source` (`statusline` or `transcript`) and `age` in seconds; `list` shows the same
+object per pane as `context`. `percent` is `null` when only the transcript is available, because it carries no
+window size. `compacted` marks a compaction after the last measured answer. State `unknown` means there is no
+measurement (Codex pane, session not started yet, no statusline).
+`add` starts a Claude command with a fixed `--session-id` and stores it on the pane.
+
 ## Invocation
 
 `team [tasks or scope] [--limit <n|0>] [--leads <n>] [--fly] [run directive]`

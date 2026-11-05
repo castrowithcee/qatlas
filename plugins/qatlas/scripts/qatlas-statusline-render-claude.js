@@ -2,6 +2,9 @@
 'use strict';
 // Renders Claude session JSON with ~/.qatlas/plugins/statusline.yaml to stdout.
 // Setup copies renderer and runtime to ~/.qatlas/plugins/.
+// Each render also stores the context fill of its session (tokens, window size, time; no conversation
+// content) in ~/.qatlas/state/context/<session-id>.json, written atomically; the team control script reads it.
+// Failures there are silent and never change the output.
 
 const { execSync } = require('child_process');
 const crypto = require('crypto');
@@ -184,6 +187,16 @@ function gitInfo(d) {
     return info;
 }
 
+function contextTokens(d) {
+    const cw = d.context_window || {};
+    let tok = cw.total_input_tokens;
+    if (tok == null && cw.current_usage) {
+        const u = cw.current_usage;
+        tok = (u.input_tokens || 0) + (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0);
+    }
+    return tok == null ? null : tok;
+}
+
 const WIDGETS = {
     model: (d) => {
         const m = d.model && (d.model.display_name || d.model.id);
@@ -209,13 +222,8 @@ const WIDGETS = {
         return o != null ? lv('out', 'Ausgabe', k(o), C.dim, '') : null;
     },
     context: (d) => {
-        const cw = d.context_window || {};
-        let tok = cw.total_input_tokens;
-        if (tok == null && cw.current_usage) {
-            const u = cw.current_usage;
-            tok = (u.input_tokens || 0) + (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0);
-        }
-        const size = cw.context_window_size;
+        const tok = contextTokens(d);
+        const size = (d.context_window || {}).context_window_size;
         if (tok == null || !size) return null;
         return barSeg('context', 'Eingabe', Math.round(100 * tok / size), `(${k(tok)}/${k(size)})`);
     },
@@ -291,3 +299,19 @@ if (cfg.layout === 'fixed') {
 }
 
 process.stdout.write(out);
+
+// The id becomes a file name, so only plain ids pass.
+function storeContext(d) {
+    const id = d.session_id;
+    const tok = contextTokens(d);
+    if (typeof id !== 'string' || !/^[A-Za-z0-9-]{8,64}$/.test(id) || typeof tok !== 'number') return;
+    const size = Number((d.context_window || {}).context_window_size);
+    const dir = path.join(os.homedir(), '.qatlas', 'state', 'context');
+    const tmp = path.join(dir, `.${id}.${process.pid}.tmp`);
+    try {
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(tmp, JSON.stringify({ tokens: tok, window: size > 0 ? size : null, at: Date.now() }));
+        fs.renameSync(tmp, path.join(dir, `${id}.json`));
+    } catch { try { fs.rmSync(tmp, { force: true }); } catch { } }
+}
+try { storeContext(data); } catch { }
