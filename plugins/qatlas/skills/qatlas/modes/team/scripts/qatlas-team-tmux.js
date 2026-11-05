@@ -39,7 +39,9 @@
 // open signal whose conversation part has not changed for --stale minutes (once per standstill phase;
 // the state lives in pane options and so survives across wait calls). While the host shows that the
 // lead waits for its own background agent (Claude Code: "Waiting for N background agent(s)"), the
-// limit is WAITING_FACTOR times --stale, so a hung worker is still reported. disk: free space of the repo
+// limit is WAITING_FACTOR times --stale, so a hung worker is still reported; the same holds while a `slot`
+// command of qatlas-run-tools.js (waiting for a test slot or resource, or running under one) is a descendant of
+// the pane process, since it prints once and then stays silent. disk: free space of the repo
 // filesystem fell below --min-free GB (once per undershoot). nudge is the only way to write into a pane.
 // If add finds no marked window, an existing log is renamed to events-<timestamp>.jsonl.
 // Context fill of Claude Code sessions is measured, not estimated: add starts a Claude command with a fixed
@@ -374,14 +376,47 @@ function conversation(pane) {
   return lines;
 }
 
+// One process table per call; a failing ps counts as no slot command anywhere.
+function processTable() {
+  try {
+    const children = new Map();
+    for (const line of execFileSync('ps', ['-axww', '-o', 'pid=,ppid=,args='], { encoding: 'utf8' }).split('\n')) {
+      const m = /^\s*(\d+)\s+(\d+)\s+(.*)$/.exec(line);
+      if (m) children.set(m[2], [...(children.get(m[2]) || []), { pid: m[1], args: m[3] }]);
+    }
+    return children;
+  } catch { return new Map(); }
+}
+
+// The `slot` command of qatlas-run-tools.js below the pane process, as { resource } (null: test slot), or null.
+function slotCommand(table, panePid) {
+  const queue = [...(table.get(String(panePid)) || [])];
+  for (let proc; (proc = queue.shift());) {
+    const argv = proc.args.split(/\s+/);
+    const i = argv.findIndex(a => path.basename(a) === 'qatlas-run-tools.js');
+    const end = argv.indexOf('--');
+    if (i >= 0 && argv[i + 1] === 'slot' && end > i) {
+      const r = argv.indexOf('--resource', i);
+      return { resource: r >= 0 && r < end ? argv[r + 1] || null : null };
+    }
+    queue.push(...(table.get(proc.pid) || []));
+  }
+  return null;
+}
+
 // Standstill tracking per pane in pane options: @qatlas-hash, @qatlas-since (ms), @qatlas-stale (reported).
 const TRACK = ['@qatlas-hash', '@qatlas-since', '@qatlas-stale'];
 function recordStale(repo, minutes) {
+  const table = processTable();
   for (const p of allPanes(repo)) {
     if (p.dead) continue;
     if (p.kind) { for (const name of TRACK) tmux(['set', '-p', '-u', '-t', p.pane, name]); continue; }
     const lines = conversation(p.pane);
-    const waiting = WAITING.test(tmux(['capture-pane', '-p', '-t', p.pane]));
+    const agent = WAITING.test(tmux(['capture-pane', '-p', '-t', p.pane]));
+    const slot = slotCommand(table, option(p.pane, 'pane_pid'));
+    const waiting = agent || !!slot;
+    const reason = slot ? (slot.resource ? ` while waiting for or running under resource ${slot.resource}` : ' while waiting for or running under a test slot')
+      : agent ? ' while waiting for a background agent' : '';
     const masked = lines.join('\n').replace(VOLATILE, '').replace(/\s+/g, ' ');
     const hash = crypto.createHash('sha1').update(masked).digest('hex');
     const now = Date.now();
@@ -393,7 +428,7 @@ function recordStale(repo, minutes) {
     } else if (!option(p.pane, '@qatlas-stale') && now - since >= minutes * (waiting ? WAITING_FACTOR : 1) * 60000) {
       setOption(p.pane, '@qatlas-stale', '1');
       record(repo, 'stale', { package: p.package, role: p.role === 'integrator' ? p.role : null, pane: p.pane,
-        text: `No change for ${((now - since) / 6e4).toFixed(1)} min${waiting ? ' while waiting for a background agent' : ''}. Last lines:\n${lines.slice(-5).join('\n')}` });
+        text: `No change for ${((now - since) / 6e4).toFixed(1)} min${reason}. Last lines:\n${lines.slice(-5).join('\n')}` });
     }
   }
 }
