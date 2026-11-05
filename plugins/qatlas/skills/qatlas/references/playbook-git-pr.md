@@ -41,7 +41,8 @@ bullets below apply to the `run` unless "In a team" names the difference.
   conflict with the base comes back from the integrator as `rework`. The integrator opens no pull request; it
   merges with `land --pr <n> --report <file>`. If branch protection requires an up-to-date state, it catches
   up with the base without conflict and waits for CI again; `land` then accepts the remote head. On `land`
-  exit 8 (`no-ci`) it tests the merged state with the project tests via `slot` and calls `land … --no-ci`.
+  exit 8 (`no-ci`) it confirms the merged state as [the integrator's evidence and delta
+  checks](../modes/team/integrator.md#evidence-and-delta-checks) describe and calls `land … --no-ci`.
 - **Cut for squash merge:** A task yields as many pull requests as the commit boundary of the git norm
   ([commit boundaries](../../qatlas-core-git/references/commit-boundaries.md)) requires for a squashed
   review; a pull request never bundles independent milestones. Each pull request gets its own task branch of

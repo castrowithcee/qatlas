@@ -255,7 +255,9 @@ stays unchanged.
   `close` with the same arguments. It stays open only if an open point such as an abort or an unresolved
   conflict cannot be secured, or if the pane belongs to the user (see "Monitoring"). With the last pane, the
   session ends. A `done` of the integrator closes it the same way with `--role integrator`, once every
-  package is integrated or secured and no replenishment is possible.
+  package is integrated or secured and no replenishment is possible. Before it, the integrator runs the final
+  check of its [delta checks](integrator.md#evidence-and-delta-checks); wait for it, and if it is red, record
+  the draft per "Shaping new drafts".
 - **`exited` without `done`:** Secure the package's open tasks per the git workflow as a handover to
   `review`, save the pane with `capture` and close it with `close`. If the integrator exited, save and close
   its pane and start a new one as described in "Starting the integrator", adding to its directive that this is

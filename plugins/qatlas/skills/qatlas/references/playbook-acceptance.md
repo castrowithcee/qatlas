@@ -60,9 +60,12 @@ demonstrably independent tasks may continue serially within the remaining task l
 ## Integrate and close
 
 Integrate the work of the active task, run its shared checks and maintain task, final report and spine per
-the authoritative contract. Set it to `done` only when all criteria are evidenced on the control branch.
-In doing so, reconcile the actual diff and the resulting behavior against the execution basis. Whoever
-integrates decides on the documentation effect and carries over necessary changes before the task closing:
+the authoritative contract. A valid tree-bound evidence of the same tree counts as that check and is not
+repeated; in a team, the integrator's [evidence and delta
+checks](../modes/team/integrator.md#evidence-and-delta-checks) apply. Set it to `done` only when all
+criteria are evidenced on the control branch. In doing so, reconcile the actual diff and the resulting
+behavior against the execution basis. Whoever integrates decides on the documentation effect and carries over
+necessary changes before the task closing:
 
 - Document only statements that a future maintainer must know to satisfy a requirement or to avoid a wrong
   decision. Describe no details that code and tests already reveal without a relevant wrong decision, and

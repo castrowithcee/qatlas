@@ -67,13 +67,15 @@ until its `integrated`. Integrate handovers one at a time and log every integrat
 3. Without a conflict, integrate per the git workflow, and for integration via pull requests per [integration
    via pull requests](../../references/playbook-git-pr.md) with `land --pr <n> --report <file>` of
    `qatlas-run-tools.js`; the lead opened the pull request. `land` checks the head, waits for CI like
-   `ci-wait`, squash-merges, proves the squash and deletes the remote branch. In doing so, check locally only
-   the affected areas via `slot --priority` and leave the full breadth to CI. If `land` ends with exit 8
-   (`no-ci`), test the merged state yourself with the project tests via `slot` and call `land … --no-ci`. You
-   treat a known or new flake by its rule in [accepting and
-   integrating](../../references/playbook-acceptance.md). Without pull requests, you run the shared checks
-   yourself. Every command that the project instructions assign to an exclusive resource runs via `slot
-   --resource <name> -- <command>`. You integrate tasks spanning several repos per the git workflow.
+   `ci-wait`, squash-merges, proves the squash and deletes the remote branch. Which local checks remain is
+   decided by [Evidence and delta checks](#evidence-and-delta-checks); without a declaration there, check
+   locally only the affected areas via `slot --priority` and leave the full breadth to CI. If `land` ends
+   with exit 8 (`no-ci`), test the merged state yourself with the project tests via `slot`, or take over a
+   valid evidence per the same section, and call `land … --no-ci`. You treat a known or new flake by its rule
+   in [accepting and integrating](../../references/playbook-acceptance.md). Without pull requests, you run
+   the shared checks yourself, as that section narrows. Every command that the project instructions assign
+   to an exclusive resource runs via `slot --resource <name> -- <command>`. You integrate tasks spanning
+   several repos per the git workflow.
 4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.
    Reply with `answer … --answer "integrated <sha>"`, where `<sha>` is the integration commit on the control
    branch.
@@ -85,6 +87,25 @@ requires an up-to-date state, catch up with the base yourself without conflict, 
 branch update, and wait for CI again; `land` then accepts the remote head. You return a conflict as in
 step 2. In this case integration stays serially bound to the CI duration; name that as a bottleneck with
 `log --type risiko`. Without pull requests, a conflict likewise goes back as `rework`.
+
+## Evidence and delta checks
+
+The integrator never re-runs what a valid evidence already proves. The project's native instructions declare
+the fast shared checks and, per expensive check, its command and path areas (path prefixes or git
+pathspecs). An expensive check without areas counts as affected everywhere. Without any declaration, run the
+shared checks as step 3 says and skip none.
+
+- **Same tree:** if the tree of the `probe` result (for a fast-forward, the tree of the branch) equals the
+  `tree` of a green (`exit: 0`) entry in the handover's `checks`, and `slot results --tree <tree>` shows a
+  matching record, take the evidence over without a new run. Without CI, `land --no-ci` is then allowed; with
+  green CI on the same head, drop the local `slot --priority` check.
+- **Different tree:** run the fast shared checks fully via `slot`. Run an expensive check only if `git diff
+  --name-only <merge-base of task branch and basis> <current basis>` touches one of its path areas. Log every
+  skipped check with `log --type skipped --task <id> --text "<check and reason>"`.
+- **Final check:** after the last integration of the run and before the integrator's `done`, run once via
+  `slot` on the final state every expensive check that was skipped at least once in this run. If it is red,
+  log it with `log --type risiko` and name it in the closing under `Entscheiden`; the supervisor records a
+  draft for it. Tasks already integrated stay as they are.
 
 `land` deletes the remote branch itself once it has proven the squash; the authorization for push and merge
 covers it. Clean up local worktrees and branches per the worktree contract, with the `proof` result of `land`

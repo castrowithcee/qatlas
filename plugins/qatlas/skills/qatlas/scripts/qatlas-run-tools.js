@@ -28,8 +28,8 @@
 //     parents (needs git >= 2.38, else exit 3). The PR head is fetched via origin pull/<number>/head. Merge, proof and
 //     deletion then use the PR head.
 //     Without any check (see ci-wait) land does not merge: result "no-ci". With --no-ci the merger confirms
-//     that the merged state was tested locally with the project tests; land then merges without CI. Checks
-//     that do exist are still waited for.
+//     that the merged state was tested locally with the project tests or that a valid taken-over evidence
+//     covers its tree; land then merges without CI. Checks that do exist are still waited for.
 //     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|null,"branch_deleted",...}; result is
 //     merged | ci-fail | timeout | no-ci | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
 //     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed, 8 no-ci,
