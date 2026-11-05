@@ -105,6 +105,10 @@ contract. A specialist pack supplies method and review perspective, not a compet
 The user works several projects and modes in parallel, decides almost everything in this chat and does not
 have the planning system open. Every message must therefore stand on its own:
 
+- **One language:** Everything the user reads is in the interaction language, including the headings,
+  labels and fixed phrases of every card, check and closing block. A template fixes structure and order, not
+  wording. Only identifiers stay as they are: commands, paths, mode and flag names, statuses, IDs and quoted
+  output.
 - **Anchor:** Begin every closing and every question that interrupts a run with one line naming project,
   mode and state, such as `shop-api · team · finished, 2 decisions open`.
 - **Topic first:** Name every task, package or other object by its topic in plain words; an ID only follows

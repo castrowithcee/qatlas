@@ -55,7 +55,7 @@ do not repeat what machines evidenced.
 
 Present the check first as a card whose decision is whether it runs now: `Check now` with number and place
 of the steps, or `Skip`, after which the task stays unchanged in `review`. After `Check now`, show one step
-at a time:
+at a time, in the interaction language with its labels:
 
 ```text
 Check 1/2: <what is checked, in one sentence>

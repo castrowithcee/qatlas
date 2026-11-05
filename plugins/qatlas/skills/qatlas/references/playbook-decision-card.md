@@ -11,7 +11,7 @@ license: MIT
 
 This applies whenever a mode needs a real user decision. The mode keeps selection, substantive checking and
 its closing; this file governs the card and the recording of the answer. Write the card in the interaction
-language; the template fixes its structure.
+language, its labels and answer line included; the template fixes only its structure.
 
 ## Queue
 

@@ -9,9 +9,10 @@ license: MIT
 
 # Closing block
 
-End the mode with exactly this block in the interaction language; the template fixes its structure. Each
-item stands only here, once, topic first and task ID after it. Number the items of `Decide`, `Check` and
-`Assumed` continuously so that the user can answer by number. Leave out empty categories.
+End the mode with exactly this block in the interaction language, its headings and labels included; the
+template fixes only its structure. Each item stands only here, once, topic first and task ID after it. Number
+the items of `Decide`, `Check` and `Assumed` continuously so that the user can answer by number. Leave out
+empty categories.
 
 ```markdown
 <project> · <mode> · <state, e.g. finished, 2 decisions open>
