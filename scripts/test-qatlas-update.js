@@ -172,8 +172,10 @@ function testLibraryAndSubagent() {
   runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(fs.readFileSync(agentsFile, 'utf8'), '# Own version\n', 'The user file stays unchanged.');
 
-  const config = readYaml(path.join(f.home, '.qatlas', 'plugins', 'config.yaml'));
-  assert.deepStrictEqual(config, { format: 1, protection: { secrets: 'block', 'personal-data': 'ask' } });
+  for (const name of ['config.yaml', 'statusline.yaml']) {
+    assert.strictEqual(fs.existsSync(path.join(f.home, '.qatlas', 'plugins', name)), false,
+      'Setup writes no configuration file; the shipped defaults apply.');
+  }
 
   assert.ok(hookOutput(f, 'library').includes(agentsFile.split(path.sep).join('/')));
   assert.strictEqual(hookOutput(f, 'library'), hookOutput(f, 'library', true));
@@ -260,7 +262,7 @@ function testEarlierProjectRoot() {
 
 function testStatuslineRefresh() {
   const f = fixture('statusline');
-  const setup = path.join(pluginRoot, 'scripts', 'qatlas-statusline-setup-claude.js');
+  const setup = path.join(pluginRoot, 'scripts', 'qatlas-statusline-claude.js');
   const copy = path.join(f.home, '.qatlas', 'plugins', 'statusline.js');
   const marker = path.join(f.home, '.qatlas', 'plugins', 'runtime', 'VERSION');
   const version = fs.readFileSync(path.join(pluginRoot, 'VERSION'), 'utf8').trim();
@@ -282,11 +284,30 @@ function testStatuslineRefresh() {
   hookOutput(f, 'qatlas', true);
   assert.strictEqual(fs.readFileSync(copy, 'utf8'), '// codex\n', 'Codex does not use the Claude renderer.');
 
-  const result = runNode(setup, [], { cwd: f.project, home: f.home });
+  const settingsFile = path.join(f.home, '.claude', 'settings.json');
+  const foreign = { type: 'command', command: 'echo own' };
+  write(settingsFile, { statusLine: foreign, theme: 'dark' });
+  const result = runNode(setup, ['setup'], { cwd: f.project, home: f.home });
   assert.strictEqual(result.status, 0, result.stderr);
   assert.strictEqual(fs.readFileSync(marker, 'utf8').trim(), version);
-  const settings = JSON.parse(fs.readFileSync(path.join(f.home, '.claude', 'settings.json'), 'utf8'));
+  let settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
   assert.ok(settings.statusLine.command.includes('.qatlas/plugins/statusline.js'));
+  assert.strictEqual(fs.existsSync(path.join(f.home, '.qatlas', 'plugins', 'statusline.yaml')), false,
+    'Setup writes no statusline.yaml; the shipped defaults apply.');
+
+  const removed = runNode(setup, ['remove'], { cwd: f.project, home: f.home });
+  assert.strictEqual(removed.status, 0, removed.stderr);
+  settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+  assert.deepStrictEqual(settings, { statusLine: foreign, theme: 'dark' }, 'Remove restores the previous entry.');
+  assert.strictEqual(fs.existsSync(copy), false);
+  assert.strictEqual(fs.existsSync(marker), false);
+  hookOutput(f, 'qatlas');
+  assert.strictEqual(fs.existsSync(copy), false, 'After remove the session start copies nothing.');
+
+  const again = runNode(setup, ['remove'], { cwd: f.project, home: f.home });
+  assert.strictEqual(again.status, 0, again.stderr);
+  assert.deepStrictEqual(JSON.parse(fs.readFileSync(settingsFile, 'utf8')).statusLine, foreign,
+    'A foreign entry is never removed.');
 }
 
 function testSkippedUpdateVersions() {

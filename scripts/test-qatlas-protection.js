@@ -105,16 +105,15 @@ try {
   assert.strictEqual(result.status, 1);
   assert.match(result.stdout, /a\.txt:1 old-gitleaks/);
 
-  // Top-up adds missing keys and keeps set values with their comment.
-  const home = path.join(root, 'topup');
-  write(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\n# own comment\nprotection:\n  secrets: allow\n');
-  const added = execFileSync(process.execPath, ['-e',
-    'process.stdout.write(JSON.stringify(require(' + JSON.stringify(loader) + ').topUpConfig()))'],
+  // A file with a single deviation keeps the shipped default for every other key and is never rewritten.
+  const home = path.join(root, 'deviation');
+  const own = 'format: 1\n# own comment\nprotection:\n  secrets: allow\n';
+  write(path.join(home, '.qatlas', 'plugins', 'config.yaml'), own);
+  const effective = execFileSync(process.execPath, ['-e',
+    'process.stdout.write(JSON.stringify(require(' + JSON.stringify(loader) + ').readConfig().config.protection))'],
   { encoding: 'utf8', env: { ...process.env, HOME: home } });
-  assert.ok(JSON.parse(added).includes('protection.personal-data'));
-  const text = fs.readFileSync(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'utf8');
-  assert.match(text, /# own comment/);
-  assert.match(text, /secrets: allow/);
+  assert.deepStrictEqual(JSON.parse(effective), { secrets: 'allow', 'personal-data': 'ask' });
+  assert.strictEqual(fs.readFileSync(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'utf8'), own);
 
   process.stdout.write('✓ Qatlas protection: 15 scenarios passed.\n');
 } finally {
