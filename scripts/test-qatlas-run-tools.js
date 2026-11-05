@@ -1061,9 +1061,155 @@ try {
     // A malformed state file counts as no measurement.
     write(path.join(stateDir, idX + '.json'), '{broken');
     assert.strictEqual(ok({ CLAUDE_CODE_SESSION_ID: idX }, 'context', '--self').context.state, 'unknown');
+    // Stop decision against the threshold (default 60): over, under, unknown after compaction, unknown without.
+    const decision = res => [res.stop, res.reason];
+    const idD = '66666666-6666-4666-8666-666666666666';
+    write(path.join(stateDir, idD + '.json'), JSON.stringify({ tokens: 150000, window: 200000, at: Date.now() }));
+    const over = ok({ CLAUDE_CODE_SESSION_ID: idD }, 'context', '--self');
+    assert.deepStrictEqual([over.threshold, ...decision(over)], [60, true, 'threshold']);
+    assert.deepStrictEqual(decision(ok({ CLAUDE_CODE_SESSION_ID: idD }, 'context', '--self', '--threshold', '80')), [false, 'below']);
+    assert.deepStrictEqual(decision(ok({ CLAUDE_CODE_SESSION_ID: idA }, 'context', '--self')), [false, 'below']);
+    assert.deepStrictEqual(decision(ok({ CLAUDE_CODE_SESSION_ID: idA }, 'context', '--self', '--threshold', '25')), [true, 'threshold']);
+    assert.deepStrictEqual(decision(ok({ CLAUDE_CODE_SESSION_ID: idC }, 'context', '--self')), [true, 'compacted']);
+    assert.deepStrictEqual(decision(ok({}, 'context', '--self')), [false, 'unknown']);
+    assert.deepStrictEqual(decision(ok({}, 'context', '--package', 'b').panes[0]), [false, 'unknown']);
+    for (const bad of ['0', '101', 'x']) assert.strictEqual(run({}, 'context', '--self', '--threshold', bad).status, 2);
+    assert.strictEqual(run({}, 'context', '--self', '--threshold').status, 2);
+    // The supervisor judges the integrator the same way.
+    ok({}, 'add', '--role', 'integrator', ...common, '--', fake, '--session-id', idD);
+    const integ = ok({}, 'context', '--role', 'integrator', '--threshold', '70');
+    assert.deepStrictEqual([integ.threshold, integ.panes.length, integ.panes[0].role, ...decision(integ.panes[0])], [70, 1, 'integrator', true, 'threshold']);
+    assert.deepStrictEqual(ok({}, 'context').panes.map(x => [x.package || x.role, x.stop]).sort(),
+      [['a', false], ['b', false], ['integrator', true], ['x', false]]);
   } finally {
     try { tm3('kill-server'); } catch { /* already gone */ }
     if (socketPath3) fs.rmSync(socketPath3, { force: true });
+  }
+
+  // Replacement: done with rest, continuation package, open handovers exactly once across an integrator switch.
+  const sockSwitch = `qatlas-test-switch-${process.pid}`;
+  const tmSwitch = (...args) => execFileSync('tmux', ['-L', sockSwitch, ...args], { encoding: 'utf8' }).trim();
+  let socketPathSwitch = null;
+  try {
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'switch-')));
+    tmSwitch('new-session', '-d', '-x', '80', '-y', '24', '-s', 'base', 'sleep 300');
+    socketPathSwitch = tmSwitch('display', '-p', '#{socket_path}');
+    const senv = { ...process.env, TMUX: `${socketPathSwitch},1,0` };
+    const run = (...args) => spawnSync(process.execPath, [team, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8', env: senv });
+    const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
+    const refused = (...args) => assert.strictEqual(run(...args).status, 2, args.join(' '));
+    const common = ['--label', 'w', '--title', 't', '--cwd', repo];
+    const dir = path.join(repo, '.qatlas', 'local', 'team');
+    const log = () => fs.readFileSync(path.join(dir, 'events.jsonl'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
+    for (const name of ['a', 'b', 'c']) ok('add', '--package', name, ...common, '--', 'sleep', '300');
+    ok('add', '--role', 'integrator', ...common, '--', 'sleep', '300');
+    ok('plan', '--budget', '5', '--package', 'a', '--tasks', 't1,t2,t4');
+    ok('plan', '--budget', '5', '--package', 'b', '--tasks', 't3');
+    ok('plan', '--budget', '5', '--package', 'c', '--tasks', 't5');
+    // done with rest: validated ids, only for a lead whose title turns FERTIG with this call.
+    refused('title', '--package', 'b', '--title', 'work', '--rest', 't3');
+    refused('title', '--package', 'a', '--title', 'FERTIG · a', '--rest', 't2;rm');
+    refused('title', '--package', 'a', '--title', 'FERTIG · a', '--rest', '-x');
+    refused('title', '--package', 'a', '--title', 'FERTIG · a', '--rest', '');
+    refused('title', '--role', 'integrator', '--title', 'FERTIG · i', '--rest', 't2');
+    assert.deepStrictEqual(ok('title', '--package', 'a', '--title', 'FERTIG · a', '--rest', 't2,t4,t2').rest, ['t2', 't4']);
+    refused('title', '--package', 'a', '--title', 'FERTIG · a again', '--rest', 't2');
+    const done = ok('wait', '--since', '0', '--timeout', '0.01', '--min-free', '0.001').events.filter(e => e.type === 'done');
+    assert.deepStrictEqual(done.map(e => [e.package, e.rest]), [['a', ['t2', 't4']]]);
+    assert.deepStrictEqual(ok('report').packages.a.rest, ['t2', 't4']);
+    // Continuation: only of a closed package, same run budget, its tasks, once; not counted as a package.
+    refused('plan', '--budget', '5', '--package', 'a2', '--tasks', 't2,t4', '--continues', 'a');
+    ok('capture', '--package', 'a');
+    ok('close', '--package', 'a');
+    refused('plan', '--budget', '6', '--package', 'a2', '--tasks', 't2,t4', '--continues', 'a');
+    refused('plan', '--budget', '5', '--package', 'a2', '--tasks', 't2,t9', '--continues', 'a');
+    refused('plan', '--budget', '5', '--package', 'b', '--tasks', 't2', '--continues', 'a');
+    refused('plan', '--budget', '5', '--package', 'a2', '--tasks', 't2', '--continues', 'zz');
+    refused('plan', '--budget', '5', '--package', 'a2', '--tasks', 't2', '--continues');
+    assert.deepStrictEqual(ok('plan', '--budget', '5', '--package', 'a2', '--tasks', 't2,t4', '--continues', 'a').continues, 'a');
+    refused('plan', '--budget', '5', '--package', 'a3', '--tasks', 't2', '--continues', 'a');
+    let rep = ok('report');
+    assert.strictEqual(rep.plan.budget, 5);
+    assert.deepStrictEqual(Object.keys(rep.plan.packages).sort(), ['a', 'b', 'c']);
+    assert.deepStrictEqual(rep.plan.continuations, { a2: { continues: 'a', tasks: ['t2', 't4'] } });
+    ok('add', '--package', 'a2', ...common, '--', 'sleep', '300');
+    // Handovers before the switch: b answered and picked, a2 answered but not picked, c open with a changed report.
+    const hand = (name, task, text, timeout = '0.01') => ok('handover', '--package', name, '--task', task, '--report', text, '--timeout', timeout);
+    hand('b', 't3', 'report b');
+    hand('a2', 't2', 'report a2');
+    hand('c', 't5', 'report c v1');
+    hand('c', 't5', 'report c v2');
+    ok('answer', '--package', 'b', '--answer', 'integrated b1');
+    assert.strictEqual(hand('b', 't3', 'report b', '5').answer, 'integrated b1');
+    ok('answer', '--package', 'a2', '--answer', 'integrated a1');
+    refused('answer', '--package', 'a2', '--answer', 'integrated a1');
+    // Checks mode: a rejected resubmission raises nothing, so the open report stays the one offered; after a
+    // rework the resubmitted report is offered again.
+    const code = setup('switch-code');
+    const codeTree = git(code.repo, 'rev-parse', 'task^{tree}');
+    const checked = (tag, t = codeTree) => { const f = path.join(repo, `report-${tag}.md`);
+      write(f, `---\nbranch: task\nchecks:\n  - command: node test\n    exit: 0\n    tree: "${t}"\n---\n${tag}\n`); return f; };
+    const handD = (f, timeout = '0.01') => run('handover', '--code-repo', code.repo, '--package', 'd', '--task', 't6', '--report', f,
+      '--timeout', timeout);
+    const offeredNow = () => ok('wait', '--role', 'integrator', '--since', '0', '--timeout', '0.01').events;
+    ok('add', '--package', 'd', ...common, '--', 'sleep', '300');
+    assert.strictEqual(handD(checked('v1')).status, 0);
+    assert.strictEqual(handD(checked('v2', '1'.repeat(40))).status, 2);
+    let forD = offeredNow().filter(e => e.package === 'd');
+    assert.deepStrictEqual(forD.map(e => e.task), ['t6']);
+    assert.match(fs.readFileSync(forD[0].report, 'utf8'), /\nv1\n/);
+    ok('answer', '--package', 'd', '--answer', 'rework fix it');
+    assert.deepStrictEqual(offeredNow().filter(e => e.package === 'd'), []);
+    assert.strictEqual(JSON.parse(handD(checked('v1'), '5').stdout).answer, 'rework fix it');
+    assert.strictEqual(handD(checked('v3')).status, 0);
+    const byPkg = () => Object.fromEntries(ok('list').panes.map(x => [x.package || x.role, x]));
+    assert.deepStrictEqual([byPkg().a2.kind, byPkg().a2.answered, byPkg().c.kind, byPkg().c.answered], ['handover', true, 'handover', undefined]);
+    // The old integrator is replaced only once it shows FERTIG; plain add stays refused.
+    refused('add', '--role', 'integrator', '--replace', ...common, '--', 'sleep', '300');
+    refused('add', '--package', 'd', '--replace', ...common, '--', 'sleep', '300');
+    assert.notStrictEqual(run('add', '--role', 'integrator', ...common, '--', 'sleep', '300').status, 0);
+    const oldPane = byPkg().integrator.pane;
+    ok('nudge', '--role', 'integrator', '--text', 'finish the running integration, then FERTIG');
+    ok('title', '--role', 'integrator', '--title', 'FERTIG · integrator');
+    const swapped = ok('add', '--role', 'integrator', '--replace', ...common, '--', 'sleep', '300');
+    assert.strictEqual(swapped.replaced.pane, oldPane);
+    assert.ok(fs.existsSync(swapped.replaced.file));
+    const integrators = ok('list').panes.filter(x => x.role === 'integrator');
+    assert.deepStrictEqual(integrators.map(x => x.pane), [swapped.pane]);
+    assert.notStrictEqual(swapped.pane, oldPane);
+    // The new integrator gets exactly the open handovers, each with its latest report; after its answers, none.
+    let offered = ok('wait', '--role', 'integrator', '--since', '0', '--timeout', '0.01').events;
+    assert.deepStrictEqual(offered.map(e => [e.package, e.task]), [['c', 't5'], ['d', 't6']]);
+    assert.strictEqual(fs.readFileSync(offered[0].report, 'utf8'), 'report c v2\n');
+    assert.match(fs.readFileSync(offered[1].report, 'utf8'), /\nv3\n/);
+    ok('answer', '--package', 'c', '--answer', 'integrated c1');
+    refused('answer', '--package', 'c', '--answer', 'rework again');
+    ok('answer', '--package', 'd', '--answer', 'integrated d1');
+    refused('answer', '--package', 'd', '--answer', 'integrated d1');
+    assert.deepStrictEqual(ok('wait', '--role', 'integrator', '--since', '0', '--timeout', '0.01').events, []);
+    assert.strictEqual(log().filter(e => e.type === 'answer' && e.package === 'c').length, 1);
+    // A later handover reaches the new integrator; a dead integrator is replaced as well, and replacing
+    // the last pane keeps the run log.
+    hand('b', 't3', 'report b again');
+    offered = ok('wait', '--role', 'integrator', '--since', '0', '--timeout', '0.01').events;
+    assert.deepStrictEqual(offered.map(e => [e.package, e.task]), [['b', 't3']]);
+    ok('answer', '--package', 'b', '--answer', 'integrated b2');
+    for (const name of ['a2', 'b', 'c', 'd']) ok('close', '--package', name);
+    refused('add', '--role', 'integrator', '--replace', ...common, '--', 'sleep', '1');
+    ok('title', '--role', 'integrator', '--title', 'FERTIG · integrator 2');
+    ok('add', '--role', 'integrator', '--replace', ...common, '--', 'sleep', '1');
+    const deadline = Date.now() + 5000;
+    while (!ok('list').panes.every(x => x.dead) && Date.now() < deadline) spawnSync('sleep', ['0.1']);
+    const last = ok('add', '--role', 'integrator', '--replace', ...common, '--', 'sleep', '300');
+    assert.ok(last.replaced);
+    assert.deepStrictEqual(ok('list').panes.map(x => x.role), ['integrator']);
+    assert.deepStrictEqual(fs.readdirSync(dir).filter(f => /^events-/.test(f)), []);
+    rep = ok('report');
+    assert.deepStrictEqual(Object.keys(rep.plan.packages).sort(), ['a', 'b', 'c']);
+    assert.strictEqual(log().filter(e => e.type === 'start' && e.role === 'integrator').length, 4);
+  } finally {
+    try { tmSwitch('kill-server'); } catch { /* already gone */ }
+    if (socketPathSwitch) fs.rmSync(socketPathSwitch, { force: true });
   }
 
   // Statusline renderer: stores the context state without changing its output.

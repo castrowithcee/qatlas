@@ -39,9 +39,15 @@ Read each one completely at the stated time:
   `erfasst`, `entscheiden`) with `log`.
 - **Finish:** when every lead pane shows `FERTIG` or has ended and every handed-over task is integrated or
   secured as a handover, set the pane title with `node <script> title --repo <repo-root> --role integrator
-  --title "FERTIG · <title>"` and continue to wait; a replenished lead can still hand over.
-- **After a restart:** reconstruct the state from `list`, `report` and the planning system, take up the
-  handovers that `list` shows as open and start `wait` with the `cursor` of `list` instead of `--since 0`.
+  --title "FERTIG · <title>"` and continue to wait; a replenished lead can still hand over. If you integrate
+  again after a regular `FERTIG`, first set your title without `FERTIG`.
+- **Replacement nudge:** if the supervisor nudges you to finish because your context is full, finish and
+  answer only the running integration, take no new handover, set the `FERTIG` title as above and call nothing
+  further. The final check of [Evidence and delta checks](#evidence-and-delta-checks) stays with your
+  successor, which finds the skipped checks of the run as `skipped` in the `notes` of `report`.
+- **After a restart or takeover:** reconstruct the state from `list`, `report` and the planning system and
+  start `wait --role integrator --since 0`; it returns every open handover exactly once. Never take handovers
+  from `list`.
 
 ## Integration
 

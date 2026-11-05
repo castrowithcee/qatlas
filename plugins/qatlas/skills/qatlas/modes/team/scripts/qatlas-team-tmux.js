@@ -70,19 +70,33 @@
 // and faint or explicitly coloured text on the input line is dropped (plainPane), so a suggestion neither
 // moves the stale hash nor reaches stale text or capture files; add also starts a Claude command with
 // --prompt-suggestions false unless the command sets it.
+// `context` also decides per pane or for --self whether the session stops at the next task boundary (`stop`,
+// `reason`) against `threshold` (--threshold, default 60): threshold when percent >= threshold, compacted when
+// percent is unknown after a compaction; otherwise no stop with below, or unknown (the caller then estimates).
+// A FERTIG title writes one done event; a lead adds the tasks it leaves unstarted with --rest, carried as list
+// `rest` in done and in report.packages. plan --continues <package> logs a continuation of a closed package
+// with the same run budget and tasks of that package; report lists it under plan.continuations, not in
+// plan.packages, so it counts neither as a package nor against the budget.
+// A handover is open while it is the last signal event of its lead pane. wait --role integrator returns only
+// open handovers, so one already answered or picked, or superseded by a changed report, is never offered
+// again (a rejected report raises nothing and leaves the open one in place; a resubmission after a picked
+// rework is a new open handover), and answer refuses a second answer to it; list marks an open signal with a
+// pending answer as `answered`. add --role integrator --replace saves and closes the old integrator pane only
+// if it shows FERTIG or is dead and waits for no answer, then starts the new one in the same log; the new
+// integrator takes over every open handover exactly once with wait --role integrator --since 0.
 // Usage:
-//   qatlas-team-tmux.js add --repo <root> (--package <package> | --role integrator) --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
+//   qatlas-team-tmux.js add --repo <root> (--package <package> | --role integrator [--replace]) --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-team-tmux.js list --repo <root>
-//   qatlas-team-tmux.js context (--repo <root> [--package <package> | --role integrator] | --self)   (without selector: all panes)
+//   qatlas-team-tmux.js context (--repo <root> [--package <package> | --role integrator] | --self) [--threshold <percent, default 60>]   (without selector: all panes)
 //   qatlas-team-tmux.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <seconds>] [--stale <minutes, default 20>] [--min-free <GB, default 5>] [--health <minutes, default 30>] [--code-repo <path>]
 //   qatlas-team-tmux.js nudge --repo <root> (--package <package> | --role integrator) --text <text>   (refused while the pane has an open signal)
-//   qatlas-team-tmux.js title --repo <root> (--package <package> | --role integrator) --title <title>
+//   qatlas-team-tmux.js title --repo <root> (--package <package> | --role integrator) --title <title> [--rest <id,id,...>]   (--rest: lead, title turning FERTIG)
 //   qatlas-team-tmux.js ask --repo <root> (--package <package> | --role integrator) --question <question> [--timeout <seconds>]
 //   qatlas-team-tmux.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <text|file> [--timeout <seconds>]
 //   qatlas-team-tmux.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
-//   qatlas-team-tmux.js answer --repo <root> (--package <package> | --role integrator) --answer <answer>   (handover: "integrated <sha>" or "rework <reason>")
+//   qatlas-team-tmux.js answer --repo <root> (--package <package> | --role integrator) --answer <answer>   (handover: "integrated <sha>" or "rework <reason>", once)
 //   qatlas-team-tmux.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
-//   qatlas-team-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>   (run budget and package tasks; repeatable)
+//   qatlas-team-tmux.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...> [--continues <closed package>]   (run budget and package tasks; repeatable)
 //   qatlas-team-tmux.js report --repo <root>
 //   qatlas-team-tmux.js capture --repo <root> (--package <package> | --role integrator)   (scrollback to <root>/.qatlas/local/team/<package>.log)
 //   qatlas-team-tmux.js close --repo <root> (--package <package> | --role integrator)
@@ -137,7 +151,7 @@ const eventsFile = repo => path.join(eventsDir(repo), 'events.jsonl');
 function record(repo, type, fields = {}) {
   fs.mkdirSync(eventsDir(repo), { recursive: true });
   const entry = { at: new Date().toISOString(), type };
-  for (const key of ['package', 'role', 'task', 'pane', 'text', 'report']) if (fields[key]) entry[key] = fields[key];
+  for (const key of ['package', 'role', 'task', 'pane', 'text', 'report', 'rest']) if (fields[key]) entry[key] = fields[key];
   fs.appendFileSync(eventsFile(repo), JSON.stringify(entry) + '\n');
 }
 
@@ -153,6 +167,16 @@ function events(repo) {
 function pendingAnswer(repo, pane) {
   const last = events(repo).filter(e => e.pane === pane && SIGNAL.has(e.type)).pop();
   return last && last.type === 'answer' ? last.text : null;
+}
+
+// Last signal event per pane: a handover is open for the integrator only while it is that event.
+const lastSignals = all => all.reduce((map, e) => (SIGNAL.has(e.type) && e.pane ? map.set(e.pane, e) : map), new Map());
+
+const TASK_ID = /^[A-Za-z0-9#_][A-Za-z0-9#_-]*$/;
+function idList(name) {
+  const ids = (flag(name) ?? '').split(',').map(s => s.trim());
+  if (ids.some(id => !TASK_ID.test(id))) fail(name + ' takes comma-separated ids of [A-Za-z0-9#_-]', 2);
+  return [...new Set(ids)];
 }
 
 function markedWindows(repo) {
@@ -308,15 +332,24 @@ function contextOf(id) {
 
 const withContext = p => ({ ...p, context: contextOf(option(p.pane, '@qatlas-session')) });
 
+// Without a percent only a compaction proves a full context; otherwise the caller falls back to its estimate.
+function decide(context, threshold) {
+  if (context.percent !== null) return context.percent >= threshold ? { stop: true, reason: 'threshold' } : { stop: false, reason: 'below' };
+  return context.compacted ? { stop: true, reason: 'compacted' } : { stop: false, reason: 'unknown' };
+}
+
 function contextCommand() {
+  const threshold = opts.includes('--threshold') ? Number(flag('--threshold')) : 60;
+  if (!(threshold > 0 && threshold <= 100)) fail('--threshold must be a percent above 0 and at most 100', 2);
   if (opts.includes('--self')) {
     if (flag('--package') !== null || flag('--role') !== null) fail('--self excludes --package and --role', 2);
-    return out({ self: true, context: contextOf(process.env.CLAUDE_CODE_SESSION_ID) });
+    const context = contextOf(process.env.CLAUDE_CODE_SESSION_ID);
+    return out({ self: true, context, threshold, ...decide(context, threshold) });
   }
   const repo = repoKey();
   let list = allPanes(repo);
   if (flag('--package') !== null || flag('--role') !== null) { const pane = target(); list = list.filter(p => p.pane === pane); }
-  out({ panes: list.map(withContext).map(({ pane, package: name, role, context }) => ({ pane, package: name, role, context })) });
+  out({ threshold, panes: list.map(withContext).map(({ pane, package: name, role, context }) => ({ pane, package: name, role, context, ...decide(context, threshold) })) });
 }
 
 const CLAUDE_ID = 'claude';
@@ -345,6 +378,8 @@ function add() {
   const role = flag('--role') ?? 'lead';
   if (role !== 'lead' && role !== 'integrator') fail('--role must be lead or integrator', 2);
   const integrator = role === 'integrator';
+  const replace = opts.includes('--replace');
+  if (replace && !integrator) fail('--replace applies only to --role integrator', 2);
   if (integrator && flag('--package') !== null) fail('The integrator takes no --package', 2);
   const name = integrator ? null : need('--package')[0];
   if (name === 'integrator') fail('Reserved package name: integrator', 2);
@@ -352,6 +387,7 @@ function add() {
   const sessionId = sessionIdFor(rest);
   disablePromptSuggestions(rest);
   if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Not a directory: ' + cwd);
+  const replaced = replace ? retire(repo) : null;
   const wins = markedWindows(repo);
   let win = wins.find(w => panes(w).length < MAX_PANES);
   let pane;
@@ -366,7 +402,8 @@ function add() {
     [win, pane, session] = extraWindow(repo, wins[0], label, cwd);
   } else {
     [win, pane, session] = newWindow(repo, label, cwd);
-    if (fs.existsSync(eventsFile(repo))) {
+    // A replacement continues the run even if the old integrator was the last pane.
+    if (!replaced && fs.existsSync(eventsFile(repo))) {
       fs.rmSync(path.join(eventsDir(repo), 'disk-low'), { force: true });
       fs.renameSync(eventsFile(repo), path.join(eventsDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
     }
@@ -377,13 +414,31 @@ function add() {
   setTitle(pane, title);
   layout(win);
   record(repo, 'start', { package: name, role: integrator ? role : null, pane });
-  out({ window: win, pane, session,
+  out({ window: win, pane, session, ...(replaced ? { replaced } : {}),
     ...(inTmux ? { switch: 'Ctrl+B s (session list) or Ctrl+B ( / Ctrl+B )' } : { attach: `tmux -L ${SOCKET} attach` }) });
 }
 
+// Only an integrator that ended its work (FERTIG or dead) and waits for no answer is replaced, so no integration
+// runs in two sessions; the new one starts only after the old pane is closed.
+function retire(repo) {
+  const old = allPanes(repo).find(p => p.role === 'integrator');
+  if (!old) fail('No integrator pane to replace', 2);
+  if (!old.dead && !old.title.startsWith('FERTIG')) fail(`Integrator pane ${old.pane} is live without FERTIG; no replacement.`, 2);
+  if (!old.dead && old.kind) fail(`Integrator pane ${old.pane} has an open signal (${old.kind}); no replacement.`, 2);
+  const file = captureTo(repo, old.pane);
+  closePane(repo, old.pane);
+  return { pane: old.pane, file };
+}
+
+// The cursor is read before the panes: a signal raised in between is then both listed and returned by wait,
+// never neither.
 function list() {
   const repo = repoKey();
-  out({ windows: markedWindows(repo), panes: allPanes(repo).map(withContext), cursor: events(repo).length });
+  const cursor = events(repo).length;
+  const found = allPanes(repo).map(withContext);
+  const last = lastSignals(events(repo));
+  const panes = found.map(p => (p.kind && last.get(p.pane)?.type === 'answer' ? { ...p, answered: true } : p));
+  out({ windows: markedWindows(repo), panes, cursor });
 }
 
 // Writes exactly one exited per newly detected dead pane.
@@ -687,7 +742,8 @@ async function wait() {
       detectLocked(repo, () => { recordExits(repo); recordStale(repo, stale); recordDisk(repo, minFree); recordHealth(repo, health, code); });
     }
     const all = events(repo);
-    const hits = all.filter(e => e.seq >= since && wakes.has(e.type));
+    const last = role === 'integrator' ? lastSignals(all) : null;
+    const hits = all.filter(e => e.seq >= since && wakes.has(e.type) && (!last || last.get(e.pane) === e));
     if (hits.length) return out({ events: hits, cursor: all.length, timeout: false });
     if (Date.now() >= end) return out({ events: [], cursor: all.length, timeout: true });
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -869,6 +925,7 @@ function answer() {
   if (kind === 'handover' && !/^(integrated \S+|rework \S[\s\S]*)$/.test(text)) {
     fail('A handover accepts only "integrated <sha>" or "rework <reason>".', 2);
   }
+  if (kind === 'handover' && pendingAnswer(repo, pane) !== null) fail(`Handover in ${pane} is already answered; the lead has not picked it up yet.`, 2);
   const task = kind === 'handover' ? option(pane, '@qatlas-task') : '';
   record(repo, 'answer', { ...who(), pane, task, text });
   out({ pane, answered: true });
@@ -882,8 +939,23 @@ function plan() {
   const ids = tasks.split(',').map(s => s.trim());
   if (!name.trim() || ids.some(id => !id)) fail('--package and --tasks must not be empty', 2);
   if (name === 'integrator') fail('Reserved package name: integrator', 2);
-  record(repo, 'plan', { package: name, text: JSON.stringify({ budget, tasks: ids }) });
-  out({ planned: name, budget, tasks: ids, cursor: events(repo).length });
+  const continues = opts.includes('--continues') ? flag('--continues') || fail('Missing: --continues', 2) : null;
+  if (continues !== null) {
+    const all = events(repo);
+    const plans = all.filter(e => e.type === 'plan').flatMap(e => { try { return [{ package: e.package, ...JSON.parse(e.text) }]; } catch { return []; } });
+    const from = plans.filter(p => p.package === continues).pop();
+    if (!from) fail('--continues: package was never planned: ' + continues, 2);
+    if (!all.some(e => e.type === 'closed' && e.package === continues)) fail('--continues: package is not closed: ' + continues, 2);
+    if (plans.some(p => p.package === name)) fail('Package already planned: ' + name, 2);
+    if (plans.some(p => p.continues === continues)) fail('--continues: package already has a continuation: ' + continues, 2);
+    const runBudget = plans[plans.length - 1].budget;
+    if (budget !== runBudget) fail(`A continuation keeps the run budget ${runBudget}`, 2);
+    const foreign = ids.filter(id => !from.tasks.includes(id));
+    if (foreign.length) fail(`--continues: tasks not in package ${continues}: ${foreign.join(',')}`, 2);
+  }
+  const entry = { budget, tasks: ids, ...(continues !== null ? { continues } : {}) };
+  record(repo, 'plan', { package: name, text: JSON.stringify(entry) });
+  out({ planned: name, ...entry, cursor: events(repo).length });
 }
 
 function logEvent() {
@@ -906,7 +978,7 @@ function report() {
   const tasks = {};
   const log = { rerun: 0, conflict: 0, nudge: 0 };
   const notes = {};
-  const plan = { budget: null, packages: {} };
+  const plan = { budget: null, packages: {}, continuations: {} };
   const integrator = { vorhanden: false, rueckfragen: 0 };
   const lastIntegrated = {};
   for (const e of list) {
@@ -914,11 +986,16 @@ function report() {
       (notes[e.type] ||= []).push(Object.fromEntries(['package', 'task', 'text'].filter(k => e[k]).map(k => [k, e[k]])));
     }
     if (e.type === 'plan') {
-      try { const p = JSON.parse(e.text); plan.budget = p.budget; plan.packages[e.package] = p.tasks; } catch { /* skip */ }
+      try {
+        const p = JSON.parse(e.text);
+        plan.budget = p.budget;
+        if (p.continues) plan.continuations[e.package] = { continues: p.continues, tasks: p.tasks }; else plan.packages[e.package] = p.tasks;
+      } catch { /* skip */ }
     }
     const pkg = e.package && (packages[e.package] ||= { rueckfragen: 0, start: null });
     if (e.type === 'start' && pkg) pkg.start = time(e);
     if (e.type === 'question' && pkg) pkg.rueckfragen++;
+    if (e.type === 'done' && pkg && Array.isArray(e.rest)) pkg.rest = e.rest;
     if (e.role === 'integrator') {
       integrator.vorhanden = true;
       if (e.type === 'question') integrator.rueckfragen++;
@@ -947,18 +1024,20 @@ function report() {
   });
 }
 
-function capture() {
-  const repo = repoKey();
-  const pane = target();
+function captureTo(repo, pane) {
   const content = plainPane(tmux(['capture-pane', '-e', '-p', '-J', '-S', '-', '-t', pane])) + '\n';
   const file = writeUnique(eventsDir(repo), safe(flag('--package') ?? flag('--role')), '.log', content);
   record(repo, 'captured', { ...who(), pane, text: file });
-  out({ pane, file });
+  return file;
 }
 
-function close() {
+function capture() {
   const repo = repoKey();
   const pane = target();
+  out({ pane, file: captureTo(repo, pane) });
+}
+
+function closePane(repo, pane) {
   const win = tmux(['display', '-p', '-t', pane, '#{window_id}']);
   const session = tmux(['display', '-p', '-t', pane, '#{session_id}']);
   const last = panes(win).length === 1;
@@ -967,22 +1046,28 @@ function close() {
   let sessionClosed = false;
   try { tmux(['has-session', '-t', session]); } catch { sessionClosed = true; }
   record(repo, 'closed', { ...who(), pane });
-  out({ closed: pane, windowClosed: last, sessionClosed });
+  return { closed: pane, windowClosed: last, sessionClosed };
+}
+
+const close = () => { const repo = repoKey(); out(closePane(repo, target())); };
+
+function title() {
+  const repo = repoKey();
+  const pane = target();
+  const [text] = need('--title');
+  const done = text.startsWith('FERTIG') && !option(pane, 'pane_title').startsWith('FERTIG');
+  const rest = opts.includes('--rest') ? idList('--rest') : null;
+  if (rest && (flag('--role') !== null || !done)) fail('--rest needs a lead pane whose title turns FERTIG with this call', 2);
+  setTitle(pane, text);
+  if (done) record(repo, 'done', { ...who(), pane, text, rest });
+  out({ pane, title: text, ...(rest ? { rest } : {}) });
 }
 
 try {
   if (command === 'add') add();
   else if (command === 'list') list();
   else if (command === 'context') contextCommand();
-  else if (command === 'title') {
-    const repo = repoKey();
-    const pane = target();
-    const [title] = need('--title');
-    const was = option(pane, 'pane_title');
-    setTitle(pane, title);
-    if (title.startsWith('FERTIG') && !was.startsWith('FERTIG')) record(repo, 'done', { ...who(), pane, text: title });
-    out({ pane, title });
-  }
+  else if (command === 'title') title();
   else if (command === 'wait') wait().catch(error => fail(error.message));
   else if (command === 'ask') raise('question', need('--question')[0]).catch(error => fail(error.message));
   else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, codeRepo(repoKey())); raise('handover', text, task).catch(error => fail(error.message)); }

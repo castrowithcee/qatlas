@@ -66,6 +66,14 @@ the handed-over task counts as securely handed over in that case. Then call `han
 afterwards. A `rework` takes precedence: secure the running task at the next checked milestone as a
 checkpoint, work on the reason, hand over again and continue afterwards.
 
+After each completed or securely handed-over task, after its `integrated` and before you start another, measure
+your context with `node <script> context --self`; if your directive names a threshold, add `--threshold
+<percent>`. On `stop: true` start no new task. Still wait for the answers of open handovers as usual; a `rework`
+that arrives after the stop decision you secure as a checkpoint at the existing location, and its task goes
+into the rest. Then write your closing block, naming branch and worktree of every task in the rest, and end
+with the title call below, passing the ids of the tasks you neither completed nor handed over as `--rest
+<id,id,...>`. On `reason: unknown` keep the estimate rule of [executing work](../run/run.md).
+
 Log every draft you record in the planning system right away with `node <script> log --repo <repo-root>
 --type erfasst --package <package> --task <id> --text "<title>"`; the supervisor has it shaped.
 
@@ -73,4 +81,5 @@ Whatever you would otherwise ask the user, you ask the supervisor exclusively wi
 <repo-root> --package <package> --question "<question with context, options and recommendation>"`; the
 output is the answer. Without an answer, call the same command again. While a handover is open, no question
 is possible; first wait for its answer with `handover`. After your closing block, set the pane title with
-`node <script> title --repo <repo-root> --package <package> --title "FERTIG · <title>"`.
+`node <script> title --repo <repo-root> --package <package> --title "FERTIG · <title>"`, with `--rest
+<id,id,...>` if tasks remain (see above).

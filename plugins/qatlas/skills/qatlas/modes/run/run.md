@@ -29,8 +29,11 @@ they report completion.
 - **Without `--limit`:** The task limit is five.
 - **`--limit <n|all>`:** Sets the task limit to `n` or, with `all`, to all executable tasks of the scope. If
   it is above five, after each completed or securely handed-over task check whether your context can still
-  safely carry another complete task including integration and the final report. If it has already been
-  compacted or foreseeably will not suffice, end the run regularly at this task boundary.
+  safely carry another complete task including integration and the final report. Measure it with `node
+  <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tmux.js context --self`, adding `--threshold
+  <percent>` if the run directive names one (default 60), and end the run regularly at this task boundary on
+  `stop: true`. Where `reason` is `unknown` (no measurement), estimate instead: if the context has already been
+  compacted or foreseeably will not suffice, end the run at this task boundary.
 - **`--fly`:** The user is unreachable during the run; [`--fly` in the run](flag-fly.md) applies.
 
 ## Reading list
@@ -96,7 +99,8 @@ does not automatically become an assignment for a stronger model.
 End the run as soon as one of these conditions holds:
 
 - The task limit is reached: that many tasks were completed or securely handed over.
-- With a raised task limit, the lead's context cannot carry another complete task.
+- With a raised task limit, the lead's context cannot carry another complete task (measured or estimated as
+  described in "Invocation").
 - The chosen scope is completely and demonstrably finished.
 - The scope contains neither an executable `next` nor an executable `ready`.
 - A failed task blocks the remaining work.

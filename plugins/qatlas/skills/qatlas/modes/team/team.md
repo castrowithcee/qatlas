@@ -46,6 +46,10 @@ object per pane as `context`. `percent` is `null` when only the transcript is av
 window size. `compacted` marks a compaction after the last measured answer. State `unknown` means there is no
 measurement (Codex pane, session not started yet, no statusline).
 `add` starts a Claude command with a fixed `--session-id` and stores it on the pane.
+`context` also decides: `stop` is true when `percent` reaches `--threshold` (reason `threshold`) or is `null`
+after a compaction (reason `compacted`); otherwise `reason` is `below`, or `unknown` without a usable
+measurement, where the caller falls back to its estimate. The threshold is 60 percent for leads and integrator;
+only the user's run directive changes it. `list` carries no decision.
 
 ## Invocation
 
@@ -70,8 +74,8 @@ Read each one completely at the stated time:
    team](../../references/playbook-team.md).
 3. **If user or project instructions require pull requests, before the first lead:** [integration via
    pull requests](../../references/playbook-git-pr.md).
-4. **When the integrator has to be restarted or taken over (the supervisor does not read it otherwise):**
-   [the integrator playbook](integrator.md).
+4. **When the integrator has to be restarted, replaced or taken over (the supervisor does not read it
+   otherwise):** [the integrator playbook](integrator.md).
 5. **Before the final report:** [the closing block](../../references/playbook-closing-block.md).
 
 ## Prepare
@@ -168,7 +172,8 @@ decided by your own `--fly`. The run directive reads in essence:
 
 Insert `<plugin-root>`, `<script>`, `<tools>`, `<repo-root>`, `<package>` and `<basis>` as fixed values (paths
 absolute; `--code-repo` where the code lies in another repo). Add the part of the user's run directive that
-concerns this package. Add no option that loosens permissions, sandbox or approvals of the host.
+concerns this package, including a threshold it names, which every `context` call of the lead then carries as
+`--threshold <n>`. Add no option that loosens permissions, sandbox or approvals of the host.
 
 ## Starting the integrator
 
@@ -189,7 +194,9 @@ reads in essence:
 > base.
 
 Insert `<plugin-root>`, `<script>`, `<repo-root>` and `<basis>` as fixed values (paths absolute), because the
-integrator loads no skill of its own. Add the part of the user's run directive that concerns integration.
+integrator loads no skill of its own. Add the part of the user's run directive that concerns integration,
+including a threshold it names. After an exit or a replacement, add that this is a restart: the integrator
+begins with `wait --role integrator --since 0`.
 
 ## Monitoring
 
@@ -199,6 +206,12 @@ repo, so that `health` sees its test slots. It returns on one of the events `que
 `exited`, `stale`, `disk`, `health` or `erfasst`, or after a timeout; handovers go to the integrator and wake you
 never. `wait` is the only monitoring: build no monitors, crons or wait loops of your own. If the host can run
 commands in the background, do so, so that you stay available to the user.
+
+After every return of `wait`, event or timeout, check the integrator's fill with `context --repo <repo-root>
+--role integrator`, adding `--threshold <n>` if the run directive names one. On `stop: true`, send one
+`nudge --repo <repo-root> --role integrator --text "<text>"` telling it to finish and answer only the running
+integration, take no new handover, set `FERTIG` and then call nothing else; its `done` triggers the
+replacement described in "Finish". The leads measure themselves.
 
 Keep your context lean: read diffs first as `--stat` and then only the affected spots. What you carry into
 the closing you log immediately with `log` instead of holding it in memory: assumptions as `annahme`,
@@ -213,7 +226,7 @@ Handle each event:
   --role integrator --answer "<answer with source>"`. Otherwise ask the user briefly with package (or
   integrator), question and recommendation and pass on their answer; with `--fly` you instead answer as the
   flag file prescribes.
-- **`done` and `exited`:** Proceed as described in "Finish".
+- **`done` and `exited`:** Proceed as described in "Finish". A `done` of a lead may carry a `rest`.
 - **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20), or for three
   times that while the host shows that it waits for its own background agent (Claude Code: "Waiting for N
   background agents"; no equivalent is detected for Codex) or while a `slot` command, with or without
@@ -262,16 +275,27 @@ stays unchanged.
   handover to `review`, save the pane with `capture --repo <repo-root> --package <package>` and close it with
   `close` with the same arguments. It stays open only if an open point such as an abort or an unresolved
   conflict cannot be secured, or if the pane belongs to the user (see "Monitoring"). With the last pane, the
-  session ends. A `done` of the integrator closes it the same way with `--role integrator`, once every
-  package is integrated or secured and no replenishment is possible. Before it, the integrator runs the final
-  check of its [delta checks](integrator.md#evidence-and-delta-checks); wait for it, and if it is red, record
-  the draft per "Shaping new drafts".
+  session ends. If the `done` carries a `rest`, the lead stopped because its context is full; continue as
+  described under **Continuation** below.
+  A `done` of the integrator after your replacement nudge starts the replacement with `add --role integrator
+  --replace` as in "Starting the integrator"; the script saves and closes the old pane. Any other `done` of
+  the integrator closes it the same way with `--role integrator`, once every package is integrated or
+  secured and no replenishment is possible. Before it, the integrator runs the final check of its [delta
+  checks](integrator.md#evidence-and-delta-checks); wait for it, and if it is red, record the draft per
+  "Shaping new drafts".
 - **`exited` without `done`:** Secure the package's open tasks per the git workflow as a handover to
-  `review`, save the pane with `capture` and close it with `close`. If the integrator exited, save and close
-  its pane and start a new one as described in "Starting the integrator", adding to its directive that this is
-  a restart. Integration rests until it runs.
+  `review`, save the pane with `capture` and close it with `close`. If the integrator exited, start a new one
+  with `add --role integrator --replace` as described in "Starting the integrator", which saves and closes
+  the old pane. Integration rests until it runs.
 - At the end of the team run, run the cleanup steps that native project instructions or project memory name
   for the end of a run, and name them in the final report.
+
+**Continuation:** On a `done` with `rest`, save and close the pane as above, then log the continuation with
+`plan --repo <repo-root> --budget <n> --package <new> --tasks <rest> --continues <package>`, with the unchanged
+run budget. Start the continuation lead as described in "Starting leads" with exactly these tasks, the same
+coupling rules and the takeover of the branches and worktrees named in the closing block of the closed lead.
+The continuation replaces the closed pane: it counts neither additionally against the package count nor
+against the run budget. A `rest` can recur; the same rule applies to the new lead.
 
 **Replenishment:** If a pane is closed and the run budget is not used up, cut a new package from the
 remaining executable tasks as described in "Cutting packages" that is independent of all running packages. It
