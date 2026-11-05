@@ -49,6 +49,10 @@
 // first (tokens and window); otherwise the host transcript ~/.claude/projects/*/<id>.jsonl gives tokens of
 // the last answer without a window (percent null). Without a measurement the state is "unknown". `compacted`
 // marks a compaction after the last measured answer. list carries the same object per pane as `context`.
+// The host's greyed input suggestion is never read as typed input: panes are captured with escape sequences
+// and faint or explicitly coloured text on the input line is dropped (plainPane), so a suggestion neither
+// moves the stale hash nor reaches stale text or capture files; add also starts a Claude command with
+// --prompt-suggestions false unless the command sets it.
 // Usage:
 //   qatlas-team-tmux.js add --repo <root> (--package <package> | --role integrator) --label <window-name> --title <title> --cwd <dir> -- <command> [args...]
 //   qatlas-team-tmux.js list --repo <root>
@@ -311,6 +315,12 @@ function sessionIdFor(command) {
   return id;
 }
 
+function disablePromptSuggestions(command) {
+  if (!command.length || path.basename(command[0]) !== CLAUDE_ID) return;
+  if (command.some(a => a === '--prompt-suggestions' || a.startsWith('--prompt-suggestions='))) return;
+  command.splice(1, 0, '--prompt-suggestions', 'false');
+}
+
 function add() {
   const repo = repoKey();
   const [label, title, cwd] = need('--label', '--title', '--cwd');
@@ -322,6 +332,7 @@ function add() {
   if (name === 'integrator') fail('Reserved package name: integrator', 2);
   if (!rest.length) fail('Missing: command after --', 2);
   const sessionId = sessionIdFor(rest);
+  disablePromptSuggestions(rest);
   if (!fs.statSync(cwd, { throwIfNoEntry: false })?.isDirectory()) fail('Not a directory: ' + cwd);
   const wins = markedWindows(repo);
   let win = wins.find(w => panes(w).length < MAX_PANES);
@@ -365,11 +376,62 @@ function recordExits(repo) {
   }
 }
 
+const ESCAPE = /\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(?:\x07|\x1b\\)|[ -/]*[0-~])/y;
+const RULE = /^─{3,}\s*$/;
+// Plain text of a `capture-pane -e` dump. On a host input line (Claude: ❯ between two rule lines; Codex: ›)
+// only the glyph and text in the default foreground without SGR 2 are kept, which drops a greyed suggestion.
+function plainPane(text) {
+  let faint = false;
+  let coloured = false;
+  const sgr = params => {
+    const codes = params.split(';');
+    for (let i = 0; i < codes.length; i++) {
+      const code = Number(codes[i].split(':')[0]);
+      if (!codes[i]) { faint = false; coloured = false; }
+      else if (code === 0) { faint = false; coloured = false; }
+      else if (code === 2) faint = true;
+      else if (code === 22) faint = false;
+      else if (code === 39) coloured = false;
+      else if ((code >= 30 && code <= 37) || (code >= 90 && code <= 97)) coloured = true;
+      else if (code === 38 || code === 48 || code === 58) {
+        if (code === 38) coloured = true;
+        if (!codes[i].includes(':')) i += codes[i + 1] === '5' ? 2 : codes[i + 1] === '2' ? 4 : 0;
+      }
+    }
+  };
+  const rows = text.split('\n').map(raw => {
+    const chars = [];
+    for (let i = 0; i < raw.length;) {
+      if (raw[i] === '\x1b') {
+        ESCAPE.lastIndex = i;
+        const m = ESCAPE.exec(raw);
+        if (m) {
+          const csi = /^\x1b\[([0-9;:]*)m$/.exec(m[0]);
+          if (csi) sgr(csi[1]);
+          i += m[0].length;
+          continue;
+        }
+      }
+      const ch = String.fromCodePoint(raw.codePointAt(i));
+      chars.push({ ch, quiet: faint || coloured });
+      i += ch.length;
+    }
+    return chars;
+  });
+  const plain = rows.map(chars => chars.map(c => c.ch).join(''));
+  return rows.map((chars, i) => {
+    const glyph = plain[i][0];
+    const claude = glyph === '❯' && RULE.test(plain[i - 1] ?? '') && RULE.test(plain[i + 1] ?? '');
+    if (!claude && glyph !== '›') return plain[i];
+    return chars.filter((c, at) => at === 0 || (at === 1 && c.ch === ' ') || !c.quiet).map(c => c.ch).join('');
+  }).join('\n');
+}
+
 // Conversation part of the visible pane: without the status rows at the bottom, trailing blanks trimmed.
 function conversation(pane) {
   const height = Number(option(pane, 'pane_height')) || 0;
   const keep = Math.max(1, height - Math.min(STATUS_ROWS, Math.floor(height / 2)));
-  const lines = tmux(['capture-pane', '-p', '-t', pane]).split('\n').slice(0, keep).map(l => l.trimEnd());
+  const lines = plainPane(tmux(['capture-pane', '-e', '-p', '-t', pane])).split('\n').slice(0, keep).map(l => l.trimEnd());
   while (lines.length && !lines[lines.length - 1]) lines.pop();
   return lines;
 }
@@ -696,7 +758,7 @@ function report() {
 function capture() {
   const repo = repoKey();
   const pane = target();
-  const content = tmux(['capture-pane', '-p', '-J', '-S', '-', '-t', pane]) + '\n';
+  const content = plainPane(tmux(['capture-pane', '-e', '-p', '-J', '-S', '-', '-t', pane])) + '\n';
   const file = writeUnique(eventsDir(repo), safe(flag('--package') ?? flag('--role')), '.log', content);
   record(repo, 'captured', { ...who(), pane, text: file });
   out({ pane, file });

@@ -222,7 +222,9 @@ Handle each event:
 - **`disk`:** Free space fell below `--min-free` GB (default 5). Run the cleanup step the project names for
   low space, otherwise report it to the user.
 - **`erfasst`:** A lead or the integrator recorded a draft; proceed as described in "Shaping new drafts".
-- If the user writes into a pane themselves, that session belongs to them; do not touch it.
+- A pane belongs to the user only after a submitted user input in its conversation history that does not
+  come from `nudge` or `answer`, or after the user says so; text in the input line alone, often the host's
+  greyed suggestion, never counts. Do not touch such a session.
 
 ## Shaping new drafts
 
@@ -247,9 +249,9 @@ stays unchanged.
 - **`done`:** If every task of the package is integrated or secured in the planning system, for example as a
   handover to `review`, save the pane with `capture --repo <repo-root> --package <package>` and close it with
   `close` with the same arguments. It stays open only if an open point such as an abort or an unresolved
-  conflict cannot be secured, or if the user has written into the pane. With the last pane, the session ends.
-  A `done` of the integrator closes it the same way with `--role integrator`, once every package is
-  integrated or secured and no replenishment is possible.
+  conflict cannot be secured, or if the pane belongs to the user (see "Monitoring"). With the last pane, the
+  session ends. A `done` of the integrator closes it the same way with `--role integrator`, once every
+  package is integrated or secured and no replenishment is possible.
 - **`exited` without `done`:** Secure the package's open tasks per the git workflow as a handover to
   `review`, save the pane with `capture` and close it with `close`. If the integrator exited, save and close
   its pane and start a new one as described in "Starting the integrator", adding to its directive that this is

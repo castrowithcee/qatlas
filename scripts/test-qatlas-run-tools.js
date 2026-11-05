@@ -452,6 +452,68 @@ try {
     if (socketPath) fs.rmSync(socketPath, { force: true });
   }
 
+  // Input suggestion: faint or coloured text on the host input line is neither hashed, nor in stale text, nor in the
+  // capture file; typed default-foreground text stays. Own tmux server.
+  const sockS = `qatlas-test-sug-${process.pid}`;
+  const tmS = (...args) => execFileSync('tmux', ['-L', sockS, ...args], { encoding: 'utf8' }).trim();
+  let socketPathS = null;
+  try {
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'suggest-')));
+    const rule = '\\033[38;2;136;136;136m────────────\\033[0m';
+    const screen = input => `printf 'work\\n${rule}\\n${input}\\n${rule}\\n'; sleep 300`;
+    const cases = {
+      empty: '\\033[38;2;153;153;153m❯ \\033[39m',
+      faint: '\\033[38;2;153;153;153m❯ \\033[39m\\033[2mrun the tests\\033[0m',
+      grey: '\\033[38;2;153;153;153m❯ \\033[39m\\033[38;2;153;153;153mrun the tests\\033[0m',
+      palette: '\\033[38;2;153;153;153m❯ \\033[39m\\033[90mrun the tests\\033[0m',
+      typed: '\\033[38;2;153;153;153m❯ \\033[39mreal words',
+    };
+    const wins = {};
+    for (const [name, input] of Object.entries(cases)) {
+      const first = !socketPathS;
+      wins[name] = first
+        ? tmS('new-session', '-d', '-x', '80', '-y', '24', '-P', '-F', '#{window_id}', 'sh', '-c', screen(input))
+        : tmS('new-window', '-d', '-P', '-F', '#{window_id}', 'sh', '-c', screen(input));
+      if (first) socketPathS = tmS('display', '-p', '#{socket_path}');
+      tmS('set', '-w', '-t', wins[name], '@qatlas-team', repo);
+      tmS('set', '-p', '-t', wins[name], '@qatlas-package', name);
+    }
+    wins.codex = tmS('new-window', '-d', '-P', '-F', '#{window_id}', 'sh', '-c', `printf 'work\\n\\033[1m› \\033[0m\\033[2mfix the bug\\033[0m\\n'; sleep 300`);
+    tmS('set', '-w', '-t', wins.codex, '@qatlas-team', repo);
+    tmS('set', '-p', '-t', wins.codex, '@qatlas-package', 'codex');
+    const envS = { ...process.env, TMUX: `${socketPathS},1,0` };
+    const runS = (...args) => {
+      const res = spawnSync(process.execPath, [team, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8', env: envS });
+      assert.strictEqual(res.status, 0, res.stderr);
+      return JSON.parse(res.stdout);
+    };
+    const waitS = () => runS('wait', '--timeout', '0.01', '--stale', '20');
+    waitS();
+    const hash = name => tmS('display', '-p', '-t', wins[name], '#{@qatlas-hash}');
+    assert.ok(hash('empty'));
+    for (const name of ['faint', 'grey', 'palette']) assert.strictEqual(hash(name), hash('empty'), name);
+    assert.notStrictEqual(hash('typed'), hash('empty'));
+    for (const name of Object.keys(wins)) tmS('set', '-p', '-t', wins[name], '@qatlas-since', String(Date.now() - 25 * 60000));
+    const staleText = waitS().events.filter(e => e.type === 'stale').map(e => [e.package, e.text]);
+    assert.strictEqual(staleText.length, 6);
+    for (const [name, text] of staleText) {
+      assert.ok(!/run the tests|fix the bug/.test(text), name);
+      assert.ok(!text.includes('\x1b'), name);
+      assert.strictEqual(text.includes('real words'), name === 'typed');
+    }
+    for (const name of ['faint', 'codex', 'typed']) {
+      const file = runS('capture', '--package', name).file;
+      const content = fs.readFileSync(file, 'utf8');
+      assert.ok(!content.includes('\x1b'));
+      assert.ok(content.includes('work'));
+      assert.ok(!/run the tests|fix the bug/.test(content), name);
+      assert.strictEqual(content.includes('real words'), name === 'typed');
+    }
+  } finally {
+    try { tmS('kill-server'); } catch { /* already gone */ }
+    if (socketPathS) fs.rmSync(socketPathS, { force: true });
+  }
+
   // Integrator role: routing per role, one integrator, detection written once. Own tmux server.
   const sock2 = `qatlas-test-int-${process.pid}`;
   const tm2 = (...args) => execFileSync('tmux', ['-L', sock2, ...args], { encoding: 'utf8' }).trim();
@@ -569,7 +631,7 @@ try {
     write(fake, '#!/bin/sh\nexec sleep 300\n');
     fs.chmodSync(fake, 0o755);
     const common = ['--label', 'w', '--title', 't', '--cwd', repo];
-    ok({}, 'add', '--package', 'a', ...common, '--', fake, '--session-id', idA);
+    ok({}, 'add', '--package', 'a', ...common, '--', fake, '--session-id', idA, '--prompt-suggestions', 'true');
     ok({}, 'add', '--package', 'b', ...common, '--', fake);
     ok({}, 'add', '--package', 'x', ...common, '--', 'sleep', '300');
     const pa = ok({}, 'list').panes;
@@ -580,6 +642,11 @@ try {
     // Command line: id added after the command exactly once; an existing one is reused.
     assert.ok(tm3('list-panes', '-a', '-F', '#{pane_start_command}').includes(`--session-id ${idA}`));
     assert.strictEqual(tm3('list-panes', '-a', '-F', '#{pane_start_command}').split('--session-id').length - 1, 2);
+    // Claude commands get --prompt-suggestions false unless they set it; other commands stay unchanged.
+    const startOf = name => tm3('display', '-p', '-t', pa.find(x => x.package === name).pane, '#{pane_start_command}');
+    assert.ok(startOf('b').includes('--prompt-suggestions false'));
+    assert.ok(startOf('a').includes('--prompt-suggestions true') && !startOf('a').includes('--prompt-suggestions false'));
+    assert.ok(!startOf('x').includes('prompt-suggestions'));
     // State file: percent from tokens and window.
     const a = ok({}, 'context', '--package', 'a').panes[0].context;
     assert.deepStrictEqual([a.state, a.tokens, a.window, a.percent, a.source], ['measured', 50000, 200000, 25, 'statusline']);
