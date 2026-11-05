@@ -991,6 +991,69 @@ try {
     if (socketPath2) fs.rmSync(socketPath2, { force: true });
   }
 
+  // A command that ends at once leaves a dead pane on every window-creating path. Own tmux servers only; the
+  // fallback socket is redirected via TMUX_TMPDIR into a temp dir, so the real `qatlas-team` socket stays untouched.
+  {
+    const early = (env, repo) => {
+      const run = (...args) => spawnSync(process.execPath, [team, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8', env });
+      const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
+      const common = ['--label', 'w', '--title', 't', '--cwd', repo];
+      const check = (pkg, panes) => {
+        assert.ok(panes.some(x => x.package === pkg && x.dead === true), pkg);
+        const evs = ok('wait', '--since', '0', '--timeout', '0.01', '--min-free', '1000000000').events;
+        assert.strictEqual(evs.filter(e => e.type === 'exited' && e.package === pkg).length, 1, pkg);
+        assert.ok(fs.readFileSync(path.join(repo, '.qatlas', 'local', 'team', 'events.jsonl'), 'utf8').split('\n').filter(Boolean)
+          .some(l => { const e = JSON.parse(l); return e.type === 'start' && e.package === pkg; }), pkg);
+      };
+      return { ok, common, check };
+    };
+    const mkrepo = () => fs.realpathSync(fs.mkdtempSync(path.join(root, 'early-')));
+    // Inside tmux: first pane of a fresh session (new-session) and a pane in a new extra window (full window).
+    const sockE = `qatlas-test-early-${process.pid}`;
+    const tmE = (...args) => execFileSync('tmux', ['-L', sockE, ...args], { encoding: 'utf8' }).trim();
+    let socketPathE = null;
+    try {
+      tmE('new-session', '-d', '-x', '80', '-y', '24', '-s', 'base', 'sleep 300');
+      socketPathE = tmE('display', '-p', '#{socket_path}');
+      const env = { ...process.env, TMUX: `${socketPathE},1,0` };
+      const repo = mkrepo();
+      const t = early(env, repo);
+      t.ok('add', '--package', 'first', ...t.common, '--', 'true');
+      t.check('first', t.ok('list').panes);
+      const repo2 = mkrepo();
+      const t2 = early(env, repo2);
+      for (const n of ['a', 'b', 'c', 'd']) t2.ok('add', '--package', n, ...t2.common, '--', 'sleep', '300');
+      t2.ok('add', '--package', 'e', ...t2.common, '--', 'true');
+      t2.ok('add', '--package', 'f', ...t2.common, '--', 'sh', '-c', 'exit 3');
+      const panes = t2.ok('list').panes;
+      t2.check('e', panes);
+      assert.ok(panes.find(x => x.package === 'f').dead);
+      // base, the fresh session, and two windows of the full run: no placeholder window is left over.
+      assert.strictEqual(tmE('list-windows', '-a', '-F', '#{window_id}').split('\n').length, 4);
+    } finally {
+      try { tmE('kill-server'); } catch { /* already gone */ }
+      if (socketPathE) fs.rmSync(socketPathE, { force: true });
+    }
+    // Without tmux environment: fallback socket `qatlas-team` below a private TMUX_TMPDIR (new-session, then new-window).
+    const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'qte-'));
+    const envN = { ...process.env, TMUX_TMPDIR: tmpdir };
+    delete envN.TMUX;
+    try {
+      const repo = mkrepo();
+      const t = early(envN, repo);
+      t.ok('add', '--package', 'n1', ...t.common, '--', 'true');
+      assert.ok(fs.existsSync(path.join(tmpdir, `tmux-${process.getuid()}`, 'qatlas-team')));
+      t.check('n1', t.ok('list').panes);
+      const repo2 = mkrepo();
+      const t2 = early(envN, repo2);
+      t2.ok('add', '--package', 'n2', ...t2.common, '--', 'true');
+      t2.check('n2', t2.ok('list').panes);
+    } finally {
+      try { execFileSync('tmux', ['-L', 'qatlas-team', 'kill-server'], { env: envN }); } catch { /* already gone */ }
+      fs.rmSync(tmpdir, { recursive: true, force: true });
+    }
+  }
+
   // Context measurement: temp HOME with state and transcript files; own tmux server.
   const sock3 = `qatlas-test-ctx-${process.pid}`;
   const tm3 = (...args) => execFileSync('tmux', ['-L', sock3, ...args], { encoding: 'utf8' }).trim();

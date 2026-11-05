@@ -245,17 +245,29 @@ function newWindow(repo, label, cwd) {
     let exists = true;
     try { tmux(['has-session', '-t', '=' + session]); } catch { exists = false; }
     if (exists) fail(`Session ${session} already exists but does not belong to ${repo}. Nothing changed.`);
-    line = tmux(['new-session', '-d', '-s', session, '-n', label, '-c', cwd, '-P', '-F', '#{window_id}\t#{pane_id}\t#{session_id}', '--', ...rest]);
-    tmux(['set', '-t', line.split('\t')[2], 'mouse', 'off']);
+    line = tmux(['new-session', '-d', '-s', session, '-n', label, '-c', cwd, '-P', '-F', '#{window_id}\t#{pane_id}\t#{session_id}', '--', ...PLACEHOLDER]);
+    try { tmux(['set', '-t', line.split('\t')[2], 'mouse', 'off']); } catch (error) { discard(line.split('\t')[0]); throw error; }
   } else {
-    const spawn = ['-d', '-P', '-F', '#{window_id}\t#{pane_id}', '-n', label, '-c', cwd, ...rest];
+    const spawn = ['-d', '-P', '-F', '#{window_id}\t#{pane_id}', '-n', label, '-c', cwd, ...PLACEHOLDER];
     let has = true;
     try { tmux(['has-session', '-t', SOCKET]); } catch { has = false; }
     line = has ? tmux(['new-window', '-t', SOCKET + ':', ...spawn]) : tmux(['new-session', '-s', SOCKET, ...spawn]);
   }
   const [win, pane] = line.split('\t');
-  markWindow(win, repo);
+  launch(win, pane, repo, cwd);
   return [win, pane, session];
+}
+
+// A command that ends at once would close its window before remain-on-exit is set. The window starts with a
+// placeholder, is marked, and only then does the real command take over the same pane.
+const PLACEHOLDER = ['sleep', '3600'];
+const discard = win => { try { tmux(['kill-window', '-t', win]); } catch { /* already gone */ } };
+
+function launch(win, pane, repo, cwd) {
+  try {
+    markWindow(win, repo);
+    tmux(['respawn-pane', '-k', '-t', pane, '-c', cwd, '--', ...rest]);
+  } catch (error) { discard(win); throw error; }
 }
 
 function markWindow(win, repo) {
@@ -269,9 +281,9 @@ function markWindow(win, repo) {
 
 function extraWindow(repo, first, label, cwd) {
   const session = tmux(['display', '-p', '-t', first, '#{session_name}']);
-  const line = tmux(['new-window', '-d', '-t', '=' + session + ':', '-n', label, '-c', cwd, '-P', '-F', '#{window_id}\t#{pane_id}', '--', ...rest]);
+  const line = tmux(['new-window', '-d', '-t', '=' + session + ':', '-n', label, '-c', cwd, '-P', '-F', '#{window_id}\t#{pane_id}', '--', ...PLACEHOLDER]);
   const [win, pane] = line.split('\t');
-  markWindow(win, repo);
+  launch(win, pane, repo, cwd);
   return [win, pane, session];
 }
 
