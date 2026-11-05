@@ -155,8 +155,128 @@ function testSlotCount() {
   }
 }
 
+function testSlotQueues() {
+  const home = path.join(root, 'queue-home');
+  const repo = path.join(root, 'queue-repo');
+  fs.mkdirSync(home);
+  fs.mkdirSync(repo);
+  execFileSync('git', ['init', '-q', repo]);
+  const env = { ...process.env, HOME: home };
+  const sleep = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  const until = (condition, what) => {
+    for (let i = 0; i < 200; i++) { if (condition()) return; sleep(50); }
+    assert.fail('Timeout waiting for ' + what);
+  };
+  const log = path.join(root, 'queue-log');
+  // Holds for ms and logs "<tag> start|end <time>"; the slot tool runs it as the guarded command.
+  const hold = (tag, ms) => ['node', '-e',
+    `const fs=require('fs');const l=m=>fs.appendFileSync(process.argv[1],process.argv[2]+' '+m+' '+Date.now()+'\\n');` +
+    `l('start');setTimeout(()=>{l('end')},${ms})`, log, tag];
+  const events = () => (fs.existsSync(log) ? fs.readFileSync(log, 'utf8') : '').split('\n').filter(Boolean)
+    .map(line => { const [tag, kind, time] = line.split(' '); return { tag, kind, time: Number(time) }; });
+  const at = (tag, kind) => (events().find(e => e.tag === tag && e.kind === kind) || {}).time;
+  const started = tag => at(tag, 'start') !== undefined;
+  const ended = tag => at(tag, 'end') !== undefined;
+  // Starts the slot tool in the background; the exit code lands in a file.
+  const bg = (name, flags, command) => {
+    const rc = path.join(root, 'queue-rc-' + name);
+    const stderr = path.join(root, 'queue-err-' + name);
+    const child = require('child_process').spawn('sh',
+      ['-c', '"$@" 2>"$0"; echo $? >"$0.rc"', stderr, process.execPath, tools, 'slot', '--repo', repo, ...flags, '--', ...command],
+      { env, stdio: 'ignore', detached: true });
+    child.unref();
+    return { pid: child.pid, stderr, done: () => fs.existsSync(stderr + '.rc'), code: () => Number(fs.readFileSync(stderr + '.rc', 'utf8')) };
+  };
+  const run = (flags, command) => spawnSync(process.execPath, [tools, 'slot', '--repo', repo, ...flags, '--', ...command],
+    { encoding: 'utf8', env, timeout: 30000 });
+  const status = () => { const r = spawnSync(process.execPath, [tools, 'slot', '--repo', repo, 'status'], { encoding: 'utf8', env }); assert.strictEqual(r.status, 0, r.stderr); return JSON.parse(r.stdout); };
+  const resourceOf = (st, name) => (st.resources || []).find(x => x.resource === name);
+
+  // Two callers of one resource never overlap; the resource is visible in status and uses no test slot.
+  const a = bg('a', ['--resource', 'e2e'], hold('a', 1500));
+  until(() => started('a'), 'holder a');
+  const b = bg('b', ['--resource', 'e2e'], hold('b', 100));
+  until(() => { const x = resourceOf(status(), 'e2e'); return x && x.waiting.length === 1; }, 'waiter b');
+  let st = status();
+  let x = resourceOf(st, 'e2e');
+  assert.strictEqual(x.busy.length, 1);
+  assert.strictEqual(x.busy[0].orphaned, false);
+  assert.ok(Number.isInteger(x.busy[0].pid) && x.busy[0].started);
+  assert.deepStrictEqual(x.busy[0].command.slice(0, 1), ['node']);
+  assert.strictEqual(x.waiting[0].priority, false);
+  assert.strictEqual(x.waiting[0].orphaned, false);
+  assert.deepStrictEqual(st.busy, []);
+  assert.deepStrictEqual(st.waiting, []);
+  until(() => a.done() && b.done(), 'a and b');
+  assert.strictEqual(a.code(), 0);
+  assert.strictEqual(b.code(), 0);
+  assert.ok(fs.readFileSync(b.stderr, 'utf8').includes('Waiting for resource e2e'));
+  assert.ok(at('b', 'start') >= at('a', 'end'), 'resource holders overlapped');
+  assert.strictEqual(resourceOf(status(), 'e2e'), undefined);
+
+  // --priority goes ahead of earlier callers of the same resource; other resources are independent.
+  fs.writeFileSync(log, '');
+  const h = bg('h', ['--resource', 'prio'], hold('h', 1500));
+  until(() => started('h'), 'holder h');
+  const n = bg('n', ['--resource', 'prio'], hold('n', 100));
+  until(() => resourceOf(status(), 'prio').waiting.length === 1, 'waiter n');
+  sleep(20);
+  const p = bg('p', ['--priority', '--resource', 'prio'], hold('p', 100));
+  until(() => resourceOf(status(), 'prio').waiting.length === 2, 'waiter p');
+  x = resourceOf(status(), 'prio');
+  assert.deepStrictEqual(x.waiting.map(w => w.priority), [true, false]);
+  const other = run(['--resource', 'other'], ['node', '-e', 'process.exit(0)']);
+  assert.strictEqual(other.status, 0, other.stderr);
+  until(() => h.done() && n.done() && p.done(), 'h, n and p');
+  assert.ok(at('p', 'start') >= at('h', 'end'));
+  assert.ok(at('n', 'start') >= at('p', 'end'), 'priority caller did not go first');
+
+  // A holder killed without cleanup leaves an orphaned lock that the next caller takes over.
+  const pidFile = path.join(root, 'queue-sleeper');
+  bg('orphan', ['--resource', 'dead'],
+    ['node', '-e', `require('fs').writeFileSync(${JSON.stringify(pidFile)}, String(process.pid));setTimeout(()=>{},60000)`]);
+  until(() => fs.existsSync(pidFile) && fs.readFileSync(pidFile, 'utf8') !== '', 'orphan holder');
+  const sleeper = Number(fs.readFileSync(pidFile, 'utf8'));
+  process.kill(resourceOf(status(), 'dead').busy[0].pid, 'SIGKILL');
+  try {
+    until(() => { const y = resourceOf(status(), 'dead'); return y && y.busy[0].orphaned; }, 'orphaned status');
+    const r = run(['--resource', 'dead'], ['node', '-e', 'process.exit(0)']);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.ok(!r.stderr.includes('Waiting'));
+  } finally { try { process.kill(sleeper, 'SIGKILL'); } catch { /* already gone */ } }
+
+  // Exit code pass-through, signal release and name validation.
+  assert.strictEqual(run(['--resource', 'rc'], ['node', '-e', 'process.exit(7)']).status, 7);
+  assert.strictEqual(run(['--resource', 'rc'], ['node', '-e', 'process.exit(0)']).status, 0);
+  for (const bad of ['Bad', '-a', 'a_b', 'a/b', '']) {
+    const r = run(['--resource', bad], ['true']);
+    assert.strictEqual(r.status, 2, 'name ' + JSON.stringify(bad));
+  }
+  assert.strictEqual(run(['--resource'], ['true']).status, 2);
+  assert.strictEqual(run(['--resource', '1'], ['true']).status, 0);
+  const term = bg('term', ['--resource', 'sig'], hold('term', 60000));
+  until(() => started('term'), 'term holder');
+  process.kill(resourceOf(status(), 'sig').busy[0].pid, 'SIGTERM');
+  until(() => term.done(), 'term exit');
+  assert.strictEqual(run(['--resource', 'sig'], ['true']).status, 0);
+
+  // General slots still queue when all are busy, and ignore resources.
+  fs.writeFileSync(log, '');
+  const s1 = bg('s1', ['--slots', '1'], hold('s1', 1500));
+  until(() => started('s1'), 'slot holder');
+  const s2 = bg('s2', ['--slots', '1'], hold('s2', 100));
+  until(() => status().waiting.length === 1, 'slot waiter');
+  st = status();
+  assert.strictEqual(st.busy.length, 1);
+  assert.strictEqual(run(['--resource', 'free'], ['true']).status, 0);
+  until(() => s1.done() && s2.done(), 's1 and s2');
+  assert.ok(at('s2', 'start') >= at('s1', 'end'), 'slot holders overlapped');
+  assert.ok(fs.readFileSync(s2.stderr, 'utf8').includes('Waiting for a free test slot (1 slots)'));
+}
+
 try {
   testSlotCount();
+  testSlotQueues();
   let c = setup('tree');
   let r = land(c);
   assert.strictEqual(r.status, 0, r.stderr);

@@ -43,7 +43,13 @@
 //   qatlas-run-tools.js slot [--slots <count>] [--repo <path>] status
 //     Read-only view of the test slots; "status" without "--" (after "--" it is a command to run).
 //     Output: {"slots","busy":[{slot,pid,started,cwd,command,orphaned}],
-//     "waiting":[{priority,arrival,pid,cwd,command,orphaned}]}; unknown fields are null. Exit: 0, 3 no git repo.
+//     "waiting":[{priority,arrival,pid,cwd,command,orphaned}],
+//     "resources":[{"resource","busy":[{pid,started,cwd,command,orphaned}],"waiting":[...]}]} (resources with
+//     a holder or waiter only); unknown fields are null. Exit: 0, 3 no git repo.
+//   qatlas-run-tools.js slot [--priority] [--repo <path>] --resource <name> -- <command> [args...]
+//     Like slot, but runs the command under a named exclusive resource (capacity 1) instead of a test
+//     slot, e.g. one e2e suite at a time. Each resource has its own queue; it does not occupy a test slot
+//     and ignores --slots. <name> matches [a-z0-9][a-z0-9-]*, else exit 2.
 
 const fs = require('fs');
 const os = require('os');
@@ -334,52 +340,72 @@ const orphaned = lock => {
   return !Number.isInteger(pid) || pid <= 0 || !alive(pid);
 };
 
+const listDir = folder => { try { return fs.readdirSync(folder); } catch { return []; } };
+const holder = lock => {
+  let text = null;
+  try { text = fs.readFileSync(ownerFile(lock), 'utf8'); } catch { /* no owner file yet */ }
+  const lines = text === null ? [] : text.split('\n');
+  const pid = Number(lines[0]);
+  return {
+    pid: Number.isInteger(pid) && pid > 0 ? pid : null,
+    started: lines[1] || null,
+    ...readDetail(lines[2]),
+    orphaned: orphaned(lock),
+  };
+};
+const waiters = queue => listDir(queue).sort().flatMap(entry => {
+  const match = /^(\d+)-(\d+)-(\d+)$/.exec(entry);
+  if (!match) return [];
+  let text = '';
+  try { text = fs.readFileSync(path.join(queue, entry), 'utf8'); } catch { /* ticket just removed */ }
+  return [{
+    priority: Number(match[1]) === 0,
+    arrival: new Date(Number(match[2])).toISOString(),
+    pid: Number(match[3]),
+    ...readDetail(text),
+    orphaned: !alive(Number(match[3])),
+  }];
+});
+
+const RESOURCE_NAME = /^[a-z0-9][a-z0-9-]*$/;
+// Resources live apart from the numbered slots so a numeric name cannot collide with a slot.
+const resourcePaths = (dir, name) => {
+  const base = path.join(dir, 'resources', name);
+  return { lock: path.join(base, 'lock'), queue: path.join(base, 'queue') };
+};
+
 function slotStatus() {
   const slots = slotCount();
   const dir = slotDir();
-  const list = folder => { try { return fs.readdirSync(folder); } catch { return []; } };
-  const busy = list(dir).filter(entry => /^\d+$/.test(entry)).sort((a, b) => a - b).flatMap(entry => {
-    const lock = path.join(dir, entry);
-    let text = null;
-    try { text = fs.readFileSync(ownerFile(lock), 'utf8'); } catch { /* no owner file yet */ }
-    const lines = text === null ? [] : text.split('\n');
-    const pid = Number(lines[0]);
-    return [{
-      slot: Number(entry),
-      pid: Number.isInteger(pid) && pid > 0 ? pid : null,
-      started: lines[1] || null,
-      ...readDetail(lines[2]),
-      orphaned: orphaned(lock),
-    }];
+  const busy = listDir(dir).filter(entry => /^\d+$/.test(entry)).sort((a, b) => a - b).map(entry => {
+    const { pid, started, ...detailFields } = holder(path.join(dir, entry));
+    return { slot: Number(entry), pid, started, ...detailFields };
   });
-  const queue = path.join(dir, 'queue');
-  const waiting = list(queue).sort().flatMap(entry => {
-    const match = /^(\d+)-(\d+)-(\d+)$/.exec(entry);
-    if (!match) return [];
-    let text = '';
-    try { text = fs.readFileSync(path.join(queue, entry), 'utf8'); } catch { /* ticket just removed */ }
-    return [{
-      priority: Number(match[1]) === 0,
-      arrival: new Date(Number(match[2])).toISOString(),
-      pid: Number(match[3]),
-      ...readDetail(text),
-      orphaned: !alive(Number(match[3])),
-    }];
+  const resources = listDir(path.join(dir, 'resources')).sort().flatMap(name => {
+    const paths = resourcePaths(dir, name);
+    const held = fs.existsSync(paths.lock) ? [holder(paths.lock)] : [];
+    const waiting = waiters(paths.queue);
+    return held.length || waiting.length ? [{ resource: name, busy: held, waiting }] : [];
   });
-  out({ slots, busy, waiting });
+  out({ slots, busy, waiting: waiters(path.join(dir, 'queue')), resources });
 }
 
 function slot() {
-  const isStatus = sep < 0 && opts.some((arg, i) => arg === 'status' && !['--slots', '--repo'].includes(opts[i - 1]));
+  const isStatus = sep < 0 && opts.some((arg, i) => arg === 'status' && !['--slots', '--repo', '--resource'].includes(opts[i - 1]));
   if (isStatus) return slotStatus();
   if (!rest.length) fail('Missing: command after --', 2);
-  const slots = slotCount();
+  const resource = opts.includes('--resource') ? flag('--resource') || '' : null;
+  if (resource !== null && !RESOURCE_NAME.test(resource)) fail('Invalid: --resource needs a name matching [a-z0-9][a-z0-9-]*', 2);
+  const slots = resource === null ? slotCount() : 1;
   const dir = slotDir();
-  fs.mkdirSync(dir, { recursive: true });
+  const paths = resource === null ? null : resourcePaths(dir, resource);
+  const target = paths
+    ? { locks: [paths.lock], queue: paths.queue }
+    : { locks: Array.from({ length: slots }, (_, i) => path.join(dir, String(i + 1))), queue: path.join(dir, 'queue') };
+  fs.mkdirSync(path.dirname(target.locks[0]), { recursive: true });
 
   const take = () => {
-    for (let i = 1; i <= slots; i++) {
-      const lock = path.join(dir, String(i));
+    for (const lock of target.locks) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           fs.mkdirSync(lock);
@@ -396,7 +422,7 @@ function slot() {
   };
 
   // Ticket names sort by priority, then arrival; only the oldest live ticket may take a slot.
-  const queue = path.join(dir, 'queue');
+  const queue = target.queue;
   fs.mkdirSync(queue, { recursive: true });
   const name = `${opts.includes('--priority') ? 0 : 1}-${String(Date.now()).padStart(15, '0')}-${process.pid}`;
   const ticket = path.join(queue, name);
@@ -409,7 +435,9 @@ function slot() {
 
   let lock = first() && take();
   if (!lock) {
-    process.stderr.write(`Waiting for a free test slot (${slots} slots)\n`);
+    process.stderr.write(resource === null
+      ? `Waiting for a free test slot (${slots} slots)\n`
+      : `Waiting for resource ${resource}\n`);
     while (!(lock = first() && take())) sleep(2000);
   }
   fs.rmSync(ticket, { force: true });
