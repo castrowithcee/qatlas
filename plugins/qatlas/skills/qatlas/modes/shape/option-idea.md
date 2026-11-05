@@ -90,14 +90,13 @@ do not create a competing documentation tree.
   run, as `.qatlas-project/plans/plan-<slug>.md` with `type: plan` and `status: active`. It is a reference:
   the plan in one sentence, problem and benefit, smallest viable target state with boundaries, capabilities,
   later capabilities with their introduction signal, assumptions and accepted risks. The tasks decide the
-  concrete work and name the plan as their source. When the plan sharpens, change it in place with a new
-  `version`; once its tasks are done or dropped, set `status: done`. A single small package without a target
-  state of its own needs no plan.
+  concrete work and name the plan as their source. When the plan sharpens, change it in place; once its
+  tasks are done or dropped, set `status: done`. A single small package without a target state of its own
+  needs no plan.
 - **Policies:** Record every final decision the user makes in this run as a policy in
   `.qatlas-project/policies/`, one on how work in the project is done in `policies/conventions/`. Add it
   with its necessary reason to the existing policy file of its context, or create one for a new context;
-  the plan links to it instead of repeating it. A policy that the user changes is changed in place with a
-  new `version`.
+  the plan links to it instead of repeating it. A policy that the user changes is changed in place.
 - **Domain scope rules:** If a domain scope outside the knowledge space needs lasting working rules,
   particularities or exceptions of its own, propose a `FRAMEWORK.md` next to its README and create it only
   after the user agrees.

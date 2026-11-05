@@ -13,8 +13,8 @@ edit: locked
    change anything. `edit: locked` needs explicit approval.
 2. **Rename and move:** Type prefix and task ID stay stable. Search for references to the old path and
    change only those actually broken.
-3. **Merge:** Take all binding statements into the target file at the authoritative place and raise its
-   `version`. Then remove the source and point its references to the target.
+3. **Merge:** Take all binding statements into the target file at the authoritative place. Then remove the
+   source and point its references to the target.
 4. **Promote:** If content becomes more binding, such as a memory becoming a policy, that
    requires a decision by the user. The content moves into a file of the new type in its folder; the old file
    and its index line are removed.

@@ -4,7 +4,6 @@ description: >
 type: fact
 edit: locked
 source: https://github.com/DietrichGebert/ponytail/blob/09c434ab73ca43761c5d8b0c5d341926c2fba710/LICENSE
-updated: 2026-10-23
 ---
 
 # Third-Party Licenses

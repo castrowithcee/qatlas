@@ -4,7 +4,6 @@ description: >
 type: fact
 edit: locked
 source: https://github.com/Leonxlnx/taste-skill/blob/6010f91a9935f1c167dfc500fb1a475681892e6b/LICENSE
-updated: 2026-10-23
 ---
 
 # Third-Party Licenses

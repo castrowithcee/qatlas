@@ -53,6 +53,5 @@ the operation:
 - Create without a fitting template: [File](references/playbook-create.md)
 - Rename, move, merge, promote, archive, delete: [Restructure](references/playbook-restructure.md)
 - Import: [Import](references/playbook-import.md)
-- Set or change frontmatter, including by any content change to a file with `version`:
-  [Frontmatter](references/frontmatter.md)
+- Set or change frontmatter: [Frontmatter](references/frontmatter.md)
 - Determine folder, name or task ID in the knowledge space: [Project knowledge space](references/structure.md)

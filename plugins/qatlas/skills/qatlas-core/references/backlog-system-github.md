@@ -3,7 +3,6 @@ description: >
   Aktuelle GitHub-Besonderheiten für Issues und Projects: selektiver Kontextabruf, gh-Zugang, Tokenwahl,
   getrennte REST- und GraphQL-Limits, gebündelte Mutationen und nicht pauschal automatisierbare Konfiguration.
 source: https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects
-updated: 2026-09-30
 license: MIT
 type: fact
 edit: locked

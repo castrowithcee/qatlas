@@ -1,7 +1,7 @@
 ---
 description: >
   Frontmatter schema for content Markdown files: description, the eight content types and how to tell them
-  apart, edit rights, required fields and in-place versioning.
+  apart, edit rights, required fields and in-place changes.
 license: MIT
 type: policy
 edit: locked
@@ -73,41 +73,31 @@ statement.
 | `type` | Additional fields |
 |---|---|
 | `meta` | none; a project head in the local backlog adds `status` |
-| `task` | `status`, `created`, `updated` |
-| `plan` | `status` (`active` or `done`), `version`, `created`, `updated` |
-| `policy` | `version`, `created`, `updated`, optional `paths` |
-| `playbook`, `knowledge`, `memory` | `version`, `created`, `updated` |
-| `fact` | `version`, `created`, `updated`, optional `source` |
+| `task` | `status` |
+| `plan` | `status` (`active` or `done`) |
+| `policy` | optional `paths` |
+| `playbook`, `knowledge`, `memory` | none |
+| `fact` | optional `source` |
 
-Dates are `YYYY-MM-DD`. Task status values belong to the local backlog contract. A plan is `done` once it is
+Task status values belong to the local backlog contract. A plan is `done` once it is
 fulfilled or dropped; it then no longer guides current work, and what holds from it stands in its policies.
 Fixed `meta` targets are the root README of the knowledge space, `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, a
 project head in the local backlog and a `FRAMEWORK.md` outside the knowledge space.
 
-A shipped copy-ready template under `store/` or `skills/*/assets/` may already carry the frontmatter of its
+A shipped copy-ready template under `skills/*/assets/` may already carry the frontmatter of its
 target when its body names the concrete target file and requires all placeholders to be replaced before
 writing. Judge its frontmatter against that target. The exception applies neither to ordinary content files
 nor to user-owned templates.
 
-## Versioning
+## Changes
 
-There is exactly one valid file per subject, never a copy with a version in its name.
+There is exactly one valid file per subject, never a copy with a version in its name. A file is changed in
+place; Git keeps its earlier states.
 
-- Every file with `version` is changed in place. `version` is a whole number from `1`. Every change of
-  content raises it by one and sets `updated` to the date of the change. Pure corrections of form, typos or
-  references change neither field.
-- A policy changes only on a decision by the user, in place and with a new `version`. A file per context
-  may grow by further policies of the same context.
-- A plan raises `version` whenever it sharpens.
-- The current version applies until the user decides otherwise. Earlier versions live in Git only for
-  restoring; read them only to restore something or when the user asks for the history.
-- Shipped plugin text is versioned by the plugin version and carries no `version` or `created`; a shipped
-  `fact` keeps only `updated` as the date of its last check against the source.
-
-When an existing file lacks these fields, add them silently as soon as you write the file, even under
-`edit: locked`; they change no statement. The state found becomes `version: 1`, `created` from the date of
-the file's first commit and `updated` from its last commit, without Git history both from today. If the
-same write changes content, `version: 2` with today's date follows.
+- A policy changes only on a decision by the user. A file per context may grow by further policies of the
+  same context.
+- The current state applies until the user decides otherwise. Read earlier states in Git only to restore
+  something or when the user asks for the history.
 
 ## Invariants
 
@@ -126,9 +116,6 @@ description: >
   Subject and purpose of the file as one sentence with the decisive search terms.
 type: knowledge
 edit: shared
-version: 1
-created: YYYY-MM-DD
-updated: YYYY-MM-DD
 ---
 ```
 

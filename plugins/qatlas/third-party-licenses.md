@@ -4,7 +4,6 @@ description: >
 type: fact
 edit: locked
 source: https://github.com/ayghri/i-have-adhd/blob/main/LICENSE
-updated: 2026-08-19
 ---
 
 # Third-Party Licenses
