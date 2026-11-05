@@ -106,6 +106,9 @@ Read each one completely at the stated time:
    `qatlas.describe` before the first lead that the connection exists and offers creating and merging
    pull requests; otherwise do not start. In that case the leads open their pull requests through it, and
    the integrator performs the steps of `land` through the broker instead of calling `land`.
+5. Before the first lead, clear the stored test results of the previous run with `node
+   <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot results --clear --repo <code-repo>`, where
+   `<code-repo>` is the repo holding the code.
 
 The integration base `<basis>` is `origin/<control-branch>` for integration via pull requests, otherwise the
 local `<control-branch>`.

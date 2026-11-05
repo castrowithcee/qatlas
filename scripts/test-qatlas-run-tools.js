@@ -155,6 +155,124 @@ function testSlotCount() {
   }
 }
 
+function testSlotResults() {
+  const home = path.join(root, 'results-home');
+  const repo = path.join(root, 'results-repo');
+  fs.mkdirSync(home);
+  fs.mkdirSync(path.join(repo, 'sub'), { recursive: true });
+  const env = { ...process.env, HOME: home };
+  const git = (...args) => execFileSync('git', ['-C', repo, '-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { encoding: 'utf8' }).trim();
+  git('init', '-q');
+  fs.writeFileSync(path.join(repo, 'a.txt'), 'a\n');
+  fs.writeFileSync(path.join(repo, 'sub', 'b.txt'), 'b\n');
+  git('add', '-A');
+  git('commit', '-q', '-m', 'one');
+
+  // The side-effect file lies outside the worktree, so running the command never dirties it.
+  const effects = path.join(root, 'results-effects');
+  const count = () => (fs.existsSync(effects) ? fs.readFileSync(effects, 'utf8').length : 0);
+  const mark = code => ['node', '-e', `require('fs').appendFileSync(${JSON.stringify(effects)},'x');process.exit(${code})`];
+  const slot = (flags, command, cwd = repo) => spawnSync(process.execPath, [tools, 'slot', '--repo', repo, ...flags, '--', ...command],
+    { encoding: 'utf8', env, cwd, timeout: 30000 });
+  const sub = (...args) => spawnSync(process.execPath, [tools, 'slot', '--repo', repo, ...args], { encoding: 'utf8', env, cwd: repo });
+  const results = (...args) => { const r = sub('results', ...args); assert.strictEqual(r.status, 0, r.stderr); return JSON.parse(r.stdout).results; };
+
+  // Green run writes a record; the same key is not run again and names its origin.
+  let r = slot([], mark(0));
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(count(), 1);
+  const tree = git('rev-parse', 'HEAD^{tree}');
+  let list = results();
+  assert.strictEqual(list.length, 1);
+  assert.deepStrictEqual(Object.keys(list[0]).sort(), ['command', 'cwd', 'duration', 'exit', 'resource', 'time', 'tree']);
+  assert.strictEqual(list[0].tree, tree);
+  assert.strictEqual(list[0].cwd, '.');
+  assert.strictEqual(list[0].resource, null);
+  assert.strictEqual(list[0].exit, 0);
+  r = slot([], mark(0));
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(count(), 1, 'second call ran again');
+  assert.ok(r.stderr.includes(tree.slice(0, 7)) && r.stderr.includes(list[0].time), r.stderr);
+
+  // --no-cache runs and still records.
+  assert.strictEqual(slot(['--no-cache'], mark(0)).status, 0);
+  assert.strictEqual(count(), 2);
+  assert.strictEqual(results().length, 1);
+
+  // Different cwd, argv and resource are different keys.
+  assert.strictEqual(slot([], mark(0), path.join(repo, 'sub')).status, 0);
+  assert.strictEqual(count(), 3);
+  assert.strictEqual(results().find(x => x.cwd === 'sub').cwd, 'sub');
+  const other = [...mark(0), 'extra'];
+  assert.strictEqual(slot([], other).status, 0);
+  assert.strictEqual(count(), 4);
+  assert.strictEqual(slot(['--resource', 'res'], mark(0)).status, 0);
+  assert.strictEqual(count(), 5);
+  assert.strictEqual(slot(['--resource', 'res'], mark(0)).status, 0);
+  assert.strictEqual(count(), 5);
+  assert.strictEqual(results().length, 4);
+
+  // The unignored slot store inside this primary tree does not make it dirty; an untracked file elsewhere does.
+  assert.ok(git('status', '--short').includes('.qatlas/'), 'store is expected unignored');
+
+  // Dirty worktree (untracked file) neither reads nor writes.
+  fs.writeFileSync(path.join(repo, 'dirty.txt'), 'x\n');
+  const before = results().length;
+  assert.strictEqual(slot([], mark(0)).status, 0);
+  assert.strictEqual(count(), 6, 'dirty worktree reused a record');
+  assert.strictEqual(slot([], mark(0), path.join(repo, 'sub')).status, 0);
+  assert.strictEqual(count(), 7);
+  assert.strictEqual(results().length, before);
+  const times = results().map(x => x.time).join();
+  assert.strictEqual(slot(['--no-cache'], mark(0)).status, 0);
+  assert.strictEqual(count(), 8);
+  assert.strictEqual(results().map(x => x.time).join(), times, 'dirty worktree wrote a record');
+  fs.rmSync(path.join(repo, 'dirty.txt'));
+
+  // A changed tree runs again and is recorded under the new tree.
+  fs.writeFileSync(path.join(repo, 'a.txt'), 'changed\n');
+  git('commit', '-q', '-am', 'two');
+  const tree2 = git('rev-parse', 'HEAD^{tree}');
+  assert.notStrictEqual(tree2, tree);
+  assert.strictEqual(slot([], mark(0)).status, 0);
+  assert.strictEqual(count(), 9);
+  assert.strictEqual(results('--tree', tree2).length, 1);
+
+  // Red runs write nothing and are not reused.
+  assert.strictEqual(slot([], mark(3)).status, 3);
+  assert.strictEqual(count(), 10);
+  assert.strictEqual(slot([], mark(3)).status, 3);
+  assert.strictEqual(count(), 11);
+  assert.strictEqual(results('--tree', tree2).length, 1);
+
+  // --tree filters by full or abbreviated tree; a short or invalid value is a usage error.
+  assert.strictEqual(results('--tree', tree).length, 4);
+  assert.strictEqual(results('--tree', tree.slice(0, 7)).length, 4);
+  assert.strictEqual(results('--tree', '0'.repeat(7)).length, 0);
+  assert.strictEqual(sub('results', '--tree', tree.slice(0, 4)).status, 2);
+  assert.strictEqual(results().length, 5);
+
+  // A record older than 24 hours is ignored on read and does not stop the run.
+  const dir = path.join(repo, '.qatlas', 'local', 'slots', 'results');
+  for (const file of fs.readdirSync(dir)) {
+    const full = path.join(dir, file);
+    const record = JSON.parse(fs.readFileSync(full, 'utf8'));
+    record.time = new Date(Date.now() - 25 * 3600 * 1000).toISOString();
+    fs.writeFileSync(full, JSON.stringify(record));
+  }
+  assert.deepStrictEqual(results(), []);
+  assert.strictEqual(slot([], mark(0)).status, 0);
+  assert.strictEqual(count(), 12);
+  assert.strictEqual(results().length, 1);
+
+  // --clear removes all records, also when there are none.
+  assert.strictEqual(sub('results', '--clear').status, 0);
+  assert.deepStrictEqual(results(), []);
+  assert.strictEqual(sub('results', '--clear').status, 0);
+  assert.strictEqual(slot([], mark(0)).status, 0);
+  assert.strictEqual(count(), 13);
+}
+
 function testSlotQueues() {
   const home = path.join(root, 'queue-home');
   const repo = path.join(root, 'queue-repo');
@@ -277,6 +395,7 @@ function testSlotQueues() {
 try {
   testSlotCount();
   testSlotQueues();
+  testSlotResults();
   let c = setup('tree');
   let r = land(c);
   assert.strictEqual(r.status, 0, r.stderr);
