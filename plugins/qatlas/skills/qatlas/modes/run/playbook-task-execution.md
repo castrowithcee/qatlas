@@ -77,18 +77,23 @@ order:
 A small task is normally implemented by one subagent. If the same task legitimately needs several separate
 roles or target areas, the lead may use two or more subagents. Their assignments must demonstrably
 complement each other, must not build competing solutions and remain together within the error budget of
-this one task. The git workflow isolates simultaneously writing subagents. Full tests of simultaneous
-writers run via `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot -- <test command>`, which
-limits them repo-wide. `slot` blocks until the command ends and passes its exit code through: run a full
-test through `slot` in the foreground or through the host's background execution with its completion notice,
-and never wait by polling processes (`pgrep`, `ps`) or lock folders. `slot status` (without `--`) prints busy
+this one task. The git workflow isolates simultaneously writing subagents. Local evidence runs by default
+via `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot -- <test command>`, which limits
+simultaneous writers repo-wide and is mandatory for their full tests. Project values for validity,
+unversioned inputs and slot count come from the [project test
+strategy](../../references/playbook-acceptance.md#project-test-strategy). `slot` blocks until the command
+ends and passes its exit code through: run a full test through `slot` in the foreground or through the host's
+background execution with its completion notice, and never wait by polling processes (`pgrep`, `ps`) or lock
+folders. `slot status` (without `--`) prints busy
 and waiting slots and resources as one read-only JSON line. A command that the project instructions assign to
 an exclusive resource, such as an e2e environment with fixed names, runs via `slot --resource <name> --
 <command>` with the name from those instructions; it waits for that resource alone and occupies no test slot.
-In a clean worktree, `slot` stores a green result bound to the `HEAD` tree, directory, command and resource,
-and for 24 hours reuses it instead of running again: it prints one line naming the origin and exits 0 without
-taking a slot. A dirty worktree, a red run or a moved `HEAD` stores and reuses nothing; `--no-cache` forces
-the run. `slot results [--tree <sha>]` prints the valid records as one JSON line.
+In a clean worktree, `slot` stores a green result bound to the `HEAD` tree, directory, command, resource and
+the content of every `--input <path>` (an unversioned file or directory the command depends on), and reuses
+it for 24 hours or the given `--max-age <hours>` instead of running again: it prints one line naming the
+origin and exits 0 without taking a slot. A dirty worktree, a red run or a moved `HEAD` stores and reuses
+nothing; `--no-cache` forces the run. `slot results [--tree <sha>] [--max-age <hours>]` prints the valid
+records as one JSON line.
 A further task begins only when the active task is completed or securely handed over.
 
 The subagent may include an unpredicted file on its own if it demonstrably lies within the substantive

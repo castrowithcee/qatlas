@@ -27,16 +27,43 @@ invariants again at the latest when all milestones are integrated. Classify ever
   substitute approach. Secure the task immediately for `review` or `waiting`.
 - **Solution error:** The approach was executed but does not meet an acceptance criterion. Derive a concrete
   correction from the diagnosis or new evidence.
-- **Known flake:** A CI failure counts as a known flake, not as a solution error, only if the failing test
-  lies outside the diff and is recorded in the planning system as a known flake with a task ID. Then restart
-  the failed job at most once per pull request and count the rerun in the closing. Assign a
-  new occurrence to the existing task instead of recording it anew.
+- **Known flake:** Unless the project strategy names another flake rule, a CI failure counts as a known
+  flake, not as a solution error, only if the failing test lies outside the diff and is recorded in the
+  planning system as a known flake with a task ID. Then restart the failed job at most once per pull request
+  and count the rerun in the closing. Assign a new occurrence to the existing task instead of recording it
+  anew.
 - **New flake:** A CI failure not yet recorded counts as a new flake only if (a) the failing test lies
   outside the diff, (b) it fails only in some jobs or platforms, (c) the others are green and (d) a targeted
   local run via `slot` is green. Then record it as a draft in the planning system, restart the failed job at
   most once per pull request, log the rerun with the new task ID and list the draft under `New` in [the
   closing block](playbook-closing-block.md). If the rerun fails again,
-  it is a solution error. Every other CI failure remains a solution error.
+  it is a solution error. Every other CI failure remains a solution error. A project flake rule replaces
+  both flake rules above and never counts red as green.
+
+## Project test strategy
+
+How a project tests is project knowledge and lives in its native project instructions (`AGENTS.md` or
+equivalent); Qatlas defines only the evidence contract. Without a strategy, the defaults of the
+instructions apply. The contract holds for every project:
+
+- Only a demonstrably checked state is integrated.
+- Evidence counts only for exactly the git tree on which it arose. Green CI on the handed-over head counts,
+  because the commit fixes the tree.
+- Red is never reported as green; valid green evidence is not repeated.
+- Shared resources are not occupied concurrently.
+- `slot` is the default path for local evidence.
+
+The strategy answers these questions:
+
+1. Which checks prove a task before handover, and which only CI runs?
+2. Which tiers exist beyond fast and expensive checks, each with command, path areas and timing?
+3. What counts as evidence besides `slot` and CI, and how does the integrator check it against the tree?
+   Without that check, only `slot` evidence is taken over.
+4. Which unversioned inputs belong in the cache key (`slot --input <path>`), and how long does evidence stay
+   valid (`slot --max-age <hours>`)?
+5. Which flake rule applies?
+6. Which checks occupy an exclusive resource (`slot --resource <name>`), and how many test slots may the
+   project use (`slot --slots <count>`, at most the device capacity)?
 
 ## At most two corrections
 

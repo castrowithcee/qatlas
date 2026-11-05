@@ -96,15 +96,17 @@ step 2. In this case integration stays serially bound to the CI duration; name t
 
 ## Evidence and delta checks
 
-The integrator never re-runs what a valid evidence already proves. The project's native instructions declare
-the fast shared checks and, per expensive check, its command and path areas (path prefixes or git
-pathspecs). An expensive check without areas counts as affected everywhere. Without any declaration, run the
-shared checks as step 3 says and skip none.
+The integrator never re-runs what a valid evidence already proves. What counts as evidence follows the
+[project test strategy](../../references/playbook-acceptance.md#project-test-strategy). The project's native
+instructions may declare tiers, for example the fast shared checks and, per expensive check, its command and
+path areas (path prefixes or git pathspecs). An expensive check without areas counts as affected everywhere.
+Without any declaration, run the shared checks as step 3 says and skip none.
 
 - **Same tree:** if the tree of the `probe` result (for a fast-forward, the tree of the branch) equals the
   `tree` of a green (`exit: 0`) entry in the handover's `checks`, and `slot results --tree <tree>` shows a
-  matching record, take the evidence over without a new run. Without CI, `land --no-ci` is then allowed; with
-  green CI on the same head, drop the local `slot --priority` check.
+  matching record (or the project-named path of the entry passes the project's tree check), take the
+  evidence over without a new run. Without CI, `land --no-ci` is then allowed; with green CI on the same
+  head, drop the local `slot --priority` check.
 - **Different tree:** run the fast shared checks fully via `slot`. Run an expensive check only if `git diff
   --name-only <merge-base of task branch and basis> <current basis>` touches one of its path areas. Log every
   skipped check with `log --type skipped --task <id> --text "<check and reason>"`.

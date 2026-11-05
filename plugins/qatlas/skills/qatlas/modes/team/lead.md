@@ -23,8 +23,10 @@ commit anything.
 
 If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
 per task from `<basis>`. You do not merge the current `<basis>` into the task branch before a handover; the
-state you hand over is the one on which the complete check, with full tests via `node <tools> slot --
-<test command>`, was green. Every command that the project instructions assign to an exclusive resource runs
+state you hand over is the one on which the complete check was green: the checks the [project test
+strategy](../../references/playbook-acceptance.md#project-test-strategy) names for a handover, without a
+strategy full tests via `node <tools> slot -- <test command>`. Pass the project's values as `--max-age`,
+`--input` and `--slots`. Every command that the project instructions assign to an exclusive resource runs
 via `node <tools> slot --resource <name> -- <command>`. A conflict with the base comes back from the
 integrator as `rework`.
 Start every worker with a profile as [checking the team](../../references/playbook-team-config.md)
@@ -47,6 +49,7 @@ this handover is the last one of the task. Every report starts with YAML
 frontmatter (`---` on the first line) with `checks`: one entry per full check of the handover, each with
 `command` (as run), `exit` and `tree` (the tree of the handed-over branch tip, e.g. from `git rev-parse
 <branch>^{tree}` or `slot results --tree`); `handover` rejects a `tree` that is not the handed-over tree.
+An entry may stem from another evidence path that the project names, always with its `tree`.
 Without pull request integration the frontmatter also carries `branch`. For integration via pull requests,
 it adds the fields `pr-title` (one non-empty line), `pr-body` (non-empty, usually a `|` block scalar),
 `branch`, `base`, `last` (`true` or `false`), `pr` (number of the open pull request), `head` (SHA of the
