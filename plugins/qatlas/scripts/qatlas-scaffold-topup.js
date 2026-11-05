@@ -1,6 +1,6 @@
 'use strict';
 
-// Shared scaffold comparison for doctor and session hook. Copies only missing files.
+// Scaffold comparison for the doctor. Copies only missing files.
 
 const fs = require('fs');
 const path = require('path');
@@ -18,11 +18,6 @@ function walk(dir, base = dir) {
   return out;
 }
 
-function copy(from, to) {
-  fs.mkdirSync(path.dirname(to), { recursive: true });
-  fs.copyFileSync(from, to);
-}
-
 function copyMissing(from, to) {
   fs.mkdirSync(path.dirname(to), { recursive: true });
   try {
@@ -35,12 +30,11 @@ function copyMissing(from, to) {
 }
 
 // apply=false reports, apply=true fills in. Existing files stay untouched.
-function scaffoldTopUp(target, bundle, { apply = false, only = null, exclude = [] } = {}) {
+function scaffoldTopUp(target, bundle, { apply = false } = {}) {
   const base = path.join(bundle, '.qatlas-project');
   const project = path.join(target, '.qatlas-project');
   const existing = fs.existsSync(project);
   const selected = walk(base).filter(rel => {
-    if ((only && !only.includes(rel)) || exclude.includes(rel)) return false;
     if (!existing || rel === 'README.md') return true;
     const dir = path.join(project, path.dirname(rel));
     if (!fs.existsSync(dir)) return false;
@@ -60,4 +54,4 @@ function scaffoldTopUp(target, bundle, { apply = false, only = null, exclude = [
   return { absent, created };
 }
 
-module.exports = { walk, copy, scaffoldTopUp };
+module.exports = { walk, scaffoldTopUp };

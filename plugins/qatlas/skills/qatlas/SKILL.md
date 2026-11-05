@@ -67,7 +67,7 @@ Answer only with this card as rendered Markdown. Read nothing, recommend no mode
 
 Invocation: `<mode> [scope] [--flags] [run directive]`, in Claude with `/qatlas`, in Codex with `$qatlas`.
 
-If the session context reports `QATLAS SCAFFOLD: nein`, add exactly one line below the card: "This project
+If the session context reports `QATLAS SCAFFOLD: no`, add exactly one line below the card: "This project
 is not set up yet: `qatlas-core setup`."
 
 ## Shared contract

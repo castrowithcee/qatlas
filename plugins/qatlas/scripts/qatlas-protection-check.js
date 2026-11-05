@@ -92,15 +92,15 @@ function readAllow(file, staged) {
   let value;
   try { value = parseYamlText(source); } catch (error) { return bad(error.message); }
   const unknown = Object.keys(value).filter(key => key !== 'format' && key !== 'allow');
-  if (unknown.length) return bad('unbekannte Schlüssel: ' + unknown.join(', '));
+  if (unknown.length) return bad('unknown keys: ' + unknown.join(', '));
   const list = value.allow === undefined || value.allow === null ? [] : value.allow;
-  if (!Array.isArray(list)) return bad('allow muss eine Liste sein.');
+  if (!Array.isArray(list)) return bad('allow must be a list.');
   const entries = [];
   for (const entry of list) {
     const valid = entry && typeof entry === 'object' && !Array.isArray(entry)
       && Object.keys(entry).length === 3
       && ['file', 'rule', 'hash'].every(key => typeof entry[key] === 'string' && entry[key]);
-    if (!valid) return bad('jeder Eintrag in allow braucht genau die Strings file, rule und hash.');
+    if (!valid) return bad('every entry in allow needs exactly the strings file, rule and hash.');
     entries.push({ file: entry.file, rule: entry.rule, hash: entry.hash });
   }
   return { entries, problems: [] };
@@ -134,7 +134,7 @@ try { root = git(['rev-parse', '--show-toplevel']).trim(); } catch { /* not a gi
 
 const state = readConfig(root || target);
 if (!state.protectionValid) {
-  process.stdout.write('protection: Prüfung nicht möglich, Konfiguration ungültig.\n'
+  process.stdout.write('protection: check not possible, invalid configuration.\n'
     + state.diagnostics.map(line => '- ' + line).join('\n') + '\n');
   process.exit(3);
 }
@@ -143,22 +143,20 @@ if (argv.includes('--print-config')) {
   process.stdout.write(JSON.stringify(protection) + '\n');
   process.exit(0);
 }
-if (!protection.enabled) process.exit(0);
-
 if (!root) process.exit(0);
 
 let lines;
 try {
   lines = stagedLines();
 } catch {
-  process.stdout.write('protection: Prüfung nicht möglich, gestagter Diff nicht lesbar.\n');
+  process.stdout.write('protection: check not possible, staged diff not readable.\n');
   process.exit(3);
 }
 
 const allowFile = locations(root).allowFile;
 const allow = readAllow(allowFile, !argv.includes('--allow'));
 if (allow.problems.length) {
-  process.stdout.write('protection: Prüfung nicht möglich, Freigabedatei ungültig.\n'
+  process.stdout.write('protection: check not possible, invalid allowlist file.\n'
     + allow.problems.map(line => '- ' + line).join('\n') + '\n');
   process.exit(3);
 }
@@ -169,8 +167,8 @@ if (argv.includes('--allow')) {
   const hit = allowHash && allowable
     ? scan(lines, PERSONAL_RULES).find(entry => entry.hash === allowHash) : null;
   if (!hit) {
-    process.stdout.write('protection: Kennung ' + (allowHash || '(fehlt)') + ' ist im gestagten Diff kein '
-      + 'freigebbarer personal-data-Befund (nur ask oder warn); nichts eingetragen.\n');
+    process.stdout.write('protection: id ' + (allowHash || '(missing)') + ' is no allowable personal-data '
+      + 'finding in the staged diff (only ask or warn); nothing recorded.\n');
     process.exit(2);
   }
   const known = allow.entries.some(e => e.file === hit.file && e.rule === hit.rule && e.hash === hit.hash);

@@ -1,7 +1,7 @@
 ---
 description: >
-  Read-only diagnosis of a Qatlas project: checks dependencies, store, scaffold, project instructions, user
-  library and the repo-local update state without repairing or confirming anything itself.
+  Read-only diagnosis of a Qatlas project: checks dependencies, configuration, scaffold, project
+  instructions, user library and the repo-local update state without repairing or confirming anything.
 license: MIT
 type: playbook
 edit: locked
@@ -22,15 +22,14 @@ node <plugin-root>/scripts/qatlas-doctor.js
 node <plugin-root>/scripts/qatlas-update.js status
 ```
 
-The first command checks Node, git, git identity, optional git LFS support, the user-wide store, syntax and
-basic structure of the optional `team.yaml` (per host `supervisor`, `integrator`, `lead` and `worker` with
-the three profiles, and a leftover configuration file that the startup migration has already taken over,
-which it names for explicit cleanup), the project knowledge space including root README and size budget,
-`.gitignore`, project instructions and the scaffold of the user library under `~/qatlas/`. It names missing
-library parts as a suggestion for `qatlas-core setup`. A missing `team.yaml` is a hint for `run`, not a setup
-blocker; Doctor does not create it even with `--apply` without confirmed model values. Model and effort
-availability is checked only by `run` in the current host. With an old or parallel project root, every
-writing repair run stays blocked and names the inventory command. The second command compares, for every
+The first command checks Node, git, git identity, the user-wide and the project configuration including
+keys Qatlas no longer reads, syntax and basic structure of an existing `team.yaml` (per host `supervisor`,
+`integrator`, `lead` and `worker` with the three profiles), the project knowledge space including root
+README and size budget, `.gitignore`, project instructions and the scaffold of the user library under
+`~/qatlas/`. It names missing library parts as a suggestion for `qatlas-core setup`. `team.yaml` is optional
+and never created by Doctor; model and effort availability is checked only by `run` in the current host.
+With an earlier project root, every writing repair stays blocked and points to `qatlas-core update`. The
+second command compares, for every
 installed plugin of the Qatlas marketplace, the review state stored for this repo under
 `.qatlas/plugins/updates/state.json` with the installed version and lists the pending update instructions.
 

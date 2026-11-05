@@ -8,11 +8,6 @@ const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { projectMigrationInventory } = require('./qatlas-migrations.js');
-
-let readConfig = () => ({ config: { 'session-start': { enabled: true } } });
-try { ({ readConfig } = require('./runtime/config-loader.js')); }
-catch { /* missing config helper must not block explicit update commands */ }
 
 const pluginRoot = path.resolve(__dirname, '..');
 const isCodex = Boolean(process.env.PLUGIN_ROOT);
@@ -161,12 +156,18 @@ function hasCurrentScaffold(root) {
   catch { return false; }
 }
 
-function hasScaffold(root) {
-  if (hasCurrentScaffold(root)) return true;
-  return ['__qatlas__', '__callbell__'].some(name => {
+// Earlier project roots; the pending update instruction moves them to .qatlas-project/.
+const LEGACY_ROOTS = ['.qatlas/project', '__qatlas__', '__callbell__'];
+
+function legacyRoots(root) {
+  return LEGACY_ROOTS.filter(name => {
     try { return fs.statSync(path.join(root, name)).isDirectory(); }
     catch { return false; }
   });
+}
+
+function hasScaffold(root) {
+  return hasCurrentScaffold(root) || legacyRoots(root).length > 0;
 }
 
 function readState(root) {
@@ -224,22 +225,21 @@ function invocation() {
 
 function banner(plugins) {
   const width = Math.max(0, ...plugins.map(p => p.name.length));
-  const lines = plugins.length ? [
+  const lines = [
     'Qatlas plugins were updated. This repo still needs a project update.',
     '',
     ...plugins.map(p => `  ${p.name.padEnd(width)}  ${p.checked} -> ${p.version}`),
-  ] : ['This repo has an old Qatlas project root that needs a migration.'];
-  lines.push('', 'Run: ' + invocation());
+    '',
+    'Run: ' + invocation(),
+  ];
   const inner = Math.max(...lines.map(line => line.length));
   const rule = '+' + '-'.repeat(inner + 4) + '+';
   return [rule, ...lines.map(line => '|  ' + line.padEnd(inner) + '  |'), rule].join('\n');
 }
 
 function emitNotice(plugins) {
-  const summary = plugins.length
-    ? 'Installed plugins changed since this repo was last checked: '
-      + plugins.map(p => `${p.name} ${p.checked} -> ${p.version}`).join(', ') + '.'
-    : 'The project root of this repo needs a migration.';
+  const summary = 'Installed plugins changed since this repo was last checked: '
+    + plugins.map(p => `${p.name} ${p.checked} -> ${p.version}`).join(', ') + '.';
   const line = `> Qatlas project update pending: run ${invocation()}`;
   const context = [
     `QATLAS-UPDATE: ${summary}`,
@@ -270,26 +270,12 @@ function writeState(root, plugins) {
 
 function main() {
   const root = resolveRoot();
-  if (command === 'notice' && !readConfig(root).config['session-start'].enabled) return;
   if (!pluginIdentity()) return;
-  const migration = projectMigrationInventory(root, { detailed: false });
-
-  if (migration.unresolved) {
-    if (command === 'status') {
-      process.stdout.write('Project migration pending: migrate the project root first; the review state stays '
-        + 'unchanged until then.\n');
-    } else if (command === 'ack') {
-      process.stderr.write('Project migration pending. The review state was not confirmed.\n');
-      process.exitCode = 1;
-    } else {
-      emitNotice([]);
-    }
-    return;
-  }
 
   if (command === 'ack') {
-    if (!hasCurrentScaffold(root)) {
-      process.stderr.write('No .qatlas-project/ scaffold in the target repo. Set up Qatlas first.\n');
+    if (!hasCurrentScaffold(root) || legacyRoots(root).length) {
+      process.stderr.write('The target repo needs exactly one project root .qatlas-project/. '
+        + 'The review state was not confirmed.\n');
       process.exitCode = 1;
       return;
     }
@@ -339,4 +325,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { compare, installedPlugins, pendingUpdates, semver };
+module.exports = { compare, installedPlugins, legacyRoots, pendingUpdates, semver };

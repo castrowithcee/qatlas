@@ -14,7 +14,10 @@ An entry applies to a task when its subject fits and no explicit user instructio
 contradicts it. Its location alone does not make it binding for every project. If a project is to follow a
 convention permanently, its agent file refers to the entry explicitly.
 
-## Folders
+## Areas
+
+The library starts with this file and `AGENTS.qatlas.md`. An area folder is created together with its first
+entry:
 
 - `conventions/` holds transferable conventions on how work is shaped.
 - `playbooks/` holds procedures for recurring activities.

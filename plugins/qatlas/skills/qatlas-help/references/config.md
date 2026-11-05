@@ -13,18 +13,14 @@ license: MIT
 | `~/.qatlas/plugins/config.yaml` | Global settings for all projects |
 | `<repo>/.qatlas/plugins/config.yaml` | Project values; a set value overrides the global one, a missing one inherits |
 | `~/.qatlas/plugins/statusline.yaml` | Appearance of the Claude statusline |
-| `~/.qatlas/plugins/team.yaml` | Team roles, models and effort levels for `qatlas run` |
+| `~/.qatlas/plugins/team.yaml` | Optional roles, models and effort levels for `qatlas run` and `qatlas team` |
 
 ## Keys in `config.yaml`
 
 | Key | Level | Effect |
 |---|---|---|
-| `session-start.enabled` | global | Switches the passive Qatlas context at session start |
-| `brains.qatlas.enabled` | global, project | Switches the signpost to the library `~/qatlas/` |
-| `brains.project` | project | Names additional project-related sources with `paths` and `description` |
-| `protection.enabled` | global, project | Switches the protection check fully off or on |
-| `protection.secrets` | global, project | `block`, `ask`, `warn` or `allow` for secrets before the commit |
-| `protection.personal-data` | global, project | The same values for personal data |
+| `protection.secrets` | global, project | `block` or `allow` for secrets before the commit |
+| `protection.personal-data` | global, project | `block`, `ask`, `warn` or `allow` for personal data |
 
 The default is `secrets: block` and `personal-data: ask`. `block` prevents the step, `ask` asks beforehand,
 `warn` only reports, `allow` does not check. A passed check stays silent. Whether a repo is public or private
@@ -40,7 +36,7 @@ reported again. The file contains only identifiers, no plain text. An entry is c
 `node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <identifier>`; the
 identifier is named by the finding in square brackets. The format is described in the head of the script.
 
-Credentials never belong in a `config.yaml`. A commented template lives in the plugin at
-`store/config/config.example.yaml`.
+Doctor reports keys Qatlas no longer reads. Credentials never belong in a `config.yaml`. A commented
+template lives in the plugin at `skills/qatlas-core/assets/config.example.yaml`.
 
 An already existing `AGENTS.md` belongs to the user and is not rewritten by this procedure.

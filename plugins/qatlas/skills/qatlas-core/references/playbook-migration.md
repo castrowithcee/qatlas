@@ -15,7 +15,7 @@ outside the knowledge space; outside it you only adjust references to moved file
 
 ## 1. Inventory
 
-List every folder and file of the knowledge space with type, `edit`, version fields and status from its
+List every folder and file of the knowledge space with type, `edit` and status from its
 frontmatter, and find its inbound references across the repo. Report files without frontmatter and folders
 outside the fixed set.
 
@@ -43,7 +43,7 @@ Assign every file its target folder, name and type, plus the frontmatter delta:
 | the memory index | `memory/MEMORY.md` with `type: meta` |
 
 Derive the slug from the old name without prefix and ID. Frontmatter delta: set the target `type` and its
-default `edit` unless the found `edit` is stricter; add `version`, `created` and `updated` by the schema;
+default `edit` unless the found `edit` is stricter; remove `version`, `created` and `updated`;
 remove `status` outside tasks, plans and project heads as well as `supersedes` and `superseded_by`. A file
 whose type stays unclear or whose slug collides is a question to the user, never a new folder.
 

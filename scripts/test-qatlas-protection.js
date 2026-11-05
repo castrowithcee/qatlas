@@ -62,13 +62,21 @@ try {
   result = run('mail-example', { staged: { 'a.md': 'nutzer@example.com\n' } });
   assert.strictEqual(result.status, 0);
 
-  result = run('warn', { home: 'format: 1\nprotection:\n  secrets: warn\n', staged: secret });
+  result = run('warn', { home: 'format: 1\nprotection:\n  personal-data: warn\n', staged: mail });
   assert.strictEqual(result.status, 0);
-  assert.match(result.stdout, /secrets \(warn\)/);
+  assert.match(result.stdout, /personal-data \(warn\)/);
 
-  result = run('disabled', { home: 'format: 1\nprotection:\n  enabled: false\n', staged: { ...secret, ...mail } });
+  result = run('secret-warn-invalid', { home: 'format: 1\nprotection:\n  secrets: warn\n', staged: secret });
+  assert.strictEqual(result.status, 3, 'Secrets know only block and allow.');
+
+  result = run('disabled', {
+    home: 'format: 1\nprotection:\n  secrets: allow\n  personal-data: allow\n', staged: { ...secret, ...mail },
+  });
   assert.strictEqual(result.status, 0);
   assert.strictEqual(result.stdout, '');
+
+  result = run('stale-key', { home: 'format: 1\nprotection:\n  enabled: false\n', staged: secret });
+  assert.strictEqual(result.status, 1, 'A key Qatlas no longer reads changes nothing.');
 
   result = run('project-override', {
     home: 'format: 1\nprotection:\n  secrets: allow\n',
@@ -99,16 +107,16 @@ try {
 
   // Top-up adds missing keys and keeps set values with their comment.
   const home = path.join(root, 'topup');
-  write(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\n# eigener Kommentar\nprotection:\n  secrets: warn\n');
+  write(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\n# own comment\nprotection:\n  secrets: allow\n');
   const added = execFileSync(process.execPath, ['-e',
     'process.stdout.write(JSON.stringify(require(' + JSON.stringify(loader) + ').topUpConfig()))'],
   { encoding: 'utf8', env: { ...process.env, HOME: home } });
   assert.ok(JSON.parse(added).includes('protection.personal-data'));
   const text = fs.readFileSync(path.join(home, '.qatlas', 'plugins', 'config.yaml'), 'utf8');
-  assert.match(text, /# eigener Kommentar/);
-  assert.match(text, /secrets: warn/);
+  assert.match(text, /# own comment/);
+  assert.match(text, /secrets: allow/);
 
-  process.stdout.write('✓ Qatlas-Protection: 13 Szenarien erfolgreich.\n');
+  process.stdout.write('✓ Qatlas protection: 15 scenarios passed.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

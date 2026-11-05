@@ -1,0 +1,108 @@
+---
+description: >
+  Check instruction that brings a project of any earlier Qatlas version onto the current state: project
+  root, knowledge space, frontmatter, project configuration, project instructions, library and device.
+license: MIT
+type: policy
+edit: locked
+---
+
+# Bring the project onto the current Qatlas state
+
+This instruction covers every earlier release, however many a repo skipped. Check each point against the
+actual state; a point whose condition does not hold needs nothing.
+
+## Project root
+
+- If `__callbell__/`, `__qatlas__/` or `.qatlas/project/` exists, the project state still lies under an
+  earlier root. Without `.qatlas-project/`, propose moving it there with `git mv`; both zones travel byte for
+  byte. With several roots side by side, compare their content and let the user decide; never merge or
+  overwrite wholesale. Embedded Git repos and worktrees are not crossed.
+- A review state at `<root>/updates/state.json` moves to `.qatlas/plugins/updates/state.json`; if both
+  exist and differ, ask.
+- Point every reference in the repo to the new paths and leave historical records such as closed tasks
+  unchanged. An `INDEX.md` is merged into the fitting README by its content.
+- Replace `.gitignore` rules for an earlier root with the current ones that `qatlas-core doctor` names.
+
+## Knowledge space
+
+- If `.qatlas-project/` does not match the layout of `qatlas-core-filing`, migrate it as part of this
+  update. This covers, among others, a `decisions/` folder, files named `decision-*`, `rule-*` or with an ID
+  outside tasks, `type: decision` or `type: rule`, `history` and archive folders.
+- Remove `version`, `created` and `updated` from the frontmatter of every file in the knowledge space,
+  tasks included. This point changes no statement and is carried out without asking; name the number of
+  files and one example afterwards.
+
+## Project configuration
+
+In `.qatlas/plugins/config.yaml`:
+
+- Remove `brains` and `session-start`; Qatlas no longer reads them. If `brains.project` named real sources,
+  propose naming them in the project instructions instead.
+- `protection.enabled` no longer exists. For `false`, propose `secrets: allow` and `personal-data: allow`;
+  for `true`, remove it. `protection.secrets` takes only `block` or `allow`; for `ask` or `warn`, propose
+  `block`.
+- A file that keeps only `format: 1` may be deleted; offer it.
+
+## Project instructions and memory
+
+Check `AGENTS.md`, `CLAUDE.md`, memory and the knowledge space for working instructions, not mere
+mentions, that use outdated names, and propose the concrete replacement:
+
+| Found | Now |
+|---|---|
+| `qatlas setup` | `qatlas-core setup` |
+| `qatlas worktree` | `qatlas-work tree` |
+| `qatlas-core-cli-mcp`, or the Qatlas CLI for user tools | the Qatlas MCP broker configured in the host |
+| `qatlas-core-import` | `qatlas-core-filing` |
+| `qatlas-core ping`, Telegram notifications | none |
+| `qatlas sentinel`, sentinel, orchestrator, `--orchestras` | `qatlas team`, supervisor, lead, `--leads` |
+| `qatlas:run-<effort>` subagents | `qatlas:worker` with model and effort per call |
+
+- Sections from an earlier Qatlas template, "Sichtbarkeit und Datenschutz" and the point on parallel agent
+  work under "Zusammenarbeit", can go when they only repeat it; the protection check and `qatlas-core-git`
+  cover both. If they state whether secrets or personal data may be versioned here, propose the matching
+  `protection` value instead.
+- If project instructions allow push, pull request creation or merge to only one role, check them against
+  `qatlas team`: leads push and open pull requests, the integrator merges.
+- Offer to delete old run state under `.qatlas/local/sentinel/`.
+
+## Planning system
+
+- If `.qatlas-project/backlog/BACKLOG.md` binds an external planning system without a way to close a
+  finished, dropped or duplicate entry, propose a line `Completion`. For GitHub: finished issues are closed
+  as completed and set to `Done` in the same step, dropped ones as not planned; the issue state decides.
+  Check read-only whether entries on the completion status are still open; name the count and one example,
+  and align them only after approval.
+
+## Checks and exclusive test resources
+
+Run and team read two optional declarations from the project instructions; without them nothing changes.
+
+- **Fast and expensive checks:** The team integrator takes over a lead's valid evidence for an identical tree
+  and, for a different tree, runs an expensive check only if the base touched one of its path areas. If
+  wanted, name the fast shared checks and, per expensive check, its command and path areas (path prefixes
+  or git pathspecs). An expensive check without areas counts as affected everywhere.
+- **Exclusive test resources:** Commands assigned to a named resource run via `slot --resource <name>`, one
+  at a time. If checks share an environment that cannot run twice at once, or the project serializes them
+  with its own lock, name the resource and its commands; an own lock then becomes unnecessary.
+
+Propose each declaration before writing it into the project instructions.
+
+## Library and device
+
+These points concern `~/qatlas/` and `~/.qatlas/` on this device. Change them only after approval; once a
+point is done there, it no longer applies in any other repo.
+
+- In `~/qatlas/`, a `rules/` folder or files with `type: rule` become `policies/` and `type: policy`, with
+  `git mv` where the library is a Git repo and with its references, such as in `AGENTS.qatlas.md`, updated.
+- In `~/.qatlas/plugins/config.yaml`, remove the keys `qatlas-core doctor` reports as unknown.
+- If `~/.qatlas/plugins/orchestra.yaml` exists without `team.yaml`, propose a `team.yaml` with `format: 2`
+  from it (`orchestrator` gives `lead`, `supervisor` and `integrator`, `workers` gives `worker`); the file is
+  optional, so offering only to delete the old one is fine too.
+- Offer to delete what Qatlas no longer uses: `~/.qatlas/plugins/credentials.yaml` (it may hold an old bot
+  token; point out revoking it), `~/.qatlas/plugins/orchestra.yaml`, `~/.qatlas/rules/`,
+  `~/.qatlas/state/migrations.json`, `~/.qatlas/state/migrations/` and `~/.callbell/`. Take over still
+  wanted values from `~/.callbell/` into the current files first.
+- Worktrees registered under `~/.callbell/worktrees/` or `~/.qatlas/worktrees/` move with
+  `git worktree move` to `~/.qatlas/state/worktrees/`; never move their folders directly.

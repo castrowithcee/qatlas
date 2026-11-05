@@ -59,14 +59,14 @@ function defaultStatusline() {
 
 const DEFAULT_CONFIG = {
   format: 1,
-  'session-start': { enabled: true },
-  brains: { qatlas: { enabled: true } },
-  protection: { enabled: true, secrets: 'block', 'personal-data': 'ask' },
+  protection: { secrets: 'block', 'personal-data': 'ask' },
 };
 
-const PROTECTION_LEVELS = ['block', 'ask', 'warn', 'allow'];
-// Keys a project config may override.
-const PROJECT_KEYS = new Set(['format', 'brains', 'protection']);
+const PROTECTION_LEVELS = {
+  secrets: ['block', 'allow'],
+  'personal-data': ['block', 'ask', 'warn', 'allow'],
+};
+const CONFIG_KEYS = new Set(['format', 'protection']);
 
 const DEFAULT_STATUSLINE = defaultStatusline();
 
@@ -105,32 +105,32 @@ function parseYamlText(source, format = 1) {
   });
   if (document.errors.length) throw document.errors[0];
   const value = document.toJS({ maxAliasCount: 0 });
-  if (!isObject(value)) throw new Error('Das YAML-Wurzeldokument muss eine Map sein.');
-  if (value.format !== format) throw new Error('Das Feld format muss den Wert ' + format + ' haben.');
+  if (!isObject(value)) throw new Error('The YAML root document must be a map.');
+  if (value.format !== format) throw new Error('The field format must be ' + format + '.');
   return value;
 }
 
 const TEAM_PROFILES = ['light', 'standard', 'demanding'];
 const TEAM_ROLES = ['supervisor', 'integrator', 'lead'];
 
-// Structure check shared by the doctor and the team migration; returns a list of problems.
+// Structure check of team.yaml for the doctor; returns a list of problems.
 function teamProblems(value) {
   if (!isObject(value.profiles) || !TEAM_PROFILES.every(name => typeof value.profiles[name] === 'string')) {
-    return ['profiles braucht die Profile ' + TEAM_PROFILES.join(', ') + ' als Text.'];
+    return ['profiles needs the profiles ' + TEAM_PROFILES.join(', ') + ' as text.'];
   }
-  if (!isObject(value.hosts) || !Object.keys(value.hosts).length) return ['hosts fehlt oder ist leer.'];
+  if (!isObject(value.hosts) || !Object.keys(value.hosts).length) return ['hosts is missing or empty.'];
   const problems = [];
   for (const [host, entry] of Object.entries(value.hosts)) {
-    if (!isObject(entry)) { problems.push('hosts.' + host + ' muss eine Map sein.'); continue; }
+    if (!isObject(entry)) { problems.push('hosts.' + host + ' must be a map.'); continue; }
     for (const role of TEAM_ROLES) {
       if (entry[role] !== null && typeof entry[role] !== 'string') {
-        problems.push('hosts.' + host + '.' + role + ' braucht ein Modell oder null.');
+        problems.push('hosts.' + host + '.' + role + ' needs a model or null.');
       }
     }
     for (const profile of TEAM_PROFILES) {
       const worker = isObject(entry.worker) ? entry.worker[profile] : undefined;
       if (!isObject(worker) || !('model' in worker) || !('effort' in worker)) {
-        problems.push('hosts.' + host + '.worker.' + profile + ' braucht model und effort.');
+        problems.push('hosts.' + host + '.worker.' + profile + ' needs model and effort.');
       }
     }
   }
@@ -141,63 +141,34 @@ function stringifyYaml(value) {
   return YAML.stringify(value, { lineWidth: 0, version: '1.2' });
 }
 
+function knownProtection(value) {
+  const out = {};
+  if (isObject(value)) for (const key of Object.keys(PROTECTION_LEVELS)) if (key in value) out[key] = value[key];
+  return out;
+}
+
 function normalizeConfig(value) {
-  const config = merge(DEFAULT_CONFIG, value);
-  const session = isObject(config['session-start']) ? config['session-start'] : {};
-  config['session-start'] = { enabled: session.enabled !== false };
-  if (!isObject(config.protection)) config.protection = clone(DEFAULT_CONFIG.protection);
-  if (!isObject(config.brains)) config.brains = clone(DEFAULT_CONFIG.brains);
-  if (!isObject(config.brains.qatlas)) config.brains.qatlas = clone(DEFAULT_CONFIG.brains.qatlas);
-  delete config.brains.project;
-  return config;
+  return {
+    format: 1,
+    protection: { ...DEFAULT_CONFIG.protection, ...knownProtection(isObject(value) && value.protection) },
+  };
 }
 
-function brainsProblems(brains, file, isProject) {
-  if (brains === undefined) return [];
-  if (!isObject(brains)) return [file + ': brains muss eine Map sein.'];
-  const problems = [];
-  for (const key of Object.keys(brains)) {
-    const value = brains[key];
-    if (key === 'qatlas') {
-      if (!isObject(value) || Object.keys(value).some(name => name !== 'enabled')
-        || (value.enabled !== undefined && typeof value.enabled !== 'boolean')) {
-        problems.push(file + ': brains.qatlas erlaubt nur enabled mit true oder false.');
-      }
-    } else if (key === 'project') {
-      if (!isProject) {
-        problems.push(file + ': brains.project gilt ausschließlich in der Projektkonfiguration.');
-      } else if (!isObject(value)
-        || Object.keys(value).some(name => !['enabled', 'paths', 'description'].includes(name))
-        || (value.enabled !== undefined && typeof value.enabled !== 'boolean')
-        || (value.paths !== undefined && (!Array.isArray(value.paths)
-          || value.paths.some(entry => typeof entry !== 'string' || !entry)))
-        || (value.description !== undefined && typeof value.description !== 'string')) {
-        problems.push(file + ': brains.project erlaubt enabled, paths als Liste von Pfaden und description.');
-      }
-    } else {
-      problems.push(file + ': unbekannter Schlüssel brains.' + key + '.');
-    }
-  }
-  return problems;
-}
-
-function protectionProblems(protection, file) {
-  if (protection === undefined) return [];
-  if (!isObject(protection)) return [file + ': protection muss eine Map sein.'];
-  const problems = [];
+// Invalid values make the protection check impossible; unknown keys are only reported.
+function configProblems(value, file) {
+  const invalid = [];
+  const unknown = Object.keys(value).filter(key => !CONFIG_KEYS.has(key)).map(key => file + ': unknown key ' + key + '.');
+  const protection = value.protection;
+  if (protection === undefined) return { invalid, unknown };
+  if (!isObject(protection)) return { invalid: [file + ': protection must be a map.'], unknown };
   for (const key of Object.keys(protection)) {
-    const value = protection[key];
-    if (key === 'enabled') {
-      if (typeof value !== 'boolean') problems.push(file + ': protection.enabled muss true oder false sein.');
-    } else if (key === 'secrets' || key === 'personal-data') {
-      if (!PROTECTION_LEVELS.includes(value)) {
-        problems.push(file + ': protection.' + key + ' muss ' + PROTECTION_LEVELS.join(', ') + ' sein.');
-      }
-    } else {
-      problems.push(file + ': unbekannter Schlüssel protection.' + key + '.');
+    const levels = PROTECTION_LEVELS[key];
+    if (!levels) unknown.push(file + ': unknown key protection.' + key + '.');
+    else if (!levels.includes(protection[key])) {
+      invalid.push(file + ': protection.' + key + ' must be one of ' + levels.join(', ') + '.');
     }
   }
-  return problems;
+  return { invalid, unknown };
 }
 
 function normalizeStatusline(value) {
@@ -213,45 +184,37 @@ function readConfig(projectRoot = null) {
   const home = parseFile(paths.configFile);
   const diagnostics = [];
   if (home.exists && !home.valid) diagnostics.push(paths.configFile + ': ' + home.error.message);
-  const config = normalizeConfig(home.valid && home.value ? home.value : DEFAULT_CONFIG);
-  const homeProblems = home.valid && home.value
-    ? protectionProblems(home.value.protection, paths.configFile) : [];
-  const homeBrainsProblems = home.valid && home.value
-    ? brainsProblems(home.value.brains, paths.configFile, false) : [];
-  diagnostics.push(...homeProblems, ...homeBrainsProblems);
+  const homeIssues = home.valid && home.value
+    ? configProblems(home.value, paths.configFile) : { invalid: [], unknown: [] };
+  diagnostics.push(...homeIssues.invalid, ...homeIssues.unknown);
+  const config = normalizeConfig(home.valid && !homeIssues.invalid.length ? home.value : null);
 
-  let projectProblems = [];
   let project = { exists: false, valid: true, value: null };
+  let projectIssues = { invalid: [], unknown: [] };
   if (paths.projectConfigFile) {
     project = parseFile(paths.projectConfigFile);
     if (project.exists && !project.valid) {
       diagnostics.push(paths.projectConfigFile + ': ' + project.error.message);
     } else if (project.value) {
-      const denied = Object.keys(project.value).filter(key => !PROJECT_KEYS.has(key));
-      if (denied.length) diagnostics.push(paths.projectConfigFile
-        + ': Projekt-Overrides sind noch nicht freigegeben: ' + denied.join(', '));
-      projectProblems = protectionProblems(project.value.protection, paths.projectConfigFile);
-      diagnostics.push(...projectProblems);
-      if (!projectProblems.length && isObject(project.value.protection)) {
-        config.protection = merge(config.protection, project.value.protection);
-      }
-      const brainsIssues = brainsProblems(project.value.brains, paths.projectConfigFile, true);
-      diagnostics.push(...brainsIssues);
-      if (!brainsIssues.length && isObject(project.value.brains)) {
-        config.brains = merge(config.brains, project.value.brains);
+      projectIssues = configProblems(project.value, paths.projectConfigFile);
+      diagnostics.push(...projectIssues.invalid, ...projectIssues.unknown);
+      if (!projectIssues.invalid.length && isObject(project.value.protection)) {
+        Object.assign(config.protection, knownProtection(project.value.protection));
       }
     }
   }
-  const protectionValid = home.valid && project.valid && !homeProblems.length && !projectProblems.length;
+  const valid = home.valid && project.valid && !homeIssues.invalid.length && !projectIssues.invalid.length;
 
   return {
     ...paths,
     exists: home.exists,
-    valid: home.valid && project.valid && !homeProblems.length && !homeBrainsProblems.length,
-    protectionValid,
+    valid,
+    protectionValid: valid,
     config,
     project,
     diagnostics,
+    problems: diagnostics.filter(line => !homeIssues.unknown.includes(line) && !projectIssues.unknown.includes(line)),
+    unknown: [...homeIssues.unknown, ...projectIssues.unknown],
   };
 }
 

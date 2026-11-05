@@ -1,134 +1,133 @@
 ---
 description: >
-  Statusline des aktuellen Hosts einrichten und konfigurieren: unter Claude Code den Qatlas-Renderer,
-  unter Codex CLI den nativen TUI-Footer.
+  Set up and configure the status line of the current host: the Qatlas renderer under Claude Code, the
+  native TUI footer under Codex CLI.
 license: MIT
 type: playbook
 edit: locked
 ---
 
-# Statusline konfigurieren
+# Configure the status line
 
-Konfiguriere die Statusline des Hosts, auf dem dieser Skill läuft. Ermittle den Host aus der aktuellen
-Session, niemals aus installierten Konfigurationsordnern. Claude Code und Codex können zugleich auf einem
-Gerät installiert sein.
+Configure the status line of the host this skill runs on. Determine the host from the current session,
+never from installed configuration folders. Claude Code and Codex can both be installed on one device.
 
-## Wann
+## When
 
-- Nur auf direkte Anfrage des Nutzers. Die erstmalige Einrichtung verändert globale Nutzerkonfiguration
-  und darf nie automatisch starten.
-- Unter Codex ist das Ziel die CLI-TUI. Wird der Skill aus Desktop-App oder IDE aufgerufen, konfiguriere
-  künftige CLI-Sessions und sage klar, dass der Footer in der aktuellen Oberfläche nicht erscheint.
+- Only on the user's direct request. The first setup changes global user configuration and must never start
+  automatically.
+- Under Codex the target is the CLI TUI. If the skill is called from the desktop app or an IDE, configure
+  future CLI sessions and say clearly that the footer does not appear in the current interface.
 
-## Plugin-Root
+## Plugin root
 
-Verwende den vom Router aufgelösten `<plugin-root>`. Setze vor einem Script-Aufruf den echten absoluten
-Pfad ein. Nie fest codieren, denn der Installationspfad trägt die Version.
+Use the `<plugin-root>` resolved by the router. Insert the real absolute path before a script call. Never
+hard-code it, because the installation path carries the version.
 
 ## Claude Code
 
-Claude Code führt einen externen Renderer aus und übergibt Session-JSON über stdin. Der Renderer liest die
-Nutzerwahl aus `~/.qatlas/plugins/statusline.yaml`; seine stabile Kopie ist ausgelieferte Payload, die der
-Nutzer nie bearbeitet.
+Claude Code runs an external renderer and passes session JSON on stdin. The renderer reads the user's choice
+from `~/.qatlas/plugins/statusline.yaml`; its stable copy is shipped payload that the user never edits.
 
-### Einrichten
+### Set up
 
-1. Führe aus: `node "<plugin-root>/scripts/qatlas-statusline-setup-claude.js"`
-2. Sage, dass die Zeile bei der nächsten Interaktion erscheint und eine frühere Claude-Statusline ersetzt.
-3. Frage, ob das Layout passt. Schneidet dynamischer Umbruch Widgets ab oder verhält sich im Terminal
-   schlecht, setze `layout: fixed` in `~/.qatlas/plugins/statusline.yaml`.
+1. Run: `node "<plugin-root>/scripts/qatlas-statusline-setup-claude.js"`
+2. Say that the line appears with the next interaction and replaces an earlier Claude status line.
+3. Ask whether the layout fits. If dynamic wrapping cuts off widgets or behaves badly in the terminal, set
+   `layout: fixed` in `~/.qatlas/plugins/statusline.yaml`.
 
-Das Setup kopiert Renderer und YAML-Runtime nach `~/.qatlas/plugins/`, legt eine fehlende `config.yaml`
-sowie `statusline.yaml` einmalig an und verweist aus `~/.claude/settings.json` mit 60 Sekunden
-Aktualisierungsintervall auf die stabile Kopie. Vorhandene Nutzerkonfigurationen bleiben unverändert.
+The setup copies renderer and YAML runtime to `~/.qatlas/plugins/`, creates a missing `config.yaml` and
+`statusline.yaml` once and points `~/.claude/settings.json` to the stable copy with a refresh interval of 60
+seconds. Existing user configuration stays unchanged. The session start renews the copy whenever a newer
+plugin version runs.
 
 ### Widgets
 
-Die Map `widgets` in `~/.qatlas/plugins/statusline.yaml` ist zugleich Menü und Render-Reihenfolge.
-Ein Widget erscheint bei `on: true`. Neu ausgelieferte, dort fehlende Widgets bleiben ausgeschaltet, bis
-der Nutzer sie ergänzt; bestehende Wahl und Reihenfolge bleiben unverändert.
+The map `widgets` in `~/.qatlas/plugins/statusline.yaml` is menu and render order at once. A widget appears
+with `on: true`. Newly shipped widgets missing there stay off until the user adds them; the existing choice
+and order stay unchanged.
 
 `model` | `thinking` | `dir` | `branch` | `diff` | `out` | `context` | `cost` | `session` |
 `session-reset` | `weekly` | `weekly-reset` | `method`
 
-- Git-Widgets verschwinden außerhalb eines Repos.
-- Nutzungslimits brauchen ein Abonnement und verschwinden bei API-Nutzung. `method` macht den Grund sichtbar.
-- Array- und Boolean-Map-Formen werden akzeptiert und normalisiert. Unbekannte Widget-Namen entfallen.
+- Git widgets disappear outside a repo.
+- Usage limits need a subscription and disappear with API usage. `method` makes the reason visible.
+- Array and boolean map forms are accepted and normalized. Unknown widget names are dropped.
 
-### Farben
+### Colors
 
-Jeder Widget-Teil besitzt `fg` und `bold`. Ein leerer String behält die eingebaute Farbe. Die Standards
-kennen nur zwei Rollen: Labels sind gedimmt, Werte nutzen die Terminal-Vordergrundfarbe. Bedeutungsvolle
-Farben bleiben bei Diff-Zahlen und Balkenschwellen.
+Every widget part has `fg` and `bold`. An empty string keeps the built-in color. The defaults know only two
+roles: labels are dimmed, values use the terminal foreground color. Meaningful colors remain for diff numbers
+and bar thresholds.
 
-Die Erstinstallation schreibt eine Palette für dunkle Terminals als normale Konfiguration. Für hellen
-Hintergrund verwende `<plugin-root>/store/statusline/dual-theme.yaml` als Ausgangspunkt für
-`~/.qatlas/plugins/statusline.yaml`; ein erneutes Setup ist unnötig. Ersetze eine vorhandene Widget-Auswahl
-nur mit Zustimmung des Nutzers.
+The first installation writes a palette for dark terminals as normal configuration. For a light background
+use `<plugin-root>/skills/qatlas-core/assets/statusline-dual-theme.yaml` as the starting point for
+`~/.qatlas/plugins/statusline.yaml`; a new setup is unnecessary. Replace an existing widget choice only with
+the user's consent. The commented field reference is
+`<plugin-root>/skills/qatlas-core/assets/statusline.example.yaml`.
 
-Farben werden in dieser Reihenfolge aufgelöst:
+Colors resolve in this order:
 
-1. Teil des Widgets,
-2. `defaults.label` oder `defaults.value`,
-3. eingebaute Farbe.
+1. part of the widget,
+2. `defaults.label` or `defaults.value`,
+3. built-in color.
 
-`fg` akzeptiert `#rgb`, `#rrggbb`, `rgb(r,g,b)` sowie `dim`, `cyan`, `green`, `yellow`, `blue`, `magenta`,
-`orange`, `red`, `diffgreen` und `diffred`. `bold` wirkt zusätzlich. `NO_COLOR` erzwingt reine Textausgabe.
+`fg` accepts `#rgb`, `#rrggbb`, `rgb(r,g,b)` and `dim`, `cyan`, `green`, `yellow`, `blue`, `magenta`,
+`orange`, `red`, `diffgreen` and `diffred`. `bold` applies in addition. `NO_COLOR` forces plain text.
 
-Balkenschwellen sind aufsteigende Einträge `{ from, fg }`; der zuletzt erreichte gewinnt. Balken, Prozentwert
-und Suffix bilden eine Anzeige und behalten dieselbe Schwellenfarbe, sofern das Widget keinen Teil
-ausdrücklich gestaltet. Der Kontextbalken bezieht sich auf das aktive Modellfenster, Nutzungsbalken auf ihre
-Limits.
+Bar thresholds are ascending entries `{ from, fg }`; the last one reached wins. Bar, percentage and suffix
+form one display and keep the same threshold color unless the widget styles a part explicitly. The context
+bar refers to the active model window, usage bars to their limits.
 
-### Argumente und Layout
+### Arguments and layout
 
-Bei Wünschen wie `disable out, weekly-reset`, `enable method`, `put cost first`, `make cost green` oder
-`dim all labels` bearbeite ausschließlich `~/.qatlas/plugins/statusline.yaml`. Schalte `on`, verschiebe
-einen Widget-Block oder ändere den Stil seiner Teile. Führe das Setup nicht erneut aus.
+For wishes such as `disable out, weekly-reset`, `enable method`, `put cost first`, `make cost green` or
+`dim all labels`, edit only `~/.qatlas/plugins/statusline.yaml`. Switch `on`, move a widget block or change
+the style of its parts. Do not run the setup again.
 
-- `wrap` ist Standard. Widgets fließen von links nach rechts und brechen bei Bedarf um.
-- `fixed` nutzt vier Zeilen: model/thinking/dir; branch/diff; out/context/cost; Limits und method.
-- `separator.text` bestimmt den Text zwischen Widgets.
+- `wrap` is the default. Widgets flow from left to right and wrap when needed.
+- `fixed` uses four lines: model/thinking/dir; branch/diff; out/context/cost; limits and method.
+- `separator.text` sets the text between widgets.
 
 ## Codex CLI
 
-Codex besitzt Renderer und feste native Felder. Quelle ist die Tabelle `[tui]` in
-`$CODEX_HOME/config.toml`, mit Fallback auf `~/.codex/config.toml`. Erzeuge keinen Codex-Renderer und spiegle
-diese Wahl nicht nach `~/.qatlas/plugins/statusline.yaml`.
+Codex owns the renderer and fixed native fields. The source is the table `[tui]` in
+`$CODEX_HOME/config.toml`, falling back to `~/.codex/config.toml`. Create no Codex renderer and do not mirror
+this choice into `~/.qatlas/plugins/statusline.yaml`.
 
-### Einrichten
+### Set up
 
-Führe aus: `node "<plugin-root>/scripts/qatlas-statusline-setup-codex.js"`
+Run: `node "<plugin-root>/scripts/qatlas-statusline-setup-codex.js"`
 
-Das Script ersetzt nur `tui.status_line` und `tui.status_line_use_colors`, bewahrt alle anderen Werte und
-Kommentare und lehnt doppelte oder gemischte TOML-Definitionen ab. Das Qatlas-Preset lautet:
+The script replaces only `tui.status_line` and `tui.status_line_use_colors`, keeps all other values and
+comments and rejects duplicate or mixed TOML definitions. The Qatlas preset is:
 
 `model-with-reasoning` | `project-name` | `git-branch` | `branch-changes` | `context-used` | `used-tokens` |
 `five-hour-limit` | `weekly-limit` | `permissions` | `approval-mode` | `context-window-size`
 
-Bitte den Nutzer nach dem Setup um eine neue Codex-CLI-Session. Der native Picker `/statusline` ist die
-maßgebliche Oberfläche zum interaktiven Anzeigen, Umschalten und Sortieren der Felder.
+Ask the user for a new Codex CLI session after the setup. The native picker `/statusline` is the
+authoritative interface for showing, switching and ordering the fields interactively.
 
-### Native Unterschiede
+### Native differences
 
-- `branch-changes` zählt committete Änderungen gegen den Standardbranch. Es ist nicht Claudes uncommitteter
-  Diff plus Zustand wie `Änderungen vorhanden`, `Push nötig` oder `aktuell`.
-- Tokenzähler gelten kumulativ für die Session, nicht nur für Claudes letzten `out`-Wert.
-- Codex zeigt Kontext und primäre/sekundäre Nutzungslimits, aber nicht Kosten, Reset-Countdown, Methode oder
-  die entsprechenden Qatlas-Widgets.
-- Codex bestimmt Layout und Trenner. Farben kommen als eine native Einstellung aus dem aktiven Theme; es
-  gibt keine Qatlas-Palette pro Widget.
+- `branch-changes` counts committed changes against the default branch. It is not Claude's uncommitted diff
+  plus a state such as changes present, push needed or up to date.
+- Token counters are cumulative for the session, not only Claude's last `out` value.
+- Codex shows context and primary/secondary usage limits, but not cost, reset countdown, method or the
+  matching Qatlas widgets.
+- Codex sets layout and separator. Colors come as one native setting from the active theme; there is no
+  Qatlas palette per widget.
 
-### Argumente
+### Arguments
 
-Übersetze Änderungen in die nativen Optionen des Setup-Scripts:
+Translate changes into the native options of the setup script:
 
 - `--enable item[,item]`
 - `--disable item[,item]`
 - `--colors on|off`
-- `--defaults` stellt das Qatlas-Preset wieder her
+- `--defaults` restores the Qatlas preset
 
-Ohne `--defaults` beginnt das Script beim Aktivieren oder Deaktivieren mit der vorhandenen nativen Liste.
-Erkennt es ein natives Feld nicht, verweise auf `/statusline`, statt eine Kennung zu raten. Fordert ein
-Argument Kosten, Reset-Timer, Methode, Farben pro Widget, Trenner oder Umbruch, melde genau diese unter Codex
-nicht unterstützte Claude-Funktion.
+Without `--defaults`, the script starts from the existing native list when enabling or disabling. If it does
+not recognize a native field, point to `/statusline` instead of guessing an identifier. If an argument asks
+for cost, reset timers, method, colors per widget, separator or wrapping, report exactly this Claude function
+as unsupported under Codex.
