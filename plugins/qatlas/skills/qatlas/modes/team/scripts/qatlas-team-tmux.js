@@ -24,8 +24,10 @@
 // from seq on and the new `cursor` (count of all events); every consumer keeps its own cursor and passes it
 // as --since on the next call, so the events of the other role cost nothing. Handover reports are stored as
 // files under reports/ and events carry only their path. A handover report with YAML frontmatter
-// is validated before any tmux access. Checks mode (none of pr-title, pr-body, last, base, pr, head, pushed,
-// cut-exception): requires branch and checks, no cut rule. PR mode (any of those): pr-title, pr-body, branch,
+// is validated before it sets a new or changed signal; a repeated call with the unchanged report only waits
+// for or picks up the answer and does not validate again, so the answer survives removal of branch and
+// worktree. Checks mode (none of pr-title, pr-body, last, base, pr, head, pushed, cut-exception):
+// requires branch and checks, no cut rule. PR mode (any of those): pr-title, pr-body, branch,
 // base, last, optional cut-exception and checks. checks is a non-empty list of {command, exit, tree}; every
 // tree must equal the tree of the handed-over state (head with pr, else branch); a red exit is allowed.
 // In PR mode the branch must carry exactly one non-merge commit over the base, unless cut-exception names a reason.
@@ -750,10 +752,25 @@ async function wait() {
   }
 }
 
+// True if the call would set a new or changed signal. Same signal: a question with the same text, a handover
+// of the same task; a changed report replaces the open one only while no answer exists.
+function setsSignal(repo, pane, kind, text, task) {
+  const same = option(pane, '@qatlas-kind') === kind && (kind === 'handover' ? option(pane, '@qatlas-task') === task : option(pane, '@qatlas-text') === text);
+  return !same || (option(pane, '@qatlas-text') !== text && pendingAnswer(repo, pane) === null);
+}
+
+// Without a reachable pane the handover is validated, so the rejection stays independent of tmux.
+function handoverNeedsValidation(text, task) {
+  if (flag('--role') !== null) return true;
+  const repo = repoKey();
+  try {
+    const hit = allPanes(repo).find(p => p.package === flag('--package') && p.role !== 'integrator');
+    return !hit || setsSignal(repo, hit.pane, 'handover', text, task);
+  } catch { return true; }
+}
+
 // A repeated call with the same signal keeps waiting and never discards an answer that has arrived
-// meanwhile. Same signal: a question with the same text, a handover of the same task. A changed report
-// replaces the open one only while no answer exists. At most one open signal per pane; an open signal of
-// the other kind is an error.
+// meanwhile. At most one open signal per pane; an open signal of the other kind is an error.
 async function raise(kind, text, task) {
   const repo = repoKey();
   if (kind === 'handover' && flag('--role') !== null) fail('Only a lead hands over; the integrator integrates.', 2);
@@ -762,8 +779,7 @@ async function raise(kind, text, task) {
   const title = option(pane, '@qatlas-title') || option(pane, 'pane_title');
   const open = option(pane, '@qatlas-kind');
   if (open && open !== kind) fail(`Pane ${pane} already has an open signal (${open}).`);
-  const same = open === kind && (kind === 'handover' ? option(pane, '@qatlas-task') === task : option(pane, '@qatlas-text') === text);
-  const changed = !same || (option(pane, '@qatlas-text') !== text && pendingAnswer(repo, pane) === null);
+  const changed = setsSignal(repo, pane, kind, text, task);
   if (changed) {
     setOption(pane, '@qatlas-kind', kind);
     setOption(pane, '@qatlas-text', text);
@@ -1070,7 +1086,7 @@ try {
   else if (command === 'title') title();
   else if (command === 'wait') wait().catch(error => fail(error.message));
   else if (command === 'ask') raise('question', need('--question')[0]).catch(error => fail(error.message));
-  else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); validateHandover(text, codeRepo(repoKey())); raise('handover', text, task).catch(error => fail(error.message)); }
+  else if (command === 'handover') { const [task] = need('--task'); const text = reportText(); if (handoverNeedsValidation(text, task)) validateHandover(text, codeRepo(repoKey())); raise('handover', text, task).catch(error => fail(error.message)); }
   else if (command === 'cut') cut(codeRepo(repoKey()));
   else if (command === 'answer') answer();
   else if (command === 'log') logEvent();

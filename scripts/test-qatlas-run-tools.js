@@ -1212,6 +1212,84 @@ try {
     if (socketPathSwitch) fs.rmSync(socketPathSwitch, { force: true });
   }
 
+  // Handover validation timing: only a new or changed report is validated; a repeated call with the unchanged
+  // report delivers the answer even after the branch is gone. Own tmux server.
+  const sockVal = `qatlas-test-val-${process.pid}`;
+  const tmVal = (...args) => execFileSync('tmux', ['-L', sockVal, ...args], { encoding: 'utf8' }).trim();
+  let socketPathVal = null;
+  try {
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'val-')));
+    tmVal('new-session', '-d', '-x', '80', '-y', '24', '-s', 'base', 'sleep 300');
+    socketPathVal = tmVal('display', '-p', '#{socket_path}');
+    const venv = { ...process.env, TMUX: `${socketPathVal},1,0` };
+    const run = (...args) => spawnSync(process.execPath, [team, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8', env: venv });
+    const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
+    const log = () => { try { return fs.readFileSync(path.join(repo, '.qatlas', 'local', 'team', 'events.jsonl'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)); } catch { return []; } };
+    const common = ['--label', 'w', '--title', 't', '--cwd', repo];
+    const hand = (code, pkg, file, timeout = '0.01') => run('handover', '--code-repo', code.repo, '--package', pkg, '--task', 'tv', '--report', file, '--timeout', timeout);
+    const pane = pkg => ok('list').panes.find(x => x.package === pkg);
+    const handovers = pkg => log().filter(e => e.type === 'handover' && e.package === pkg).length;
+    const removeBranch = code => { git(code.repo, 'checkout', '-q', 'main'); git(code.repo, 'merge', '-q', '--ff-only', 'task'); git(code.repo, 'branch', '-q', '-D', 'task'); };
+    const prReport = (code, tag) => { const f = path.join(repo, `val-${tag}.md`);
+      write(f, `---\nbranch: task\nbase: main\npr-title: "feat: add b"\npr-body: x\nlast: true\npr: 16\nhead: ${code.sha}\npushed: ${code.sha}\n---\n${tag}\n`); return f; };
+    for (const pkg of ['a', 'b', 'c', 'd', 'e']) ok('add', '--package', pkg, ...common, '--', 'sleep', '300');
+
+    // Plain frontmatter and PR frontmatter: the answer arrives after fast-forward and branch deletion.
+    for (const [pkg, mk] of [['a', code => code.report], ['b', code => prReport(code, 'pr')]]) {
+      const code = setup(`val-${pkg}`);
+      const file = mk(code);
+      assert.strictEqual(hand(code, pkg, file).status, 0);
+      removeBranch(code);
+      assert.strictEqual(git(code.repo, "branch", "--list", "task"), "");
+      ok('answer', '--package', pkg, '--answer', `integrated ${code.sha}`);
+      const res = hand(code, pkg, file, '5');
+      assert.strictEqual(res.status, 0, res.stderr);
+      assert.strictEqual(JSON.parse(res.stdout).answer, `integrated ${code.sha}`);
+      assert.strictEqual(pane(pkg).kind, undefined);
+      if (pkg === 'a') {
+        // After picked the next handover of the task is validated again.
+        const again = hand(code, pkg, file);
+        assert.strictEqual(again.status, 2);
+        assert.match(again.stderr, /does not resolve to a commit/);
+        assert.strictEqual(pane(pkg).kind, undefined);
+        assert.strictEqual(handovers(pkg), 1);
+      }
+    }
+
+    // A new report with two commits is rejected without signal and event.
+    const bad = setup('val-c', { extra: ['d.txt'] });
+    let res = hand(bad, 'c', bad.report);
+    assert.strictEqual(res.status, 2);
+    assert.match(res.stderr, /non-merge commits over main/);
+    assert.strictEqual(pane('c').kind, undefined);
+    assert.strictEqual(handovers('c'), 0);
+
+    // A changed report without a pending answer is validated; the rejection leaves the open signal as it was.
+    const good = setup('val-d');
+    assert.strictEqual(hand(good, 'd', good.report).status, 0);
+    const changed = path.join(repo, 'val-d-changed.md');
+    write(changed, fs.readFileSync(good.report, 'utf8').replace('last: true', 'last: true\ncut-exception: ""'));
+    res = hand(good, 'd', changed);
+    assert.strictEqual(res.status, 2);
+    assert.strictEqual(pane('d').kind, 'handover');
+    assert.strictEqual(handovers('d'), 1);
+
+    // A changed report with a pending answer delivers the answer, also with the branch gone.
+    const kept = setup('val-e');
+    assert.strictEqual(hand(kept, 'e', kept.report).status, 0);
+    removeBranch(kept);
+    ok('answer', '--package', 'e', '--answer', 'rework fix it');
+    const other = path.join(repo, 'val-e-changed.md');
+    write(other, fs.readFileSync(kept.report, 'utf8') + 'more\n');
+    res = hand(kept, 'e', other, '5');
+    assert.strictEqual(res.status, 0, res.stderr);
+    assert.strictEqual(JSON.parse(res.stdout).answer, 'rework fix it');
+    assert.strictEqual(handovers('e'), 1);
+  } finally {
+    try { tmVal('kill-server'); } catch { /* already gone */ }
+    if (socketPathVal) fs.rmSync(socketPathVal, { force: true });
+  }
+
   // Statusline renderer: stores the context state without changing its output.
   {
     const render = path.join(skill, '..', '..', 'scripts', 'qatlas-statusline-render-claude.js');

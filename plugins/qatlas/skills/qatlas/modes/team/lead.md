@@ -56,9 +56,10 @@ separate pull requests before you hand over. With pull request fields, `handover
 than one non-merge commit over `base`, for a pull request up to `pushed` (CI fixes after it are allowed;
 exit 2, nothing raised) unless the frontmatter carries `cut-exception: <reason>`. The answer is
 `integrated <sha>` or `rework <reason>`; without an answer, call the same command again with the report
-unchanged. Until the answer arrives, task, branches and worktree
-belong to the integrator; do not touch them. `rework` gives them back to you: work on the reason and hand
-over again. `integrated` on a handover that is not the last gives you the task back to continue.
+unchanged; the answer is delivered even after the integrator has removed branch and worktree. Until the
+answer arrives, task, branches and worktree belong to the integrator; do not touch them. `rework` gives them
+back to you: work on the reason and hand over again. `integrated` on a handover that is not the last gives
+you the task back to continue.
 
 If the next task depends on the handed-over one, wait for `integrated` and start it from the new `<basis>`.
 You may begin a demonstrably independent task of this package during the wait from the current `<basis>`;
