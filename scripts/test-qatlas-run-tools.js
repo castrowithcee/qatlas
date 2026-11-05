@@ -184,11 +184,12 @@ function testSlotResults() {
   const tree = git('rev-parse', 'HEAD^{tree}');
   let list = results();
   assert.strictEqual(list.length, 1);
-  assert.deepStrictEqual(Object.keys(list[0]).sort(), ['command', 'cwd', 'duration', 'exit', 'resource', 'time', 'tree']);
+  assert.deepStrictEqual(Object.keys(list[0]).sort(), ['command', 'cwd', 'duration', 'exit', 'inputs', 'resource', 'time', 'tree']);
   assert.strictEqual(list[0].tree, tree);
   assert.strictEqual(list[0].cwd, '.');
   assert.strictEqual(list[0].resource, null);
   assert.strictEqual(list[0].exit, 0);
+  assert.deepStrictEqual(list[0].inputs, []);
   r = slot([], mark(0));
   assert.strictEqual(r.status, 0, r.stderr);
   assert.strictEqual(count(), 1, 'second call ran again');
@@ -271,6 +272,94 @@ function testSlotResults() {
   assert.strictEqual(sub('results', '--clear').status, 0);
   assert.strictEqual(slot([], mark(0)).status, 0);
   assert.strictEqual(count(), 13);
+
+  // Unversioned inputs: content enters the key; ignored or untracked inputs do not dirty the worktree.
+  fs.writeFileSync(path.join(repo, '.gitignore'), '.env\nmods/\n');
+  git('add', '.gitignore');
+  git('commit', '-q', '-m', 'ignore');
+  fs.writeFileSync(path.join(repo, '.env'), 'A=1\n');
+  fs.mkdirSync(path.join(repo, 'mods', 'p'), { recursive: true });
+  fs.writeFileSync(path.join(repo, 'mods', 'p', 'x.js'), '1');
+  fs.writeFileSync(path.join(repo, 'mods', 'y.js'), '1');
+  fs.symlinkSync(os.tmpdir(), path.join(repo, 'mods', 'escape'));
+  assert.strictEqual(sub('results', '--clear').status, 0);
+  let base = count();
+  const ran = (flags, expected, what) => {
+    const res = slot(flags, mark(0));
+    assert.strictEqual(res.status, 0, res.stderr);
+    base += expected;
+    assert.strictEqual(count(), base, what);
+  };
+  ran(['--input', '.env'], 1, 'first run');
+  ran(['--input', '.env'], 0, 'unchanged input reused');
+  assert.deepStrictEqual(results()[0].inputs, ['.env']);
+  assert.ok(!JSON.stringify(results()).includes('A=1'), 'record holds content');
+  fs.writeFileSync(path.join(repo, '.env'), 'A=2\n');
+  ran(['--input', '.env'], 1, 'changed input reused');
+  ran(['--input', path.join(repo, '.env')], 0, 'absolute path is another key');
+  ran(['--input', 'mods'], 1, 'directory first run');
+  ran(['--input', 'mods'], 0, 'directory unchanged reused');
+  fs.writeFileSync(path.join(repo, 'mods', 'p', 'x.js'), '2');
+  ran(['--input', 'mods'], 1, 'changed file in directory reused');
+  ran(['--input', 'mods'], 0, 'directory reuse after change');
+
+  // Order does not matter; a missing input is no error.
+  ran(['--input', '.env', '--input', 'mods'], 1, 'two inputs first');
+  ran(['--input', 'mods', '--input', '.env'], 0, 'swapped order is another key');
+  assert.deepStrictEqual(results().find(x => x.inputs.length === 2).inputs, ['.env', 'mods']);
+  ran(['--input', 'nothing.txt'], 1, 'missing input');
+  ran(['--input', 'nothing.txt'], 0, 'missing input reuse');
+
+  // Inputs outside the worktree are rejected.
+  for (const bad of ['../outside', os.tmpdir(), 'mods/escape', 'mods/../../x', '.']) {
+    assert.strictEqual(slot(['--input', bad], mark(0)).status, 2, bad);
+  }
+  assert.strictEqual(count(), base);
+
+  // A non-named untracked file still makes the worktree dirty.
+  fs.writeFileSync(path.join(repo, 'stray.txt'), 'x\n');
+  ran(['--input', '.env'], 1, 'stray file did not dirty the worktree');
+  fs.writeFileSync(path.join(repo, 'extra-input.txt'), 'x\n');
+  ran(['--input', 'stray.txt', '--input', 'extra-input.txt'], 1, 'named untracked inputs ran');
+  ran(['--input', 'stray.txt', '--input', 'extra-input.txt'], 0, 'named untracked inputs not reused');
+  fs.rmSync(path.join(repo, 'stray.txt'));
+  fs.rmSync(path.join(repo, 'extra-input.txt'));
+
+  // Validity: --max-age shortens it, the default stays 24 hours; invalid values exit 2.
+  const dir2 = path.join(repo, '.qatlas', 'local', 'slots', 'results');
+  const age = hours => {
+    for (const file of fs.readdirSync(dir2)) {
+      const full = path.join(dir2, file);
+      const record = JSON.parse(fs.readFileSync(full, 'utf8'));
+      record.time = new Date(Date.now() - hours * 3600 * 1000).toISOString();
+      fs.writeFileSync(full, JSON.stringify(record));
+    }
+  };
+  assert.strictEqual(sub('results', '--clear').status, 0);
+  ran([], 1, 'age first');
+  age(2);
+  assert.strictEqual(results().length, 1, 'default validity');
+  assert.deepStrictEqual(results('--max-age', '1'), []);
+  assert.strictEqual(results('--max-age', '3').length, 1);
+  ran([], 0, 'valid at 2 hours');
+  ran(['--max-age', '1'], 1, 'expired by --max-age reused');
+  ran(['--max-age', '1'], 0, 'fresh record reused');
+  for (const bad of ['0', 'x', '-1']) {
+    assert.strictEqual(slot(['--max-age', bad], mark(0)).status, 2, bad);
+    assert.strictEqual(sub('results', '--max-age', bad).status, 2, bad);
+  }
+  assert.strictEqual(count(), base);
+
+  // A writing run removes records older than the larger of 24 hours and --max-age.
+  age(25);
+  assert.ok(fs.readdirSync(dir2).length > 0);
+  ran(['--input', 'nothing.txt'], 1, 'cleanup trigger');
+  assert.strictEqual(fs.readdirSync(dir2).filter(f => f.endsWith('.json')).length, 1, 'old records not removed');
+  age(30);
+  ran(['--input', 'other-missing'], 1, 'cleanup trigger 2');
+  age(30);
+  ran(['--input', 'third-missing', '--max-age', '48'], 1, 'cleanup trigger 3');
+  assert.strictEqual(fs.readdirSync(dir2).filter(f => f.endsWith('.json')).length, 2, 'cleanup ignored --max-age');
 }
 
 function testSlotQueues() {

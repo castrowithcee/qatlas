@@ -66,9 +66,10 @@ stay unchanged.
 
 ### Colors
 
-Every widget part has `fg` and `bold`. An empty string keeps the built-in color. The defaults know only two
-roles: labels are dimmed, values use the terminal foreground color. Meaningful colors remain for diff numbers
-and bar thresholds.
+Every widget part has `fg` and `bold`. An empty string keeps the built-in color. `label.on: false` hides a
+widget's label, `defaults.label.on: false` hides every label that its widget does not switch on again. The
+defaults know only two roles: labels are dimmed, values use the terminal foreground color. Meaningful colors
+remain for diff numbers and bar thresholds.
 
 The shipped palette suits dark terminals. For a light background copy
 `<plugin-root>/skills/qatlas-core/assets/statusline-dual-theme.yaml` to `~/.qatlas/plugins/statusline.yaml`
@@ -91,10 +92,10 @@ bar refers to the active model window, usage bars to their limits.
 
 ### Arguments and layout
 
-For wishes such as `disable out, weekly-reset`, `enable method`, `put cost first`, `make cost green` or
-`dim all labels`, write only the deviation into `~/.qatlas/plugins/statusline.yaml` and create the file with
-`format: 1` if it is missing. Switch `on`, move a widget block or change the style of its parts. Do not run
-the setup again.
+For wishes such as `disable out, weekly-reset`, `enable method`, `put cost first`, `make cost green`,
+`dim all labels` or `hide all labels`, write only the deviation into `~/.qatlas/plugins/statusline.yaml` and
+create the file with `format: 1` if it is missing. Switch `on`, move a widget block or change the style of
+its parts. Do not run the setup again.
 
 - `wrap` is the default. Widgets flow from left to right and wrap when needed.
 - `fixed` uses four lines: model/thinking/dir; branch/diff; out/context/cost; limits and method.
@@ -129,7 +130,7 @@ left empty. Ask for a new Codex CLI session afterwards.
 ### Native differences
 
 - `branch-changes` counts committed changes against the default branch. It is not Claude's uncommitted diff
-  plus a state such as changes present, push needed or up to date.
+  plus a state such as `dirty`, `push` or `synced`.
 - Token counters are cumulative for the session, not only Claude's last `out` value.
 - Codex shows context and primary/secondary usage limits, but not cost, reset countdown, method or the
   matching Qatlas widgets.

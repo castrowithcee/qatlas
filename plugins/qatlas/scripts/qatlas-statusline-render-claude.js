@@ -99,8 +99,16 @@ function styleFor(name, p) {
     return fg + (ansi(own.bg, true) || ansi(glob.bg, true)) + (own.bold === true || glob.bold === true ? C.bold : '');
 }
 
+// Label visibility: widget label.on, then defaults.label.on, then shown.
+function labelOn(name) {
+    const own = (cfg.widgets[name] || {}).label;
+    if (own && typeof own.on === 'boolean') return own.on;
+    return cfg.defaults.label.on !== false;
+}
+
 function build(name, parts) {
-    const list = parts.filter(p => p.text);
+    const show = labelOn(name);
+    const list = parts.filter(p => p.text && (show || p.part !== 'label'));
     const plain = list.map(p => p.text).join('');
     if (noColor) return { plain, colored: plain };
     return { plain, colored: list.map(p => paint(p.text, styleFor(name, p))).join('') };
@@ -141,7 +149,7 @@ function hms(epochSec, withDays) {
     let s = epochSec - Math.floor(Date.now() / 1000);
     if (s < 0) s = 0;
     const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
-    return withDays ? `${d}T ${h}Std ${m}Min` : `${Math.floor(s / 3600)}Std ${m}Min`;
+    return withDays ? `${d}d ${h}h ${m}m` : `${Math.floor(s / 3600)}h ${m}m`;
 }
 
 // Cache git info per session for five seconds.
@@ -169,16 +177,16 @@ function gitInfo(d) {
         }
         const dirty = run(cwd, 'git --no-optional-locks status --porcelain');
         let sync;
-        if (dirty && dirty.trim() !== '') sync = 'Änderungen vorhanden';
+        if (dirty && dirty.trim() !== '') sync = 'dirty';
         else {
             const counts = run(cwd, 'git --no-optional-locks rev-list --left-right --count HEAD...@{u}');
-            if (counts === null) sync = 'kein Upstream';
+            if (counts === null) sync = 'no upstream';
             else {
                 const [ahead, behind] = counts.split(/\s+/).map(Number);
-                if (ahead > 0 && behind > 0) sync = 'divergiert';
-                else if (ahead > 0) sync = 'Push nötig';
-                else if (behind > 0) sync = 'Pull nötig';
-                else sync = 'aktuell';
+                if (ahead > 0 && behind > 0) sync = 'diverged';
+                else if (ahead > 0) sync = 'push';
+                else if (behind > 0) sync = 'pull';
+                else sync = 'synced';
             }
         }
         info = { branch, add, del, sync };
@@ -200,15 +208,15 @@ function contextTokens(d) {
 const WIDGETS = {
     model: (d) => {
         const m = d.model && (d.model.display_name || d.model.id);
-        return m ? lv('model', 'Modell', m.replace(/\s*\(.*\)$/, ''), C.dim, '') : null;
+        return m ? lv('model', 'Model', m.replace(/\s*\(.*\)$/, ''), C.dim, '') : null;
     },
     thinking: (d) => {
         const e = d.effort && d.effort.level;
-        return e ? lv('thinking', 'Denken', e, C.dim, '') : null;
+        return e ? lv('thinking', 'Think', e, C.dim, '') : null;
     },
     dir: (d) => {
         const cwd = (d.workspace && d.workspace.current_dir) || d.cwd;
-        return cwd ? lv('dir', 'Ordner', path.basename(cwd), C.dim, '') : null;
+        return cwd ? lv('dir', 'Dir', path.basename(cwd), C.dim, '') : null;
     },
     branch: (d, g) => (g && g.branch) ? lv('branch', 'Branch', '⎎ ' + g.branch, C.dim, '') : null,
     diff: (d, g) => g ? build('diff', [
@@ -219,17 +227,17 @@ const WIDGETS = {
     ]) : null,
     out: (d) => {
         const o = d.context_window && d.context_window.total_output_tokens;
-        return o != null ? lv('out', 'Ausgabe', k(o), C.dim, '') : null;
+        return o != null ? lv('out', 'Out', k(o), C.dim, '') : null;
     },
     context: (d) => {
         const tok = contextTokens(d);
         const size = (d.context_window || {}).context_window_size;
         if (tok == null || !size) return null;
-        return barSeg('context', 'Eingabe', Math.round(100 * tok / size), `(${k(tok)}/${k(size)})`);
+        return barSeg('context', 'Ctx', Math.round(100 * tok / size), `(${k(tok)}/${k(size)})`);
     },
     cost: (d) => {
         const c = d.cost && d.cost.total_cost_usd;
-        return c != null ? lv('cost', 'Kosten', '💰$' + Number(c).toFixed(2), C.dim, '') : null;
+        return c != null ? lv('cost', 'Costs', '💰$' + Number(c).toFixed(2), C.dim, '') : null;
     },
     session: (d) => {
         const r = d.rate_limits && d.rate_limits.five_hour;
@@ -241,13 +249,13 @@ const WIDGETS = {
     },
     weekly: (d) => {
         const r = d.rate_limits && d.rate_limits.seven_day;
-        return r && r.used_percentage != null ? barSeg('weekly', 'Woche', Math.round(r.used_percentage)) : null;
+        return r && r.used_percentage != null ? barSeg('weekly', 'Week', Math.round(r.used_percentage)) : null;
     },
     'weekly-reset': (d) => {
         const r = d.rate_limits && d.rate_limits.seven_day && d.rate_limits.seven_day.resets_at;
-        return r != null ? lv('weekly-reset', 'Wochen-Reset', hms(r, true), C.dim, '') : null;
+        return r != null ? lv('weekly-reset', 'Week-Reset', hms(r, true), C.dim, '') : null;
     },
-    method: (d) => lv('method', 'Methode', d.rate_limits ? 'Abo' : 'API', C.dim, '')
+    method: (d) => lv('method', 'Method', d.rate_limits ? 'Sub' : 'API', C.dim, '')
 };
 
 // qatlas-update.js keeps this marker while a project check is pending; it is not a configurable widget.

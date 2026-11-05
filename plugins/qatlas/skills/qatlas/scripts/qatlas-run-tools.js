@@ -50,18 +50,27 @@
 //     Like slot, but runs the command under a named exclusive resource (capacity 1) instead of a test
 //     slot, e.g. one e2e suite at a time. Each resource has its own queue; it does not occupy a test slot
 //     and ignores --slots. <name> matches [a-z0-9][a-z0-9-]*, else exit 2.
-//   qatlas-run-tools.js slot [--no-cache] ... -- <command> [args...]
+//   qatlas-run-tools.js slot [--no-cache] [--max-age <hours>] [--input <path>]... ... -- <command> [args...]
 //     Green results are reused: in a clean worktree (git status --porcelain --untracked-files=all empty,
-//     apart from the slot store itself) an
-//     exit-0 run is stored under the repo-wide slot store, keyed by the HEAD tree, the working directory
-//     relative to the worktree root, the command and the resource. The same key within 24 hours is not run
-//     again: one stderr line names the origin and the exit code is 0, without taking a slot or resource.
-//     A dirty worktree neither reads nor writes records, and neither does a run during which HEAD moved or
-//     that fails. --no-cache always runs the command (and still records a green run).
-//     Dependencies, environment and ignored files are not part of the key.
-//   qatlas-run-tools.js slot [--tree <sha>] [--repo <path>] results
-//     Read-only: the valid records (younger than 24 hours) as {"results":[{command,cwd,resource,exit,tree,
-//     time,duration}]}, filtered by --tree (full or abbreviated, at least 7 characters) if given.
+//     apart from the slot store and the --input paths) an exit-0 run is stored under the repo-wide slot
+//     store, keyed by the HEAD tree, the working directory relative to the worktree root, the command, the
+//     resource and the content of every --input. The same key within the validity (default 24 hours,
+//     --max-age <hours> as a positive number, else exit 2) is not run again: one stderr line names the
+//     origin and the exit code is 0, without taking a slot or resource. A dirty worktree neither reads nor
+//     writes records, and neither does a run during which HEAD or an input changed, or that fails.
+//     --no-cache always runs the command (and still records a green run).
+//     --input <path> (repeatable; relative to the worktree root or absolute) names a file or directory that
+//     git does not version but the command depends on, e.g. .env or node_modules: a file enters the key by
+//     its content hash, a directory by a hash over its files (symlinks inside are not followed). A missing
+//     input enters as missing. The order of the inputs does not matter, and a named input does not make the
+//     worktree dirty. A path that resolves outside the worktree, or is the root itself, exits 2.
+//     Dependencies, environment and ignored files that are not named are not part of the key.
+//     Every run that writes a record first removes the records older than the larger of 24 hours and
+//     --max-age; cleanup errors are ignored.
+//   qatlas-run-tools.js slot [--tree <sha>] [--max-age <hours>] [--repo <path>] results
+//     Read-only: the valid records (younger than 24 hours, or --max-age) as {"results":[{command,cwd,
+//     resource,exit,tree,inputs,time,duration}]}, inputs being the named paths (empty if none), filtered by
+//     --tree (full or abbreviated, at least 7 characters) if given.
 //   qatlas-run-tools.js slot [--repo <path>] results --clear
 //     Removes all records of the store. Exit 0, also without any.
 
@@ -405,12 +414,14 @@ function slotStatus() {
   out({ slots, busy, waiting: waiters(path.join(dir, 'queue')), resources });
 }
 
-const RESULT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+const RESULT_MAX_AGE_MS = 24 * HOUR_MS;
+const maxAgeMs = () => number('--max-age', 24) * HOUR_MS;
 const resultsDir = dir => path.join(dir, 'results');
 
 // State of the worktree holding the working directory; null if it cannot be read (no repo, no commit).
 // The slot store itself does not count as dirt: in the primary working tree it lies inside the worktree.
-function worktreeState(store) {
+function worktreeState(store, inputs = []) {
   try {
     const cwd = fs.realpathSync(process.cwd());
     const g = args => execFileSync('git', ['-C', cwd, ...args],
@@ -423,24 +434,104 @@ function worktreeState(store) {
     const exclude = inside && !inside.startsWith('..') && !path.isAbsolute(inside)
       ? [`:(exclude,top)${inside.split(path.sep).join('/')}`] : [];
     return {
-      clean: g(['status', '--porcelain', '--untracked-files=all', '--', ':/', ...exclude]) === '',
+      clean: g(['status', '--porcelain', '--untracked-files=all', '--', ':/', ...exclude,
+        ...inputs.map(input => `:(exclude,top,literal)${input.rel}`)]) === '',
       head: g(['rev-parse', 'HEAD']),
       tree: g(['rev-parse', 'HEAD^{tree}']),
       cwd: path.relative(top, cwd) || '.',
+      inputs: inputs.map(input => [input.rel, hashInput(input.real)]),
     };
   } catch { return null; }
 }
-const resultKey = (state, resource) => JSON.stringify({ tree: state.tree, cwd: state.cwd, command: rest, resource });
+const resultKey = (state, resource) => JSON.stringify(
+  { tree: state.tree, cwd: state.cwd, command: rest, resource, inputs: state.inputs });
 const resultFile = (dir, key) => path.join(resultsDir(dir), crypto.createHash('sha256').update(key).digest('hex') + '.json');
 
-function readResults(dir) {
-  return listDir(resultsDir(dir)).filter(entry => entry.endsWith('.json')).flatMap(entry => {
-    try {
-      const record = JSON.parse(fs.readFileSync(path.join(resultsDir(dir), entry), 'utf8'));
-      const age = Date.now() - Date.parse(record.time);
-      return record.exit === 0 && typeof record.tree === 'string' && age <= RESULT_MAX_AGE_MS ? [record] : [];
-    } catch { return []; }
-  });
+function worktreeTop() {
+  try {
+    const cwd = fs.realpathSync(process.cwd());
+    return fs.realpathSync(execFileSync('git', ['-C', cwd, 'rev-parse', '--show-toplevel'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim());
+  } catch { return null; }
+}
+
+// --input values as {rel, real}, sorted and unique. Symlinks and .. are resolved before the containment check.
+function resolveInputs(top) {
+  const raw = [];
+  opts.forEach((arg, i) => { if (arg === '--input') raw.push(opts[i + 1] || fail('Missing: value of --input', 2)); });
+  const seen = new Map();
+  for (const value of raw) {
+    let existing = path.resolve(top, value);
+    const tail = [];
+    for (;;) {
+      try { fs.lstatSync(existing); break; } catch {
+        const parent = path.dirname(existing);
+        if (parent === existing) break;
+        tail.unshift(path.basename(existing));
+        existing = parent;
+      }
+    }
+    const real = path.join(fs.realpathSync(existing), ...tail);
+    const rel = path.relative(top, real);
+    if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) {
+      fail(`Invalid: --input ${value} is not inside the worktree`, 2);
+    }
+    seen.set(rel.split(path.sep).join('/'), real);
+  }
+  return [...seen].sort(([a], [b]) => (a < b ? -1 : 1)).map(([rel, real]) => ({ rel, real }));
+}
+
+// Content hash of a file, or of all files below a directory; symlinks inside are hashed by their target text.
+function hashInput(real) {
+  let stat;
+  try { stat = fs.lstatSync(real); } catch { return 'missing'; }
+  const hash = crypto.createHash('sha256');
+  const add = (name, kind, body) => hash.update(`${name}\0${kind}\0${body.length}\0`).update(body);
+  try {
+    if (stat.isFile()) add('', 'f', fs.readFileSync(real));
+    else if (stat.isDirectory()) {
+      const stack = [''];
+      while (stack.length) {
+        const sub = stack.pop();
+        const entries = fs.readdirSync(path.join(real, sub), { withFileTypes: true })
+          .sort((a, b) => (a.name < b.name ? -1 : 1));
+        for (const entry of entries) {
+          const name = sub ? `${sub}/${entry.name}` : entry.name;
+          const full = path.join(real, name);
+          if (entry.isDirectory()) stack.push(name);
+          else if (entry.isSymbolicLink()) add(name, 'l', fs.readlinkSync(full));
+          else if (entry.isFile()) add(name, 'f', fs.readFileSync(full));
+        }
+      }
+    } else return 'other';
+  } catch { return 'unreadable'; }
+  return hash.digest('hex');
+}
+
+function readRecord(file, maxAge) {
+  try {
+    const record = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const age = Date.now() - Date.parse(record.time);
+    return record.exit === 0 && typeof record.tree === 'string' && age <= maxAge ? record : null;
+  } catch { return null; }
+}
+
+function readResults(dir, maxAge) {
+  return listDir(resultsDir(dir)).filter(entry => entry.endsWith('.json'))
+    .flatMap(entry => readRecord(path.join(resultsDir(dir), entry), maxAge) || []);
+}
+
+// Removes records older than maxAge; errors are ignored.
+function cleanResults(dir, maxAge) {
+  try {
+    for (const entry of listDir(resultsDir(dir)).filter(name => name.endsWith('.json'))) {
+      const file = path.join(resultsDir(dir), entry);
+      try {
+        const age = Date.now() - Date.parse(JSON.parse(fs.readFileSync(file, 'utf8')).time);
+        if (age > maxAge) fs.rmSync(file, { force: true });
+      } catch { /* unreadable record: left alone */ }
+    }
+  } catch { /* ignored */ }
 }
 
 function slotResults() {
@@ -451,13 +542,13 @@ function slotResults() {
   }
   const tree = opts.includes('--tree') ? flag('--tree') : null;
   if (tree !== null && !/^[0-9a-f]{7,64}$/i.test(tree || '')) fail('Invalid: --tree needs a tree SHA of at least 7 hex characters', 2);
-  const results = readResults(dir).filter(record => tree === null || record.tree.startsWith(tree.toLowerCase()))
-    .sort((a, b) => a.time.localeCompare(b.time));
+  const results = readResults(dir, maxAgeMs()).filter(record => tree === null || record.tree.startsWith(tree.toLowerCase()))
+    .map(record => ({ ...record, inputs: record.inputs || [] })).sort((a, b) => a.time.localeCompare(b.time));
   out({ results });
 }
 
 function slot() {
-  const valued = ['--slots', '--repo', '--resource', '--tree'];
+  const valued = ['--slots', '--repo', '--resource', '--tree', '--max-age', '--input'];
   const word = name => sep < 0 && opts.some((arg, i) => arg === name && !valued.includes(opts[i - 1]));
   if (word('status')) return slotStatus();
   if (word('results')) return slotResults();
@@ -465,13 +556,15 @@ function slot() {
   const resource = opts.includes('--resource') ? flag('--resource') || '' : null;
   if (resource !== null && !RESOURCE_NAME.test(resource)) fail('Invalid: --resource needs a name matching [a-z0-9][a-z0-9-]*', 2);
   const slots = resource === null ? slotCount() : 1;
+  const maxAge = maxAgeMs();
+  const top = opts.includes('--input') ? worktreeTop() : null;
+  const inputs = top ? resolveInputs(top) : [];
   const dir = slotDir();
   const paths = resource === null ? null : resourcePaths(dir, resource);
 
-  const pre = worktreeState(dir);
+  const pre = worktreeState(dir, inputs);
   if (pre && pre.clean && !opts.includes('--no-cache')) {
-    const hit = readResults(dir).find(record => resultKey(pre, resource) ===
-      JSON.stringify({ tree: record.tree, cwd: record.cwd, command: record.command, resource: record.resource }));
+    const hit = readRecord(resultFile(dir, resultKey(pre, resource)), maxAge);
     if (hit) {
       process.stderr.write(`Reusing green result from ${hit.time} (tree ${hit.tree.slice(0, 7)}): ${rest.join(' ')}\n`);
       return;
@@ -522,7 +615,7 @@ function slot() {
 
   let released = false;
   const release = () => { if (!released) { released = true; fs.rmSync(lock, { recursive: true, force: true }); } };
-  const before = worktreeState(dir);
+  const before = worktreeState(dir, inputs);
   const startedAt = Date.now();
   const child = spawn(rest[0], rest.slice(1), { stdio: 'inherit' });
   let signalled = null;
@@ -531,18 +624,19 @@ function slot() {
   }
   child.on('error', error => { release(); fail('Command could not be started: ' + error.message, 127); });
   const record = () => {
-    const after = worktreeState(dir);
-    if (!before || !before.clean || !after || after.head !== before.head) return;
+    const after = worktreeState(dir, inputs);
+    if (!before || !before.clean || !after || after.head !== before.head || resultKey(after, resource) !== resultKey(before, resource)) return;
     const target = resultFile(dir, resultKey(before, resource));
     const temp = `${target}.${process.pid}.tmp`;
     try {
       fs.mkdirSync(resultsDir(dir), { recursive: true });
       fs.writeFileSync(temp, JSON.stringify({
-        command: rest, cwd: before.cwd, resource, exit: 0, tree: before.tree,
+        command: rest, cwd: before.cwd, resource, exit: 0, tree: before.tree, inputs: inputs.map(input => input.rel),
         time: new Date().toISOString(), duration: Date.now() - startedAt,
       }) + '\n');
       fs.renameSync(temp, target);
     } catch { fs.rmSync(temp, { force: true }); }
+    cleanResults(dir, Math.max(RESULT_MAX_AGE_MS, maxAge));
   };
   child.on('exit', (code, signal) => {
     if (code === 0) record();

@@ -13,6 +13,8 @@ separator:
 
 defaults:
   label:
+    # false hides every label; a widget's own label.on wins.
+    on: true
     fg: "#7dcaf6"
   value:
     # An empty value keeps the terminal foreground color.
