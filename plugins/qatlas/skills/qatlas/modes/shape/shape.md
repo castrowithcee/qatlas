@@ -1,7 +1,7 @@
 ---
 description: >
-  Entry to shape: variants by scope, the --fly flag, reading list and the shared contract of all shape runs
-  from the planning system to the collective commit.
+  Entry to shape: variants by scope, reading list and the shared contract of all shape runs from the
+  planning system to the collective commit.
 type: playbook
 edit: locked
 license: MIT
@@ -16,11 +16,9 @@ implemented.
 ## Invocation
 
 - `shape [idea or file path]` works per [shaping an idea](option-idea.md).
-- `shape <unambiguous task> [--fly]` and `shape backlog [scope] [--fly]` work per [shaping existing
+- `shape <unambiguous task>` and `shape backlog [scope]` work per [shaping existing
   work](option-backlog.md). After `shape`, the word `backlog` is a reserved scope, not an idea. `shape
   backlog` without further scope covers the entire open work supply.
-- **`--fly`:** The user is unreachable during the run; [`--fly` in shape](flag-fly.md) applies. It exists only
-  for existing work, because an idea needs the user's intent.
 
 For an idea, a file or a single task, `shape` receives the permission to edit locked project documentation
 (`Freigabe für gesperrte Projektdokumentation`) under the shared contract; `shape backlog [scope]` does not.
@@ -32,12 +30,11 @@ The blocks repeat nothing from this file or from each other; what you do not rea
 Read each one completely at the stated time:
 
 1. **Before the first step:** the file of your variant from "Invocation" and [the backlog
-   norm](../../../qatlas-core-backlog/SKILL.md). With `--fly`, additionally the flag file from "Invocation"
-   and [deciding without the user](../../references/playbook-autonomy.md).
+   norm](../../../qatlas-core-backlog/SKILL.md).
 2. **Before the first cut, split or working-in of a task:** [cutting tasks](playbook-task-cut.md).
 3. **Before maintaining the `next` queue:** [scheduling the next horizon](playbook-horizon.md).
-4. **Before the first presentation of a real user decision, with `--fly` before recording the first one:**
-   [presenting decisions](../../references/playbook-decision-card.md).
+4. **Before the first presentation of a real user decision:** [presenting
+   decisions](../../references/playbook-decision-card.md).
 5. **Before the collective commit:** [the git norm](../../../qatlas-core-git/SKILL.md) and its [commit
    reference](../../../qatlas-core-git/references/playbook-commit.md).
 6. **Before the closing:** [the closing block](../../references/playbook-closing-block.md), and presenting

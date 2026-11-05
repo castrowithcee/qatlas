@@ -5,7 +5,7 @@ description: >
   tasks autonomously, and settle human handoffs. Without a mode, show only the mode card. Never start
   automatically.
 disable-model-invocation: true
-argument-hint: "[goal|shape|run|team|review] [idea|task|file|backlog] [--limit <n|all|0>] [--leads <n>] [--fly|--ask]"
+argument-hint: "[goal|shape|run|team|review] [idea|task|file|backlog] [--limit <n|all|0>] [--leads <n>] [--ask]"
 license: MIT
 ---
 
@@ -60,7 +60,7 @@ Answer only with this card as rendered Markdown. Read nothing, recommend no mode
 | Invocation | Purpose |
 |---|---|
 | `qatlas goal [idea, task, or file]` | Clarify a plan in conversation without changing anything |
-| `qatlas shape [idea, file, task, or backlog] [--fly]` | Cut execution-ready tasks or sharpen existing ones |
+| `qatlas shape [idea, file, task, or backlog]` | Cut execution-ready tasks or sharpen existing ones |
 | `qatlas run [scope] [--limit <n\|all>] [--ask]` | Execute tasks in sequence with a lead and subagents |
 | `qatlas team [scope] [--limit <n\|0>] [--leads <n>] [--ask]` | Work independent packages in parallel in tmux |
 | `qatlas review [scope]` | Settle checks and decisions step by step |

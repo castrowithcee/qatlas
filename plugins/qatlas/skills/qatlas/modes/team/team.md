@@ -259,10 +259,12 @@ owner writes the spine; the draft then waits for a later `shape`. Start the suba
 `demanding` profile as [checking the team](../../references/playbook-team-config.md)
 describes. Its assignment reads in essence:
 
-> Read `<plugin-root>/skills/qatlas/SKILL.md` completely and work the mode `shape <task> --fly`. You shape
-> for the supervisor of a running team: write only to this task and to the tasks you split from it, change
-> no file, create no commit and leave the `next` queue untouched. Return the status of every task and each
-> prepared decision with context, question and recommendation.
+> Read `<plugin-root>/skills/qatlas/SKILL.md` completely and work the mode `shape <task>`. You shape for the
+> supervisor of a running team, and no user is reachable: do all work that needs no user, decide what project
+> knowledge settles, and leave every open user decision as a prepared card in the task by presenting
+> decisions, so that the task stays `draft` unless it needs no user decision. Write only to this task and to
+> the tasks you split from it, change no file, create no commit and leave the `next` queue untouched. Return
+> the status of every task and each prepared decision with context, question and recommendation.
 
 Insert `<plugin-root>` and `<task>` as fixed values. Log every prepared decision of a task that stays
 `draft` as `entscheiden`. A task that became `ready` is available for
