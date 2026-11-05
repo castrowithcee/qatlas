@@ -590,6 +590,106 @@ try {
     if (socketPath) fs.rmSync(socketPath, { force: true });
   }
 
+  // health: fact-based check from synthetic host files in a temporary HOME. Own tmux server.
+  const sockHealth = `qatlas-test-health-${process.pid}`;
+  const tmHealth = (...args) => execFileSync('tmux', ['-L', sockHealth, ...args], { encoding: 'utf8' }).trim();
+  let socketPathHealth = null;
+  try {
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'health-')));
+    git(repo, 'init', '-q');
+    const home = fs.mkdtempSync(path.join(root, 'home-'));
+    const names = ['active', 'hung', 'dead', 'unknown', 'asking'];
+    const win = tmHealth('new-session', '-d', '-x', '80', '-y', '24', '-P', '-F', '#{window_id}', 'sleep', '300');
+    tmHealth('set', '-w', '-t', win, '@qatlas-team', repo);
+    const panes = { active: tmHealth('display', '-p', '-t', win, '#{pane_id}') };
+    for (const n of names.slice(1)) panes[n] = tmHealth('split-window', '-d', '-P', '-F', '#{pane_id}', '-t', win, 'sleep', '300');
+    for (const n of names) tmHealth('set', '-p', '-t', panes[n], '@qatlas-package', n);
+    tmHealth('set', '-p', '-t', panes.asking, '@qatlas-kind', 'question');
+    socketPathHealth = tmHealth('display', '-p', '#{socket_path}');
+    const gone = spawnSync(process.execPath, ['-e', 'process.stdout.write(String(process.pid))'], { encoding: 'utf8' }).stdout.trim();
+    const old = new Date(Date.now() - 10 * 60000);
+    const id = n => `0000000${names.indexOf(n)}-aaaa-bbbb-cccc-dddddddddddd`;
+    const session = (n, pid, status) => write(path.join(home, '.claude', 'sessions', `${pid}.json`),
+      JSON.stringify({ pid: Number(pid), sessionId: id(n), tmux: `s:@1.${panes[n]}`, status, statusUpdatedAt: old.getTime() }));
+    const transcript = (n, when, sub) => {
+      const dir = path.join(home, '.claude', 'projects', 'slug');
+      write(path.join(dir, id(n) + '.jsonl'), 'secret\n');
+      fs.utimesSync(path.join(dir, id(n) + '.jsonl'), old, old);
+      if (!sub) return;
+      const file = path.join(dir, id(n), 'subagents', 'agent-abc123.jsonl');
+      write(file, 'secret\n');
+      write(file.replace(/\.jsonl$/, '.meta.json'), '{"finished":false}');
+      fs.utimesSync(file, when, when);
+    };
+    const panePid = n => tmHealth('display', '-p', '-t', panes[n], '#{pane_pid}');
+    session('active', panePid('active'), 'busy'); transcript('active', new Date(), true);
+    session('hung', panePid('hung'), 'busy'); transcript('hung', old, true);
+    session('dead', gone, 'idle');
+    session('asking', panePid('asking'), 'busy'); transcript('asking', old, false);
+    const env = { ...process.env, HOME: home, TMUX: `${socketPathHealth},1,0` };
+    let cursor = 0;
+    const health = (...extra) => {
+      const res = spawnSync(process.execPath, [team, 'wait', '--repo', repo, '--since', String(cursor), '--timeout', '0.01', '--health', '1', ...extra, '--min-free', '1000000000', '--stale', '9999'],
+        { encoding: 'utf8', env });
+      assert.strictEqual(res.status, 0, res.stderr);
+      const result = JSON.parse(res.stdout);
+      cursor = result.cursor;
+      return result.events.filter(e => e.type === 'health');
+    };
+    const listed = () => Object.fromEntries(JSON.parse(spawnSync(process.execPath, [team, 'list', '--repo', repo], { encoding: 'utf8', env }).stdout)
+      .panes.map(p => [p.package, p.health]));
+    const rearm = n => tmHealth('set', '-p', '-t', panes[n], '@qatlas-health-at', '1');
+    const first = health();
+    assert.deepStrictEqual(first.map(e => e.package).sort(), ['dead', 'hung']);
+    assert.match(first.find(e => e.package === 'dead').text, /process is gone/);
+    assert.match(first.find(e => e.package === 'hung').text, /without activity/);
+    assert.doesNotMatch(JSON.stringify(first), /secret/);
+    assert.deepStrictEqual(listed(), { active: 'ok', hung: 'anomaly', dead: 'anomaly', unknown: 'unknown', asking: 'ok' });
+    // Within the interval nothing is checked; after it the anomaly is not reported again.
+    assert.deepStrictEqual(health(), []);
+    for (const n of names) rearm(n);
+    assert.deepStrictEqual(health(), []);
+    // A running test of the repo counts as activity and re-arms the phase once healthy.
+    const holder = spawn(process.execPath, [tools, 'slot', '--repo', repo, '--', 'sleep', '30'], { stdio: 'ignore' });
+    try {
+      for (let i = 0; i < 100 && JSON.parse(execFileSync(process.execPath, [tools, 'slot', '--repo', repo, 'status'], { encoding: 'utf8' })).busy.length === 0; i++) {
+        spawnSync('sleep', ['0.1']);
+      }
+      for (const n of names) rearm(n);
+      assert.deepStrictEqual(health(), []);
+      assert.strictEqual(listed().hung, 'ok');
+    } finally { holder.kill(); }
+    for (const n of names) rearm(n);
+    assert.deepStrictEqual(health().map(e => e.package), ['hung']);
+    // The slot lives in the code repo: only --code-repo makes the running test visible.
+    const code = fs.realpathSync(fs.mkdtempSync(path.join(root, 'code-')));
+    git(code, 'init', '-q');
+    const codeHolder = spawn(process.execPath, [tools, 'slot', '--repo', code, '--', 'sleep', '30'], { stdio: 'ignore' });
+    try {
+      for (let i = 0; i < 100 && JSON.parse(execFileSync(process.execPath, [tools, 'slot', '--repo', code, 'status'], { encoding: 'utf8' })).busy.length === 0; i++) {
+        spawnSync('sleep', ['0.1']);
+      }
+      for (const n of names) rearm(n);
+      assert.deepStrictEqual(health('--code-repo', code), []);
+      assert.strictEqual(listed().hung, 'ok');
+      for (const n of names) rearm(n);
+      assert.deepStrictEqual(health().map(e => e.package), ['hung']);
+    } finally { codeHolder.kill(); }
+    // An exclusive resource run appears only under resources[] and counts as test activity as well.
+    const resHolder = spawn(process.execPath, [tools, 'slot', '--resource', 'e2e', '--repo', code, '--', 'sleep', '30'], { stdio: 'ignore' });
+    try {
+      for (let i = 0; i < 100 && !(JSON.parse(execFileSync(process.execPath, [tools, 'slot', '--repo', code, 'status'], { encoding: 'utf8' })).resources || []).some(r => r.busy.length); i++) {
+        spawnSync('sleep', ['0.1']);
+      }
+      for (const n of names) rearm(n);
+      assert.deepStrictEqual(health('--code-repo', code), []);
+      assert.strictEqual(listed().hung, 'ok');
+    } finally { resHolder.kill(); }
+  } finally {
+    try { tmHealth('kill-server'); } catch { /* already gone */ }
+    if (socketPathHealth) fs.rmSync(socketPathHealth, { force: true });
+  }
+
   // Input suggestion: faint or coloured text on the host input line is neither hashed, nor in stale text, nor in the
   // capture file; typed default-foreground text stays. Own tmux server.
   const sockS = `qatlas-test-sug-${process.pid}`;
