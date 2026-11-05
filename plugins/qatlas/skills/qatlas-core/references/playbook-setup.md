@@ -62,7 +62,7 @@ suffice:
   in its existing authoritative places; a scope gets an optional `FRAMEWORK.md` next to its README only for
   its own lasting particularities.
 - `.qatlas/plugins/` carries technical project configuration and the versioned update review state.
-- `~/.qatlas/plugins/config.yaml` carries the user-wide plugin configuration.
+- `~/.qatlas/plugins/config.yaml` is optional and holds only user-wide deviations from the shipped defaults.
 - `~/qatlas/` is the user's own library. `AGENTS.qatlas.md` in it contains the global working agreement and
   belongs to the user from the moment it is created.
 

@@ -8,7 +8,7 @@ const os = require('os');
 const path = require('path');
 
 let refreshStatusline = () => {};
-try { ({ refreshStatusline } = require('../scripts/qatlas-statusline-setup-claude.js')); }
+try { ({ refreshStatusline } = require('../scripts/qatlas-statusline-claude.js')); }
 catch { /* a missing refresh must not block the rules */ }
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT || '';

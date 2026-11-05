@@ -1,7 +1,9 @@
-# Globale Claude-Statusline-Konfiguration. Codex verwendet stattdessen seine nativen TUI-Einstellungen.
+# Optional Claude status line configuration at ~/.qatlas/plugins/statusline.yaml. Qatlas ships every
+# default; this file holds only what deviates. The values below are the shipped defaults. Codex uses its
+# native TUI settings instead.
 format: 1
 
-# "fixed" verwenden, wenn der Terminalumbruch Widgets verbirgt.
+# Use "fixed" when terminal wrapping hides widgets.
 layout: wrap
 
 separator:
@@ -13,10 +15,11 @@ defaults:
   label:
     fg: "#7dcaf6"
   value:
-    # Ein leerer Wert behält die Vordergrundfarbe des Terminals.
+    # An empty value keeps the terminal foreground color.
     fg: ""
 
-# Die Map-Reihenfolge ist die Render-Reihenfolge. Fehlende Widgets sind bei vorhandener Map deaktiviert.
+# Without this map every shipped widget appears in the shipped order. With it, the map order is the render
+# order and widgets missing from it stay off.
 widgets:
   model:
     on: true
@@ -39,7 +42,7 @@ widgets:
   context:
     on: true
     bar:
-      # Die zuletzt erreichte Schwelle liefert die semantische Farbe.
+      # The last threshold reached gives the semantic color.
       thresholds:
         - from: 0
           fg: "#24e302"

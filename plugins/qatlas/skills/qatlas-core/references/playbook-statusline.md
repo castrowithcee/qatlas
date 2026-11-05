@@ -26,26 +26,36 @@ hard-code it, because the installation path carries the version.
 
 ## Claude Code
 
-Claude Code runs an external renderer and passes session JSON on stdin. The renderer reads the user's choice
-from `~/.qatlas/plugins/statusline.yaml`; its stable copy is shipped payload that the user never edits.
+Claude Code runs an external renderer and passes session JSON on stdin. The renderer applies the shipped
+defaults and reads only the deviations from an optional `~/.qatlas/plugins/statusline.yaml`; its stable copy
+is shipped payload that the user never edits.
 
 ### Set up
 
-1. Run: `node "<plugin-root>/scripts/qatlas-statusline-setup-claude.js"`
+1. Run: `node "<plugin-root>/scripts/qatlas-statusline-claude.js" setup`
 2. Say that the line appears with the next interaction and replaces an earlier Claude status line.
 3. Ask whether the layout fits. If dynamic wrapping cuts off widgets or behaves badly in the terminal, set
    `layout: fixed` in `~/.qatlas/plugins/statusline.yaml`.
 
-The setup copies renderer and YAML runtime to `~/.qatlas/plugins/`, creates a missing `config.yaml` and
-`statusline.yaml` once and points `~/.claude/settings.json` to the stable copy with a refresh interval of 60
-seconds. Existing user configuration stays unchanged. The session start renews the copy whenever a newer
-plugin version runs.
+The setup copies renderer and YAML runtime to `~/.qatlas/plugins/`, keeps a previous `statusLine` entry of
+`~/.claude/settings.json` aside for `remove` and points the settings to the stable copy with a refresh
+interval of 60 seconds. It writes neither `statusline.yaml` nor `config.yaml`; an existing file stays
+unchanged. The session start renews the copy whenever a newer plugin version runs.
+
+### Remove
+
+Run: `node "<plugin-root>/scripts/qatlas-statusline-claude.js" remove`
+
+The script puts the previous `statusLine` entry back or removes the Qatlas entry, deletes renderer and
+runtime copy and leaves `~/.qatlas/plugins/statusline.yaml` to the user. An entry that is not the Qatlas
+renderer stays unchanged. Say that the change shows with the next interaction.
 
 ### Widgets
 
-The map `widgets` in `~/.qatlas/plugins/statusline.yaml` is menu and render order at once. A widget appears
-with `on: true`. Newly shipped widgets missing there stay off until the user adds them; the existing choice
-and order stay unchanged.
+Without `widgets` in `~/.qatlas/plugins/statusline.yaml` every shipped widget appears in the shipped order,
+newly shipped ones included. A map `widgets` is menu and render order at once: a widget appears with
+`on: true`, widgets missing from the map stay off, newly shipped ones too, and the user's choice and order
+stay unchanged.
 
 `model` | `thinking` | `dir` | `branch` | `diff` | `out` | `context` | `cost` | `session` |
 `session-reset` | `weekly` | `weekly-reset` | `method`
@@ -60,9 +70,9 @@ Every widget part has `fg` and `bold`. An empty string keeps the built-in color.
 roles: labels are dimmed, values use the terminal foreground color. Meaningful colors remain for diff numbers
 and bar thresholds.
 
-The first installation writes a palette for dark terminals as normal configuration. For a light background
-use `<plugin-root>/skills/qatlas-core/assets/statusline-dual-theme.yaml` as the starting point for
-`~/.qatlas/plugins/statusline.yaml`; a new setup is unnecessary. Replace an existing widget choice only with
+The shipped palette suits dark terminals. For a light background copy
+`<plugin-root>/skills/qatlas-core/assets/statusline-dual-theme.yaml` to `~/.qatlas/plugins/statusline.yaml`
+as the starting point; a new setup is unnecessary. Replace an existing widget choice only with
 the user's consent. The commented field reference is
 `<plugin-root>/skills/qatlas-core/assets/statusline.example.yaml`.
 
@@ -82,8 +92,9 @@ bar refers to the active model window, usage bars to their limits.
 ### Arguments and layout
 
 For wishes such as `disable out, weekly-reset`, `enable method`, `put cost first`, `make cost green` or
-`dim all labels`, edit only `~/.qatlas/plugins/statusline.yaml`. Switch `on`, move a widget block or change
-the style of its parts. Do not run the setup again.
+`dim all labels`, write only the deviation into `~/.qatlas/plugins/statusline.yaml` and create the file with
+`format: 1` if it is missing. Switch `on`, move a widget block or change the style of its parts. Do not run
+the setup again.
 
 - `wrap` is the default. Widgets flow from left to right and wrap when needed.
 - `fixed` uses four lines: model/thinking/dir; branch/diff; out/context/cost; limits and method.
@@ -97,7 +108,7 @@ this choice into `~/.qatlas/plugins/statusline.yaml`.
 
 ### Set up
 
-Run: `node "<plugin-root>/scripts/qatlas-statusline-setup-codex.js"`
+Run: `node "<plugin-root>/scripts/qatlas-statusline-codex.js" setup`
 
 The script replaces only `tui.status_line` and `tui.status_line_use_colors`, keeps all other values and
 comments and rejects duplicate or mixed TOML definitions. The Qatlas preset is:
@@ -107,6 +118,13 @@ comments and rejects duplicate or mixed TOML definitions. The Qatlas preset is:
 
 Ask the user for a new Codex CLI session after the setup. The native picker `/statusline` is the
 authoritative interface for showing, switching and ordering the fields interactively.
+
+### Remove
+
+Run: `node "<plugin-root>/scripts/qatlas-statusline-codex.js" remove`
+
+The script puts the native list the setup found back or removes the preset together with a `[tui]` table
+left empty. Ask for a new Codex CLI session afterwards.
 
 ### Native differences
 

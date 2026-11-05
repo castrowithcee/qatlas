@@ -8,12 +8,15 @@ license: MIT
 
 # Configuration
 
+Qatlas ships every default. A configuration file is optional, holds only what deviates from the defaults
+and is never created by setup; a missing file is the normal case.
+
 | File | Purpose |
 |---|---|
-| `~/.qatlas/plugins/config.yaml` | Global settings for all projects |
-| `<repo>/.qatlas/plugins/config.yaml` | Project values; a set value overrides the global one, a missing one inherits |
-| `~/.qatlas/plugins/statusline.yaml` | Appearance of the Claude statusline |
-| `~/.qatlas/plugins/team.yaml` | Optional roles, models and effort levels for `qatlas run` and `qatlas team` |
+| `~/.qatlas/plugins/config.yaml` | User-wide deviations for all projects |
+| `<repo>/.qatlas/plugins/config.yaml` | Project values; a set value overrides the user-wide one, a missing one inherits |
+| `~/.qatlas/plugins/statusline.yaml` | Deviations in the appearance of the Claude statusline |
+| `~/.qatlas/plugins/team.yaml` | Roles, models and effort levels for `qatlas run` and `qatlas team` |
 
 ## Keys in `config.yaml`
 
@@ -22,7 +25,7 @@ license: MIT
 | `protection.secrets` | global, project | `block` or `allow` for secrets before the commit |
 | `protection.personal-data` | global, project | `block`, `ask`, `warn` or `allow` for personal data |
 
-The default is `secrets: block` and `personal-data: ask`. `block` prevents the step, `ask` asks beforehand,
+The shipped default is `secrets: block` and `personal-data: ask`. `block` prevents the step, `ask` asks beforehand,
 `warn` only reports, `allow` does not check. A passed check stays silent. Whether a repo is public or private
 is not derived by Qatlas; the project configuration expresses that intent.
 

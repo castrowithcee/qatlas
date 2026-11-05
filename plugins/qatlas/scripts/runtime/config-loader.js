@@ -230,53 +230,13 @@ function readStatusline() {
   };
 }
 
-function writeNew(file, value, mode) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, stringifyYaml(value), {
-    flag: 'wx', mode,
-  });
-  return file;
-}
-
-// Adds missing global keys with their default; set values and comments stay as they are.
-function topUpConfig() {
-  const file = locations().configFile;
-  const document = YAML.parseDocument(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
-  if (document.errors.length || !isObject(document.toJS())) return [];
-  const added = [];
-  const visit = (value, keys) => {
-    if (isObject(value)) {
-      for (const key of Object.keys(value)) visit(value[key], keys.concat(key));
-    } else if (!document.hasIn(keys)) {
-      try {
-        document.setIn(keys, value);
-        added.push(keys.join('.'));
-      } catch { /* an existing non-map value stays untouched and is reported */ }
-    }
-  };
-  visit(DEFAULT_CONFIG, []);
-  if (added.length) fs.writeFileSync(file, document.toString({ lineWidth: 0 }), { mode: 0o600 });
-  return added;
-}
-
-function createConfig() {
-  return writeNew(locations().configFile, DEFAULT_CONFIG, 0o600);
-}
-
-function createStatusline() {
-  return writeNew(locations().statuslineFile, DEFAULT_STATUSLINE, 0o600);
-}
-
 module.exports = {
   DEFAULT_CONFIG,
   DEFAULT_STATUSLINE,
-  createConfig,
-  createStatusline,
   locations,
   parseYamlText,
   readConfig,
   readStatusline,
   stringifyYaml,
   teamProblems,
-  topUpConfig,
 };

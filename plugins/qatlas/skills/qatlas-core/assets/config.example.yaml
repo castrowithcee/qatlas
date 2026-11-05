@@ -1,5 +1,6 @@
-# Global Qatlas plugin configuration at ~/.qatlas/plugins/config.yaml. A project configuration at
-# <repo>/.qatlas/plugins/config.yaml may override protection; a missing project value inherits.
+# Optional user-wide Qatlas plugin configuration at ~/.qatlas/plugins/config.yaml. Qatlas ships every
+# default; this file holds only what deviates. A project configuration at <repo>/.qatlas/plugins/config.yaml
+# may override protection per repo; a missing value inherits. The values below are the shipped defaults.
 format: 1
 
 protection:

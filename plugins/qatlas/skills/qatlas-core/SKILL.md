@@ -26,7 +26,7 @@ Reply only with the following card as rendered Markdown. Read no mode reference 
 | `setup` | Sets up Qatlas and its project state. |
 | `doctor` | Checks Qatlas, scaffold, dependencies and the project update state without repairing. |
 | `update` | Migrates this project to what installed plugin updates require. |
-| `statusline` | Sets up or adjusts the status line of the current host. |
+| `statusline` | Sets up, adjusts or removes the status line of the current host. |
 | `backlog-system` | Switches or migrates the authoritative planning system of a project. |
 
 Call: `qatlas-core <argument>`

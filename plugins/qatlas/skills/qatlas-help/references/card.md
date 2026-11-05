@@ -21,7 +21,7 @@ license: MIT
 | **qatlas-core setup** | Sets up project state, project instructions, library and settings. |
 | **qatlas-core doctor** | Checks dependencies, scaffold, library and update state without repairing anything. |
 | **qatlas-core update** | Migrates this project to what installed plugin updates require. |
-| **qatlas-core statusline** | Configures the status line of the current host. |
+| **qatlas-core statusline** | Configures or removes the status line of the current host. |
 | **qatlas-core backlog-system** | Switches or migrates the authoritative planning system. |
 | **qatlas-mode adhd** | Shapes the collaboration for the rest of the session so a reader with ADHD can act on it. |
 | **qatlas-help [topic]** | Guides through Qatlas like a handbook. |

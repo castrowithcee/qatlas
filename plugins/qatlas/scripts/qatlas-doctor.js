@@ -11,12 +11,10 @@ const { execFileSync } = require('child_process');
 const { scaffoldTopUp, walk } = require('./qatlas-scaffold-topup.js');
 const { installedPlugins, legacyRoots } = require('./qatlas-update.js');
 const {
-  createConfig,
   parseYamlText,
   readConfig,
   readStatusline,
   teamProblems,
-  topUpConfig,
 } = require('./runtime/config-loader.js');
 
 const argv = process.argv.slice(2);
@@ -77,27 +75,8 @@ if (!has('git', ['--version'])) {
   }
 }
 
+// Both config files are optional overrides of shipped defaults; a missing file is the normal case.
 const configState = readConfig(target);
-
-if (!configState.exists) {
-  if (apply) {
-    try {
-      createConfig();
-      created.push('~/.qatlas/plugins/config.yaml');
-    } catch {
-      missing.push('config: ~/.qatlas/plugins/config.yaml could not be created.');
-    }
-  } else {
-    missing.push('config: ~/.qatlas/plugins/config.yaml is missing.');
-  }
-} else if (configState.valid && apply) {
-  try {
-    const added = topUpConfig();
-    if (added.length) created.push('~/.qatlas/plugins/config.yaml: ' + added.join(', '));
-  } catch {
-    missing.push('config: missing keys in ~/.qatlas/plugins/config.yaml could not be added.');
-  }
-}
 for (const problem of configState.problems) missing.push('config: ' + problem + ' The file stays untouched.');
 for (const unknown of configState.unknown) notes.push('config: ' + unknown + ' Qatlas no longer reads it; remove it.');
 
