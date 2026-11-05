@@ -24,7 +24,7 @@ they report completion.
 
 ## Invocation
 
-`run [task, project or backlog] [--limit <n|all>] [--fly] [run directive]`
+`run [task, project or backlog] [--limit <n|all>] [--ask] [run directive]`
 
 - **Without `--limit`:** The task limit is five.
 - **`--limit <n|all>`:** Sets the task limit to `n` or, with `all`, to all executable tasks of the scope. If
@@ -34,7 +34,9 @@ they report completion.
   <percent>` if the run directive names one (default 60), and end the run regularly at this task boundary on
   `stop: true`. Where `reason` is `unknown` (no measurement), estimate instead: if the context has already been
   compacted or foreseeably will not suffice, end the run at this task boundary.
-- **`--fly`:** The user is unreachable during the run; [`--fly` in the run](flag-fly.md) applies.
+- **Without `--ask`:** The user is unreachable during the run; [the run without a reachable
+  user](playbook-unattended.md) applies.
+- **`--ask`:** The user is reachable during the run and decides; [`--ask` in the run](flag-ask.md) applies.
 
 ## Reading list
 
@@ -43,8 +45,9 @@ Read each one completely at the stated time:
 
 1. **Before the first step:** [the backlog norm](../../../qatlas-core-backlog/SKILL.md), [checking the
    team](../../references/playbook-team-config.md) and [selecting
-   tasks](../../references/playbook-task-selection.md). With `--fly`, additionally the flag file from
-   "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
+   tasks](../../references/playbook-task-selection.md). Without `--ask`, additionally [the run without a
+   reachable user](playbook-unattended.md) and [deciding without the
+   user](../../references/playbook-autonomy.md); with `--ask`, instead [`--ask` in the run](flag-ask.md).
 2. **When `team.yaml` is invalid, a model looks doubtful or the user wants to set it up:** [setting up the
    team](../../references/playbook-team.md).
 3. **Before the first writing git step:** [the git workflow](../../references/playbook-git-workflow.md),

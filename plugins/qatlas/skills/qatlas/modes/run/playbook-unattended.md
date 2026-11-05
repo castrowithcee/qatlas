@@ -1,13 +1,13 @@
 ---
 description: >
-  Meaning of --fly in run: the user is unreachable during the run, and the lead decides, assumes, or hands
-  off without waiting.
+  Default of run without --ask: the user is unreachable during the run, and the lead decides, assumes, or
+  hands off without waiting.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# `--fly` in run
+# Run without a reachable user
 
 The user is unreachable during the run; no step waits for their answer. Before the first task, settle
 everything that would stall the run later, and decide every question that would otherwise need the user by

@@ -1,17 +1,17 @@
 ---
 description: >
-  Meaning of --fly in team: the user is unreachable during the run, and the supervisor answers the questions
-  of the leads and the integrator itself.
+  Default of team without --ask: the user is unreachable during the run, and the supervisor answers the
+  questions of the leads and the integrator itself.
 type: playbook
 edit: locked
 license: MIT
 ---
 
-# `--fly` in team
+# Team without a reachable user
 
 The user is unreachable during the run; no step waits for their answer. Before the first lead, settle
 everything that would stall the run later, by [deciding without the user](../../references/playbook-autonomy.md).
-The flag applies to you alone: the leads and the integrator keep asking you and never receive it.
+The leads and the integrator keep asking you and never decide in your place.
 
 Answer a `question` that project knowledge does not settle by the same decision ladder:
 

@@ -79,9 +79,9 @@ Log every draft you record in the planning system right away with `node <script>
 --type erfasst --package <package> --task <id> --text "<topic>: <what> - <why>"`; the supervisor has it
 shaped.
 
-Whatever you would otherwise ask the user, you ask the supervisor exclusively with `node <script> ask --repo
-<repo-root> --package <package> --question "<question with context, options and recommendation>"`; the
-output is the answer. Without an answer, call the same command again. While a handover is open, no question
-is possible; first wait for its answer with `handover`. After your closing block, set the pane title with
-`node <script> title --repo <repo-root> --package <package> --title "FERTIG · <title>"`, with `--rest
-<id,id,...>` if tasks remain (see above).
+You run with `--ask`, and your user is the supervisor. Whatever you would otherwise ask the user, you ask the
+supervisor exclusively with `node <script> ask --repo <repo-root> --package <package> --question "<question
+with context, options and recommendation>"`; the output is the answer. Without an answer, call the same
+command again. While a handover is open, no question is possible; first wait for its answer with `handover`.
+After your closing block, set the pane title with `node <script> title --repo <repo-root> --package <package>
+--title "FERTIG · <title>"`, with `--rest <id,id,...>` if tasks remain (see above).

@@ -47,10 +47,12 @@ The threshold is 60 percent for leads and integrator; only the user's run direct
 
 ## Invocation
 
-`team [tasks or scope] [--limit <n|0>] [--leads <n>] [--fly] [run directive]`
+`team [tasks or scope] [--limit <n|0>] [--leads <n>] [--ask] [run directive]`
 
 - **`--limit` and `--leads`:** determine package size and package count as described in "Cutting packages".
-- **`--fly`:** The user is unreachable during the run; [`--fly` in the team](flag-fly.md) applies.
+- **Without `--ask`:** The user is unreachable during the run; [the team without a reachable
+  user](playbook-unattended.md) applies.
+- **`--ask`:** The user is reachable during the run and decides; [`--ask` in the team](flag-ask.md) applies.
 
 ## Reading list
 
@@ -62,8 +64,9 @@ Read each one completely at the stated time:
    tasks](../../references/playbook-task-selection.md), [the
    git workflow](../../references/playbook-git-workflow.md), [parallel work in a
    run](../../references/git-parallel.md), [the git norm](../../../qatlas-core-git/SKILL.md) and its
-   [commit reference](../../../qatlas-core-git/references/playbook-commit.md). With `--fly`, additionally the
-   flag file from "Invocation" and [deciding without the user](../../references/playbook-autonomy.md).
+   [commit reference](../../../qatlas-core-git/references/playbook-commit.md). Without `--ask`, additionally
+   [the team without a reachable user](playbook-unattended.md) and [deciding without the
+   user](../../references/playbook-autonomy.md); with `--ask`, instead [`--ask` in the team](flag-ask.md).
 2. **When `team.yaml` is invalid, a model looks doubtful or the user wants to set it up:** [setting up the
    team](../../references/playbook-team.md).
 3. **If user or project instructions require pull requests, before the first lead:** [integration via
@@ -154,12 +157,12 @@ Start each package in the repo root; the script distributes the panes over windo
 add --repo <repo-root> --package <package> --label "<project>·lead" --title "<project>·<package> · <host>" --cwd <repo-root> -- <cli>
 ```
 
-- Claude Code: `claude --model <lead> '/qatlas run <tasks> [--limit <n>] <run directive>'`
-- Codex: `codex -m <lead> '$qatlas run <tasks> [--limit <n>] <run directive>'`
+- Claude Code: `claude --model <lead> '/qatlas run <tasks> [--limit <n>] --ask <run directive>'`
+- Codex: `codex -m <lead> '$qatlas run <tasks> [--limit <n>] --ask <run directive>'`
 
 Quote the prompt simply in the shell so that `$qatlas` is not expanded. Set `--limit` to the package size if
-it exceeds five. Never pass on `--fly`: a lead always asks you, and whether you ask the user is
-decided by your own `--fly`. The run directive reads in essence:
+it exceeds five. Always pass `--ask`: a lead's user is you, so it asks you instead of deciding, and whether
+you ask the user is decided by your own `--ask`. The run directive reads in essence:
 
 > You are the lead of package <package> of a team. Read `<plugin-root>/skills/qatlas/modes/team/lead.md`
 > completely and work by it. `<script>` is the control script, `<tools>` is `qatlas-run-tools.js`,
@@ -220,8 +223,9 @@ Handle each event:
 
 - **`question`:** If project knowledge supports the answer, reply with `answer --repo <repo-root> --package
   <package> --answer "<answer with source>"`, for a question of the integrator with `answer --repo <repo-root>
-  --role integrator --answer "<answer with source>"`. Otherwise ask the user with a decision card and pass on
-  their answer; with `--fly` you instead answer as the flag file prescribes.
+  --role integrator --answer "<answer with source>"`. Otherwise answer as [the team without a reachable
+  user](playbook-unattended.md) prescribes; with `--ask` you instead ask the user with a decision card and
+  pass on their answer.
 - **`done` and `exited`:** Proceed as described in "Finish". A `done` of a lead may carry a `rest`.
 - **`stale`:** A pane without open signal made no progress for `--stale` minutes (default 20), or for three
   times that while the host shows that it waits for its own background agent (Claude Code: "Waiting for N
@@ -231,8 +235,8 @@ Handle each event:
   shows no open handover. Nudge with `nudge --repo <repo-root> --package <package> --text "<text>"` (for the
   integrator `--role integrator` instead of `--package`) only after `stale`, with no open signal, no command
   of the package worktree running or waiting in a slot or resource per `slot status`, and at most once per
-  standstill phase. A second `stale` after a nudge you report to the user; with `--fly` you secure the
-  package's open tasks as for `exited`.
+  standstill phase. After a second `stale` following a nudge you secure the package's open tasks as for
+  `exited`; with `--ask` you instead report it to the user.
 - **`health`:** Fact-based check, at most once per `--health` minutes (default 30) per pane, in addition to
   the screen-based `stale`. It reports a pane whose process is gone although the pane lives, or whose host
   status is busy or waiting although neither its transcript, a running subagent nor any test slot or resource

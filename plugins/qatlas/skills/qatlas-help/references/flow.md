@@ -15,7 +15,8 @@ license: MIT
 3. **Shape:** `qatlas shape <idea or file>` records confirmed knowledge and cuts small, execution-ready
    tasks. `qatlas shape backlog` reorders existing work.
 4. **Run:** `qatlas run` works through at most five tasks in sequence by default; `--limit` changes the
-   number, and `--fly` lets the run work without a reachable user. A lead hands out assignments to
+   number. Without `--ask` the run works without a reachable user and decides, assumes or hands off to
+   `review`; `--ask` keeps the user in the loop for decisions. A lead hands out assignments to
    subagents, checks their results, and commits locally. A run never authorizes push, publish, deployment,
    or irreversible steps. `qatlas team` cuts up to four independent packages, with `--leads <n>` up to
    `n`, and has each worked through by its own lead in parallel in tmux.
