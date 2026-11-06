@@ -144,6 +144,22 @@ const stampedManifests = MANIFESTS.map(rel => {
   return [file, original.replace(/("version":\s*")[^"]*(")/, `$1${version}$2`)];
 });
 
+// Test gate: every test script must pass before anything is written. Fast scripts run first.
+const TEST_ORDER = ['test-qatlas-protection.js', 'test-qatlas-update.js', 'test-qatlas-run-tools.js'];
+const testRank = name => (TEST_ORDER.includes(name) ? TEST_ORDER.indexOf(name) : TEST_ORDER.length);
+const testScripts = fs.readdirSync(path.join(ROOT, 'scripts'))
+  .filter(name => /^test-.*\.js$/.test(name))
+  .sort((a, b) => testRank(a) - testRank(b) || a.localeCompare(b));
+for (const name of testScripts) {
+  try {
+    execFileSync(process.execPath, [`scripts/${name}`], { cwd: ROOT, stdio: 'inherit' });
+  } catch {
+    console.error(`✗ Tests rot: scripts/${name}`);
+    process.exit(1);
+  }
+}
+console.log(`✓ Tests grün (${testScripts.length} Skripte)`);
+
 if (projectUpdate) fs.renameSync(draftUpdate, releaseUpdate);
 fs.writeFileSync(path.join(ROOT, VERSION_FILE), version + '\n');
 for (const [file, text] of stampedManifests) fs.writeFileSync(file, text);
