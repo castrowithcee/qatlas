@@ -100,12 +100,18 @@ Read each one completely at the stated time:
 3. For each intended host, check its section in `team.yaml`, if there is one, and its CLI on the `PATH`:
    `claude` for Claude Code, `codex` for Codex. The default is your own host; a run directive may assign
    packages to another host.
-4. Recognize from user and project instructions whether they require integration via pull requests; if so,
+4. Recognize from `.qatlas-project/CONTRIBUTING.md` or user and project instructions whether they require
+   integration via pull requests; if so,
    [integration via pull requests](../../references/playbook-git-pr.md) applies, including its check of the
    platform means before the first lead.
 5. Before the first lead, clear the stored test results of the previous run with `node
    <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot results --clear --repo <code-repo>`, where
    `<code-repo>` is the repo holding the code.
+6. If `.qatlas-project/TESTING.md` is missing, derive the checks from manifests, CI configuration and
+   existing instructions and create it per the filing norm with what you can evidence, answering the
+   questions of the [project test strategy](../../references/playbook-acceptance.md#project-test-strategy),
+   before the first lead; what stays unknown keeps the default and goes under `Entscheiden` in the closing
+   block.
 
 The integration base `<basis>` is `origin/<control-branch>` for integration via pull requests, otherwise the
 local `<control-branch>`.

@@ -27,17 +27,20 @@ Assign every file its target folder, name and type, plus the frontmatter delta:
 |---|---|
 | a type in its fixed folder with `<type>-<slug>.md` | unchanged apart from missing fields |
 | an ID or another prefix in the name, such as `decision-0003-…`, `adr-`, `convention-`, `memory-0001-…` | `<type>-<slug>.md` in the type's folder |
-| `type: decision` or `type: rule`, or a `decisions/` folder | `policy` in `policies/`, a former `decisions/conventions/` in `policies/conventions/` |
+| a decision, rule or policy, whatever its type or folder (`decisions/`, `policies/`, `adr-…`) | worked into the reserved file it concerns: `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md` or `CONTRIBUTING.md`; a rule that must hold in every session into `AGENTS.md`; then removed |
 | a plan stored as `decision`, `rule` or `policy` | `plans/plan-<slug>.md` with `type: plan`, `edit: shared`, `status` `active` or `done` |
-| a convention, whatever its type | `policies/conventions/policy-<slug>.md` |
-| an architecture decision or accepted risk | `policies/policy-<slug>.md` |
-| a current architecture description | `architecture/knowledge-<slug>.md` |
+| a convention, whatever its type or folder (`policies/conventions/`, `conventions/`) | `CONVENTIONS.md`, beyond the line limit `conventions/policy-<slug>.md` |
+| a test strategy or acceptance profile, also inside `AGENTS.md` | `TESTING.md` |
+| a workflow rule on branches, commits or pull requests, also inside `AGENTS.md` | `CONTRIBUTING.md` |
+| a current architecture description | `ARCHITECTURE.md`, beyond the line limit `architecture/knowledge-<slug>.md` |
 | an operating procedure | `playbooks/playbook-<slug>.md` |
-| an overview of the project | merged into the root README |
+| an overview of the project | the `Purpose` section of `AGENTS.md` |
+| the root README of the knowledge space | its read conditions into the `Project knowledge` section of `AGENTS.md`, then removed |
 | a requirement | a plan or a task, chosen by the user |
 | quality reports, findings, other knowledge | `knowledge/knowledge-<slug>.md` |
-| a `FRAMEWORK.md` inside the knowledge space | `policies/conventions/policy-<slug>.md` |
-| a scope README or `INDEX.md` below the root | merged into the root README, then removed |
+| a `FRAMEWORK.md` inside the knowledge space | `CONVENTIONS.md` |
+| a scope README or `INDEX.md` below the root | merged into the reserved file or folder of its subject, then removed |
+| an empty folder or a `.gitkeep` placeholder | removed; folders arise with their first entry |
 | `type: history`, `HISTORY.md`, a superseded decision or policy, an `archive/` folder | proposed for deletion; Git keeps them |
 | a task | keeps its name and folder under the backlog contract |
 | the memory index | `memory/MEMORY.md` with `type: meta` |
@@ -57,14 +60,14 @@ of this table covers moving and renaming locked files; it does not cover content
 
 1. Move with `git mv` so Git keeps each file's history.
 2. Adjust frontmatter and carry out the merges.
-3. Create missing fixed folders, empty ones with `.gitkeep`.
-4. Point every reference in the repo to the new paths. Leave historical records that name an old path as
+3. Point every reference in the repo to the new paths. Leave historical records that name an old path as
    such unchanged, for example closed tasks.
-5. Update the folder overview and read conditions of the root README.
-6. Delete only what was approved for deletion.
+4. Update the read conditions in `AGENTS.md`: one line per reserved file that exists.
+5. Delete only what was approved for deletion.
 
 ## 5. Verify
 
-Check that no folder exists outside the fixed set, every file name starts with its type, every frontmatter
-matches the schema and no reference points to an old path. Report counts per change kind, open questions and
+Check that no folder exists outside the fixed set, no folder is empty, every reserved file stays within the
+line limit, every file name starts with its type, every frontmatter matches the schema and no reference
+points to an old path. Report counts per change kind, open questions and
 remaining findings.

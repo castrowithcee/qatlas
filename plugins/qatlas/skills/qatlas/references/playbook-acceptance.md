@@ -42,9 +42,9 @@ invariants again at the latest when all milestones are integrated. Classify ever
 
 ## Project test strategy
 
-How a project tests is project knowledge and lives in its native project instructions (`AGENTS.md` or
-equivalent); Qatlas defines only the evidence contract. Without a strategy, the defaults of the
-instructions apply. The contract holds for every project:
+How a project tests is project knowledge and lives in `.qatlas-project/TESTING.md`; Qatlas defines only
+the evidence contract. Without that file, the defaults of the instructions apply. The contract holds for
+every project:
 
 - Only a demonstrably checked state is integrated.
 - Evidence counts only for exactly the git tree on which it arose. Green CI on the handed-over head counts,
@@ -64,6 +64,7 @@ The strategy answers these questions:
 5. Which flake rule applies?
 6. Which checks occupy an exclusive resource (`slot --resource <name>`), and how many test slots may the
    project use (`slot --slots <count>`, at most the device capacity)?
+7. Which checks must be green before a commit, and which coverage does the project expect?
 
 ## At most two corrections
 

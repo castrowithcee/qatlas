@@ -72,8 +72,9 @@ Ein Task oder eine Datei darf eine ungeklärte Richtungsentscheidung enthalten. 
 Nutzer; übertrage die bestätigte Antwort erst in einem gesondert aufgerufenen `shape`-Lauf an den
 maßgeblichen Ort.
 
-Ist `.qatlas-project/README.md` vorhanden, beginne dort und folge den Lesebedingungen, die den Plan
-begrenzen oder zu einer bereits getroffenen Entscheidung führen. Berücksichtige ebenso maßgebliche
+Beginne bei `AGENTS.md` und folge den Lesebedingungen, die den Plan begrenzen oder zu einer bereits
+getroffenen Entscheidung führen; `ARCHITECTURE.md` und `CONVENTIONS.md` unter `.qatlas-project/` halten
+solche Entscheidungen. Berücksichtige ebenso maßgebliche
 fachliche Quellen außerhalb des Wissensraums. Untersuche lesend so weit, dass du Planfragen, die Bestand
 und Quellen beantworten, selbst beantwortest und Entscheidungen fundiert vorlegen kannst; die
 Tiefenanalyse für den Taskschnitt bleibt bei `shape`. Prüfe jede Aussage auf Geltung für den konkreten

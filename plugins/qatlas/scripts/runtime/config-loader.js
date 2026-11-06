@@ -60,13 +60,14 @@ function defaultStatusline() {
 const DEFAULT_CONFIG = {
   format: 1,
   protection: { secrets: 'block', 'personal-data': 'ask' },
+  memory: { enable: true },
 };
 
 const PROTECTION_LEVELS = {
   secrets: ['block', 'allow'],
   'personal-data': ['block', 'ask', 'warn', 'allow'],
 };
-const CONFIG_KEYS = new Set(['format', 'protection']);
+const CONFIG_KEYS = new Set(['format', 'protection', 'memory']);
 
 const DEFAULT_STATUSLINE = defaultStatusline();
 
@@ -147,10 +148,15 @@ function knownProtection(value) {
   return out;
 }
 
+function knownMemoryEnable(memory) {
+  return isObject(memory) && typeof memory.enable === 'boolean' ? memory.enable : undefined;
+}
+
 function normalizeConfig(value) {
   return {
     format: 1,
     protection: { ...DEFAULT_CONFIG.protection, ...knownProtection(isObject(value) && value.protection) },
+    memory: { enable: knownMemoryEnable(isObject(value) && value.memory) ?? DEFAULT_CONFIG.memory.enable },
   };
 }
 
@@ -158,6 +164,17 @@ function normalizeConfig(value) {
 function configProblems(value, file) {
   const invalid = [];
   const unknown = Object.keys(value).filter(key => !CONFIG_KEYS.has(key)).map(key => file + ': unknown key ' + key + '.');
+  if (value.memory !== undefined) {
+    if (!isObject(value.memory)) invalid.push(file + ': memory must be a map.');
+    else {
+      for (const key of Object.keys(value.memory)) {
+        if (key !== 'enable') unknown.push(file + ': unknown key memory.' + key + '.');
+        else if (typeof value.memory.enable !== 'boolean') {
+          invalid.push(file + ': memory.enable must be true or false.');
+        }
+      }
+    }
+  }
   const protection = value.protection;
   if (protection === undefined) return { invalid, unknown };
   if (!isObject(protection)) return { invalid: [file + ': protection must be a map.'], unknown };
@@ -198,8 +215,12 @@ function readConfig(projectRoot = null) {
     } else if (project.value) {
       projectIssues = configProblems(project.value, paths.projectConfigFile);
       diagnostics.push(...projectIssues.invalid, ...projectIssues.unknown);
-      if (!projectIssues.invalid.length && isObject(project.value.protection)) {
-        Object.assign(config.protection, knownProtection(project.value.protection));
+      if (!projectIssues.invalid.length) {
+        if (isObject(project.value.protection)) {
+          Object.assign(config.protection, knownProtection(project.value.protection));
+        }
+        const enable = knownMemoryEnable(project.value.memory);
+        if (enable !== undefined) config.memory.enable = enable;
       }
     }
   }

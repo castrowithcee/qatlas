@@ -1,6 +1,6 @@
 # Optional user-wide Qatlas plugin configuration at ~/.qatlas/plugins/config.yaml. Qatlas ships every
 # default; this file holds only what deviates. A project configuration at <repo>/.qatlas/plugins/config.yaml
-# may override protection per repo; a missing value inherits. The values below are the shipped defaults.
+# may override every key per repo; a missing value inherits. The values below are the shipped defaults.
 format: 1
 
 protection:
@@ -8,3 +8,8 @@ protection:
   secrets: block
   # block | ask | warn | allow
   personal-data: ask
+
+memory:
+  # true keeps the project memory versioned in .qatlas-project/memory/ and loads its index every session;
+  # false creates no memory files, so the agent's own device-local memory is all there is.
+  enable: true

@@ -4,22 +4,25 @@ description: >
   Create, name, file, rename, move, merge, promote, archive or delete files according to the rules, change
   Markdown content, insert references and process raw material from .qatlas-project/zone-import/ once the
   user announces it or names the path: sets place, name, type and frontmatter and keeps navigation and
-  references consistent. Not for pure reading, for code changes inside existing files or for conversions
-  outside the import zone.
+  references consistent, including the reserved files CONVENTIONS.md, ARCHITECTURE.md, TESTING.md and
+  CONTRIBUTING.md of the knowledge space. Not for pure reading, for code changes inside existing files or
+  for conversions outside the import zone.
 license: MIT
 ---
 
 # qatlas-core-filing
 
 The place of a file follows the subject of its statement. Neither Markdown, agent readership nor habit decide
-it alone. Inside `.qatlas-project/` the fixed folders decide, and each folder holds only its types.
+it alone. Inside `.qatlas-project/` the reserved files and fixed folders decide, and each holds only its
+mission or types.
 
 ## Names and format
 
 - Use kebab-case, plain ASCII and no spaces for ordinary file and folder names. Müller becomes `mueller`.
 - Reserved function and agent files keep their fixed capitalisation: `README.md`, `AGENTS.md`, `CLAUDE.md`,
-  `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `FRAMEWORK.md` and `INDEX.md`. Existing function files keep their
-  purpose and local scope.
+  `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md`,
+  `CONTRIBUTING.md`, `FRAMEWORK.md` and `INDEX.md`. Existing function files keep their purpose and local
+  scope.
 - Content files in the knowledge space start with their frontmatter `type`; only tasks add an ID.
 - Write dates as `YYYY-MM-DD`. Chronological files may start with this date.
 - Write ä, ö, ü and ß directly in German files. Do not use em dashes or en dashes as punctuation.
@@ -40,8 +43,8 @@ Every reference creates maintenance. Create one only when the task really needs 
 
 Read an existing file before changing it. Respect its frontmatter and local structure. Make a change at the
 authoritative place instead of creating a near-identical copy. Templates, seeds and plugin material never
-replace user files wholesale. Never create a folder in the knowledge space beyond its fixed folders unless
-the user explicitly asks for it.
+replace user files wholesale. A fixed folder of the knowledge space arises with its first entry; never
+create a folder beyond the fixed ones unless the user explicitly asks for it.
 
 ## Choose the operation
 

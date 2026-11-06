@@ -29,19 +29,12 @@ function copyMissing(from, to) {
   }
 }
 
-// apply=false reports, apply=true fills in. Existing files stay untouched.
-function scaffoldTopUp(target, bundle, { apply = false } = {}) {
+// apply=false reports, apply=true fills in. Existing files stay untouched. The scaffold holds only the
+// seeds the session start injects; every other fixed folder arises with its first entry.
+function scaffoldTopUp(target, bundle, { apply = false, memory = true } = {}) {
   const base = path.join(bundle, '.qatlas-project');
   const project = path.join(target, '.qatlas-project');
-  const existing = fs.existsSync(project);
-  const selected = walk(base).filter(rel => {
-    if (!existing || rel === 'README.md') return true;
-    const dir = path.join(project, path.dirname(rel));
-    if (!fs.existsSync(dir)) return false;
-    // A folder that already holds content needs no placeholder.
-    if (path.basename(rel) === '.gitkeep') return !fs.readdirSync(dir).some(name => name !== '.gitkeep');
-    return true;
-  });
+  const selected = walk(base).filter(rel => memory || !rel.startsWith('memory/'));
   const absent = selected.filter(rel => !fs.existsSync(path.join(project, rel)));
   const created = [];
   if (apply) {

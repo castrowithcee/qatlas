@@ -30,13 +30,19 @@ node <plugin-root>/scripts/qatlas-doctor.js --apply
 Use the output as the finding. Do not repeat what was checked and do not name anything that already existed.
 The script must not replace existing project files.
 
-If Doctor newly created `AGENTS.md` from `scaffold/agents-template.md`, make it concrete before the handover:
+Files Doctor newly created from the English seeds are the user's own text and get their language: `AGENTS.md`
+follows the language of the repo's existing documentation, otherwise the language of the conversation;
+`~/qatlas/AGENTS.qatlas.md` follows the language of the conversation. Translate such a file completely and
+keep its structure. The seeds with frontmatter under `.qatlas-project/` stay English.
+
+If Doctor newly created `AGENTS.md`, make it concrete before the handover:
 
 1. Determine repo name and purpose from the directory, README, manifests and existing content.
 2. Replace the two placeholders with concrete statements.
-3. Add only project-specific rules that are actually known. Ask about scope or agent role only if the answer
-   materially changes a pending action.
-4. Leave no placeholders or setup comments behind.
+3. Add no rules and ask no questions about them; the file fills as the work goes on. The reserved files of
+   the knowledge space arise later with their first entry and get their line under `Project knowledge`
+   then. Remove the memory line if the configuration disables repo memory.
+4. Leave no placeholders behind.
 
 ## Clarify git
 
@@ -56,11 +62,13 @@ If the user agrees:
 Summarize only what was actually created and open blockers. For the first setup, these orientation points
 suffice:
 
-- `AGENTS.md` carries the project instructions; `CLAUDE.md` includes them for Claude.
-- `.qatlas-project/README.md` is the entry into the repo's own project state. The knowledge space also
-  carries the signpost to the authoritative planning system, memory and the two zones. Subject content stays
-  in its existing authoritative places; a scope gets an optional `FRAMEWORK.md` next to its README only for
-  its own lasting particularities.
+- `AGENTS.md` carries the project instructions and is the entry into `.qatlas-project/`; `CLAUDE.md`
+  includes it for Claude.
+- `.qatlas-project/` carries the signpost to the authoritative planning system and, unless the configuration
+  disables repo memory, the memory index. Its reserved files `CONVENTIONS.md`, `ARCHITECTURE.md`,
+  `TESTING.md` and `CONTRIBUTING.md` and its folders arise with their first entry. Subject content stays in
+  its existing authoritative places; a scope gets an optional `FRAMEWORK.md` next to its README only for its
+  own lasting particularities.
 - `.qatlas/plugins/` carries technical project configuration and the versioned update review state.
 - `~/.qatlas/plugins/config.yaml` is optional and holds only user-wide deviations from the shipped defaults.
 - `~/qatlas/` is the user's own library. `AGENTS.qatlas.md` in it contains the global working agreement and

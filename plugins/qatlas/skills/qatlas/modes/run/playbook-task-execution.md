@@ -63,7 +63,9 @@ order:
   check the binding of foreign object IDs to the chosen target and the handling of untrusted content, as far
   as the task touches such boundaries. Instruct the subagent: if the contract leaves a target or permission
   boundary open, it chooses the narrower reading and names it in its return; it never widens access or
-  effect from its own interpretation.
+  effect from its own interpretation. Before a command that deletes, overwrites, changes permissions or acts
+  outside the repo, it verifies the exact target and scope and runs nothing whose effect it cannot bound. It
+  never tests a protective mechanism in a way that damages real data if the mechanism fails.
 - **Budget:** number of subagents used for this task and remaining correction attempts.
 - **Worker profile:** chosen profile with model, effort or its lack of support, and, for `standard` or
   `demanding`, the reason.

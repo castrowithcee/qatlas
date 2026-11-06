@@ -22,8 +22,8 @@ new examination and cut is worked on here at its existing place.
 
 ## Build the inventory
 
-1. Resolve the scope in the authoritative planning system. If `.qatlas-project/README.md` exists, follow only
-   the read conditions relevant to the scope and its open contract questions.
+1. Resolve the scope in the authoritative planning system. From `AGENTS.md`, follow only the read
+   conditions relevant to the scope and its open contract questions.
 2. Read only roster or external metadata first: status, short state, order, dependencies, ownership and
    existing follow-ups.
 3. Form separate candidate sets for `review`, `draft`, `waiting`, `ready` and `next`, and from the drafts, in

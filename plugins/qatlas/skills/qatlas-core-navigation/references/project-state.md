@@ -1,17 +1,18 @@
 ---
 description: >
-  Lesepolitik für den verwalteten Projektzustand: Memory, Roster des lokalen Backlogs und Ideen.
+  Reading policy for the managed project state: memory, the roster of the local backlog and ideas.
 license: MIT
 type: policy
 edit: locked
 ---
 
-# Projektzustand lesen
+# Read project state
 
-- **Memory:** `MEMORY.md` ist der Index. Öffne daraus nur aufgabenrelevante Dateien und prüfe ihre Aussagen
-  gegen den aktuellen Stand, bevor du darauf aufbaust.
-- **Roster:** Nutze bei lokalem Backlog `BACKLOG.md` und Projektindizes zuerst zur Auswahl anhand von
-  Status, Kurzstand, Reihenfolge, Abhängigkeiten und Eigentümerschaft. Lies danach nur die gewählten Tasks und
-  ihre echten Blocker vollständig. Ein ausdrücklich gewählter einzelner Task darf direkt vollständig gelesen
-  werden. Lade nie vorsorglich alle offenen Task-Dateien.
-- **Ideen:** Öffne `IDEAS.md` nur zum Erfassen, Sichten oder Ausarbeiten von Ideen.
+- **Memory:** `MEMORY.md` is the index. Open from it only task-relevant files and check their statements
+  against the current state before building on them. With `memory.enable: false` in the plugin
+  configuration there is no index and no repo memory.
+- **Roster:** With a local backlog, use `BACKLOG.md` and project indexes first to select by status, brief
+  state, order, dependencies and ownership. Then read only the chosen tasks and their real blockers fully.
+  An explicitly chosen single task may be read fully right away. Never load all open task files as a
+  precaution.
+- **Ideas:** Open `IDEAS.md` only to record, review or work out ideas.

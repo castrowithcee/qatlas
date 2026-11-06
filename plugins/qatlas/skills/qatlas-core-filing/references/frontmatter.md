@@ -47,8 +47,9 @@ match decides:
   policy, and the plan links to it instead of repeating it.
 - **What a policy holds:** a single settled choice ("the database is Postgres") as well as a set of norms
   for how work is done ("file names are kebab-case"). Where its reason is not self-evident, it carries it,
-  so that a later change can weigh it. Its place sets its reach: the project's policies live in its
-  knowledge space, the user's cross-project policies in the user's library, Qatlas policies in the plugin.
+  so that a later change can weigh it. Its place sets its reach: the project's policies live in the
+  reserved files of its knowledge space, the user's cross-project policies in the user's library, Qatlas
+  policies in the plugin.
 - **Playbook or skill:** A playbook is content anyone can follow. A skill is an agent-standard `SKILL.md` and
   outside this schema.
 
@@ -80,9 +81,11 @@ statement.
 | `fact` | optional `source` |
 
 Task status values belong to the local backlog contract. A plan is `done` once it is
-fulfilled or dropped; it then no longer guides current work, and what holds from it stands in its policies.
-Fixed `meta` targets are the root README of the knowledge space, `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, a
-project head in the local backlog and a `FRAMEWORK.md` outside the knowledge space.
+fulfilled or dropped; it then no longer guides current work, and what holds from it stands in the reserved
+files.
+Fixed `meta` targets are `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, a project head in the local backlog and a
+`FRAMEWORK.md` outside the knowledge space. The reserved root files carry their content type:
+`CONVENTIONS.md`, `TESTING.md` and `CONTRIBUTING.md` are `policy`, `ARCHITECTURE.md` is `knowledge`.
 
 A shipped copy-ready template under `skills/*/assets/` may already carry the frontmatter of its
 target when its body names the concrete target file and requires all placeholders to be replaced before

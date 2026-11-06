@@ -111,12 +111,14 @@ for (const rel of walk(libraryBundle).filter(rel => !fs.existsSync(path.join(lib
 }
 
 const hadScaffold = fs.existsSync(path.join(target, '.qatlas-project'));
-const { absent, created: scaffoldCreated } = scaffoldTopUp(target, bundle, { apply });
+const { absent, created: scaffoldCreated } = scaffoldTopUp(target, bundle, {
+  apply, memory: configState.config.memory.enable,
+});
 
 if (!apply) {
   if (!hadScaffold) {
     if (!legacy.length) {
-      missing.push('scaffold: there is no .qatlas-project/ here, so neither backlog, memory nor zones.');
+      missing.push('scaffold: there is no .qatlas-project/ here, so neither backlog routing nor repo memory.');
     }
   } else if (absent.length) {
     missing.push('scaffold: ' + absent.length + ' file(s) missing: ' + absent.join(', '));
@@ -163,20 +165,20 @@ if (!legacy.length && (missingZones.length || localMissing)) {
   }
 }
 
-const projectReadme = path.join(target, '.qatlas-project', 'README.md');
-if (fs.existsSync(path.join(target, '.qatlas-project'))) {
+// Reserved root files stay lean; beyond the limit their details move into the folder of the same name.
+const RESERVED = ['CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md'];
+for (const name of RESERVED) {
+  const file = path.join(target, '.qatlas-project', name);
+  if (!fs.existsSync(file)) continue;
   try {
-    const readme = fs.readFileSync(projectReadme, 'utf8');
-    const readmeLines = readme.split(/\r?\n/);
-    if (readmeLines.at(-1) === '') readmeLines.pop();
-    const lines = readmeLines.length;
-    const words = readme.trim() ? readme.trim().split(/\s+/).length : 0;
-    if (lines > 80 || words > 500) {
-      missing.push('scaffold: .qatlas-project/README.md exceeds the budget 80/500 with ' + lines + ' lines and '
-        + words + ' words. The file stays untouched and fully readable.');
+    const text = fs.readFileSync(file, 'utf8').split(/\r?\n/);
+    if (text.at(-1) === '') text.pop();
+    if (text.length > 300) {
+      notes.push('scaffold: .qatlas-project/' + name + ' has ' + text.length + ' lines, limit 300. Move details '
+        + 'into ' + name.replace('.md', '').toLowerCase() + '/ and keep the file as the entry.');
     }
   } catch (error) {
-    missing.push('scaffold: .qatlas-project/README.md is not readable: ' + error.message);
+    missing.push('scaffold: .qatlas-project/' + name + ' is not readable: ' + error.message);
   }
 }
 

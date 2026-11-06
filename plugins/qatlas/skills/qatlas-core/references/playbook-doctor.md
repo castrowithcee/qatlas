@@ -24,8 +24,8 @@ node <plugin-root>/scripts/qatlas-update.js status
 
 The first command checks Node, git, git identity, the user-wide and the project configuration including
 keys Qatlas no longer reads, syntax and basic structure of an existing `team.yaml` (per host `supervisor`,
-`integrator`, `lead` and `worker` with the three profiles), the project knowledge space including root
-README and size budget, `.gitignore`, project instructions and the scaffold of the user library under
+`integrator`, `lead` and `worker` with the three profiles), the project knowledge space including the
+line limit of its reserved files, `.gitignore`, project instructions and the scaffold of the user library under
 `~/qatlas/`. It names missing library parts as a suggestion for `qatlas-core setup`. `team.yaml` is optional
 and never created by Doctor; model and effort availability is checked only by `run` in the current host.
 With an earlier project root, every writing repair stays blocked and points to `qatlas-core update`. The

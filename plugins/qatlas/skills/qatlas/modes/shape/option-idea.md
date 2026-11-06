@@ -36,8 +36,9 @@ The input may have several forms and degrees of maturity:
   relevant to the task, do not carry sensitive raw data forward and archive the original only after the
   documentation and work confirmed from it are safely written.
 
-Read `IDEAS.md` only if the user wants to review, work out or adopt existing ideas. Remove an adopted entry
-only after its lasting content and, where applicable, its tasks exist.
+Read `IDEAS.md` only if the user wants to review, work out or adopt existing ideas; an idea that is to be
+kept without work goes there, or into the draft object of an external binding. Remove an adopted entry only
+after its lasting content and, where applicable, its tasks exist.
 
 ## Judge maturity and think along
 
@@ -58,9 +59,9 @@ work; a user decision needed for the documentation or task maturity stays open u
 
 ## Clarify before cutting
 
-Start at `.qatlas-project/README.md` if it exists and follow only the read conditions that fit the
-initiative. Read the policies in `.qatlas-project/policies/` that touch the initiative; every new
-initiative respects the policies already set. Read a `FRAMEWORK.md` of an affected domain scope when its
+Start at `AGENTS.md` and follow only the read conditions that fit the initiative. Read the reserved files
+of `.qatlas-project/` that touch the initiative, above all `ARCHITECTURE.md` and `CONVENTIONS.md`; every
+new initiative respects what is already set there. Read a `FRAMEWORK.md` of an affected domain scope when its
 README requires it. Also examine existing native instructions, domain documentation, implementation and
 relevant external sources before planning a green field. Weigh statements by native hierarchy, explicit
 scope and subject; where they are found or that they are provided automatically gives them no extra rank.
@@ -93,10 +94,12 @@ do not create a competing documentation tree.
   concrete work and name the plan as their source. When the plan sharpens, change it in place; once its
   tasks are done or dropped, set `status: done`. A single small package without a target state of its own
   needs no plan.
-- **Policies:** Record every final decision the user makes in this run as a policy in
-  `.qatlas-project/policies/`, one on how work in the project is done in `policies/conventions/`. Add it
-  with its necessary reason to the existing policy file of its context, or create one for a new context;
-  the plan links to it instead of repeating it. A policy that the user changes is changed in place.
+- **Decisions:** Work every final decision the user makes in this run, with its necessary reason, into
+  the reserved file of `.qatlas-project/` it concerns: `ARCHITECTURE.md` for how the system is built,
+  `CONVENTIONS.md` for how work is done, `TESTING.md` for how it is checked, `CONTRIBUTING.md` for how
+  changes land, and `AGENTS.md` for what must hold in every session. Create the file with its first entry
+  and add its read condition to `AGENTS.md`; the plan links to it instead of repeating it. A decision the
+  user changes is changed in place.
 - **Domain scope rules:** If a domain scope outside the knowledge space needs lasting working rules,
   particularities or exceptions of its own, propose a `FRAMEWORK.md` next to its README and create it only
   after the user agrees.

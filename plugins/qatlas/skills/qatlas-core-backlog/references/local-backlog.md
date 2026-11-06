@@ -27,7 +27,8 @@ executable on its own in one complete reading:
 
 - Why, result, scope, applicable guardrails, dependencies, current approach and acceptance criteria contain
   only statements that still hold. Work a settled decision in at its proper place and thereby remove
-  outdated alternatives. A decision that binds beyond the task belongs as a policy in `.qatlas-project/policies/`.
+  outdated alternatives. A decision that binds beyond the task is worked into the reserved file of
+  `.qatlas-project/` it concerns, or into `AGENTS.md` if it must hold in every session.
 - For work on an existing system, the task records the execution basis according to the execution maturity
   of the backlog norm.
 - The section `Abschlussbericht` is the only status-dependent handover point. At `review` it holds only the
@@ -107,6 +108,7 @@ subject order. Finished root tasks drop out; projects may keep their build recor
 
 ## Ideas
 
-`IDEAS.md` is the separate inventory of non-binding ideas. It carries no task IDs, date fields or status.
-When an idea deliberately becomes work, first create the complete task or project and then remove the adopted
-idea entry.
+`IDEAS.md` is the separate inventory of non-binding ideas and is created with the first idea. It carries no
+task IDs, date fields or status. When an idea deliberately becomes work, first create the complete task or
+project and then remove the adopted idea entry. With an external planning system there is no `IDEAS.md`;
+ideas go to the draft object the binding names.

@@ -9,8 +9,9 @@ license: MIT
 
 # Integration via pull requests
 
-This procedure applies only when user or project instructions require integration via pull requests, for
-example with a protected control branch; recognize that from these instructions, not by guessing. It changes
+This procedure applies only when `.qatlas-project/CONTRIBUTING.md` or user or project instructions require
+integration via pull requests, for example with a protected control branch; recognize that from these
+instructions, not by guessing. It changes
 no authorization: invoking a mode authorizes neither push nor pull request nor merge; only user or project
 instructions do. If they are missing, the task ends with an integration-ready, locally secured task branch as
 a handover, as described in the handover section (`Übergeben`) of [the git workflow](playbook-git-workflow.md),

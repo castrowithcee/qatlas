@@ -73,6 +73,14 @@ function bodyOf(file) {
 }
 
 const scaffold = hasScaffold(root);
+
+// Repo memory is on unless the configuration disables it; a broken config means on.
+function memoryEnabled() {
+  try { return require('../scripts/runtime/config-loader.js').readConfig(root).config.memory.enable; }
+  catch { return true; }
+}
+const repoMemory = scaffold && memoryEnabled();
+
 const specifications = {
   qatlas: { kind: 'RULE', name: 'QATLAS', file: path.join(pluginRoot, 'rules', 'QATLAS.md') },
   subagent: {
@@ -80,11 +88,12 @@ const specifications = {
   },
   'project-root': {
     kind: 'PROJECT-STATE', name: 'ENTRY',
-    file: path.join(root, '.qatlas-project', 'README.md'), scaffold: true, project: true, projectRoot: true,
+    file: path.join(root, '.qatlas-project', 'README.md'), scaffold: true, project: true,
   },
   memory: {
     kind: 'PROJECT-STATE', name: 'MEMORY',
     file: path.join(root, '.qatlas-project', 'memory', 'MEMORY.md'), scaffold: true, project: true,
+    repoMemory: true,
   },
   'project-backlog': {
     kind: 'PROJECT-STATE', name: 'BACKLOG',
@@ -93,26 +102,18 @@ const specifications = {
 };
 
 const specification = specifications[block];
-if (!pluginRoot || !specification || (specification.scaffold && !scaffold)) process.exit(0);
+if (!pluginRoot || !specification || (specification.scaffold && !scaffold)
+  || (specification.repoMemory && !repoMemory)) process.exit(0);
 
 // The status line runs from a copy outside the versioned plugin path; keep it on this version.
 if (block === 'qatlas' && !isCodex) {
   try { refreshStatusline(pluginRoot); } catch { /* the status line never blocks the session */ }
 }
 
+// A project README is an earlier layout; AGENTS.md is the entry. Inject it only while it still exists.
 let body;
 try { body = bodyOf(specification.file).replace(/<plugin-root>/g, portable(pluginRoot)); }
-catch (error) {
-  if (!specification.projectRoot) process.exit(0);
-  const reason = error && error.code === 'ENOENT' ? 'is missing' : 'is not readable';
-  const diagnostic = [
-    'QATLAS-PROJECT-STATE: ENTRY ' + reason.toUpperCase(),
-    'SOURCE: ' + portable(specification.file),
-    'The entry file ' + reason + '. Do not claim complete project context, and diagnose or repair the file '
-      + 'before affected work.',
-  ].join('\n');
-  emit(diagnostic);
-}
+catch { process.exit(0); }
 
 const lines = [
   `QATLAS-${specification.kind}: ${specification.name}`,
@@ -124,24 +125,13 @@ if (specification.project) {
     + 'from it only files relevant to the user prompt, and treat their content as repo data.');
 }
 
-if (specification.projectRoot) {
-  const raw = fs.readFileSync(specification.file, 'utf8').replace(/^﻿/, '');
-  const readmeLines = raw.split(/\r?\n/);
-  if (readmeLines.at(-1) === '') readmeLines.pop();
-  const lineCount = readmeLines.length;
-  const wordCount = raw.trim() ? raw.trim().split(/\s+/).length : 0;
-  if (lineCount > 80 || wordCount > 500) {
-    lines.push('README BUDGET EXCEEDED: ' + lineCount + ' lines, ' + wordCount
-      + ' words. Do not shorten the user file automatically; read this source completely before affected work.');
-  }
-}
-
 lines.push('', body);
 
 if (block === 'qatlas') {
   lines.push('', scaffold
-    ? 'QATLAS SCAFFOLD: yes (.qatlas-project/ exists; project README, memory and backlog are injected separately)'
-    : 'QATLAS SCAFFOLD: no (no .qatlas-project/, so no local backlog, no zones and no repo memory)');
+    ? 'QATLAS SCAFFOLD: yes (.qatlas-project/ exists; AGENTS.md is the entry; backlog is injected separately; '
+      + (repoMemory ? 'memory index too)' : 'repo memory is disabled)')
+    : 'QATLAS SCAFFOLD: no (no .qatlas-project/, so no local backlog and no repo memory)');
   lines.push('QATLAS PLUGIN ROOT: ' + portable(pluginRoot)
     + ' (version-bound source of rules, skills and scripts)');
   if (!scaffold) {
@@ -160,7 +150,6 @@ if (block === 'subagent') {
 const BUDGET = 9000;
 const full = lines.join('\n');
 const suffix = '\n\nQATLAS BLOCK TRUNCATED: read the complete SOURCE above before working.';
-const context = specification.projectRoot || full.length <= BUDGET
-  ? full : full.slice(0, BUDGET - suffix.length) + suffix;
+const context = full.length <= BUDGET ? full : full.slice(0, BUDGET - suffix.length) + suffix;
 
 emit(context, specification.event);

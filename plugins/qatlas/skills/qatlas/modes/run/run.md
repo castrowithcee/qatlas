@@ -93,7 +93,11 @@ does not automatically become an assignment for a stronger model.
 1. Check the team and select the tasks. Before the first task, check the free space of the file
    system holding the repo against the threshold named in the project instructions, else 5 GB. Below it, run
    the cleanup step for low space named there; if that does not suffice or none is named, do not start and
-   name the concrete obstacle.
+   name the concrete obstacle. If `.qatlas-project/TESTING.md` is missing, derive the checks from manifests,
+   CI configuration and existing instructions and create it per the filing norm with what you can evidence,
+   answering the questions of the [project test
+   strategy](../../references/playbook-acceptance.md#project-test-strategy); what stays unknown keeps the
+   default and goes under `Entscheiden` in the closing block.
 2. Claim exactly one task, have it implemented, accept it and integrate it.
 3. Record side findings before you begin the next selected task.
 4. Repeat selection, implementation and integration until the task limit is reached or a stop condition

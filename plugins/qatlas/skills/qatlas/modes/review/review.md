@@ -31,8 +31,8 @@ Read each one completely at the stated time:
 
 ## Build the queue
 
-1. Determine the planning system and the chosen scope. If `.qatlas-project/README.md` exists, follow only
-   the read conditions relevant to the chosen handoffs.
+1. Determine the planning system and the chosen scope. From `AGENTS.md`, follow only the read conditions
+   relevant to the chosen handoffs.
 2. Read only roster or external metadata first and build the queue from `review` and explicitly open user
    decisions, checks or actions. Mature no drafts and change no task with a running worker.
 3. Read only the queue's tasks fully and gather current state, evidence, open question, recommendation and

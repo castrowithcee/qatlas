@@ -1,10 +1,16 @@
-<!-- Dieses Template wird beim Setup als AGENTS.md ins Nutzer-Repository kopiert. AGENTS.md ist eine native Agentendatei und bleibt deshalb frontmatterfrei. -->
-# <Repo-Name>
+# <repo name>
 
-## Zweck
+## Purpose
 
-Dieses Repository enthält <Zweck in einem konkreten Satz>.
+This repository contains <purpose in one concrete sentence>.
 
-## Projektspezifische Regeln
+## Project knowledge
 
-- Keine weiteren.
+`.qatlas-project/` holds the project's own state. Read the file named here before the work it covers:
+
+- `.qatlas-project/backlog/BACKLOG.md` before any planning or task work.
+- `.qatlas-project/memory/MEMORY.md` at the start of a task, for lasting hints.
+
+## Project rules
+
+- None.

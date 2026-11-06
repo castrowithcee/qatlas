@@ -1,43 +1,46 @@
 ---
 description: >
-  Vorstellung von Qatlas: Zweck, gelöste Probleme, Grundsätze und Ablageorte.
+  Introduction to Qatlas: purpose, problems solved, principles and storage locations.
 type: meta
 edit: locked
 license: MIT
 ---
 
-# Vorstellung
+# Introduction
 
-Qatlas ist eine Arbeitsgrundlage für Coding-Agents wie Claude Code und Codex. Es gibt Agent, Nutzer und
-Projekt eine gemeinsame Struktur, damit Arbeit über Sessions, Agents und Geräte hinweg nachvollziehbar,
-sparsam und sicher bleibt.
+Qatlas is a working foundation for coding agents such as Claude Code and Codex. It gives agent, user and
+project a shared structure, so that work stays traceable, economical and safe across sessions, agents and
+devices.
 
-## Welche Probleme Qatlas löst
+## Which problems Qatlas solves
 
-- **Kontext geht zwischen Sessions verloren.** Projektwissen, Entscheidungen und Memory liegen versioniert
-  im Repo und werden beim Sessionstart als knapper Einstieg geladen.
-- **Agents suchen blind und verbrauchen Kontext.** Eine kaskadische Navigation führt von der Projekt-README
-  gezielt zum nötigen Wissen, statt ganze Bäume zu lesen.
-- **Ablage verwildert.** Dateien erhalten nach festen Regeln Ort, Namen, Kennung und Frontmatter.
-- **Planung zerfasert.** Es gibt genau ein maßgebliches Planungssystem, lokal oder extern, ohne Spiegel.
-- **Parallele Agents kommen sich in die Quere.** Git-Arbeit läuft mit geprüftem Zustand, eigenen Worktrees
-  und sauberen Commits.
-- **Sensibles landet im Repo.** Eine konfigurierbare Schutzprüfung erkennt Secrets und personenbezogene
-  Daten vor dem Commit.
+- **Context is lost between sessions.** Project knowledge, decisions and memory live versioned in the repo
+  and are loaded at session start as a lean entry.
+- **Agents search blindly and burn context.** A cascading navigation leads from `AGENTS.md` to the needed
+  knowledge instead of reading whole trees.
+- **Filing goes wild.** Files get place, name, ID and frontmatter by fixed rules, and the project's own
+  state lives in reserved files with one mission each instead of invented folders.
+- **Planning frays.** There is exactly one authoritative planning system, local or external, without a
+  mirror.
+- **Parallel agents get in each other's way.** Git work runs with a checked state, own worktrees and clean
+  commits.
+- **Sensitive data lands in the repo.** A configurable protection check detects secrets and personal data
+  before the commit.
 
-## Grundsätze
+## Principles
 
-- Was im Repo steht, beschreibt die Realität des Nutzers. Nutzer- und Projektvorgaben haben Vorrang.
-- Regeln und Sessionkontext wirken passiv; Werkzeuge und Arbeitsschleifen starten nur auf Aufruf.
-- Qatlas erklärt und ordnet, entscheidet aber nicht für den Nutzer.
+- What the repo says describes the user's reality. User and project instructions take precedence.
+- Rules and session context act passively; tools and work loops start only on invocation.
+- Qatlas explains and orders, but does not decide for the user.
 
-## Wo Qatlas Dinge ablegt
+## Where Qatlas keeps things
 
-| Ort | Inhalt |
+| Place | Content |
 |---|---|
-| `.qatlas-project/` im Repo | Projektzustand: README als Einstieg, Entscheidungen, Konventionen, Wissen, Memory, Backlog-Wegweiser sowie `zone-import/` und `zone-export/` als flüchtige Puffer |
-| `.qatlas/plugins/` im Repo | Projektkonfiguration und Prüfstand der Plugin-Updates |
-| `~/qatlas/` | Nutzereigene Bibliothek mit globaler Arbeitsvereinbarung in `AGENTS.qatlas.md` |
-| `~/.qatlas/` | Technischer Zustand wie globale Konfiguration, Statusline und Worktrees |
+| `.qatlas-project/` in the repo | project state: the reserved files `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md` and `CONTRIBUTING.md`, knowledge, memory, the backlog signpost and `zone-import/` and `zone-export/` as transient buffers |
+| `.qatlas/plugins/` in the repo | project configuration and the check state of plugin updates |
+| `~/qatlas/` | the user's own library with the global working agreement in `AGENTS.qatlas.md` |
+| `~/.qatlas/` | technical state such as global configuration, status line and worktrees |
 
-`AGENTS.md` im Repo bleibt die native Projektanweisung und enthält nur Zweck und projektspezifische Regeln.
+`AGENTS.md` in the repo stays the native project instruction: purpose, project rules and the read
+conditions that point into `.qatlas-project/`.
