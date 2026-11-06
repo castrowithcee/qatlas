@@ -756,6 +756,8 @@ async function wait() {
       detectLocked(repo, () => { recordExits(repo); recordStale(repo, stale); recordDisk(repo, minFree); recordHealth(repo, health, code); });
     }
     const all = events(repo);
+    // A new run starts a new log, so an old cursor would match nothing and wait would hang silently.
+    if (since > all.length) fail(`--since ${since} is past the end of the event log (${all.length} events); a new run started a new log, pass --since 0`, 2);
     const last = role === 'integrator' ? lastSignals(all) : null;
     const hits = all.filter(e => e.seq >= since && wakes.has(e.type) && (!last || last.get(e.pane) === e));
     if (hits.length) return out({ events: hits, cursor: all.length, timeout: false });

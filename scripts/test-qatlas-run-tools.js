@@ -1037,6 +1037,10 @@ try {
     // The consumers' cursors are independent: the integrator's cursor loses nothing for the supervisor.
     assert.strictEqual(integ.cursor, log().length);
     assert.strictEqual(log().length, before);
+    // A cursor past the end of the log (from an earlier run) fails instead of waiting silently.
+    const past = run('wait', '--since', String(log().length + 1), '--timeout', '0.01', '--min-free', '1000000000');
+    assert.strictEqual(past.status, 2);
+    assert.match(String(past.stderr), /past the end of the event log/);
     // Integrator wait writes no detection events: c is gone, b stale, disk low, none of it is written.
     const panes = Object.fromEntries(ok('list').panes.map(x => [x.package || x.role, x.pane]));
     assert.strictEqual(count('stale'), 0);
