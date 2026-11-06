@@ -24,7 +24,8 @@ Read each one completely at the stated time:
    [the commit boundary](../../../qatlas-core-git/references/commit-boundaries.md) and [the worktree
    contract](../../../qatlas-work/references/worktree-contract.md).
 2. **For integration via pull requests, before the first integration:** [integration via pull
-   requests](../../references/playbook-git-pr.md).
+   requests](../../references/playbook-git-pr.md), for a GitHub repo with `gh` also [pull requests on
+   GitHub](../../references/playbook-git-pr-github.md).
 
 ## Communication
 
@@ -65,19 +66,17 @@ until its `integrated`. Integrate handovers one at a time and log every integrat
    count as a correction attempt. If a worker ran with another model or effort than its profile in
    `team.yaml`, log that as `abweichung`; it is not a reason for correction.
 2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. If the code lies in a repo other than
-   the control root, pass it with `--repo <code-repo>` here and to `land`; `<basis>` and the control branch
+   the control root, pass it with `--repo <code-repo>` here and to the landing; `<basis>` and the control branch
    then refer to that repo. A conflict, including one that arises when catching up with the base later, you
    return as `rework <reason with files>`; it does not count as a correction attempt. Never resolve conflicts
    yourself. Only if the lead is no longer available do you secure the task as a handover to `review`
    per the git workflow.
 3. Without a conflict, integrate per the git workflow, and for integration via pull requests per [integration
-   via pull requests](../../references/playbook-git-pr.md) with `land --pr <n> --report <file>` of
-   `qatlas-run-tools.js`; the lead opened the pull request. `land` checks the head, waits for CI like
-   `ci-wait`, squash-merges, proves the squash and deletes the remote branch. Which local checks remain is
-   decided by [Evidence and delta checks](#evidence-and-delta-checks); without a declaration there, check
-   locally only the affected areas via `slot --priority` and leave the full breadth to CI. If `land` ends
-   with exit 8 (`no-ci`), test the merged state yourself with the project tests via `slot`, or take over a
-   valid evidence per the same section, and call `land … --no-ci`. You treat a known or new flake by its rule
+   via pull requests](../../references/playbook-git-pr.md) by landing the pull request the lead opened.
+   Which local checks remain is decided by [Evidence and delta checks](#evidence-and-delta-checks); without
+   a declaration there, check locally only the affected areas via `slot --priority` and leave the full
+   breadth to CI. Without CI, test the merged state yourself with the project tests via `slot`, or take over
+   a valid evidence per the same section, before landing. You treat a known or new flake by its rule
    in [accepting and integrating](../../references/playbook-acceptance.md). Without pull requests, you run
    the shared checks yourself, as that section narrows. Every command that the project instructions assign
    to an exclusive resource runs via `slot --resource <name> -- <command>`. You integrate tasks spanning
@@ -89,10 +88,9 @@ until its `integrated`. Integrate handovers one at a time and log every integrat
 When you integrate via pull requests, the handed-over pull request is already open with green CI; you open
 none yourself. If a merge queue is active, enqueue it immediately; the queue manages base and order. Without
 a merge queue, you merge individually. If the base has changed since the CI run and branch protection
-requires an up-to-date state, catch up with the base yourself without conflict, for example via GitHub's
-branch update, and wait for CI again; `land` then accepts the remote head. You return a conflict as in
-step 2. In this case integration stays serially bound to the CI duration; name that as a bottleneck with
-`log --type risiko`. Without pull requests, a conflict likewise goes back as `rework`.
+requires an up-to-date state, catch up with the base yourself without conflict and wait for CI again. You
+return a conflict as in step 2. In this case integration stays serially bound to the CI duration; name that
+as a bottleneck with `log --type risiko`. Without pull requests, a conflict likewise goes back as `rework`.
 
 ## Evidence and delta checks
 
@@ -105,7 +103,7 @@ Without any declaration, run the shared checks as step 3 says and skip none.
 - **Same tree:** if the tree of the `probe` result (for a fast-forward, the tree of the branch) equals the
   `tree` of a green (`exit: 0`) entry in the handover's `checks`, and `slot results --tree <tree>` shows a
   matching record (or the project-named path of the entry passes the project's tree check), take the
-  evidence over without a new run. Without CI, `land --no-ci` is then allowed; with green CI on the same
+  evidence over without a new run. Without CI, landing is then allowed; with green CI on the same
   head, drop the local `slot --priority` check.
 - **Different tree:** run the fast shared checks fully via `slot`. Run an expensive check only if `git diff
   --name-only <merge-base of task branch and basis> <current basis>` touches one of its path areas. Log every
@@ -115,12 +113,7 @@ Without any declaration, run the shared checks as step 3 says and skip none.
   log it with `log --type risiko` and name it in the closing under `Decide`; the supervisor records a
   draft for it. Tasks already integrated stay as they are.
 
-`land` deletes the remote branch itself once it has proven the squash; the authorization for push and merge
-covers it. Clean up local worktrees and branches per the worktree contract, with the `proof` result of `land`
-as squash evidence. If a merge queue is active, `land` does not apply; delete the remote branch there per the
-worktree contract after the queue has merged, with the Qatlas MCP broker if it offers a suitable operation,
-otherwise `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` or `git push origin --delete
-<branch>`.
-
-If the project requires pull request operations through a Qatlas broker connection, you perform the steps of
-`land` through it instead of calling `land`.
+Landing deletes the remote branch once the squash is proven; the authorization for push and merge covers it.
+Clean up local worktrees and branches per the worktree contract, with the squash proof of the landing as
+evidence. If a merge queue is active, delete the remote branch per the worktree contract after the queue has
+merged.

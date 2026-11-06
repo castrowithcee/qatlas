@@ -34,10 +34,11 @@ describes. Before every commit, run the protection check as its own command and 
 before you commit.
 
 For integration via pull requests you take the lead's part of [integration via pull
-requests](../../references/playbook-git-pr.md): run `cut` before the first push, push only your own task
-branch (never force), open the pull request, wait with `ci-wait`, fix a red CI yourself with follow-up
-commits and hand over only after green CI. Where the project has no CI (`ci-wait` exit 8), the green
-complete local test is the evidence.
+requests](../../references/playbook-git-pr.md), for a GitHub repo with `gh` with [its
+helpers](../../references/playbook-git-pr-github.md): run `cut` before the first push, push only your own
+task branch (never force), open the pull request, wait for CI, fix a red CI yourself with follow-up commits
+and hand over only after green CI. Where the project has no CI, the green complete local test is the
+evidence.
 
 Hand over every checked task with `node <script> handover --repo <repo-root> --package <package> --task <id>
 --report <file>`; if the code lies in a repo other than the control root, add `--code-repo <absolute path>`

@@ -77,10 +77,10 @@ another authority. Never mirror an external system into local tasks, and never c
 is not reachable. If the entry loaded at session start and the task contract are not enough, open further
 project knowledge by [the navigation](../qatlas-core-navigation/SKILL.md).
 
-A concrete Qatlas tool operation is permitted in no mode by its invocation alone, but only when the current
-user assignment, the authoritative task contract, or an applicable global or project-local agent file sets
-effect, connection, target area, and limits separately and unambiguously. Use the configured Qatlas MCP
-broker and its available tool descriptions for this.
+An operation with an effect outside the repo and the planning system is permitted in no mode by its
+invocation alone, but only when the current user assignment, the authoritative task contract, or an
+applicable global or project-local agent file sets effect, target area, and limits separately and
+unambiguously.
 
 A task takes over the policies and requirements that apply to its subject as concrete
 instructions and verifiable acceptance. Source links serve verification and do not replace these

@@ -28,13 +28,13 @@ several-leads section of [Parallel work in a run](../../references/git-parallel.
 the status `done` belong exclusively to it; project instructions that allow a `run` to merge apply in the team
 only to the integrator. The supervisor is the dispatcher: it cuts packages, writes `plan`, replenishes,
 monitors, answers questions (also those of the integrator) and never integrates. For integration via pull
-requests, a lead may push its own task branch and open its pull request, through `gh` or the broker connection
-the project requires; without such a requirement a lead pushes nothing. Leads claim their tasks in the
-planning system as that several-leads section prescribes, but never set `done`.
+requests, a lead may push its own task branch and open its pull request; without such a requirement a lead
+pushes nothing. Leads claim their tasks in the planning system as that several-leads section prescribes, but
+never set `done`.
 
 The control script is `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tmux.js`;
-`<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. The helper commands `probe`,
-`ci-wait` and `slot` are provided by `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js`. Touch
+`<plugin-root>` is the `QATLAS PLUGIN ROOT` named in the session context. The helper commands `probe` and
+`slot` are provided by `node <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js`. Touch
 lead panes only through the control script; writing into a pane is allowed only via `nudge`, never
 send keystrokes by other means.
 `wait`, `ask` and `handover` block until their `--timeout`; set the host's command timeout above it.
@@ -70,7 +70,8 @@ Read each one completely at the stated time:
 2. **When `team.yaml` is invalid, a model looks doubtful or the user wants to set it up:** [setting up the
    team](../../references/playbook-team.md).
 3. **If user or project instructions require pull requests, before the first lead:** [integration via
-   pull requests](../../references/playbook-git-pr.md).
+   pull requests](../../references/playbook-git-pr.md), for a GitHub repo with `gh` also [pull requests on
+   GitHub](../../references/playbook-git-pr-github.md).
 4. **When the integrator has to be restarted, replaced or taken over (the supervisor does not read it
    otherwise):** [the integrator playbook](integrator.md).
 5. **Before the first question to the user or the final report:** [presenting
@@ -100,15 +101,8 @@ Read each one completely at the stated time:
    `claude` for Claude Code, `codex` for Codex. The default is your own host; a run directive may assign
    packages to another host.
 4. Recognize from user and project instructions whether they require integration via pull requests; if so,
-   [integration via pull requests](../../references/playbook-git-pr.md) applies. In that case, check whether
-   a merge queue is active in the target repo, whether branch protection requires an up-to-date state before
-   the merge, whether `gh` is available and logged in, and whether the leads can push their task branches
-   and open pull requests with that login. If `gh`, its login or the authorization for push, pull request
-   and merge is missing, do not start and clarify it with the user. If project instructions
-   require pull request operations through a Qatlas broker connection, check with `qatlas.search` and
-   `qatlas.describe` before the first lead that the connection exists and offers creating and merging
-   pull requests; otherwise do not start. In that case the leads open their pull requests through it, and
-   the integrator performs the steps of `land` through the broker instead of calling `land`.
+   [integration via pull requests](../../references/playbook-git-pr.md) applies, including its check of the
+   platform means before the first lead.
 5. Before the first lead, clear the stored test results of the previous run with `node
    <plugin-root>/skills/qatlas/scripts/qatlas-run-tools.js slot results --clear --repo <code-repo>`, where
    `<code-repo>` is the repo holding the code.

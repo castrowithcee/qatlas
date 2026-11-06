@@ -63,7 +63,8 @@ Read each one completely at the stated time:
 8. **When in doubt about commit cutting and before a checkpoint:**
    [the commit boundary](../../../qatlas-core-git/references/commit-boundaries.md).
 9. **If user or project instructions require pull requests, before the first push:** [integration via pull
-   requests](../../references/playbook-git-pr.md).
+   requests](../../references/playbook-git-pr.md), for a GitHub repo with `gh` also [pull requests on
+   GitHub](../../references/playbook-git-pr-github.md).
 10. **Before the final report:** [the closing block](../../references/playbook-closing-block.md) and
     [presenting decisions](../../references/playbook-decision-card.md).
 
