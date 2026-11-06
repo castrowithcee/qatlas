@@ -133,25 +133,38 @@ function testProjectContext() {
 
   const missing = fixture('context-missing');
   fs.mkdirSync(path.join(missing.project, '.qatlas-project'));
-  assert.ok(hookOutput(missing, 'project-root').includes('ENTRY IS MISSING'));
+  assert.strictEqual(hookOutput(missing, 'project-root'), '', 'A missing entry yields no output.');
   assert.deepStrictEqual(fs.readdirSync(path.join(missing.project, '.qatlas-project')), [],
     'The session start writes nothing into the repo.');
 
   const unreadable = fixture('context-unreadable');
   fs.mkdirSync(path.join(unreadable.project, '.qatlas-project', 'README.md'), { recursive: true });
-  assert.ok(hookOutput(unreadable, 'project-root').includes('ENTRY IS NOT READABLE'));
+  assert.strictEqual(hookOutput(unreadable, 'project-root'), '', 'An unreadable entry yields no output.');
+  assert.deepStrictEqual(fs.readdirSync(path.join(unreadable.project, '.qatlas-project')), ['README.md']);
 
   const long = fixture('context-long');
   write(path.join(long.project, '.qatlas-project', 'README.md'),
     Array.from({ length: 82 }, (_, index) => 'Line ' + index).join('\n') + '\nEND-OF-FILE\n');
   const longOutput = hookOutput(long, 'project-root');
-  assert.ok(longOutput.includes('README BUDGET EXCEEDED'));
-  assert.ok(longOutput.includes('END-OF-FILE'));
+  assert.ok(longOutput.includes('END-OF-FILE'), 'A README within the block budget is injected completely.');
+  assert.ok(!longOutput.includes('README BUDGET EXCEEDED'));
+  assert.ok(!longOutput.includes('QATLAS BLOCK TRUNCATED'));
 
-  const exact = fixture('context-exact-budget');
-  write(path.join(exact.project, '.qatlas-project', 'README.md'),
-    Array.from({ length: 80 }, (_, index) => 'Line ' + index).join('\n') + '\n');
-  assert.ok(!hookOutput(exact, 'project-root').includes('README BUDGET EXCEEDED'));
+  const huge = fixture('context-huge');
+  write(path.join(huge.project, '.qatlas-project', 'README.md'),
+    Array.from({ length: 1200 }, (_, index) => 'Line ' + index).join('\n') + '\nEND-OF-FILE\n');
+  const hugeOutput = hookOutput(huge, 'project-root');
+  assert.ok(hugeOutput.includes('QATLAS BLOCK TRUNCATED'));
+  assert.ok(!hugeOutput.includes('END-OF-FILE'));
+
+  const disabled = fixture('context-memory-off');
+  write(path.join(disabled.project, '.qatlas-project', 'memory', 'MEMORY.md'), '# Memory\n');
+  write(path.join(disabled.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), '# Backlog\n');
+  write(path.join(disabled.project, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\nmemory:\n  enable: false\n');
+  assert.strictEqual(hookOutput(disabled, 'memory'), '', 'Disabled repo memory is not injected.');
+  assert.ok(hookOutput(disabled, 'project-backlog').includes('# Backlog'));
+  assert.ok(hookOutput(disabled, 'qatlas').includes('repo memory is disabled'));
+  assert.ok(hookOutput(f, 'qatlas').includes('memory index too'));
 
   const ambient = fixture('context-ambient');
   assert.ok(hookOutput(ambient, 'qatlas').includes('QATLAS SCAFFOLD: no'));
@@ -205,9 +218,9 @@ function testDoctorSetupAndUpdateState() {
   const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
   const first = runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(first.status, 0, first.stderr);
-  assert.ok(fs.existsSync(path.join(f.project, '.qatlas-project', 'README.md')));
-  assert.ok(fs.existsSync(path.join(f.project, '.qatlas-project', 'zone-import', '.gitkeep')));
-  assert.ok(fs.existsSync(path.join(f.project, '.qatlas-project', 'zone-export', '.gitkeep')));
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-project')).sort(), ['backlog', 'memory']);
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-project', 'backlog')), ['BACKLOG.md']);
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-project', 'memory')), ['MEMORY.md']);
   assert.ok(fs.existsSync(path.join(f.project, '.qatlas', 'plugins', 'updates', 'state.json')));
   assert.strictEqual(fs.existsSync(path.join(f.project, '.qatlas', 'plugins', 'config.yaml')), false,
     'A project configuration arises only on request.');
@@ -221,13 +234,19 @@ function testDoctorSetupAndUpdateState() {
   assert.strictEqual(second.status, 0, second.stderr);
   assert.ok(!second.stdout.includes('CREATED'), second.stdout);
   assert.ok(fs.readFileSync(backlog, 'utf8').includes('https://example.invalid/project'));
-  assert.deepStrictEqual(fs.readdirSync(path.dirname(backlog)).sort(), ['BACKLOG.md', 'IDEAS.md']);
+  assert.deepStrictEqual(fs.readdirSync(path.dirname(backlog)).sort(), ['BACKLOG.md']);
 
-  fs.rmSync(path.join(f.project, '.qatlas-project', 'memory'), { recursive: true });
+  const memoryDir = path.join(f.project, '.qatlas-project', 'memory');
+  fs.rmSync(memoryDir, { recursive: true });
   const third = runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(third.status, 0, third.stderr);
-  assert.strictEqual(fs.existsSync(path.join(f.project, '.qatlas-project', 'memory')), false,
-    'A deliberately removed functional folder is not recreated.');
+  assert.ok(fs.existsSync(path.join(memoryDir, 'MEMORY.md')), 'With repo memory enabled, the index seed is restored.');
+
+  fs.rmSync(memoryDir, { recursive: true });
+  write(path.join(f.project, '.qatlas', 'plugins', 'config.yaml'), 'format: 1\nmemory:\n  enable: false\n');
+  const fourth = runNode(doctor, ['--apply', '--target', f.project], { cwd: f.project, home: f.home });
+  assert.strictEqual(fourth.status, 0, fourth.stderr);
+  assert.strictEqual(fs.existsSync(memoryDir), false, 'With repo memory disabled, no memory folder is created.');
 }
 
 function testEarlierProjectRoot() {
