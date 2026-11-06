@@ -45,6 +45,12 @@ Assign every file its target folder, name and type, plus the frontmatter delta:
 | a task | keeps its name and folder under the backlog contract |
 | the memory index | `memory/MEMORY.md` with `type: meta` |
 
+Existing check statements of a test strategy move into `TESTING.md` verbatim. Add only what the project
+evidences (scripts and their header documentation, help texts, CI configuration, task contracts) or the user
+answers; invent no command. Check every moved command chain against the header documentation of its scripts
+for executability. A statement that cannot be evidenced or executed goes to the user as a question in the
+approval of the update and is not written.
+
 Derive the slug from the old name without prefix and ID. Frontmatter delta: set the target `type` and its
 default `edit` unless the found `edit` is stricter; remove `version`, `created` and `updated`;
 remove `status` outside tasks, plans and project heads as well as `supersedes` and `superseded_by`. A file

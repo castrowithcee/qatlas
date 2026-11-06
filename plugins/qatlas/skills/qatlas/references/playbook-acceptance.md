@@ -63,11 +63,14 @@ The strategy answers these questions:
    valid (`slot --max-age <hours>`)?
 5. Which flake rule applies?
 6. Which checks occupy an exclusive resource (`slot --resource <name>`), and how many test slots may the
-   project use (`slot --slots <count>`, at most the device capacity)?
+   project use (`slot --slots <count>`, at most the device capacity)? Slots and exclusive resources are
+   device-wide, so other projects on the same device count; the capacity from `team.yaml` is the device limit.
 7. Which checks must be green before a commit, and which coverage does the project expect?
 8. Who checks the merged state: the lead before the handover on the caught-up base (default), or the
    integrator after the merge? If the base has moved, does the handover go back as `rework` (default), or
    does a delta rule apply with the long check once at the end of the run?
+9. What happens on problems: with a red task test, a broken test environment and a defective test itself, who
+   repairs, what is aborted, and what is recorded as a draft in the planning system?
 
 ## At most two corrections
 
