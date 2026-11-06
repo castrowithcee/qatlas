@@ -63,38 +63,47 @@ until its `integrated`. Integrate handovers one at a time and log every integrat
    rule](../../references/playbook-acceptance.md). With pull requests, `handover` has already checked that
    the branch carries one non-merge commit, or a `cut-exception`. If that exception does not hold in the
    sense of the commit boundary, return the handover as `rework <cut>` with the required cut; that does not
-   count as a correction attempt. If a worker ran with another model or effort than its profile in
-   `team.yaml`, log that as `abweichung`; it is not a reason for correction.
-2. Probe conflicts with `probe --branch <task-branch> --base <basis>`. If the code lies in a repo other than
-   the control root, pass it with `--repo <code-repo>` here and to the landing; `<basis>` and the control branch
-   then refer to that repo. A conflict, including one that arises when catching up with the base later, you
-   return as `rework <reason with files>`; it does not count as a correction attempt. Never resolve conflicts
-   yourself. Only if the lead is no longer available do you secure the task as a handover to `review`
-   per the git workflow.
-3. Without a conflict, integrate per the git workflow, and for integration via pull requests per [integration
-   via pull requests](../../references/playbook-git-pr.md) by landing the pull request the lead opened.
-   Which local checks remain is decided by [Evidence and delta checks](#evidence-and-delta-checks); without
-   a declaration there, check locally only the affected areas via `slot --priority` and leave the full
-   breadth to CI. Without CI, test the merged state yourself with the project tests via `slot`, or take over
-   a valid evidence per the same section, before landing. You treat a known or new flake by its rule
-   in [accepting and integrating](../../references/playbook-acceptance.md). Without pull requests, you run
-   the shared checks yourself, as that section narrows. Every command that the project instructions assign
+   count as a correction attempt, and neither does `rework base moved` (step 3). If a worker ran with
+   another model or effort than its profile in `team.yaml`, log that as `abweichung`; it is not a reason for
+   correction.
+2. Probe conflicts with `probe --branch <task-branch> --base <basis>` against the current base. If the code
+   lies in a repo other than the control root, pass it with `--repo <code-repo>` here and to the landing;
+   `<basis>` and the control branch then refer to that repo. A conflict, including one that arises when
+   catching up with the base later, you return as `rework <reason with files>`; it does not count as a
+   correction attempt. Never resolve conflicts yourself. Only if the lead is no longer available do you
+   secure the task as a handover to `review` per the git workflow.
+3. The lead has merged the base and checked exactly that state. Without a conflict:
+   - **Base unmoved** since the lead's merge (the landing is a fast-forward of the branch, same tree): take
+     over the evidence per [Evidence and delta checks](#evidence-and-delta-checks) and land per the git
+     workflow, for integration via pull requests per [integration via
+     pull requests](../../references/playbook-git-pr.md) by landing the pull request the lead opened. Run no
+     long check of your own.
+   - **Base moved:** return `answer … --answer "rework base moved: <sha>"` with the current base; the lead
+     merges again and checks again. That is no correction attempt. If the project's strategy allows the delta
+     rule, apply it instead as the section below describes.
+   Without CI and without valid evidence, test the merged state yourself with the project tests via `slot`
+   before landing. You treat a known or new flake by its rule in [accepting and
+   integrating](../../references/playbook-acceptance.md). Every command that the project instructions assign
    to an exclusive resource runs via `slot --resource <name> -- <command>`. You integrate tasks spanning
    several repos per the git workflow.
+   After a `rework base moved` you land no other handover until the affected lead has handed over again and
+   that handover has landed. Take handovers in order of arrival otherwise. If that lead ends first (`FERTIG`
+   or `exited`), the precedence lapses. Other leads keep working; only their landing waits.
 4. If it is the last handover of the task, afterwards close it in the planning system and set it to `done`.
    Reply with `answer … --answer "integrated <sha>"`, where `<sha>` is the integration commit on the control
    branch.
 
 When you integrate via pull requests, the handed-over pull request is already open with green CI; you open
 none yourself. If a merge queue is active, enqueue it immediately; the queue manages base and order. Without
-a merge queue, you merge individually. If the base has changed since the CI run and branch protection
-requires an up-to-date state, catch up with the base yourself without conflict and wait for CI again. You
-return a conflict as in step 2. In this case integration stays serially bound to the CI duration; name that
-as a bottleneck with `log --type risiko`. Without pull requests, a conflict likewise goes back as `rework`.
+a merge queue, you merge individually. If the base has changed since the lead's merge and CI run, answer
+`rework base moved` as in step 3, so that the lead merges and CI runs again on that state. You return a
+conflict as in step 2. Integration stays serially bound to the CI duration of the lead's merge; name that as
+a bottleneck with `log --type risiko`. Without pull requests, a conflict likewise goes back as `rework`.
 
 ## Evidence and delta checks
 
-The integrator never re-runs what a valid evidence already proves. What counts as evidence follows the
+The integrator never re-runs what a valid evidence already proves; the long check of a task runs once, with
+the lead on the merged state. What counts as evidence follows the
 [project test strategy](../../references/playbook-acceptance.md#project-test-strategy). The project's native
 instructions may declare tiers, for example the fast shared checks and, per expensive check, its command and
 path areas (path prefixes or git pathspecs). An expensive check without areas counts as affected everywhere.
@@ -105,9 +114,11 @@ Without any declaration, run the shared checks as step 3 says and skip none.
   matching record (or the project-named path of the entry passes the project's tree check), take the
   evidence over without a new run. Without CI, landing is then allowed; with green CI on the same
   head, drop the local `slot --priority` check.
-- **Different tree:** run the fast shared checks fully via `slot`. Run an expensive check only if `git diff
-  --name-only <merge-base of task branch and basis> <current basis>` touches one of its path areas. Log every
-  skipped check with `log --type skipped --task <id> --text "<check and reason>"`.
+- **Different tree (base moved):** the default is `rework base moved: <sha>` as step 3 says. Only if the
+  project's test strategy allows the delta rule: run the fast shared checks fully via `slot`, and run an
+  expensive check only if `git diff --name-only <merge-base of the lead's merge and the current basis>
+  <current basis>` touches one of its path areas; otherwise answer `rework base moved`. Log every skipped
+  check with `log --type skipped --task <id> --text "<check and reason>"`.
 - **Final check:** after the last integration of the run and before the integrator's `done`, run once via
   `slot` on the final state every expensive check that was skipped at least once in this run. If it is red,
   log it with `log --type risiko` and name it in the closing under `Decide`; the supervisor records a

@@ -1068,6 +1068,17 @@ try {
     fs.utimesSync(lock, old, old);
     ok('wait', '--since', '0', '--timeout', '0.01', '--min-free', '1000000000');
     assert.ok(!fs.existsSync(lock));
+    // report: a "rework base moved" answer counts as baseRework, any other rework as a correction.
+    const handA = (text, timeout) => ok('handover', '--package', 'a', '--task', 't1', '--report', text, '--timeout', timeout);
+    ok('answer', '--package', 'a', '--answer', 'rework base moved: abc123');
+    assert.strictEqual(handA('report text', '5').answer, 'rework base moved: abc123');
+    handA('report 2', '0.01');
+    ok('answer', '--package', 'a', '--answer', 'rework fix it');
+    assert.strictEqual(handA('report 2', '5').answer, 'rework fix it');
+    handA('report 3', '0.01');
+    const t1 = ok('report').tasks.t1;
+    assert.strictEqual(t1.baseRework, 1);
+    assert.strictEqual(t1.rework, 1);
     // report: the integrator is a role, not a package.
     const rep = ok('report');
     assert.deepStrictEqual(Object.keys(rep.packages).sort(), ['a', 'b', 'c']);

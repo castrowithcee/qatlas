@@ -1030,7 +1030,7 @@ function report() {
     }
     if (Object.hasOwn(log, e.type)) log[e.type]++;
     if (!e.task) continue;
-    const t = tasks[e.task] ||= { package: e.package || null, durchlaufzeit: null, wartezeit: null, rework: 0, handovers: 0 };
+    const t = tasks[e.task] ||= { package: e.package || null, durchlaufzeit: null, wartezeit: null, rework: 0, baseRework: 0, handovers: 0 };
     if (e.type === 'handover') {
       if (!t.handovers++) {
         const from = Math.max(pkg?.start ?? -Infinity, lastIntegrated[e.package] ?? -Infinity);
@@ -1040,6 +1040,8 @@ function report() {
     } else if (e.type === 'answer' && /^integrated\b/.test(e.text || '')) {
       if (t.lastHandover !== undefined) t.wartezeit = secs(time(e) - t.lastHandover);
       lastIntegrated[e.package] = time(e);
+    } else if (e.type === 'answer' && /^rework base moved\b/.test(e.text || '')) {
+      t.baseRework++;
     } else if (e.type === 'answer' && /^rework\b/.test(e.text || '')) {
       t.rework++;
     }

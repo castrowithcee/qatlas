@@ -65,6 +65,9 @@ The strategy answers these questions:
 6. Which checks occupy an exclusive resource (`slot --resource <name>`), and how many test slots may the
    project use (`slot --slots <count>`, at most the device capacity)?
 7. Which checks must be green before a commit, and which coverage does the project expect?
+8. Who checks the merged state: the lead before the handover on the caught-up base (default), or the
+   integrator after the merge? If the base has moved, does the handover go back as `rework` (default), or
+   does a delta rule apply with the long check once at the end of the run?
 
 ## At most two corrections
 

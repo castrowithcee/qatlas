@@ -58,6 +58,9 @@ license: MIT
   open pull request with green CI, or without CI one with a green complete test. With the handover, ownership
   of the task passes to the integration owner; the owner sets `done` only after integration and evidence on
   the control branch. The integration owner serializes the merges; a lead pushes only its own task branches.
+- Before a handover the lead merges the current control branch into its task branch (never a rebase),
+  resolves conflicts itself and checks exactly that merged state; the owner takes over this evidence. If the
+  control branch has moved since, the owner returns the handover and the lead merges again.
 - For the other leads, a change to the control branch by the designated integration owner is not a foreign
   modification. Any other change there stops every participant before its next claim or integration.
 - If a claim is unclear, a task is claimed by an unknown lead, or integration ownership is not established,
