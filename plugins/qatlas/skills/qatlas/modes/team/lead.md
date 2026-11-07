@@ -22,15 +22,13 @@ Without pull request integration you push nothing. In the primary working tree y
 commit anything.
 
 If `<basis>` is an `origin/…` ref, fetch it fresh with `git fetch` before every use. Create one worktree
-per task from `<basis>`. Before every handover, merge the current `<basis>` into the task branch with `git
-merge` (never rebase), resolve any conflict yourself and check exactly that state: the checks the [project
-test strategy](../../references/playbook-acceptance.md#project-test-strategy) names for a handover, without a
-strategy full tests via `node <tools> slot -- <test command>`. The `tree` of every `checks` entry is the tree
-of the merge commit you hand over. Pass the project's values as `--max-age`, `--input` and `--slots`. Every
-command that the project instructions assign to an exclusive resource runs via `node <tools> slot
---resource <name> -- <command>`. If the integrator answers `rework base moved: <sha>`, the base advanced
-after your merge: merge it again, check the new state and hand over again; that is no correction attempt.
-A conflict with the base comes back as `rework` with the files.
+per task from `<basis>`. You do not merge the current `<basis>` into the task branch before a handover; the
+state you hand over is the one on which the complete check was green: the checks the [project test
+strategy](../../references/playbook-acceptance.md#project-test-strategy) names for a handover, without a
+strategy full tests via `node <tools> slot -- <test command>`. Pass the project's values as `--max-age`,
+`--input` and `--slots`. Every command that the project instructions assign to an exclusive resource runs
+via `node <tools> slot --resource <name> -- <command>`. A conflict with the base comes back from the
+integrator as `rework`.
 Start every worker with a profile as [checking the team](../../references/playbook-team-config.md)
 describes. Before every commit, run the protection check as its own command and evaluate its exit code
 before you commit.
