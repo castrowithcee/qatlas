@@ -34,9 +34,9 @@ anzulegen. Prüfe und sichere jeden Meilenstein vor dem nächsten Auftrag und la
 bestätigten Stand aufbauen. Gib einem unabhängigen Meilenstein oder einem vorbereitenden mechanischen
 Refactoring nach der Commit-Grenze der Git-Norm mindestens einen eigenen Commit und bei Integration über Pull
 Requests mit Squash-Merge einen eigenen Pull Request. Enthält der Task dagegen in sich geschlossene
-Ergebnisse, deren Grenzen, Reihenfolge oder Abnahme der Vertrag noch nicht klärt, setze ihn nach der
-Reifeprüfung auf `draft` und halte die offene Zuschnittsfrage am bestehenden Ort für ein späteres, vom Nutzer
-gestartetes `shape` fest. Erfinde die fehlende Planung nicht im Lauf.
+Ergebnisse, deren Grenzen, Reihenfolge oder Abnahme der Vertrag noch nicht klärt, setze ihn auf `draft` und
+halte die offene Zuschnittsfrage am bestehenden Ort für ein späteres, vom Nutzer gestartetes `shape` fest.
+Erfinde die fehlende Planung nicht im Lauf.
 
 Wähle für jeden Auftrag ein Profil, zuerst `light`: ein enger Auftrag mit klarem Vorgehen und direkter
 Prüfung. Nimm `standard` bei mehreren abhängigen Schritten oder technischen Abwägungen und `demanding` für eine
