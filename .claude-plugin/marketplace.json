@@ -1,0 +1,11 @@
+{
+  "name": "qatlas",
+  "owner": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
+  "description": "Qatlas als gemeinsame Infrastruktur und ausdrücklich gestartete Arbeitsschleife, mit optionalen Packs.",
+  "plugins": [
+    { "name": "qatlas", "source": "./plugins/qatlas", "category": "productivity", "defaultEnabled": true, "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kern- und Workspace-Verwaltung." },
+    { "name": "qatlas-dev", "source": "./plugins/qatlas-dev", "category": "productivity", "description": "Code pack: the smallest change that fully solves the task, in three levels, plus a review of a change and an audit of a whole repo. Requires qatlas." },
+    { "name": "qatlas-design", "source": "./plugins/qatlas-design", "category": "productivity", "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas." },
+    { "name": "qatlas-council", "source": "./plugins/qatlas-council", "category": "productivity", "description": "Optionales Beratungs-Pack: startet nur auf ausdrücklichen Aufruf unabhängige Subagents zu Ideen und Plänen, mit arch auch zu technischen Architekturentscheidungen. Erfordert qatlas." }
+  ]
+}

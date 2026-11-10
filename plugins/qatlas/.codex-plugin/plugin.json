@@ -1,0 +1,30 @@
+{
+  "name": "qatlas",
+  "version": "1.0.0",
+  "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kern- und Workspace-Verwaltung.",
+  "author": { "name": "Qatlas" },
+  "homepage": "https://github.com/castrowithcee/qatlas",
+  "repository": "https://github.com/castrowithcee/qatlas",
+  "license": "MIT",
+  "keywords": ["context", "scaffold", "brainstorming", "planning", "backlog", "orchestration", "subagents", "workflow", "worktree", "review", "automation"],
+  "skills": "./skills/",
+  "hooks": "./hooks/qatlas-hooks.json",
+  "interface": {
+    "displayName": "Qatlas",
+    "shortDescription": "Kontext halten und Arbeit sicher ausführen",
+    "longDescription": "Qatlas verbindet passive Infrastruktur mit ausdrücklich gestarteten Einstiegspunkten: qatlas goal zum Klären eines Ziels aus einer Idee, einem Task oder einer Datei, shape zum Zuschneiden des geklärten Gesprächs, einer Datei, eines Tasks oder des Backlogs, team für die Ausführung und review für die Übergaben; qatlas-core für Einrichtung und seltene Kernverwaltung; qatlas-work für Workspace-Arbeit außerhalb der Schleife. Sessionkontext, Regeln, Scaffold, Backlog-Bindung, Memory, Ablage, Import und Git bleiben im Plugin zusammen. Ein Supervisor verteilt unabhängige Pakete an Leads, die Worker-Aufträge zuschneiden und deren Ergebnisse prüfen; ein Integrator nimmt ab und integriert. Der Aufruf von team allein erlaubt keine externe oder unumkehrbare Wirkung; eine konkrete externe Werkzeugoperation braucht eine eigene, eindeutige Befugnis aus dem Auftrag, dem Taskvertrag oder einer geltenden Agentendatei.",
+    "developerName": "Qatlas",
+    "category": "Productivity",
+    "capabilities": ["Instructions", "Lifecycle hooks", "Multi-agent orchestration"],
+    "defaultPrompt": [
+      "Richte dieses Projekt mit qatlas-core init ein.",
+      "Prüfe dieses Projekt mit qatlas-core doctor.",
+      "Kläre Plan und offene Fragen dieser Idee mit qatlas goal.",
+      "Schneide den geklärten Plan mit qatlas shape zu.",
+      "Plane die nächste Arbeitsqueue mit qatlas shape backlog.",
+      "Arbeite die ausführbaren Tasks dieses Projekts parallel mit qatlas team ab.",
+      "Kläre die offenen Übergaben an den Menschen mit qatlas review.",
+      "Zeige die gemeinsamen Git-Worktrees dieses Projekts mit qatlas-work tree."
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core Backlog"
+  short_description: "Taskarbeit im maßgeblichen Planungssystem ausführen"
+  default_prompt: "Nutze $qatlas-core-backlog, um diese Taskarbeit im maßgeblichen Planungssystem auszuführen."

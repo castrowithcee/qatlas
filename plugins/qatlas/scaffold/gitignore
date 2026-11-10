@@ -1,0 +1,14 @@
+# Zone .qatlas-project/zone-import/: transient input (raw files the agent processes) and its processed/
+# archive. Not part of the knowledge base, never versioned. The folder may stay via .gitkeep; its content is
+# ignored.
+/.qatlas-project/zone-import/*
+!/.qatlas-project/zone-import/.gitkeep
+
+# Zone .qatlas-project/zone-export/: requested deliverables the user takes out of the repo. They often hold
+# real, unredacted data and must never be versioned. The folder may stay via .gitkeep; its content is
+# ignored.
+/.qatlas-project/zone-export/*
+!/.qatlas-project/zone-export/.gitkeep
+
+# Local Qatlas runtime state belongs to this checkout only.
+/.qatlas/local/

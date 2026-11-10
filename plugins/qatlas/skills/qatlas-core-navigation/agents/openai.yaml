@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core Navigation"
+  short_description: "Projektwissen gezielt erschließen"
+  default_prompt: "Nutze $qatlas-core-navigation, um das für diesen Auftrag nötige Projektwissen gezielt zu finden."

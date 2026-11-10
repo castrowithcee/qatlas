@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core Filing"
+  short_description: "Dateien regelkonform ablegen und umstrukturieren"
+  default_prompt: "Nutze $qatlas-core-filing, um diese Datei regelkonform abzulegen."

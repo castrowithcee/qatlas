@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Design"
+  short_description: "Art direction and a no-slop house style for web pages and app screens"
+  default_prompt: "Use $qatlas-design to give this page a researched art direction and check it in a real browser."

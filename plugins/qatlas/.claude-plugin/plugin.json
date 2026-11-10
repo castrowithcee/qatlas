@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "qatlas",
+  "displayName": "Qatlas",
+  "version": "1.0.0",
+  "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kern- und Workspace-Verwaltung.",
+  "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
+  "homepage": "https://github.com/castrowithcee/qatlas",
+  "repository": "https://github.com/castrowithcee/qatlas",
+  "license": "MIT",
+  "keywords": ["context", "scaffold", "brainstorming", "planning", "backlog", "orchestration", "subagents", "workflow", "worktree", "review", "automation"],
+  "skills": "./skills/",
+  "hooks": "./hooks/qatlas-hooks.json"
+}

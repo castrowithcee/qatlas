@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core Git"
+  short_description: "Git-Zustand und bewusste Änderungen verwalten"
+  default_prompt: "Nutze $qatlas-core-git, um den gewünschten Git-Vorgang sicher auszuführen."

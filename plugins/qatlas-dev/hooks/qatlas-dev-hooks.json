@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "matcher": "compact",
+        "hooks": [
+          { "type": "command",
+            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-dev-mode.js\" SessionStart; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-dev-mode.js\" SessionStart }; exit 0",
+            "timeout": 5, "statusMessage": "Loading qatlas-dev mode..." }
+        ] }
+    ],
+    "SubagentStart": [
+      { "hooks": [ { "type": "command",
+          "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-dev-mode.js\" SubagentStart; exit 0",
+          "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-dev-mode.js\" SubagentStart }; exit 0",
+          "timeout": 5, "statusMessage": "Loading qatlas-dev mode..." } ] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command",
+          "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-dev-mode.js\" UserPromptSubmit; exit 0",
+          "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-dev-mode.js\" UserPromptSubmit }; exit 0",
+          "timeout": 5, "statusMessage": "Tracking qatlas-dev mode..." } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command",
+          "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-dev-mode.js\" SessionEnd; exit 0",
+          "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-dev-mode.js\" SessionEnd }; exit 0",
+          "timeout": 3 } ] }
+    ]
+  }
+}
