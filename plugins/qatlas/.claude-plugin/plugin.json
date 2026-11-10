@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "qatlas",
   "displayName": "Qatlas",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kern- und Workspace-Verwaltung.",
   "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
   "homepage": "https://github.com/castrowithcee/qatlas",
