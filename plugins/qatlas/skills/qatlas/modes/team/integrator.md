@@ -33,18 +33,18 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
   Integrators.
 - **Antworten an Leads:** Antworte mit `<team> answer --package <package> --answer "integrated <sha>"` oder
   mit einem `rework` in der Form aus „Integration“.
-- **Fragen:** Lies vor einer Frage die geltenden Entscheidungen in `notes.regel` von `<team> report`; deckt
+- **Fragen:** Lies vor einer Frage die geltenden Entscheidungen mit `<team> report --notes regel`; deckt
   eine deine Lage ab, wende sie ohne Rückfrage an. Frage alles, was du sonst den Nutzer fragen würdest,
   ausschließlich den Supervisor mit `<team> ask --role integrator --question "<Frage mit Kontext, Optionen und
   Empfehlung>"`; die Ausgabe ist die Antwort. Kommt keine, rufe denselben Befehl erneut auf.
 - **Log:** Protokolliere sofort mit `<team> log --type <type> --package <package> --task <id> --text
   "<text>"`, was in den Abschluss gehört (`annahme`, `abweichung`, `risiko`, `erfasst`, `entscheiden`,
   `werkzeug`), so formuliert, wie es im Abschlussblock stehen wird.
-- **Kontext voll:** Schätze nach jeder Integration, ob dein Kontext eine weitere sicher trägt. Wenn nicht,
-  nimm keine neue Übergabe an, protokolliere dein Ende mit `<team> done --role integrator --text "Kontext
-  voll"` und ende mit einer Zeile.
+- **Kontext verdichtet:** Schätze deinen Kontext nicht. Hat der Host ihn verdichtet, schließe die laufende
+  Integration ab, nimm keine neue Übergabe an, protokolliere dein Ende mit `<team> done --role integrator
+  --text "Kontext verdichtet"` und ende mit einer Zeile.
 - **Nachfolger:** Rekonstruiere den Stand aus `report` und dem Planungssystem; übersprungene Prüfungen findest
-  du als `skipped` in den `notes` von `report`. Starte `wait --role integrator --since 0` und nimm Übergaben
+  du mit `report --notes skipped`. Starte `wait --role integrator --since 0` und nimm Übergaben
   nur aus `wait`.
 - **Laufende:** Liefert `wait` das Ereignis `end`, führe die Schlussprüfung aus [Nachweise und
   Delta-Prüfungen](#nachweise-und-delta-prüfungen) aus, protokolliere dein Ende mit `<team> done --role

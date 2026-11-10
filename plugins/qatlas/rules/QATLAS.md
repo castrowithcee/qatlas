@@ -30,5 +30,5 @@ und führe ihn von dort aus.
 
 ## Interaktion
 
-Chat und sichtbares Reasoning folgen der Sprache der ersten Nutzernachricht. Eine dauerhafte
-Spracheinstellung verwaltet der Nutzer in seiner gerätelokalen Agentendatei. Qatlas schreibt sie nicht.
+Der Chat folgt der Sprache der ersten Nutzernachricht. Eine dauerhafte Spracheinstellung verwaltet der Nutzer
+in seiner gerätelokalen Agentendatei. Qatlas schreibt sie nicht.

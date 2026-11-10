@@ -34,6 +34,11 @@
 //     merged | ci-fail | timeout | no-ci | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
 //     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed, 8 no-ci,
 //     2 usage error (also missing frontmatter or field), 3 gh/git check not possible.
+//   qatlas-team-tools.js proof --merge <sha> --head <sha> --base <branch> [--repo <path>]
+//     Squash evidence without gh, for a pull request merged by other means: fetches origin <base> and checks
+//     that the merge commit lies on it and carries exactly the change of the head (equal tree, else equal
+//     patch-id). Output: {"result":"proven","proof":"tree"|"patch-id","merge_sha","head"} or
+//     {"result":"unproven","reason",...}. Exit: 0 proven, 7 unproven, 2 usage error, 3 check not possible.
 //   qatlas-team-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
 //     --slots, else team.test-slots in ~/.qatlas/plugins/config.json, else 2. Waiting callers are
@@ -102,6 +107,40 @@ const number = (name, fallback) => {
 
 const git = args => execFileSync('git', ['-C', repo, ...args],
   { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 28 }).trim();
+
+const tryGit = args => { try { return git(args); } catch { return null; } };
+
+// The merge commit must lie on origin/<base> and carry exactly the change of the head: equal tree, or equal
+// patch-id once the base moved. Returns {proof} or {reason}.
+function squashProof(mergeSha, sha, base) {
+  try { git(['fetch', '--quiet', 'origin', base]); } catch (error) {
+    return { reason: 'git fetch failed: ' + ((error.stderr || error.message) + '').trim() };
+  }
+  if (tryGit(['merge-base', '--is-ancestor', mergeSha, 'FETCH_HEAD']) === null) {
+    return { reason: `merge commit is not on origin/${base}` };
+  }
+  if (tryGit(['rev-parse', mergeSha + '^{tree}']) === tryGit(['rev-parse', sha + '^{tree}'])) return { proof: 'tree' };
+  const patchId = diffArgs => {
+    const diff = tryGit(['diff', ...diffArgs]);
+    if (!diff) return null;
+    const run = spawnSync('git', ['-C', repo, 'patch-id', '--stable'], { input: diff + '\n', encoding: 'utf8', maxBuffer: 1 << 28 });
+    return run.status === 0 ? run.stdout.split(/\s/)[0] || null : null;
+  };
+  const mergeBase = tryGit(['merge-base', mergeSha + '^', sha]);
+  const want = patchId([mergeSha + '^', mergeSha]);
+  if (want && mergeBase && want === patchId([mergeBase, sha])) return { proof: 'patch-id' };
+  return { reason: 'merge commit content differs from the branch' };
+}
+
+function proof() {
+  const [mergeSha, head, base] = need('--merge', '--head', '--base');
+  for (const ref of [mergeSha, head, base]) if (ref.startsWith('-')) fail('Invalid: a ref must not start with "-"', 2);
+  if (!tryGit(['rev-parse', '--verify', '--quiet', head + '^{commit}'])) fail(`Check not possible: head ${head} does not resolve to a commit`, 3);
+  const result = squashProof(mergeSha, head, base);
+  if (result.proof) return out({ result: 'proven', proof: result.proof, merge_sha: mergeSha, head });
+  out({ result: 'unproven', reason: result.reason, merge_sha: mergeSha, head });
+  process.exit(7);
+}
 
 function probe() {
   const [branch] = need('--branch');
@@ -225,7 +264,6 @@ function land() {
   };
 
   // 2. The head the report vouches for must be the head GitHub will merge.
-  const tryGit = args => { try { return git(args); } catch { return null; } };
   const tip = tryGit(['rev-parse', '--verify', '--quiet', branch + '^{commit}']);
   const vouched = vouchedHead === null ? tip : tryGit(['rev-parse', '--verify', '--quiet', vouchedHead + '^{commit}']);
   if (!vouched) fail(`Check not possible: ${vouchedHead === null ? 'branch ' + branch : 'head ' + vouchedHead} does not resolve to a commit`, 3);
@@ -287,28 +325,8 @@ function land() {
   if (typeof mergeSha !== 'string' || !/^[0-9a-f]{40,64}$/.test(mergeSha)) {
     finish('proof-failed', { reason: 'merge commit not reported by gh' });
   }
-  const unproven = reason => finish('proof-failed', { merge_sha: mergeSha, reason });
-  try { git(['fetch', '--quiet', 'origin', base]); } catch (error) {
-    unproven('git fetch failed: ' + ((error.stderr || error.message) + '').trim());
-  }
-  if (tryGit(['merge-base', '--is-ancestor', mergeSha, 'FETCH_HEAD']) === null) {
-    unproven(`merge commit is not on origin/${base}`);
-  }
-  let proof = null;
-  if (tryGit(['rev-parse', mergeSha + '^{tree}']) === tryGit(['rev-parse', sha + '^{tree}'])) {
-    proof = 'tree';
-  } else {
-    const patchId = diffArgs => {
-      const diff = tryGit(['diff', ...diffArgs]);
-      if (!diff) return null;
-      const run = spawnSync('git', ['-C', repo, 'patch-id', '--stable'], { input: diff + '\n', encoding: 'utf8', maxBuffer: 1 << 28 });
-      return run.status === 0 ? run.stdout.split(/\s/)[0] || null : null;
-    };
-    const mergeBase = tryGit(['merge-base', mergeSha + '^', sha]);
-    const want = patchId([mergeSha + '^', mergeSha]);
-    if (want && mergeBase && want === patchId([mergeBase, sha])) proof = 'patch-id';
-  }
-  if (!proof) unproven('merge commit content differs from the branch');
+  const { proof: squash, reason: unproven } = squashProof(mergeSha, sha, base);
+  if (!squash) finish('proof-failed', { merge_sha: mergeSha, reason: unproven });
 
   // 6. Only with proof: delete the remote branch.
   let deleted = false, reason;
@@ -316,7 +334,7 @@ function land() {
     reason = ((error.stderr || error.message) + '').trim();
   }
   const extra = deleted ? {} : { branch_delete_reason: reason };
-  out({ pr: Number(pr), result: 'merged', merge_sha: mergeSha, proof, branch_deleted: deleted, ...extra });
+  out({ pr: Number(pr), result: 'merged', merge_sha: mergeSha, proof: squash, branch_deleted: deleted, ...extra });
 }
 
 function slotCount() {
@@ -642,6 +660,6 @@ function slot() {
   });
 }
 
-const commands = { probe, 'ci-wait': ciWait, land, slot };
+const commands = { probe, 'ci-wait': ciWait, land, proof, slot };
 if (!commands[command]) fail('Commands: ' + Object.keys(commands).join(', '), 2);
 commands[command]();

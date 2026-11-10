@@ -83,9 +83,11 @@ repoweit und verwendet einen grünen Nachweis desselben Trees wieder. Entnimm Pr
 unversionierte Eingaben, Slot-Anzahl und exklusive Ressourcen der Teststrategie des Projekts in „Abnehmen und
 integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl, den die Projektvorgaben einer
 exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. Führe vollständige Tests immer
-über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer Abschlussmeldung, und
-warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von Prozessen, Lock-Ordnern
-oder Ausgabedateien.
+selbst über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer
+Abschlussmeldung, und warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von
+Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die im Vordergrund enden, und
+weise ihn an, nichts im Hintergrund zu starten und erst zurückzugeben, wenn jeder von ihm gestartete Befehl
+beendet ist; ein Worker, der auf eigene Hintergrundarbeit wartet, gilt dem Host als angehalten.
 
 Erlaube dem Worker, eine nicht vorhergesagte Datei von sich aus einzubeziehen, wenn sie nachweislich im
 inhaltlichen Scope liegt. Wäre eine Wirkung außerhalb des Scopes nötig oder widerspricht der aktuelle Zustand

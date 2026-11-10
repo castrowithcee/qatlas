@@ -15,7 +15,7 @@
 //   qatlas-team.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <s>] [--min-free <GB>]
 //   qatlas-team.js done --repo <root> (--package <package> [--rest <id,id,...>] | --role integrator) [--text <text>]
 //   qatlas-team.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
-//   qatlas-team.js report --repo <root>
+//   qatlas-team.js report --repo <root> [--notes <type>]
 //   qatlas-team.js end --repo <root>
 //   qatlas-team.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
 
@@ -64,17 +64,20 @@ function events(repo) {
   });
 }
 
-// Open signal per sender: its last question or handover not yet picked, with the answer once one arrived.
-function openSignals(all) {
-  const open = new Map();
+// Last signal per sender: its latest question or handover, with the answer once one arrived and whether it
+// was picked up. A signal stays open until it is picked.
+function lastSignals(all) {
+  const last = new Map();
   for (const e of all) {
     if (!e.sender || !SIGNAL.has(e.type)) continue;
-    if (e.type === 'question' || e.type === 'handover') open.set(e.sender, { ...e, answer: null });
-    else if (e.type === 'answer' && open.has(e.sender)) open.get(e.sender).answer = e.text;
-    else if (e.type === 'picked') open.delete(e.sender);
+    if (e.type === 'question' || e.type === 'handover') last.set(e.sender, { ...e, answer: null, picked: false });
+    else if (e.type === 'answer' && last.has(e.sender)) last.get(e.sender).answer = e.text;
+    else if (e.type === 'picked' && last.has(e.sender)) last.get(e.sender).picked = true;
   }
-  return open;
+  return last;
 }
+
+const openSignals = all => new Map([...lastSignals(all)].filter(([, signal]) => !signal.picked));
 
 function sender() {
   const role = flag('--role');
@@ -141,25 +144,43 @@ function storeReport(repo, name, task, text) {
   }
 }
 
+// Answer "integrated ..." this sender already got for the same report of the task, else null.
+function integratedBefore(all, who, task, text) {
+  let report = null;
+  let found = null;
+  for (const e of all) {
+    if (e.sender !== who || e.task !== task) continue;
+    if (e.type === 'handover') report = e.report;
+    else if (e.type === 'answer' && /^integrated\b/.test(e.text || '') && readFile(report) === text + '\n') found = e.text;
+  }
+  return found;
+}
+
 // A repeated call with the same signal only waits, so an answer survives removal of branch and worktree. A
-// handover report changed before any answer replaces the open one and is validated again.
+// handover report changed before any answer replaces the open one and is validated again. An integrated
+// report never opens a second handover, and calls waiting in parallel all get the one answer.
 async function raise(kind, text, task) {
   const repo = repoKey();
   const who = sender();
   if (kind === 'handover' && who === INTEGRATOR) fail('Only a lead hands over; the integrator integrates.', 2);
   const timeout = positive('--timeout', 100);
-  const open = openSignals(events(repo)).get(who);
+  const all = events(repo);
+  const open = openSignals(all).get(who);
   const same = open && open.type === kind && (kind === 'handover' ? open.task === task : open.text === text);
   if (open && !same) fail(`${who} has an open ${open.type}${open.task ? ' of task ' + open.task : ''}; repeat that call to collect its answer.`, 2);
+  if (!open && kind === 'handover') {
+    const integrated = integratedBefore(all, who, task, text);
+    if (integrated) return out({ answer: integrated });
+  }
   if (!open || (kind === 'handover' && open.answer === null && readFile(open.report) !== text + '\n')) {
     if (kind === 'handover') validateHandover(text, codeRepo(repo));
     record(repo, kind, { sender: who, task, ...(kind === 'handover' ? { report: storeReport(repo, who, task, text) } : { text }) });
   }
   const end = Date.now() + timeout * 1000;
   for (;;) {
-    const current = openSignals(events(repo)).get(who);
+    const current = lastSignals(events(repo)).get(who);
     if (current && current.answer !== null) {
-      record(repo, 'picked', { sender: who, task: current.task });
+      if (!current.picked) record(repo, 'picked', { sender: who, task: current.task });
       return out({ answer: current.answer });
     }
     if (Date.now() >= end) return out({ answer: null, hint: `No answer yet. Repeat the same ${kind}.` });
@@ -280,6 +301,10 @@ function report() {
   for (const t of Object.values(tasks)) delete t.lastHandover;
   const open = [...openSignals(all).values()].map(o => ({ sender: o.sender, type: o.type, ...(o.task ? { task: o.task } : {}),
     ...(o.type === 'handover' ? { report: o.report } : { question: o.text }), answered: o.answer !== null }));
+  if (opts.includes('--notes')) {
+    const [type] = need('--notes');
+    return out({ notes: { [type]: notes[type] || [] } });
+  }
   out({ ended: ended(all), cursor: all.length, duration: all.length ? secs(time(all[all.length - 1]) - time(all[0])) : null,
     budget, packages, open, tasks, integrator, log: counts, notes });
 }

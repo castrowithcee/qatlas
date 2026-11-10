@@ -389,6 +389,47 @@ function testStatuslineRefresh() {
     'A foreign entry is never removed.');
 }
 
+function testStatuslineCodex() {
+  const f = fixture('statusline-codex');
+  const script = path.join(pluginRoot, 'scripts', 'qatlas-statusline-codex.js');
+  const config = path.join(f.root, 'config.toml');
+  const previous = path.join(f.home, '.qatlas', 'state', 'statusline', 'codex-previous.json');
+  const run = (...args) => runNode(script, [...args, '--config', config], { cwd: f.project, home: f.home });
+  const own = '# keep me\nmodel = "x"\n\n[tui]\nstatus_line = [\n  "model", # first\n  "git-branch",\n]\n\n[other]\nkey = 1\n';
+  write(config, own);
+
+  let result = run('setup');
+  assert.strictEqual(result.status, 0, result.stderr);
+  let text = fs.readFileSync(config, 'utf8');
+  assert.ok(text.startsWith('# keep me\nmodel = "x"\n') && text.endsWith('[other]\nkey = 1\n'), text);
+  assert.ok(text.includes('status_line = ["model-with-reasoning", "project-name"') && text.includes('status_line_use_colors = true'), text);
+  assert.deepStrictEqual(JSON.parse(fs.readFileSync(previous, 'utf8')), { items: ['model', 'git-branch'], colors: null });
+
+  // Without --defaults the existing list is the base; a second setup keeps the first previous state.
+  result = run('setup', '--disable', 'used-tokens', '--enable', 'thread-title', '--colors', 'off');
+  assert.strictEqual(result.status, 0, result.stderr);
+  text = fs.readFileSync(config, 'utf8');
+  assert.ok(!text.includes('"used-tokens"') && text.includes('"thread-title"]') && text.includes('status_line_use_colors = false'), text);
+  assert.deepStrictEqual(JSON.parse(fs.readFileSync(previous, 'utf8')).items, ['model', 'git-branch']);
+  assert.strictEqual(run('setup', '--enable', 'no-such-item').status, 1);
+  assert.strictEqual(fs.readFileSync(config, 'utf8'), text, 'A rejected call writes nothing.');
+
+  result = run('remove');
+  assert.strictEqual(result.status, 0, result.stderr);
+  assert.strictEqual(fs.readFileSync(config, 'utf8'),
+    '# keep me\nmodel = "x"\n\n[tui]\nstatus_line = ["model", "git-branch"]\n\n[other]\nkey = 1\n',
+    'Remove restores the previous list and drops the colors line the preset wrote.');
+  assert.strictEqual(fs.existsSync(previous), false);
+
+  // Without a previous list setup adds a [tui] table and remove takes it away again.
+  write(config, 'model = "x"\n');
+  assert.strictEqual(run('setup').status, 0);
+  assert.ok(fs.readFileSync(config, 'utf8').startsWith('model = "x"\n\n[tui]\nstatus_line = ['));
+  assert.strictEqual(fs.existsSync(previous), false);
+  assert.strictEqual(run('remove').status, 0);
+  assert.strictEqual(fs.readFileSync(config, 'utf8'), 'model = "x"\n');
+}
+
 try {
   testConfig();
   testDoctorTeamBlock();
@@ -396,7 +437,8 @@ try {
   testInit();
   testLibraryAndSubagent();
   testStatuslineRefresh();
-  process.stdout.write('✓ Qatlas init, doctor and context: 6 scenarios passed.\n');
+  testStatuslineCodex();
+  process.stdout.write('✓ Qatlas init, doctor and context: 7 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

@@ -30,9 +30,11 @@ bei beiden Plattformschritten, gleich mit welchen Mitteln, diesen Vertrag ein:
 - **Auf CI warten:** Warte, bis jede Prüfung des Pull Requests beendet ist. Ohne jede Prüfung hat das Projekt
   keine CI; dann ist der grüne vollständige lokale Test der Nachweis.
 - **Landen:** Bestätige, dass der Head des Pull Requests der übergebene Stand oder dessen konfliktfreier
-  Nachzug auf die Basis ist, warte auf CI, führe genau diesen Head per Squash-Merge zusammen, belege, dass der
-  Squash-Commit die geprüfte Änderung trägt, und lösche erst dann den Remote-Branch. Lande ohne CI erst, wenn
-  der gemergte Stand durch den grünen vollständigen lokalen Test bestätigt ist.
+  Nachzug auf die Basis ist, warte auf CI, führe genau diesen Head per Squash-Merge zusammen und belege, dass
+  der Squash-Commit die geprüfte Änderung trägt, ohne eigenen Helfer der Plattform mit `<tools> proof --merge
+  <sha> --head <sha> --base <control-branch>`. Lösche erst dann den Remote-Branch; hat die Plattform ihn beim
+  Merge schon gelöscht, ist das kein Fehler. Lande ohne CI erst, wenn der gemergte Stand durch den grünen
+  vollständigen lokalen Test bestätigt ist.
 
 ## Ablauf
 

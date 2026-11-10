@@ -17,10 +17,12 @@ Kontroll-Branches allein dem Integrator, ebenso Merge, Task-Abschluss und `done`
 diese einem Lead erlauben.
 
 Committe im gewählten Scope lokal und lass lokal integrieren, ohne nachzufragen. Pushe, öffne Pull Requests
-und merge sie nur, wenn Nutzer- oder Projektanweisungen es verlangen und erlauben. Löse keine andere externe
-oder unumkehrbare Wirkung aus. Schreibe bei einem lokalen Backlog nur vor dem ersten Lead und nach dem Ende des
-Integrators hinein; was du dazwischen schriebst, etwa einen Statuswechsel oder eine festgehaltene Antwort,
-protokolliere mit `log --type status`.
+und merge sie nur, wenn Nutzer- oder Projektanweisungen es verlangen und erlauben. Protokolliere dann vor dem
+ersten Lead einmal als `regel`, welche Vorgabe Push, Pull Request und Merge erlaubt, mit ihrem Ort, und mit
+welchen Mitteln das Projekt sie ausführt; gleiche eine Warnung des Hosts zu einem Merge damit ab. Löse keine
+andere externe oder unumkehrbare Wirkung aus. Schreibe bei einem lokalen Backlog nur vor dem ersten Lead und
+nach dem Ende des Integrators hinein; was du dazwischen schriebst, etwa einen Statuswechsel oder eine
+festgehaltene Antwort, protokolliere mit `log --type status`.
 
 `<team>` ist das Steuerskript `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team.js`, `<tools>`
 sind die Lauf-Werkzeuge `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tools.js` und
@@ -85,7 +87,7 @@ Bereiche gibt: höchstens vier, mit `--limit <n>` höchstens `n`, mit `--limit 0
   mechanisch geteilte Dateien gemeinsam nutzen, und nur, wo es sich nicht vermeiden lässt.
 - **Serielle Integration:** Ergänze ein Paket aus einer reinen Abhängigkeitskette um unabhängige Tasks, damit
   sein Lead weiterarbeitet, während er auf eine Integration wartet. Gib einem übergreifenden Task, der viele
-  Bereiche berührt, ein eigenes Paket und starte es zuerst.
+  Bereiche berührt, etwa einer Import- oder Pfadumstellung, ein eigenes Paket und starte es zuerst.
 - **Größe:** etwa fünf Tasks, genau so viele, wie ein Lead nach Umfang, Kopplung und absehbarem Kontextbedarf
   in einem Lauf tragen kann, ohne seinen Kontext zu überlasten: mehr bei sehr kleinen, weniger bei großen
   Tasks. Fülle jedes Paket bis zu dieser Größe. Nimm weniger Pakete oder Tasks nur bei einer ausdrücklichen Mengenvorgabe, nie aus der Deutung von
@@ -111,7 +113,8 @@ Starte danach den Integrator:
 > und arbeite danach. Steuerskript: `<team>`, Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`,
 > Integrationsbasis: `<basis>`.
 
-Für einen Nachfolger ergänze den Hinweis, dass er übernimmt, beim Lead mit seinen verbleibenden Tasks.
+Für einen Nachfolger ergänze den Hinweis, dass er übernimmt, beim Lead mit seinen verbleibenden Tasks. Gib
+keinem Auftrag eigene Vorgaben zu Kontext oder vorzeitigem Ende mit.
 
 ## Überwachung
 

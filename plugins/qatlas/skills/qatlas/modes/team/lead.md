@@ -36,6 +36,11 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 Arbeite deine Tasks nacheinander ab. Darfst du Subagents starten, gib die Umsetzung nach „Einen Task
 ausführen“ an Worker. Sonst setze selbst um und befolge dort alles außer der Pflicht zu Workern.
 
+Beende einen Turn nur dann ohne Tool-Aufruf, wenn ein Worker von dir arbeitet oder ein eigener
+Hintergrundbefehl läuft; sonst wertet der Host den Turn als dein Ende und verlangt deine Schlussmeldung. Ein
+Worker, der nur auf eigene Hintergrundarbeit wartet, zählt dabei nicht. Warte auf eine Antwort, indem du
+`handover` oder `ask` wiederholst.
+
 Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task einen
 Worktree von `<basis>` an. Scheitert eine Prüfung an der Umgebung, etwa an Platz oder Speicher, frage den
 Supervisor, bevor du sie als rot wertest.
@@ -89,8 +94,8 @@ Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
 
 ## Rückfragen
 
-Dein Nutzer ist der Supervisor. Lies vor einer Frage die geltenden Entscheidungen in `notes.regel` von
-`<team> report`; deckt eine deine Lage ab, wende sie an, statt zu fragen. Nenne jede angewandte Entscheidung
+Dein Nutzer ist der Supervisor. Lies vor einer Frage die geltenden Entscheidungen mit `<team> report --notes
+regel`; deckt eine deine Lage ab, wende sie an, statt zu fragen. Nenne jede angewandte Entscheidung
 und jede Antwort des Supervisors im Bericht des Tasks. Frage alles, was du sonst den Nutzer fragen, annehmen
 oder an ihn übergeben würdest, ausschließlich den Supervisor mit
 `<team> ask --question "<Frage mit Kontext, Optionen und Empfehlung>"`; die Ausgabe ist die Antwort. Kommt
@@ -99,17 +104,17 @@ keine, rufe denselben Befehl erneut auf. Frage nicht, solange eine Übergabe off
 
 ## Ende
 
-Schätze nach jedem abgeschlossenen oder sicher übergebenen Task, nach seinem `integrated` und bevor du einen
-weiteren beginnst, ob dein Kontext einen weiteren vollständigen Task samt Übergabe sicher trägt. Ist er schon
-verdichtet worden oder reicht er absehbar nicht, beginne keinen neuen Task. Warte trotzdem auf die Antworten
+Schätze deinen Kontext nicht: Ohne Messwert des Hosts lässt sich seine Füllung nicht beurteilen. Beginne nur
+dann keinen neuen Task, wenn der Host deinen Kontext schon verdichtet hat. Warte auch dann auf die Antworten
 offener Übergaben; sichere ein `rework`, das danach eintrifft, als Checkpoint am bestehenden Ort und nimm
 seinen Task in den Rest.
 
 Beende deine Arbeit, wenn jeder Task integriert, an `review` übergeben oder durch einen gescheiterten Task
-blockiert ist, oder wenn dein Kontext voll ist. Protokolliere dein Ende mit `<team> done`, mit
-`--rest <id,id,...>` für die Tasks, die du weder abgeschlossen noch übergeben hast. Halte deine Schlussmeldung
-bei wenigen Zeilen: je Task integriert, an `review` übergeben oder Rest, für jeden Rest-Task Branch und
-Worktree; alles andere steht im Protokoll.
+blockiert ist, oder wenn du nach einer Verdichtung keinen neuen Task beginnst. Protokolliere dein Ende mit
+`<team> done`, bei einer Verdichtung mit `--text "Kontext verdichtet"`, mit `--rest <id,id,...>` für die
+Tasks, die du weder abgeschlossen noch übergeben hast. Halte deine Schlussmeldung bei wenigen Zeilen: je Task
+integriert, an `review` übergeben oder Rest, für jeden Rest-Task Branch und Worktree; alles andere steht im
+Protokoll.
 
 **Nachfolger:** Übernimmst du ein Paket, übernimm Branches und Worktrees eines Tasks erst, wenn kein laufender
 oder unbekannter Worker sie nutzt und die Branches den in Task oder Protokoll genannten Stand tragen; das Ende

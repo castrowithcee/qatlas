@@ -113,6 +113,8 @@ const env = stubDir => ({ ...process.env, ...identity, STUB_DIR: stubDir,
 const land = c => spawnSync(process.execPath, [tools, 'land', '--pr', '16', '--report', c.report,
   '--interval', '0.1', '--timeout', '2', '--repo', c.repo], { encoding: 'utf8', env: env(c.stubDir) });
 const json = r => JSON.parse(r.stdout.trim().split('\n').pop());
+const proof = (c, ...args) => spawnSync(process.execPath, [tools, 'proof', '--repo', c.repo, ...args],
+  { encoding: 'utf8', env: env(c.stubDir) });
 const mergeCalls = c => { try { return fs.readFileSync(path.join(c.stubDir, 'merge-calls'), 'utf8').trim().split('\n'); } catch { return []; } };
 const landWith = (c, ...more) => spawnSync(process.execPath, [tools, 'land', '--pr', '16', '--report', c.report,
   '--interval', '0.1', '--timeout', '30', '--repo', c.repo, ...more], { encoding: 'utf8', env: env(c.stubDir) });
@@ -496,6 +498,13 @@ try {
   assert.strictEqual(o.pr, 16);
   assert.strictEqual(o.merge_sha, git(c.bare, 'rev-parse', 'main'));
   assert.ok(!hasBranch(c));
+  // The same evidence without gh, for a merge done by other means.
+  r = proof(c, '--merge', o.merge_sha, '--head', c.sha, '--base', 'main');
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.deepStrictEqual(json(r), { result: 'proven', proof: 'tree', merge_sha: o.merge_sha, head: c.sha });
+  assert.strictEqual(proof(c, '--merge', c.sha, '--head', c.sha, '--base', 'main').status, 7);
+  assert.strictEqual(proof(c, '--merge', o.merge_sha, '--head', '0'.repeat(40), '--base', 'main').status, 3);
+  assert.strictEqual(proof(c, '--merge', o.merge_sha, '--head', '-x', '--base', 'main').status, 2);
   // Title, body and the matched head reach gh as plain arguments.
   const args = JSON.parse(mergeCalls(c)[0]);
   assert.strictEqual(args[args.indexOf('--subject') + 1], 'feat: add b');
@@ -509,6 +518,7 @@ try {
   assert.strictEqual(o.result, 'merged');
   assert.strictEqual(o.proof, 'patch-id');
   assert.strictEqual(o.branch_deleted, true);
+  assert.strictEqual(json(proof(c, '--merge', o.merge_sha, '--head', c.sha, '--base', 'main')).proof, 'patch-id');
 
   c = setup('head-mismatch', { head: '0'.repeat(40) });
   r = land(c);
@@ -840,6 +850,9 @@ try {
     assert.strictEqual(fs.readFileSync(integ.events[0].report, 'utf8'), fm + 'Report v3\n');
     ok('answer', '--package', 'b', '--answer', 'integrated abc123');
     assert.strictEqual(ok('handover', '--package', 'b', '--task', '3', '--report', report, '--timeout', '0.1').answer, 'integrated abc123');
+    // Repeating an integrated report returns its answer and opens no second handover.
+    assert.strictEqual(ok('handover', '--package', 'b', '--task', '3', '--report', report, '--timeout', '0.1').answer, 'integrated abc123');
+    assert.deepStrictEqual(ok('report').open, []);
     refused(/Only a lead hands over/, 'handover', '--role', 'integrator', '--task', '3', '--report', report);
 
     // The integrator asks the supervisor like a lead.
@@ -870,6 +883,8 @@ try {
     assert.ok(rep.tasks['3'].cycle >= 0 && rep.tasks['3'].wait >= 0);
     assert.deepStrictEqual(rep.integrator, { questions: 1, finished: 0 });
     assert.deepStrictEqual(rep.notes, { erfasst: [{ package: 'a', task: '7', text: 'Bug: x - y' }], regel: [{ text: 'Flaky test: rerun once' }] });
+    assert.deepStrictEqual(ok('report', '--notes', 'regel'), { notes: { regel: [{ text: 'Flaky test: rerun once' }] } });
+    assert.deepStrictEqual(ok('report', '--notes', 'skipped'), { notes: { skipped: [] } });
 
     // end wakes the integrator and closes the run; a new run archives the log and needs --since 0.
     refused(/has not ended/, 'begin');
