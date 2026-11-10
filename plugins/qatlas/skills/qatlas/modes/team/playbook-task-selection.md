@@ -17,7 +17,8 @@ Commit- noch als Subagent-Zahl und passe es nicht an die Zahl der `next`-Tasks a
    Laufbudget erlaubt, fülle den Lauf selbst mit fachlich passenden `ready`-Tasks desselben Scopes auf. Wähle
    nach erfüllbaren Abhängigkeiten, fachlichem Wert, früher Risikoklärung und sinnvoller Integration.
 3. Setze einen gewählten `ready`-Task auf `next`, bevor er beansprucht wird.
-4. Lies die gewählten Tasks und ihre echten Blocker vollständig.
+4. Lies nur die gewählten Tasks und ihre echten Blocker vollständig. Für Auswahl und Schnitt genügen die
+   Angaben aus Schritt 1; lies keine weiteren Kandidaten auf Vorrat.
 5. Werte `ready` und `next` als belegte Ausführungsreife und prüfe sie weder selbst noch über einen Subagent
    erneut. Stößt du beim Lesen auf eine konkrete offene Vertragsfrage oder eine fehlende externe
    Voraussetzung, setze den Task nach der Backlog-Norm auf `draft` oder `waiting`, nenne ihn im Abschlussblock

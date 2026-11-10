@@ -15,7 +15,8 @@ Gib jedem Worker genau einen begrenzten Auftrag mit Task-ID und Titel, Arbeitsor
 Scope-out, Abnahmekriterien, Prüfungen und Rückgabeformat. Setze die inhaltliche Lösung nicht selbst um,
 erledige aber kleine Status-, Integrations- und Verifikationsschritte selbst. Ausnahme: Besteht das gesamte
 Ergebnis eines Tasks aus einer kleinen, risikoarmen Änderung an wenigen Dateien, die du ohnehin vollständig
-prüfen musst, setze sie selbst um.
+prüfen musst, setze sie selbst um. Ein Umbau über viele Dateien gehört nicht dazu, auch wenn er mechanisch
+ist.
 
 Lass den Worker bei einem Umsetzungs-Task dauerhafte Projektdokumentation nicht selbst aktualisieren, sondern
 als Dokumentationsbefund melden: bestehende Aussagen, die seine Änderung ungültig macht, sowie belegte neue
@@ -83,7 +84,8 @@ unversionierte Eingaben, Slot-Anzahl und exklusive Ressourcen der Teststrategie 
 integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl, den die Projektvorgaben einer
 exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. Führe vollständige Tests immer
 über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer Abschlussmeldung, und
-warte nie durch Abfragen von Prozessen oder Lock-Ordnern.
+warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von Prozessen, Lock-Ordnern
+oder Ausgabedateien.
 
 Erlaube dem Worker, eine nicht vorhergesagte Datei von sich aus einzubeziehen, wenn sie nachweislich im
 inhaltlichen Scope liegt. Wäre eine Wirkung außerhalb des Scopes nötig oder widerspricht der aktuelle Zustand
@@ -100,6 +102,10 @@ Beobachte Arbeitsstand und Rückgaben gegen Taskvertrag, tatsächlichen Diff und
 ein, wenn ein Worker den Scope verlässt, eine vorgeschriebene Prüfung oder einen Referenzvergleich auslässt,
 ohne Fortschritt hängt oder eine ausgeschlossene Wirkung vorbereitet. Begrenze oder stoppe seinen Auftrag,
 statt mit weiteren unspezifischen Prompts Tokens zu verbrennen.
+
+Bricht der Host einen Worker mit einer Sicherheitsmeldung ab, starte den Auftrag nicht erneut mit demselben
+Modell. Starte ihn einmal mit einem eingetragenen Profil eines anderen Modells neu; der Abbruch zählt nicht als
+Korrekturversuch. Bricht auch dieser Worker ab, übergib den Task an `review`.
 
 ## Nebenbefunde festhalten
 

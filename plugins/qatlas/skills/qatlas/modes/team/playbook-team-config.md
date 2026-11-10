@@ -45,7 +45,9 @@ Effort-Einstellung als die eingetragene. `effort: null` markiert ein Modell ohne
 
 ## Subagents starten
 
-Starte Lead und Integrator mit dem Modell ihrer Rolle, einen Worker mit Modell und Effort seines Profils, so:
+Starte Lead und Integrator mit dem Modell ihrer Rolle, einen Worker mit Modell und Effort seines Profils.
+Starte jeden anderen Subagent des Laufs, auch eine schreibgeschützte Analyse des Supervisors, als Worker mit
+einem Profil. So:
 
 - **Claude Code:** `model` und bei einem Worker `effort` als Parameter des Aufrufs, einen Worker mit dem
   Subagent-Typ `qatlas:worker`; lass einen Parameter weg, den der Block nicht setzt oder auf `null` setzt. Der
