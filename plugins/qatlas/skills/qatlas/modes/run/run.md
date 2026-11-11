@@ -6,7 +6,7 @@ description: >
 
 # Run
 
-`run [Tasks oder Scope] [--limit <n|0>] [--ask]`
+`run [Tasks oder Scope] [--limit <n|0>]`
 
 ## Rollen
 
@@ -42,8 +42,7 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
 
 ## Leseliste
 
-1. **Vor dem ersten Schritt:** die Flag-Datei (ohne `--ask` [Lauf ohne Nutzer](flag-no-ask.md), mit `--ask`
-   [Lauf mit Nutzer](flag-ask.md)), [die Lauf-Konfiguration](playbook-run-config.md), [die
+1. **Vor dem ersten Schritt:** [die Lauf-Konfiguration](playbook-run-config.md), [die
    Backlog-Norm](../../../qatlas-core-backlog/SKILL.md) und [Tasks auswählen](playbook-task-selection.md).
 2. **Vor dem ersten eigenen Commit:** [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre
    [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md).
@@ -54,6 +53,28 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
 5. **Vor dem Abschlussblock:** [der Abschlussblock](../../references/playbook-closing-block.md) und, falls noch
    nicht gelesen, [Entscheidungen vorlegen](../../references/playbook-decision-card.md).
 
+## Ohne Nutzer
+
+Warte während des Laufs bei keinem Schritt auf eine Antwort des Nutzers; er ist nicht erreichbar. Das gilt
+auch, wenn eine Meldung von Host oder Werkzeug auf den Nutzer verweist. Leite daraus keine weitere
+Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unverändert.
+
+1. **Vorab klären:** Prüfe vor dem ersten Schritt alles, was den Lauf später anhalten würde: Erreichbarkeit
+   und Schreibrecht des Planungssystems, benötigte Werkzeuge, Authentifizierungen und Subagents sowie
+   absehbare Berechtigungsabfragen des Hosts. Bündle offene Punkte in einer einzigen Rückfrage und starte erst
+   nach deren Klärung. Ohne offene Punkte starte direkt.
+2. **Aus Projektwissen entscheiden:** Belegen Taskvertrag, Entscheidungen, Anforderungen, Konventionen oder
+   anderes maßgebliches Projektwissen die Antwort auf eine Frage, antworte danach und nenne die Quelle.
+   Schließe eine fehlende Ausführungsreife nur so.
+3. **Annehmen:** Ist die Antwort nicht belegt, die Entscheidung aber reversibel, lokal und ohne Änderung von
+   Ziel, Scope oder Abnahme, gib die begründet beste Option als Antwort weiter und protokolliere sie mit
+   `log --type annahme`.
+4. **Übergeben:** Beantworte alles andere, insbesondere Sicherheits-, Berechtigungs- und
+   Außenwirkungsgrenzen, irreversible Wirkung oder eine mögliche Nutzerentscheidung, mit der Anweisung, den
+   Task an `review` zu übergeben und mit dem nächsten Task des Pakets fortzufahren.
+
+**Knapper Platz ohne Bereinigungsschritt des Projekts:** Protokolliere es als `risiko`.
+
 ## Vorbereitung
 
 1. **Freier Platz:** Prüfe den freien Platz des Dateisystems mit dem Repo gegen den Schwellenwert der
@@ -61,9 +82,9 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
    das nicht oder ist keiner genannt, starte nicht und nenne das Hindernis.
 2. **Planungssystem:** Ist ein vorgeschriebenes externes Planungssystem nicht erreichbar, starte nicht und
    nenne das Hindernis.
-3. **Voriger Lauf:** Zeigt `<run> report` einen `cursor` über 0 und `ended: false`, kläre mit dem Nutzer, ob
-   du den vorigen Lauf fortsetzt (siehe „Fortsetzen“) oder mit `<run> begin --discard` verwirfst. Sonst
-   beginne den Lauf mit `<run> begin`.
+3. **Voriger Lauf:** Zeigt `<run> report` einen `cursor` über 0 und `ended: false`, rufe `<run> begin` auf,
+   das den Lauf fortsetzt, und mache danach nach „Fortsetzen“ weiter. Verwirf den vorigen Lauf mit
+   `<run> begin --discard` nur auf ausdrückliche Anweisung im Aufruf. Sonst beginne den Lauf mit `<run> begin`.
 4. **Basis:** Die Integrationsbasis `<basis>` ist bei Integration über Pull Requests `origin/<control-branch>`,
    sonst der lokale `<control-branch>`.
 5. **Testergebnisse:** Lösche die Testergebnisse des vorigen Laufs mit `<tools> slot results --clear --repo
@@ -129,11 +150,11 @@ Protokolliere, was du selbst zum Abschlussblock beiträgst, sofort mit `<run> lo
 alle) und `werkzeug` (Defekt des Steuerskripts oder der Lauf-Werkzeuge, mit Nachweis).
 
 - **`question`:** Antworte mit `<run> answer` an den Absender des Ereignisses (`--package <package>` oder
-  `--role integrator`) und `--answer "<Antwort>"`: aus dem Projektwissen mit Quelle, sonst nach der
-  Flag-Datei. Kann die Lage wiederkehren, etwa ein instabiler Test, protokolliere die Antwort einmal als
+  `--role integrator`) und `--answer "<Antwort>"`: aus dem Projektwissen mit Quelle, sonst nach
+  „Ohne Nutzer“. Kann die Lage wiederkehren, etwa ein instabiler Test, protokolliere die Antwort einmal als
   `regel` mit `--text "<Lage>: <Entscheidung>"`.
-- **`disk`:** Führe den Bereinigungsschritt aus, den das Projekt dafür nennt; ohne einen handle nach der
-  Flag-Datei. Fragt ein Lead danach zu einer Prüfung, die an der Umgebung scheiterte, lass sie ihn einmal
+- **`disk`:** Führe den Bereinigungsschritt aus, den das Projekt dafür nennt; ohne einen handle nach
+  „Ohne Nutzer“. Fragt ein Lead danach zu einer Prüfung, die an der Umgebung scheiterte, lass sie ihn einmal
   wiederholen, nicht gleichzeitig mit einer anderen langen Prüfung dieses Laufs.
 
 ## Neue Entwürfe

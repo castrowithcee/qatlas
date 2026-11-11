@@ -886,8 +886,15 @@ try {
     assert.deepStrictEqual(ok('report', '--notes', 'regel'), { notes: { regel: [{ text: 'Flaky test: rerun once' }] } });
     assert.deepStrictEqual(ok('report', '--notes', 'skipped'), { notes: { skipped: [] } });
 
+    // An unfinished run is resumed: nothing is archived, the events stay and resume is no note.
+    const archives = () => fs.readdirSync(path.join(repo, '.qatlas', 'local', 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length;
+    assert.strictEqual(archives(), 0);
+    assert.deepStrictEqual(ok('begin'), { resumed: true, cursor: rep.cursor + 1 });
+    const resumed = ok('report');
+    assert.deepStrictEqual([resumed.cursor, resumed.ended, resumed.packages, resumed.notes], [rep.cursor + 1, false, rep.packages, rep.notes]);
+    assert.strictEqual(archives(), 0);
+    assert.deepStrictEqual(types(supervise(rep.cursor + 1)), []);
     // end wakes the integrator and closes the run; a new run archives the log and needs --since 0.
-    refused(/has not ended/, 'begin');
     ok('end');
     assert.deepStrictEqual(types(integrate(integ.cursor)), ['end']);
     refused(/start one with begin/, 'plan', '--budget', '1', '--package', 'z', '--tasks', '1');
@@ -897,8 +904,11 @@ try {
     refused(/past the end of the log/, 'wait', '--since', String(last.cursor), '--timeout', '0.1');
     assert.strictEqual(fs.readdirSync(path.join(repo, '.qatlas', 'local', 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
     ok('plan', '--budget', '1', '--package', 'z', '--tasks', '1');
-    refused(/has not ended/, 'begin');
-    ok('begin', '--discard');
+    assert.strictEqual(ok('begin').resumed, true);
+    assert.deepStrictEqual(Object.keys(ok('report').packages), ['z']);
+    assert.strictEqual(archives(), 1);
+    assert.deepStrictEqual(ok('begin', '--discard'), { begun: true, cursor: 1 });
+    assert.strictEqual(archives(), 2);
     assert.deepStrictEqual(ok('report').packages, {});
 
     // Low disk wakes the supervisor once per undershoot and re-arms after recovery.

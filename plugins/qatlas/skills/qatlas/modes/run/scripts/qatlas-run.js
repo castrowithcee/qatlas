@@ -8,6 +8,7 @@
 // wait wakes the supervisor on question, done and disk, the integrator on open handovers and end.
 // Usage:
 //   qatlas-run.js begin --repo <root> [--discard]
+//     Resumes an unfinished run; --discard archives it and starts anew.
 //   qatlas-run.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>
 //   qatlas-run.js ask --repo <root> (--package <package> | --role integrator) --question <text> [--timeout <s>]
 //   qatlas-run.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
@@ -29,7 +30,7 @@ const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
 const SUPERVISOR_WAKES = new Set(['question', 'done', 'disk']);
 // Rework for a conflict or a cut is no correction attempt and stays out of the per-task rework count.
 const CORRECTION = /^rework (?!(?:conflict|cut):)/;
-const RESERVED = new Set([...SIGNAL, 'begin', 'plan', 'done', 'disk', 'end']);
+const RESERVED = new Set([...SIGNAL, 'begin', 'resume', 'plan', 'done', 'disk', 'end']);
 const TASK_ID = /^[A-Za-z0-9#_][A-Za-z0-9#_-]*$/;
 
 const opts = process.argv.slice(3);
@@ -101,7 +102,10 @@ function begin() {
   const repo = repoKey();
   const all = events(repo);
   if (all.length) {
-    if (!ended(all) && !opts.includes('--discard')) fail('The last run has not ended: continue it, or start anew with --discard.', 2);
+    if (!ended(all) && !opts.includes('--discard')) {
+      record(repo, 'resume');
+      return out({ resumed: true, cursor: all.length + 1 });
+    }
     fs.renameSync(eventsFile(repo), path.join(runDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
   }
   fs.rmSync(path.join(runDir(repo), 'disk-low'), { force: true });

@@ -5,7 +5,7 @@ description: >
   Tasks eigenständig ausführen und menschliche Übergaben abschließen. Ohne Modus nur die Modus-Karte zeigen.
   Nie automatisch starten.
 disable-model-invocation: true
-argument-hint: "[goal|shape|run|review] [idea|task|file|backlog] [--limit <n|0>] [--ask]"
+argument-hint: "[goal|shape|run|review] [idea|task|file|backlog] [--limit <n|0>]"
 ---
 
 # Qatlas
@@ -34,6 +34,6 @@ nichts:
 Du musst einen Modus wählen. Einige Beispiele:  
 - `qatlas goal [Idee, Task oder Datei]`
 - `qatlas shape [Datei, Task oder Backlog]`
-- `qatlas run [Scope] [--limit <n|0>] [--ask]`
+- `qatlas run [Scope] [--limit <n|0>]`
 - `qatlas review [Scope]`
 ```

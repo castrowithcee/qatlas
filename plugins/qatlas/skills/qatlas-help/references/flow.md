@@ -15,8 +15,8 @@ description: >
 4. **Run:** `qatlas run` schneidet die ausführbaren Tasks in bis zu vier unabhängige Pakete, mit
    `--limit <n>` bis zu `n`, und lässt jedes parallel von einem eigenen Lead als Subagent abarbeiten. Leads
    verteilen Aufträge an Worker und prüfen deren Ergebnisse; ein Integrator nimmt jede Übergabe ab und
-   committet lokal. Ohne `--ask` arbeitet der Lauf ohne erreichbaren Nutzer und entscheidet, nimmt an oder
-   übergibt an `review`; `--ask` hält den Nutzer bei Entscheidungen in der Schleife. Push und Pull Requests
+   committet lokal. Der Lauf arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder
+   übergibt an `review` und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Push und Pull Requests
    nur, wenn Nutzer- oder Projektanweisungen sie verlangen und erlauben; nie Veröffentlichung, Deployment oder
    unumkehrbare Schritte.
 5. **Abnehmen:** `qatlas review` führt dich Schritt für Schritt, mit Ort und erwartetem Ergebnis, durch
