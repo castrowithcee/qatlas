@@ -11,17 +11,11 @@ Planungssystem oder Branch-Verwaltung ändern, Commits anlegen oder eigene Subag
 
 ## Worker beauftragen
 
-Gib jedem Worker genau einen begrenzten Auftrag mit Task-ID und Titel, Arbeitsort, erlaubten Zielen,
-Scope-out, Abnahmekriterien, Prüfungen und Rückgabeformat. Setze die inhaltliche Lösung nicht selbst um,
-erledige aber kleine Status-, Integrations- und Verifikationsschritte selbst. Ausnahme: Besteht das gesamte
+Gib jedem Worker genau einen begrenzten Auftrag. Setze die inhaltliche Lösung nicht selbst um, erledige aber
+kleine Status-, Integrations- und Verifikationsschritte selbst. Ausnahme: Besteht das gesamte
 Ergebnis eines Tasks aus einer kleinen, risikoarmen Änderung an wenigen Dateien, die du ohnehin vollständig
 prüfen musst, setze sie selbst um. Ein Umbau über viele Dateien gehört nicht dazu, auch wenn er mechanisch
 ist.
-
-Lass den Worker bei einem Umsetzungs-Task dauerhafte Projektdokumentation nicht selbst aktualisieren, sondern
-als Dokumentationsbefund melden: bestehende Aussagen, die seine Änderung ungültig macht, sowie belegte neue
-Pflichten oder Kopplungen für künftige Arbeit. Ist die Dokumentation selbst ausdrückliches Task-Ergebnis, darf
-er sie bearbeiten. Übernimm die Nacharbeit nach „Dokumentationswirkung“ in „Abnehmen und integrieren“.
 
 Beurteile vor jedem Start den tatsächlichen Auftrag und seinen Verifikationsaufwand: Welche Ergebnisse lassen
 sich unabhängig abnehmen, welche Schritte hängen voneinander ab, welche Sicherheits- und Zielgrenzen gelten,
@@ -45,32 +39,29 @@ belegt schwierige Diagnose oder eine eng gekoppelte Umsetzung, die sich sinnvoll
 nie wegen des Umfangs allein. Du musst dafür nicht erst einen kleinen Worker scheitern lassen. Begründe
 `standard` und `demanding` vor dem Start kurz; setze das Korrekturbudget bei einem Modellwechsel nicht zurück.
 
-Leite den Auftrag aus dem aktuellen Taskvertrag und dem geprüften Stand des Repos ab. Er enthält in dieser
-Reihenfolge:
+Der Taskvertrag ist der Auftrag; verfasse ihn nicht neu. Nenne dem Worker Task-ID und Titel und den Leseweg
+zum aktuellen Eintrag: beim lokalen Backlog den Pfad der Task-Datei, bei einem externen Planungssystem den
+Leseaufruf, mit dem du den Task selbst gelesen hast. Kann ein Worker den Task so nicht lesen, gib ihm den
+aktuellen Eintrag wörtlich mit. Ergänze nur, was der Vertrag nicht enthält, und gib keine Geheimnisse weiter:
 
-- **Ziel:** beobachtbares Ergebnis des Tasks.
-- **Arbeitsgrundlage:** Ausgangszustand, vorhandene Einstiegspunkte, erwartete Änderungsflächen, maßgebliche
-  Quellen und benötigte Ausführungsvoraussetzungen. Kennzeichne erwartete Flächen als Arbeitskarte, nicht als
-  starre Dateierlaubnis, und gib keine Geheimnisse weiter.
-- **Scope:** erlaubte inhaltliche Ziele sowie ein ausdrückliches Scope-out.
-- **Leitplanken:** verbindliche Grenzen für Architektur, Sicherheit, Kompatibilität und Dokumentation sowie
-  der Entscheidungsspielraum, jeweils als konkrete Arbeitsanweisung statt als bloßer Quellenlink. Prüfe
-  insbesondere die Bindung fremder Objekt-IDs an das gewählte Ziel und den Umgang mit nicht vertrauenswürdigen
-  Inhalten, soweit der Task solche Grenzen berührt. Weise den Worker an: Lässt der Vertrag eine Ziel- oder
-  Berechtigungsgrenze offen, wählt er die engere Lesart und nennt sie in seiner Rückgabe; er weitet Zugriff
-  oder Wirkung nie aus eigener Auslegung aus. Vor einem Befehl, der löscht, überschreibt, Berechtigungen
-  ändert oder außerhalb des Repos wirkt, verifiziert er das genaue Ziel und den Umfang und führt nichts aus,
-  dessen Wirkung er nicht begrenzen kann. Einen Schutzmechanismus testet er nie so, dass echte Daten Schaden
-  nehmen, wenn der Mechanismus versagt.
-- **Budget:** Zahl der für diesen Task eingesetzten Worker und verbleibende Korrekturversuche.
+- **Arbeitsort:** Worktree und Branch.
+- **Meilenstein:** bei einem geteilten Task der Teil dieses Workers mit seinen Abnahmekriterien und Prüfungen
+  und dem, was späteren Aufträgen bleibt.
+- **Abweichungen:** wo der geprüfte Stand des Repos von der Ausführungsgrundlage des Tasks abweicht, und jede
+  geltende Entscheidung oder Antwort des Supervisors zu diesem Task.
+- **Fehlende Grenzen:** eine für den Gegenstand verbindliche Grenze für Architektur, Sicherheit,
+  Kompatibilität oder Dokumentation, die der Vertrag nicht als konkrete Arbeitsanweisung nennt, etwa die
+  Bindung fremder Objekt-IDs an das gewählte Ziel oder den Umgang mit nicht vertrauenswürdigen Inhalten.
+- **Prüfungen:** welche Prüfungen der Worker selbst ausführt.
+- **Budget:** Zahl der für diesen Task eingesetzten Worker und verbleibende Korrekturversuche, bei einer
+  Korrektur der Befund, der sie auslöst.
 - **Worker-Profil:** gewähltes Profil mit Modell, Effort oder dessen fehlender Unterstützung und, bei
   `standard` oder `demanding`, der Grund.
-- **Stoppbedingung:** Alle dem Worker zugewiesenen Abnahmekriterien und vereinbarten Prüfungen sind erfüllt,
-  bei einer größeren Umsetzung ist der vereinbarte Meilenstein erreicht, oder eine Grenze des Vertrags, der
-  Berechtigung, des Risikos oder externer Wirkung ist erreicht.
-- **Rückgabe:** geänderte Dateien, ausgeführte Prüfungen mit Ergebnis, Dokumentationsbefunde mit Ort und
-  Nachweis oder ein begründetes `Keine`, Abweichungen von den erwarteten Änderungsflächen, ungelöste Risiken
-  und Nebenbefunde mit Ort und Nachweis.
+
+Grenzen, Stoppbedingung und Rückgabe des Workers stehen in `<plugin-root>/agents/worker.md`; wiederhole sie
+nicht. Lädt der Host diese Datei nicht selbst, wie Claude Code über den Subagent-Typ `qatlas:worker`, weise den
+Worker an, sie zuerst vollständig zu lesen. Übernimm die Nacharbeit zu seinen Dokumentationsbefunden nach
+„Dokumentationswirkung“ in „Abnehmen und integrieren“.
 
 Setze für einen kleinen Task normalerweise einen Worker ein. Braucht derselbe Task berechtigt mehrere
 getrennte Rollen oder Zielbereiche, setze mehrere ein. Lass schreibende Worker nacheinander arbeiten, nie
@@ -85,14 +76,8 @@ integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl,
 exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. Führe vollständige Tests immer
 selbst über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer
 Abschlussmeldung, und warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von
-Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die im Vordergrund enden, und
-weise ihn an, nichts im Hintergrund zu starten und erst zurückzugeben, wenn jeder von ihm gestartete Befehl
-beendet ist; ein Worker, der auf eigene Hintergrundarbeit wartet, gilt dem Host als angehalten.
-
-Erlaube dem Worker, eine nicht vorhergesagte Datei von sich aus einzubeziehen, wenn sie nachweislich im
-inhaltlichen Scope liegt. Wäre eine Wirkung außerhalb des Scopes nötig oder widerspricht der aktuelle Zustand
-einer verbindlichen inhaltlichen Quelle, lass ihn vor dieser Wirkung anhalten und dir den Befund zurückgeben.
-Den Vertrag erweitert er nicht selbst.
+Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die im Vordergrund enden;
+ein Worker, der auf eigene Hintergrundarbeit wartet, gilt dem Host als angehalten.
 
 Nenne im Bericht des Tasks für jeden Worker Profil, Modell und Effort. Meldet der Host die tatsächliche
 Kombination nicht zurück, nenne die angeforderte und kennzeichne sie mit „angefordert“; halte nur bei einer
