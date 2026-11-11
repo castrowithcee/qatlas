@@ -1,6 +1,6 @@
 {
   "name": "qatlas",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kern- und Workspace-Verwaltung.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
