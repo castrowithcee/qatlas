@@ -33,9 +33,9 @@ Lege auch keinen Entwurf oder Gesprächsmitschnitt ab. Beginne keine Umsetzung u
 
 Halte das Ergebnis vollständig im Gespräch. Zustimmung zum Plan autorisiert weder dauerhafte
 Dokumentation noch Planung oder Umsetzung. Starte keinen weiteren Modus selbst.
-Einzige Ausnahme: Verlangt der Nutzer ausdrücklich eine Übergabe an eine andere Session und existiert
-`.qatlas-project/`, schreibe das bestätigte Goal-Briefing nach `.qatlas-project/zone-export/goal-<slug>.md`.
-Diese Zone ist unversioniert; erst `shape` ohne Scope liest das Briefing und hält den Plan dauerhaft fest.
+Einzige Ausnahme: Stimmt der Nutzer dem Angebot aus „Abschluss“ zu oder verlangt er es von sich aus,
+schreibe das bestätigte Goal-Briefing in eine Datei: nach `.qatlas-project/zone-export/goal-<slug>.md`, ohne
+`.qatlas-project/` an den Ort, den er nennt.
 
 ## Eingang verstehen
 
@@ -95,4 +95,6 @@ Nach der Bestätigung gib ein kompaktes Goal-Briefing ausschließlich im Chat au
 - bestätigte Annahmen und akzeptierte Risiken,
 - nur ausdrücklich zurückgestellte oder erst beim Zuschnitt beantwortbare Fragen, jeweils mit Grund.
 
-Schließe nach dem bestätigten Briefing. Lege nichts an und führe nichts aus.
+Biete danach einmal an, das Briefing als Datei abzulegen, damit eine andere Session es mit `shape <Datei>`
+zuschneiden kann; in dieser Session genügt `shape` ohne Scope. Ohne Zustimmung legst du nichts an. Schließe
+danach und führe nichts aus.
