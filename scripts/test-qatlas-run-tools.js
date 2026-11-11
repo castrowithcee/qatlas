@@ -1041,8 +1041,9 @@ try {
         assert.deepStrictEqual([output.hookEventName, output.permissionDecision], ['PreToolUse', 'deny'], JSON.stringify(args));
         return output.permissionDecisionReason;
       };
-      const lead = { subagent_type: 'general-purpose', model: 'opus', effort: 'high' };
-      const inLead = { agent_id: 'a1', agent_type: 'general-purpose' };
+      const lead = { subagent_type: 'qatlas:lead', model: 'opus', effort: 'high' };
+      const integrator = { subagent_type: 'qatlas:integrator' };
+      const inLead = { agent_id: 'a1', agent_type: 'qatlas:lead' };
       // Would be denied in an active run: no role carries this combination.
       const stray = { subagent_type: 'Explore', model: 'haiku' };
       const withSession = id => assert.strictEqual(spawnSync(process.execPath, [runner, 'begin', '--repo', repo, '--discard'],
@@ -1056,13 +1057,17 @@ try {
 
       // Supervisor: lead and integrator with their role, everything else as a worker with a profile.
       allowed(lead);
-      allowed({ subagent_type: 'general-purpose' });
+      allowed(integrator);
       allowed({ subagent_type: 'qatlas:worker', model: 'sonnet', effort: 'medium' });
       allowed({ subagent_type: 'qatlas:worker', model: 'haiku' });
-      const reason = denied({ subagent_type: 'general-purpose', model: 'opus' });
-      assert.ok(reason.includes(config) && reason.includes('lead: model opus, effort high') && reason.includes('integrator: no model, no effort')
+      const reason = denied({ subagent_type: 'qatlas:lead', model: 'opus' });
+      assert.ok(reason.includes(config) && reason.includes('qatlas:lead or qatlas:integrator') && reason.includes('lead: model opus, effort high') && reason.includes('integrator: no model, no effort')
         && reason.includes('standard: model sonnet, effort medium') && reason.includes('light: model haiku, no effort'), reason);
-      denied({ subagent_type: 'general-purpose', model: 'fable', effort: 'high' });
+      denied({ subagent_type: 'qatlas:lead', model: 'fable', effort: 'high' });
+      // Each role only with its own combination, and no general type.
+      denied({ ...integrator, ...lead, subagent_type: 'qatlas:integrator' });
+      denied({ ...lead, subagent_type: 'general-purpose' });
+      denied({ subagent_type: 'general-purpose' });
       denied(stray);
       denied({ subagent_type: 'fork' });
       denied({ subagent_type: 'qatlas:worker' });
@@ -1072,7 +1077,8 @@ try {
       // Lead or integrator: only workers. A worker starts nothing.
       allowed({ subagent_type: 'qatlas:worker', model: 'opus', effort: 'high' }, inLead);
       denied(lead, inLead);
-      denied({ subagent_type: 'general-purpose' }, inLead);
+      denied(integrator, inLead);
+      allowed({ subagent_type: 'qatlas:worker', model: 'sonnet', effort: 'medium' }, { agent_id: 'a3', agent_type: 'qatlas:integrator' });
       denied({ subagent_type: 'qatlas:worker', model: 'haiku' }, { agent_id: 'a2', agent_type: 'qatlas:worker' });
 
       // A subagent in a task worktree, also of a nested folder, still belongs to the run.

@@ -509,6 +509,7 @@ function stopHook() {
 }
 
 const WORKER_TYPE = 'qatlas:worker';
+const ROLE_TYPES = { 'qatlas:lead': 'lead', 'qatlas:integrator': 'integrator' };
 
 // The model alone cannot be trusted to pass model and effort on every start: an omitted parameter silently
 // inherits the session's model. Only the supervisor starts leads and the integrator; a worker starts nothing.
@@ -522,16 +523,15 @@ function spawnHook() {
     const host = state.run && state.run.hosts ? state.run.hosts['claude-code'] : null;
     if (!host || state.problems.some(problem => problem.startsWith(state.configFile + ': run.'))) return;
     const same = slot => slot.model === (call.model ?? null) && slot.effort === (call.effort ?? null);
-    const worker = call.subagent_type === WORKER_TYPE;
-    // A fork ignores the model parameter and keeps the model of its parent.
+    const role = ROLE_TYPES[call.subagent_type];
     const allowed = input.agent_type === WORKER_TYPE ? false
-      : worker ? Object.values(host.worker).some(same)
-        : !input.agent_id && call.subagent_type !== 'fork' && [host.lead, host.integrator].some(same);
+      : call.subagent_type === WORKER_TYPE ? Object.values(host.worker).some(same)
+        : !input.agent_id && role !== undefined && same(host[role]);
     if (allowed) return;
     const show = ([name, slot]) => `${name}: ${slot.model === null ? 'no model' : 'model ' + slot.model}, ${slot.effort === null ? 'no effort' : 'effort ' + slot.effort}`;
     out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason:
       `Qatlas run: this subagent start matches no combination of run.hosts.claude-code in ${state.configFile}. `
-      + `Lead and integrator, started only by the supervisor with a general subagent type: ${[['lead', host.lead], ['integrator', host.integrator]].map(show).join('; ')}. `
+      + `Lead and integrator, started only by the supervisor with subagent_type ${Object.keys(ROLE_TYPES).join(' or ')}: ${[['lead', host.lead], ['integrator', host.integrator]].map(show).join('; ')}. `
       + `Every other subagent, with subagent_type ${WORKER_TYPE}: ${Object.entries(host.worker).map(show).join('; ')}. `
       + 'Omit a parameter listed as "no model" or "no effort". A worker starts no subagents.' } });
   } catch { /* allow the start */ }

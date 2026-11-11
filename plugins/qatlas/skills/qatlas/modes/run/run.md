@@ -32,11 +32,11 @@ sind die Lauf-Werkzeuge `node <plugin-root>/skills/qatlas/modes/run/scripts/qatl
 
 ## Subagents starten
 
-Starte Leads und Integrator als Subagents im Hintergrund, damit du für den Nutzer ansprechbar bleibst, mit
-einem allgemeinen Subagent-Typ des Hosts, nicht mit `qatlas:worker`, weil beide committen und ein Lead Worker
-startet, wo der Host es erlaubt. Ergänze nichts, was Berechtigungen, Sandbox oder Freigaben lockert;
-Subagents arbeiten unter den Berechtigungen dieser Session, und ihre Freigabe-Abfragen erreichen den Nutzer
-hier. Kann der Host keine Subagents starten, starte nicht und nenne das Hindernis.
+Starte Leads und Integrator als Subagents im Hintergrund, damit du für den Nutzer ansprechbar bleibst. Nimm in
+Claude Code die Subagent-Typen `qatlas:lead` und `qatlas:integrator`, sonst einen allgemeinen Subagent-Typ des
+Hosts, nie den Worker-Typ, weil beide committen und ein Lead Worker startet, wo der Host es erlaubt.
+Ergänze nichts, was Berechtigungen, Sandbox oder Freigaben lockert; Subagents arbeiten unter den
+Berechtigungen dieser Session, und ihre Freigabe-Abfragen erreichen den Nutzer hier. Kann der Host keine Subagents starten, starte nicht und nenne das Hindernis.
 
 Setze in jedem Auftrag alle Platzhalter als feste Werte ein, Pfade absolut, nenne `<code-repo>`, wo der Code in
 einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, der diesen Subagent betrifft.
