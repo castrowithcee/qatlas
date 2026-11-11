@@ -11,8 +11,7 @@ Commit- noch als Subagent-Zahl und passe es nicht an die Zahl der `next`-Tasks a
 `next`-Menge in ihrer bestehenden Reihenfolge für spätere Läufe.
 
 1. Bestimme aus dem Roster oder den externen Metadaten des gewählten Scopes Status, Kurzstand, Reihenfolge,
-   Abhängigkeiten und Zuständigkeitssignale. Lies bei einem ausdrücklich gewählten einzelnen Task direkt
-   seinen aktuellen Eintrag.
+   Abhängigkeiten und Zuständigkeitssignale. Nennt der Aufruf Tasks ausdrücklich, bestimme das nur für sie.
 2. Nimm zuerst ausführbare `next`-Tasks in der Reihenfolge des Planungssystems. Gibt es weniger, als das
    Laufbudget erlaubt, fülle den Lauf selbst mit fachlich passenden `ready`-Tasks desselben Scopes auf. Wähle
    nach erfüllbaren Abhängigkeiten, fachlichem Wert, früher Risikoklärung und sinnvoller Integration.

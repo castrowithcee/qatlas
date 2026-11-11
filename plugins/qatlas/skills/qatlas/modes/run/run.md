@@ -98,10 +98,12 @@ Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unver
 
 ## Pakete bilden
 
-Verteile die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, auf so viele Pakete, wie es unabhängige
-Bereiche gibt: höchstens vier, mit `--limit <n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Ein Paket
-ist die Zuständigkeit eines Leads für unveränderte Tasks; am Zuschnitt der Tasks änderst du nichts. Nimm
-Abhängigkeiten, Kopplung, gemeinsame Dateien und Umfang aus den Angaben des lesenden Workers.
+Verteile die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, auf Pakete: höchstens vier, mit
+`--limit <n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Bilde ein weiteres Paket erst, wenn die
+bestehenden nach der Größenregel gefüllt sind oder eine der folgenden Regeln es verlangt, und nur aus Tasks,
+die von ihnen unabhängig sind. Ein Paket ist die Zuständigkeit eines Leads für unveränderte Tasks; am
+Zuschnitt der Tasks änderst du nichts. Nimm Abhängigkeiten, Kopplung, gemeinsame Dateien und Umfang aus den
+Angaben des lesenden Workers.
 
 - **Kopplung:** Halte Abhängigkeiten und echte Kopplung über gemeinsame Invarianten, Migrationen oder
   Laufzeitressourcen innerhalb eines Pakets; lässt sich Kopplung nicht ausschließen, lege die Tasks in dasselbe
@@ -115,9 +117,9 @@ Abhängigkeiten, Kopplung, gemeinsame Dateien und Umfang aus den Angaben des les
   Bereiche berührt, etwa einer Import- oder Pfadumstellung, ein eigenes Paket und starte es zuerst.
 - **Größe:** etwa fünf Tasks, genau so viele, wie ein Lead nach Umfang, Kopplung und absehbarem Kontextbedarf
   in einem Lauf tragen kann, ohne seinen Kontext zu überlasten: mehr bei sehr kleinen, weniger bei großen
-  Tasks. Fülle jedes Paket bis zu dieser Größe. Nimm weniger Pakete oder Tasks nur bei einer ausdrücklichen Mengenvorgabe, nie aus der Deutung von
-  Wörtern wie „Pilot“ oder „Test“. Lass, was in kein Paket passt, in seiner Reihenfolge für Nachfüllen und
-  spätere Läufe.
+  Tasks. Fülle jedes Paket bis zu dieser Größe, soweit die ausgewählten Tasks reichen. Nimm weniger Tasks nur
+  bei einer ausdrücklichen Mengenvorgabe, nie aus der Deutung von Wörtern wie „Pilot“ oder „Test“. Lass, was
+  in kein Paket passt, in seiner Reihenfolge für Nachfüllen und spätere Läufe.
 
 Das Laufbudget ist die Summe der Paketgrößen zu Beginn; jeder abgeschlossene oder gesichert an `review`
 übergebene Task verbraucht einen Slot. Protokolliere jedes Paket mit `<run> plan --budget <n> --package
