@@ -57,6 +57,7 @@ Vertrag. Lies die folgenden Referenzen nur für das, was beide offenlassen. Ande
 Vorgangs vollständig vor dem Vorgang:
 
 - Anlegen ohne passende Vorlage: [Datei](references/playbook-create.md)
+- Reservierte Datei erstmals füllen: [Reservierte Datei füllen](references/playbook-reserved-files.md)
 - Umbenennen, verschieben, zusammenführen, aufwerten, archivieren, löschen:
   [Umstrukturieren](references/playbook-restructure.md)
 - Import: [Import](references/playbook-import.md)
