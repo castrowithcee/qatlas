@@ -70,14 +70,15 @@ nichts verändern. Achte darauf, dass sich die Aufträge nachweislich ergänzen,
 bauen und zusammen im Korrekturbudget dieses einen Tasks bleiben.
 
 Führe lokale Nachweise über `<tools> slot -- <test command>` aus; `slot` begrenzt gleichzeitige Testläufe
-repoweit und verwendet einen grünen Nachweis desselben Trees wieder. Entnimm Projektwerte für Gültigkeit,
+auf dem ganzen Host und verwendet einen grünen Nachweis desselben Trees wieder. Entnimm Projektwerte für Gültigkeit,
 unversionierte Eingaben, Slot-Anzahl und exklusive Ressourcen der Teststrategie des Projekts in „Abnehmen und
 integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl, den die Projektvorgaben einer
 exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. Führe vollständige Tests immer
 selbst über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer
 Abschlussmeldung, und warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von
-Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die im Vordergrund enden;
-ein Worker, der auf eigene Hintergrundarbeit wartet, gilt dem Host als angehalten.
+Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die im Vordergrund
+innerhalb des höchsten Befehls-Timeouts des Hosts enden; ein Worker, der auf eigene Hintergrundarbeit wartet,
+gilt dem Host als angehalten.
 
 Nenne im Bericht des Tasks für jeden Worker Profil, Modell und Effort. Meldet der Host die tatsächliche
 Kombination nicht zurück, nenne die angeforderte und kennzeichne sie mit „angefordert“; halte nur bei einer

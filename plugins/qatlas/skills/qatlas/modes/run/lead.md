@@ -37,10 +37,12 @@ Arbeite deine Tasks nacheinander ab. Nennt dein Auftrag mehrere Tasks und darfst
 die Umsetzung nach „Einen Task ausführen“ an Worker. Sonst setze selbst um und befolge dort alles außer der
 Pflicht zu Workern.
 
-Beende einen Turn nur dann ohne Tool-Aufruf, wenn ein Worker von dir arbeitet oder ein eigener
-Hintergrundbefehl läuft; sonst wertet der Host den Turn als dein Ende und verlangt deine Schlussmeldung. Ein
-Worker, der nur auf eigene Hintergrundarbeit wartet, zählt dabei nicht. Warte auf eine Antwort, indem du
-`handover` oder `ask` wiederholst.
+Beende einen Turn nur dann ohne Tool-Aufruf, wenn ein eigener Hintergrundbefehl läuft; sonst wertet der Host
+den Turn als dein Ende und verlangt deine Schlussmeldung. Ein Worker allein genügt dafür nicht, weil er als
+angehalten gilt, sobald er auf eigene Hintergrundarbeit wartet. Wartest du nur auf einen Worker, starte deshalb
+vorher `<run> wait --timeout <s>` im Hintergrund, mit einem Timeout über der erwarteten Dauer, und starte es
+erneut, wenn es vor der Rückkehr des Workers abläuft. Warte auf eine Antwort, indem du `handover` oder `ask`
+wiederholst.
 
 Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task einen
 Worktree von `<basis>` an. Scheitert eine Prüfung an der Umgebung, etwa an Platz oder Speicher, frage den
@@ -83,10 +85,12 @@ du sie auch ab, wenn der Integrator Branch und Worktree schon entfernt hat. Fass
 übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe nicht die letzte war.
 
 Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn von der neuen `<basis>`.
-Während des Wartens darfst du von der aktuellen `<basis>` aus einen nachweislich unabhängigen Task dieses
-Pakets beginnen; der übergebene Task gilt dann als sicher übergeben. Rufe danach an jedem Zwischenstand,
-mindestens nach jeder Rückkehr eines Workers, `handover` erneut mit `--timeout 10` auf, bis die Antwort da ist,
-und übergib den nächsten Task erst danach. Gib einem `rework` Vorrang: Sichere den laufenden Task am nächsten
+Solange du nur wartest, auf die Antwort einer Übergabe, auf einen Worker oder auf eine lange eigene Prüfung,
+darfst du von der aktuellen `<basis>` aus einen nachweislich unabhängigen Task dieses Pakets beginnen, etwa
+den zweiten Zweig einer Kette, deren gemeinsamer Vorgänger integriert ist; ein übergebener Task gilt dann als
+sicher übergeben. Rufe bei offener Übergabe an jedem Zwischenstand, mindestens nach jeder Rückkehr eines
+Workers, `handover` erneut mit `--timeout 10` auf, bis die Antwort da ist, und übergib den nächsten Task erst
+danach. Gib einem `rework` Vorrang: Sichere den laufenden Task am nächsten
 geprüften Meilenstein als Checkpoint, arbeite am Grund, übergib erneut und mach danach weiter.
 
 Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit

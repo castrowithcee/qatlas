@@ -198,6 +198,14 @@ function testSlotResults() {
   assert.strictEqual(count(), 1, 'second call ran again');
   assert.ok(r.stderr.includes(tree.slice(0, 7)) && r.stderr.includes(list[0].time), r.stderr);
 
+  // Every executed command is logged with its times and exit code; a reused result is not.
+  assert.strictEqual(slot([], ['node', '-e', 'process.exit(3)']).status, 3);
+  const logged = fs.readFileSync(path.join(repo, '.qatlas', 'local', 'slots', 'runs.jsonl'), 'utf8').trim().split('\n')
+    .map(line => JSON.parse(line));
+  assert.deepStrictEqual(logged.map(x => x.exit), [0, 3]);
+  assert.deepStrictEqual(Object.keys(logged[0]).sort(), ['command', 'cwd', 'duration', 'exit', 'resource', 'time', 'waited']);
+  assert.ok(logged[0].waited >= 0 && logged[0].duration >= 0 && !Number.isNaN(Date.parse(logged[0].time)));
+
   // --no-cache runs and still records.
   assert.strictEqual(slot(['--no-cache'], mark(0)).status, 0);
   assert.strictEqual(count(), 2);
@@ -216,8 +224,11 @@ function testSlotResults() {
   assert.strictEqual(count(), 5);
   assert.strictEqual(results().length, 4);
 
-  // The unignored slot store inside this primary tree does not make it dirty; an untracked file elsewhere does.
-  assert.ok(git('status', '--short').includes('.qatlas/'), 'store is expected unignored');
+  // The slot store is kept out of git status through .git/info/exclude, entered once; an untracked file
+  // elsewhere still makes the worktree dirty.
+  assert.strictEqual(git('status', '--short'), '', 'store shows up in git status');
+  const excludes = fs.readFileSync(path.join(repo, '.git', 'info', 'exclude'), 'utf8').split('\n');
+  assert.strictEqual(excludes.filter(line => line === '/.qatlas/local/').length, 1);
 
   // Dirty worktree (untracked file) neither reads nor writes.
   fs.writeFileSync(path.join(repo, 'dirty.txt'), 'x\n');
@@ -482,6 +493,20 @@ function testSlotQueues() {
   until(() => s1.done() && s2.done(), 's1 and s2');
   assert.ok(at('s2', 'start') >= at('s1', 'end'), 'slot holders overlapped');
   assert.ok(fs.readFileSync(s2.stderr, 'utf8').includes('Waiting for a free test slot (1 slots)'));
+
+  // The slots belong to the host: a caller from a second repo of the same user waits for the first.
+  const repo2 = path.join(root, 'queue-repo2');
+  fs.mkdirSync(repo2);
+  execFileSync('git', ['init', '-q', repo2]);
+  fs.writeFileSync(log, '');
+  const h1 = bg('h1', ['--slots', '1'], hold('h1', 1500));
+  until(() => started('h1'), 'host slot holder');
+  const h2 = spawnSync(process.execPath, [tools, 'slot', '--repo', repo2, '--slots', '1', '--', ...hold('h2', 100)],
+    { encoding: 'utf8', env, cwd: repo2, timeout: 30000 });
+  assert.strictEqual(h2.status, 0, h2.stderr);
+  assert.ok(h2.stderr.includes('Waiting for a free test slot (1 slots)'));
+  assert.ok(at('h2', 'start') >= at('h1', 'end'), 'slot holders of two repos overlapped');
+  until(() => h1.done(), 'h1');
 }
 
 try {
@@ -762,6 +787,19 @@ try {
   assert.match(r.stderr, /0 non-merge commits/);
   assert.strictEqual(cutRun(c, '-x').status, 2);
 
+  // A local base that lags behind its upstream is cut against the upstream; without one it stays local.
+  c = setup('cut-remote', { moved: true });
+  git(c.repo, 'fetch', '-q', 'origin');
+  git(c.repo, 'branch', '-q', '--set-upstream-to=origin/main', 'main');
+  git(c.repo, 'checkout', '-q', '-b', 'fresh', 'origin/main');
+  commit(c.repo, 'e.txt', 'e\n');
+  r = cutRun(c, 'fresh');
+  assert.strictEqual(r.status, 0, r.stderr);
+  git(c.repo, 'branch', '--unset-upstream', 'main');
+  r = cutRun(c, 'fresh');
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /branch fresh has 2 non-merge commits over main/);
+
   // --code-repo: code repo embedded in (and ignored by) the control repo; refs resolve there, not in --repo.
   const embedded = (name, extra) => {
     const code = setup(name, { extra });
@@ -825,6 +863,10 @@ try {
     assert.deepStrictEqual(ok('report').open, [{ sender: 'a', type: 'question', question: 'Q1?', answered: false }]);
     ok('answer', '--package', 'a', '--answer', 'A1');
     refused(/already answered/, 'answer', '--package', 'a', '--answer', 'A2');
+    // A lead blocks on its own package until the answer is there; the answer is still collected by ask.
+    assert.deepStrictEqual(ok('wait', '--package', 'a', '--timeout', '5'), { answered: true, timeout: false });
+    assert.deepStrictEqual(ok('wait', '--package', 'b', '--timeout', '0.1'), { answered: false, timeout: true });
+    refused(/not both/, 'wait', '--package', 'a', '--role', 'integrator');
     assert.strictEqual(ok('ask', '--package', 'a', '--question', 'Q1?', '--timeout', '0.1').answer, 'A1');
     refused(/No open question or handover of a/, 'answer', '--package', 'a', '--answer', 'A3');
     assert.deepStrictEqual(supervise(woke.cursor), { events: [], cursor: woke.cursor + 2, timeout: true });
@@ -885,6 +927,18 @@ try {
     assert.deepStrictEqual([rep.tasks['3'].integrated, rep.tasks['3'].rework, rep.tasks['3'].handovers], [true, 1, 3]);
     assert.ok(rep.tasks['3'].cycle >= 0 && rep.tasks['3'].wait >= 0);
     assert.deepStrictEqual(rep.integrator, { questions: 1, finished: 0 });
+    // Time block: waits for the integrator from the log, checks from the slot runs since the run began.
+    assert.deepStrictEqual(Object.keys(rep.time), ['checks', 'red', 'checking', 'queued', 'integrating']);
+    assert.deepStrictEqual([rep.time.checks, rep.time.red], [0, 0]);
+    assert.ok(rep.time.integrating >= 0);
+    write(path.join(repo, '.qatlas', 'local', 'slots', 'runs.jsonl'), [
+      { time: new Date().toISOString(), waited: 2000, duration: 3000, exit: 0 },
+      { time: new Date().toISOString(), waited: 0, duration: 1000, exit: 1 },
+      { time: '2000-01-01T00:00:00.000Z', waited: 9000, duration: 9000, exit: 1 }].map(x => JSON.stringify(x)).join('\n') + '\n');
+    const timed = ok('report').time;
+    assert.deepStrictEqual([timed.checks, timed.red, timed.checking, timed.queued], [2, 1, 4, 2]);
+    // The run folder of a repo without an ignore rule stays out of git status.
+    assert.strictEqual(git(repo, 'status', '--short'), '');
     assert.deepStrictEqual(rep.notes, { erfasst: [{ package: 'a', task: '7', text: 'Bug: x - y' }], regel: [{ text: 'Flaky test: rerun once' }] });
     assert.deepStrictEqual(ok('report', '--notes', 'regel'), { notes: { regel: [{ text: 'Flaky test: rerun once' }] } });
     assert.deepStrictEqual(ok('report', '--notes', 'skipped'), { notes: { skipped: [] } });

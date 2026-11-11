@@ -52,7 +52,9 @@ Weiter in einer neuen Session: <Modi>
   aus Korrekturen, Nacharbeiten, Konflikten, Wiederholungen, Anstößen, Stillständen, Rückfragen und
   Abweichungen; nur mit konkretem Ansatz, keine Produktideen.
 - **Kennzahlen:** Dauer und die von null verschiedenen Zahlen an Rückfragen, Nacharbeiten, Konflikten,
-  Wiederholungen und Anstößen.
+  Wiederholungen und Anstößen. Macht Warten einen wesentlichen Teil der Dauer aus, nenne dahinter die Zeit in
+  Prüfungen mit der Zahl der Durchläufe und der roten davon, die Wartezeit auf Test-Slots und die Wartezeit
+  auf die Integration.
 - **Letzte Zeile:** nur Modi mit echter Arbeit: `review` für Tasks in `review`, `shape <eindeutiger Task>`
   für einen Entwurf oder `shape backlog` für mehrere, `run <Scope>` für den ersten ausführbaren Scope nach
   `shape`. Eine neue Idee geht an `goal`. Starte keinen Modus selbst. Ist nichts offen, sagt das die

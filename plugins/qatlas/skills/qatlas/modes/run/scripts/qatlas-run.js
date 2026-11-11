@@ -5,7 +5,8 @@
 // They talk only through the JSON-lines log <repo>/.qatlas/local/run/events.jsonl; `seq` is the line index,
 // derived on read. A sender is a lead (--package) or the integrator (--role integrator) and has at most one
 // open signal (question or handover) until it picks up the answer by repeating the same call.
-// wait wakes the supervisor on question, done and disk, the integrator on open handovers and end.
+// wait wakes the supervisor on question, done and disk, the integrator on open handovers and end, and a lead
+// on the answer to its open signal.
 // Usage:
 //   qatlas-run.js begin --repo <root> [--discard]
 //     Resumes an unfinished run; --discard archives it and starts anew.
@@ -14,9 +15,15 @@
 //   qatlas-run.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
 //   qatlas-run.js answer --repo <root> (--package <package> | --role integrator) --answer <text>
 //   qatlas-run.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <s>] [--min-free <GB>]
+//   qatlas-run.js wait --repo <root> --package <package> [--timeout <s>]
+//     Blocks a lead until its open question or handover is answered or the timeout passes.
+//     Output: {"answered","timeout"}; the answer itself is collected by repeating ask or handover.
 //   qatlas-run.js done --repo <root> (--package <package> [--rest <id,id,...>] | --role integrator) [--text <text>]
 //   qatlas-run.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
-//   qatlas-run.js report --repo <root> [--notes <type>]
+//   qatlas-run.js report --repo <root> [--code-repo <path>] [--notes <type>]
+//     "time" sums, in seconds since begin: the commands run through slot in the repo of the code ("checks",
+//     of them "red", "checking", and "queued" for a free slot) and the waits from a handover to its answer
+//     ("integrating").
 //   qatlas-run.js end --repo <root>
 //   qatlas-run.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
 //   qatlas-run.js stop-hook
@@ -32,6 +39,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { parseFrontmatter } = require('./handover-frontmatter.js');
+const { localDir, excludeLocal } = require('./local-store.js');
 
 const INTEGRATOR = 'integrator';
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
@@ -117,6 +125,7 @@ function begin() {
     fs.renameSync(eventsFile(repo), path.join(runDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
   }
   fs.rmSync(path.join(runDir(repo), 'disk-low'), { force: true });
+  excludeLocal(repo);
   record(repo, 'begin', { session: process.env.CLAUDE_CODE_SESSION_ID });
   out({ begun: true, cursor: 1 });
 }
@@ -225,8 +234,23 @@ function checkDisk(repo, minFree) {
   record(repo, 'disk', { text: `Free space ${free.toFixed(1)} GB, below ${minFree} GB.` });
 }
 
+async function waitLead(repo, name) {
+  if (name === INTEGRATOR) fail('Reserved package name: integrator', 2);
+  const end = Date.now() + positive('--timeout', 600) * 1000;
+  for (;;) {
+    const open = openSignals(events(repo)).get(name);
+    const answered = Boolean(open && open.answer !== null);
+    if (answered || Date.now() >= end) return out({ answered, timeout: !answered });
+    await sleep(2000);
+  }
+}
+
 async function wait() {
   const repo = repoKey();
+  if (flag('--package') !== null) {
+    if (flag('--role') !== null) fail('wait takes --package <package> or --role, not both', 2);
+    return waitLead(repo, flag('--package'));
+  }
   const role = flag('--role') ?? 'supervisor';
   if (role !== 'supervisor' && role !== INTEGRATOR) fail('--role must be supervisor or integrator', 2);
   const since = Number(flag('--since') ?? 0);
@@ -274,8 +298,17 @@ function end() {
 
 // Times in seconds. Cycle time per task: from the plan of its package or the last integration in it to the
 // first handover. Wait time: last handover to the answer integrated.
+// Commands run through slot since the run began, from the run log of the slot store.
+function slotRuns(repo, since) {
+  const dir = localDir(repo);
+  const lines = (dir && readFile(path.join(dir, 'slots', 'runs.jsonl')) || '').split('\n').filter(Boolean);
+  return lines.flatMap(line => { try { return [JSON.parse(line)]; } catch { return []; } })
+    .filter(run => Date.parse(run.time) >= since);
+}
+
 function report() {
-  const all = events(repoKey());
+  const repo = repoKey();
+  const all = events(repo);
   const time = e => Date.parse(e.at);
   const secs = ms => Math.round(ms) / 1000;
   const packages = {};
@@ -285,6 +318,7 @@ function report() {
   const notes = {};
   const since = {};
   let budget = null;
+  let integrating = 0;
   for (const e of all) {
     if (Object.hasOwn(counts, e.type)) counts[e.type]++;
     else if (!RESERVED.has(e.type) && e.type !== 'unreadable') {
@@ -304,7 +338,9 @@ function report() {
     if (e.type === 'handover') {
       if (!t.handovers++ && since[e.sender] !== undefined) t.cycle = secs(time(e) - since[e.sender]);
       t.lastHandover = time(e);
-    } else if (e.type === 'answer' && /^integrated\b/.test(e.text || '')) {
+    }
+    if (e.type === 'answer' && t.lastHandover !== undefined) integrating += time(e) - t.lastHandover;
+    if (e.type === 'answer' && /^integrated\b/.test(e.text || '')) {
       if (t.lastHandover !== undefined) t.wait = secs(time(e) - t.lastHandover);
       t.integrated = true;
       since[e.sender] = time(e);
@@ -317,8 +353,12 @@ function report() {
     const [type] = need('--notes');
     return out({ notes: { [type]: notes[type] || [] } });
   }
+  const runs = all.length ? slotRuns(codeRepo(repo), time(all[0])) : [];
+  const sum = key => secs(runs.reduce((total, run) => total + (Number(run[key]) || 0), 0));
   out({ ended: ended(all), cursor: all.length, duration: all.length ? secs(time(all[all.length - 1]) - time(all[0])) : null,
-    budget, packages, open, tasks, integrator, log: counts, notes });
+    budget, packages, open, tasks, integrator, log: counts,
+    time: { checks: runs.length, red: runs.filter(run => run.exit !== 0).length, checking: sum('duration'), queued: sum('waited'), integrating: secs(integrating) },
+    notes });
 }
 
 function codeRepo(repo) {
@@ -338,8 +378,19 @@ function resolveCommit(repo, ref, key, bad, optional = false) {
   } catch { return optional ? null : bad(`"${key}" ${JSON.stringify(ref)} does not resolve to a commit in ${repo}.`); }
 }
 
+// A pull request is cut against the remote state: a local base that lags behind its upstream gives way to it.
+function cutBase(repo, base) {
+  const git = args => {
+    try { return execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return null; }
+  };
+  const upstream = git(['rev-parse', '--abbrev-ref', '--symbolic-full-name', `${base}@{upstream}`]);
+  if (!upstream || git(['rev-parse', base]) === git(['rev-parse', upstream])) return base;
+  return git(['merge-base', '--is-ancestor', base, upstream]) !== null ? upstream : base;
+}
+
 // A pull request is one unit of the commit boundary: exactly one non-merge commit over the base.
-function checkCut(repo, base, tip, label, exception, bad) {
+function checkCut(repo, given, tip, label, exception, bad) {
+  const base = cutBase(repo, given);
   const count = Number(execFileSync('git', ['-C', repo, 'rev-list', '--no-merges', '--count', `${base}..${tip}`], { encoding: 'utf8' }).trim());
   const limit = 'A pull request is one unit of the commit boundary: exactly one non-merge commit';
   if (count === 0) bad(`${label} has 0 non-merge commits over ${base}. ${limit}.`);

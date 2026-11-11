@@ -202,5 +202,6 @@ seiner Schlussprüfung. Trage danach bei einem lokalen Backlog die protokolliert
 ein (`status` und `erfasst` in den `notes` von `report`), führe die Bereinigungsschritte aus, die
 Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Schließe dann
 mit genau einem Abschlussblock über alle Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz
-unter `Verbesserungen`, Kennzahlen aus den Zählungen von `report`. Halte die Antworten des Nutzers darauf
+unter `Verbesserungen`, Kennzahlen aus den Zählungen und dem Block `time` von `report`, mit `--code-repo
+<code-repo>` für Code außerhalb der Steuerwurzel. Halte die Antworten des Nutzers darauf
 selbst fest, weil die Zuständigkeit des Integrators mit dem Lauf endet.

@@ -28,8 +28,8 @@ ohne Modell und Effort; was er dann erbt, bestimmt der Host.
 }
 ```
 
-`test-slots` ist optional, darf allein stehen und begrenzt gleichzeitige volle Testläufe je Repo (Standard
-2). `profiles` und `hosts` stehen nur gemeinsam. Die Beschreibungen unter `profiles` entscheiden, wie Arbeit
+`test-slots` ist optional, darf allein stehen und begrenzt gleichzeitige volle Testläufe dieses Nutzers auf
+dem ganzen Host, über alle Repos und Läufe hinweg (Standard 2). `profiles` und `hosts` stehen nur gemeinsam. Die Beschreibungen unter `profiles` entscheiden, wie Arbeit
 geschnitten wird. `hosts` trägt je Host (`claude-code`, `codex`) für `integrator`, `lead` und unter `worker`
 für jedes Profil `model` und `effort`, jeweils als Text oder `null`.
 

@@ -43,18 +43,23 @@
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
 //     --slots, else run.test-slots in ~/.qatlas/plugins/config.json, else 2. Waiting callers are
 //     served in arrival order; --priority queues ahead of every caller without it.
-//     Locks live in the primary working tree so worktrees see them. No JSON output;
-//     the command exit code is passed through (signal: 128 plus signal number).
+//     Locks and queue live under ~/.qatlas/state/slots, so the slots are shared by every repo and run of
+//     this user on the host. No JSON output; the command exit code is passed through (signal: 128 plus
+//     signal number). Each executed command adds one line to runs.jsonl in the slot store of the repo:
+//     {time,waited,duration,exit,command,cwd,resource}, times in milliseconds. The store lies in
+//     <primary working tree>/.qatlas/local/slots; a repo that does not ignore .qatlas/local/ gets the
+//     folder entered in .git/info/exclude.
 //   qatlas-run-tools.js slot [--slots <count>] [--repo <path>] status
-//     Read-only view of the test slots; "status" without "--" (after "--" it is a command to run).
+//     Read-only view of the test slots of the host and the resources of the repo; "status" without "--"
+//     (after "--" it is a command to run).
 //     Output: {"slots","busy":[{slot,pid,started,cwd,command,orphaned}],
 //     "waiting":[{priority,arrival,pid,cwd,command,orphaned}],
 //     "resources":[{"resource","busy":[{pid,started,cwd,command,orphaned}],"waiting":[...]}]} (resources with
 //     a holder or waiter only); unknown fields are null. Exit: 0, 3 no git repo.
 //   qatlas-run-tools.js slot [--priority] [--repo <path>] --resource <name> -- <command> [args...]
 //     Like slot, but runs the command under a named exclusive resource (capacity 1) instead of a test
-//     slot, e.g. one e2e suite at a time. Each resource has its own queue; it does not occupy a test slot
-//     and ignores --slots. <name> matches [a-z0-9][a-z0-9-]*, else exit 2.
+//     slot, e.g. one e2e suite at a time. Each resource has its own queue and belongs to the repo; it does
+//     not occupy a test slot and ignores --slots. <name> matches [a-z0-9][a-z0-9-]*, else exit 2.
 //   qatlas-run-tools.js slot [--no-cache] [--max-age <hours>] [--input <path>]... ... -- <command> [args...]
 //     Green results are reused: in a clean worktree (git status --porcelain --untracked-files=all empty,
 //     apart from the slot store and the --input paths) an exit-0 run is stored under the repo-wide slot
@@ -85,6 +90,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync, spawn, spawnSync } = require('child_process');
 const { parseFrontmatter } = require('./handover-frontmatter.js');
+const { localDir, excludeLocal } = require('./local-store.js');
 
 const argv = process.argv.slice(2);
 const command = argv[0];
@@ -361,13 +367,10 @@ const readDetail = text => {
     return { cwd: typeof cwd === 'string' ? cwd : null, command: Array.isArray(command) ? command : null };
   } catch { return { cwd: null, command: null }; }
 };
-const slotDir = () => {
-  let common;
-  try { common = git(['rev-parse', '--path-format=absolute', '--git-common-dir']); } catch (error) {
-    fail('Not a git repo: ' + repo, 3);
-  }
-  return path.join(path.dirname(common), '.qatlas', 'local', 'slots');
-};
+// Results, resources and the run log belong to the repo; all its worktrees share them.
+const slotDir = () => path.join(localDir(repo) || fail('Not a git repo: ' + repo, 3), 'slots');
+// Locks and queue of the numbered slots are shared by every repo of this user on the host.
+const hostSlotDir = () => path.join(os.homedir(), '.qatlas', 'state', 'slots');
 const ownerFile = lock => path.join(lock, 'owner');
 const orphaned = lock => {
   let pid;
@@ -415,8 +418,9 @@ const resourcePaths = (dir, name) => {
 function slotStatus() {
   const slots = slotCount();
   const dir = slotDir();
-  const busy = listDir(dir).filter(entry => /^\d+$/.test(entry)).sort((a, b) => a - b).map(entry => {
-    const { pid, started, ...detailFields } = holder(path.join(dir, entry));
+  const host = hostSlotDir();
+  const busy = listDir(host).filter(entry => /^\d+$/.test(entry)).sort((a, b) => a - b).map(entry => {
+    const { pid, started, ...detailFields } = holder(path.join(host, entry));
     return { slot: Number(entry), pid, started, ...detailFields };
   });
   const resources = listDir(path.join(dir, 'resources')).sort().flatMap(name => {
@@ -425,7 +429,7 @@ function slotStatus() {
     const waiting = waiters(paths.queue);
     return held.length || waiting.length ? [{ resource: name, busy: held, waiting }] : [];
   });
-  out({ slots, busy, waiting: waiters(path.join(dir, 'queue')), resources });
+  out({ slots, busy, waiting: waiters(path.join(host, 'queue')), resources });
 }
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -586,7 +590,8 @@ function slot() {
   }
   const target = paths
     ? { locks: [paths.lock], queue: paths.queue }
-    : { locks: Array.from({ length: slots }, (_, i) => path.join(dir, String(i + 1))), queue: path.join(dir, 'queue') };
+    : { locks: Array.from({ length: slots }, (_, i) => path.join(hostSlotDir(), String(i + 1))), queue: path.join(hostSlotDir(), 'queue') };
+  excludeLocal(repo);
   fs.mkdirSync(path.dirname(target.locks[0]), { recursive: true });
 
   const take = () => {
@@ -611,6 +616,7 @@ function slot() {
   fs.mkdirSync(queue, { recursive: true });
   const name = `${opts.includes('--priority') ? 0 : 1}-${String(Date.now()).padStart(15, '0')}-${process.pid}`;
   const ticket = path.join(queue, name);
+  const queuedAt = Date.now();
   fs.writeFileSync(ticket, detail() + '\n', { flag: 'wx' });
   const first = () => fs.readdirSync(queue).sort().find(entry => {
     if (alive(Number(entry.split('-')[2]))) return true;
@@ -656,7 +662,13 @@ function slot() {
     if (code === 0) record();
     release();
     const name = signal || signalled;
-    process.exit(code !== null ? code : 128 + (os.constants.signals[name] || 0));
+    const exit = code !== null ? code : 128 + (os.constants.signals[name] || 0);
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.appendFileSync(path.join(dir, 'runs.jsonl'), JSON.stringify({ time: new Date(startedAt).toISOString(),
+        waited: startedAt - queuedAt, duration: Date.now() - startedAt, exit, command: rest, cwd: process.cwd(), resource }) + '\n');
+    } catch { /* the log is no evidence; a failed write changes nothing */ }
+    process.exit(exit);
   });
 }
 

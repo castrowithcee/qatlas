@@ -51,22 +51,18 @@ Fehlt die Datei, folge den Voreinstellungen der Anweisungen. Halte in jedem Proj
 - Belege eine geteilte Ressource nie gleichzeitig mit anderen.
 - Nutze `slot` als Standardweg für lokalen Nachweis.
 
-Die Strategie beantwortet diese Fragen:
+Die Strategie beantwortet die Kernfragen zu `TESTING.md` aus [Reservierte Datei
+füllen](../../../qatlas-core-filing/references/playbook-reserved-files.md) und für einen Lauf zusätzlich
+diese:
 
-1. Welche Prüfungen belegen einen Task vor der Übergabe, und welche läuft nur das CI?
-2. Welche Stufen gibt es neben schnellen und teuren Prüfungen, jeweils mit Befehl, Pfadbereichen und
-   Zeitpunkt?
-3. Was zählt neben `slot` und CI als Nachweis, und wie prüft der Integrator ihn gegen den Tree? Ohne diese
+1. Welche Pfadbereiche und welchen Zeitpunkt hat jede teure Prüfung?
+2. Was zählt neben `slot` und CI als Nachweis, und wie prüft der Integrator ihn gegen den Tree? Ohne diese
    Prüfung wird nur `slot`-Nachweis übernommen.
-4. Welche unversionierten Eingaben gehören in den Cache-Schlüssel (`slot --input <path>`), und wie lange
+3. Welche unversionierten Eingaben gehören in den Cache-Schlüssel (`slot --input <path>`), und wie lange
    bleibt ein Nachweis gültig (`slot --max-age <hours>`)?
-5. Welche Flake-Regel gilt?
-6. Welche Prüfungen belegen eine exklusive Ressource (`slot --resource <name>`), und wie viele Test-Slots
-   darf das Projekt nutzen (`slot --slots <count>`, höchstens die Gerätekapazität)? Slots und exklusive
-   Ressourcen gelten je Repo.
-7. Welche Prüfungen müssen vor einem Commit grün sein, und welche Abdeckung erwartet das Projekt?
-8. Was geschieht bei Problemen: bei einem roten Task-Test, einer defekten Testumgebung und einem defekten
-   Test selbst, wer repariert, was wird abgebrochen und was wird als Entwurf im Planungssystem erfasst?
+4. Wie heißt die exklusive Ressource einer Prüfung, die etwas Unteilbares braucht (`slot --resource <name>`),
+   und wie viele Test-Slots darf das Projekt nutzen (`slot --slots <count>`, höchstens die Zahl des Nutzers
+   für den Host)? Slots gelten für den ganzen Host, exklusive Ressourcen je Repo.
 
 ## Höchstens zwei Korrekturen
 

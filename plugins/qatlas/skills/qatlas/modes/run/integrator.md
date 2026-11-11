@@ -104,7 +104,9 @@ Schritt 3 aus und überspringe keine.
   ihrer Pfadbereiche berührt. Protokolliere jede übersprungene Prüfung mit `<run> log --type skipped --task
   <id> --text "<Prüfung und Grund>"`.
 - **Schlussprüfung:** Führe nach `end` einmal über `slot` auf dem Endstand jede teure Prüfung aus, die in
-  diesem Lauf mindestens einmal übersprungen wurde. Ist sie rot, protokolliere sie mit `log --type risiko`
+  diesem Lauf mindestens einmal übersprungen wurde, und jede Prüfung, die das Projekt für das Ende eines Laufs
+  verlangt. Suche diese von den nativen Anweisungen des Projekts aus dort, wo es seine Prüfungen beschreibt;
+  ein bestimmter Dateiname ist nicht vorausgesetzt. Ist eine rot, protokolliere sie mit `log --type risiko`
   und nenne sie im Abschluss unter `Entscheiden`; den Entwurf dafür erfasst der Supervisor. Lass bereits
   integrierte Tasks, wie sie sind.
 
