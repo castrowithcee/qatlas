@@ -122,8 +122,21 @@ tree-gebundener Nachweis desselben Trees zählt als diese Prüfung. Setze `done`
 dem Kontroll-Branch belegt sind, und gleiche dabei den tatsächlichen Diff und das entstandene Verhalten mit
 der Ausführungsgrundlage ab.
 
-Muss der Nutzer entscheiden, prüfen oder handeln, gehört der Task auf `review`; frage dafür als Lead zuerst den
-Supervisor. Verhindert eine externe Voraussetzung, Ressource oder Umgebung das Weiterarbeiten, gehört er nach
-dem maßgeblichen Statusmodell auf `waiting`. Schreibe den Status nur so, wie „Planungssystem“ im Git-Workflow
-es regelt. Ändere den Status nicht wegen einer nicht erfüllten internen Task-Abhängigkeit; die Reihenfolge
-im Planungssystem genügt.
+## An den Nutzer übergeben
+
+Übergib einen Task erst an den Nutzer, wenn integriert ist, was geprüft und in sich stimmig ist:
+
+- **Nur die Prüfung des Nutzers fehlt:** Sind alle Kriterien belegt, die sich ohne ihn belegen lassen, übergib
+  den Task als Lead wie jeden anderen an den Integrator und nenne die offene Prüfung im Bericht. Setze ihn als
+  Integrator nach der Integration auf `review` statt auf `done`. Verlangt der Taskvertrag die Prüfung vor der
+  Integration, bleibt der Stand integrationsreif auf dem Task-Branch.
+- **Ein Teil ist fertig:** Übergib als Lead jeden geprüften Meilenstein an den Integrator, als Übergabe, die
+  nicht die letzte ist, bevor der Task an den Nutzer geht. Nur ein unfertiger Rest bleibt als Checkpoint auf
+  dem Task-Branch.
+
+Wähle den Status und schreibe die Übergabe nach „Übergabe an den Nutzer“ der Backlog-Norm. Frage als Lead vor
+`review` zuerst den Supervisor, außer der Taskvertrag selbst weist die Prüfung dem Nutzer zu. Verhindert eine
+externe Voraussetzung, Ressource oder Umgebung das Weiterarbeiten, gehört der Task nach dem maßgeblichen
+Statusmodell auf `waiting`. Schreibe den Status nur so, wie „Planungssystem“ im Git-Workflow es regelt. Ändere
+den Status nicht wegen einer nicht erfüllten internen Task-Abhängigkeit; die Reihenfolge im Planungssystem
+genügt.

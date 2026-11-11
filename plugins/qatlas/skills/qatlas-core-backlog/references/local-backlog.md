@@ -32,8 +32,7 @@ bleibt in einem vollständigen Lesen eigenständig ausführbar:
 - Der Abschnitt `Abschlussbericht` ist die einzige statusabhängige Übergabestelle. Ersetze und verdichte
   seinen bisherigen Inhalt bei einem Übergang, statt Laufberichte oder erledigte Review-Karten anzuhängen;
   nach einer Klärung bleibt nur ein noch nötiger aktueller Stand oder `- Keine.`. Er enthält:
-  - bei `review` nur die aktuelle menschliche Übergabe: Entscheidung, Prüfung oder Abnahme, belegten
-    Ist-Stand, Empfehlung, Folge und wiederaufnehmbaren Arbeitsstand;
+  - bei `review` nur die aktuelle Übergabe an den Nutzer nach der Backlog-Norm;
   - bei `waiting` Grund, Wiederaufnahmesignal, verifizierten Stand und nächsten Schritt;
   - bei `done` `- Keine.` oder nur wichtige Entscheidungen, Auffälligkeiten, Risiken, Warnungen und
     Abweichungen sowie die Orte, an denen dauerhafte Projektwahrheiten oder falsch gewordene Dokumentation
@@ -73,7 +72,7 @@ Zulässige Rück- und Übergabewege:
   Roster bestimmt Reihenfolge und Abhängigkeiten.
 - `in-progress`: Eine laufende Ausführung hat ihn beansprucht. Ohne sichtbaren Worker kläre zuerst die
   Zuständigkeit und versetze den Task nach seinem tatsächlichen nächsten Schritt in einen anderen Status.
-- `review`: Der nächste Schritt ist eine konkrete Entscheidung, Prüfung oder Abnahme durch den Nutzer.
+- `review`: Der nächste Schritt ist eine konkrete Entscheidung, Prüfung oder Handlung des Nutzers.
 - `waiting`: Eine externe Voraussetzung, Ressource oder ein externes Ereignis verhindert das Weiterarbeiten.
   Grund und Wiederaufnahmesignal müssen konkret sein; eine unfertige interne Task-Abhängigkeit allein genügt
   nicht.

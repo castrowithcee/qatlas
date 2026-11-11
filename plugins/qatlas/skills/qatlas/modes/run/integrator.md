@@ -80,7 +80,8 @@ CI-Jobs ebenso mit `--type rerun`; beide zählen in die Kennzahlen.
    über `slot --resource <name> -- <command>` aus.
 4. Erlauben Nutzer- oder Projektanweisungen, den Kontroll-Branch zu pushen, pushe ihn direkt nach der
    Landung, nie erzwungen; sonst lass ihn lokal, bis der Lauf endet. Ist es die letzte Übergabe des Tasks,
-   schließe ihn danach im Planungssystem und setze ihn auf `done`. Antworte mit `integrated <sha>`, wobei
+   schließe ihn danach im Planungssystem und setze ihn auf `done`; fehlt nur noch die Prüfung des Nutzers,
+   setze ihn stattdessen nach „An den Nutzer übergeben“ auf `review`. Antworte mit `integrated <sha>`, wobei
    `<sha>` der Integrationscommit auf dem Kontroll-Branch ist.
 
 Musst du über Pull Requests vor dem Merge die Basis nachziehen, bleibt die Integration seriell an die

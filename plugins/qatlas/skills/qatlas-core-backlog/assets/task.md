@@ -60,8 +60,9 @@ verworfene Versuche entfernen, sobald ihre Begründung nicht mehr entscheidungsr
 
 ## Prüfung
 <!-- Erwartete automatische Tests, Typecheck, Build, Browserprüfung und erforderliche manuelle Prüfung.
-Nicht relevante Prüfarten ausdrücklich so kennzeichnen. Die hier vereinbarte Prüfung und der oben
-belegte vorhandene Prüfpfad dürfen sich nicht widersprechen. -->
+Nicht relevante Prüfarten ausdrücklich so kennzeichnen. Eine Prüfung durch den Nutzer, die vor der
+Integration nötig ist, ausdrücklich so nennen. Die hier vereinbarte Prüfung und der oben belegte vorhandene
+Prüfpfad dürfen sich nicht widersprechen. -->
 
 ## Erledigt, wenn
 <!-- Beobachtbare Abnahmekriterien einschließlich der vereinbarten Dokumentationswirkung als Checkliste. -->

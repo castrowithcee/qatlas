@@ -38,6 +38,23 @@ beschaffbar.
   `draft`. Reversible technische Details im ausdrücklichen Entscheidungsspielraum verhindern die Reife nicht.
 - Beurteile Reife nach dem tatsächlichen Inhalt, nie nach einer bestimmten Überschrift oder Vorlage.
 
+## Übergabe an den Nutzer
+
+`review` heißt in jedem Planungssystem: Der Task ist vollständig beschrieben, und nur eine Entscheidung,
+Prüfung oder Handlung des Nutzers steht aus. Ist offen, was entstehen soll (Ergebnis, Scope, Vorgehen oder
+Abnahme), ist der Task `draft`. Der Task bleibt dabei eine Einheit; lege für einen offenen Rest keinen neuen
+Task an.
+
+Schreibe im selben Schritt, in dem du einen Task auf `review` setzt, die Übergabe in seinen aktuellen
+Eintrag, so vollständig, dass der Nutzer ohne Task, Diff und Verlauf antworten kann:
+
+- **Offener Punkt:** die eine Entscheidung, Prüfung oder Handlung; bei einer Prüfung Ort, Aktion und
+  erwartetes Ergebnis je Schritt, bei einer Handlung Ort oder Befehl und der erwartete Nachweis.
+- **Belegter Stand:** was erledigt und geprüft ist und ob es integriert ist, sonst Branch, Worktree und Stand
+  der nicht integrierten Arbeit.
+- **Empfehlung:** bei einer Entscheidung die Optionen mit ihrer Folge und die begründete Empfehlung.
+- **Danach:** was auf die Antwort folgt: der Abschluss oder die Arbeit, die ein neuer Lauf fortsetzt.
+
 ## Lokaler Backlog
 
 Lies vor jeder Arbeit im lokalen Backlog vollständig den

@@ -63,8 +63,8 @@ ohne danach etwas einzumischen. Gibt der Integrator bis zur Integration einen ne
 Repo als der Steuerwurzel, ergänze `--code-repo <absolute path>`, damit `branch` und `base` dort geprüft
 werden. Lege die Berichtsdatei außerhalb jedes Worktrees an. Nenne im Bericht knapp geänderte Dateien,
 ausgeführte Prüfungen, Wirkung auf die Dokumentation, Abweichungen von der Arbeitskarte, ungelöste Risiken, die
-verwendeten Worker-Profile mit Modell und Effort, Branches und Commits sowie ob diese Übergabe die letzte des
-Tasks ist; lass Rohlogs draußen.
+verwendeten Worker-Profile mit Modell und Effort, Branches und Commits, ob diese Übergabe die letzte des
+Tasks ist und ob danach eine Prüfung des Nutzers offen bleibt; lass Rohlogs draußen.
 
 Beginne jeden Bericht mit YAML-Frontmatter (`---` in der ersten Zeile) mit `checks`: ein Eintrag pro
 vollständiger Prüfung der Übergabe, jeweils mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der

@@ -1,6 +1,7 @@
 ---
 description: >
-  Arbeitsablauf mit Qatlas von Init über Goal, Shape, Run und Review bis zur Pflege.
+  Arbeitsablauf mit Qatlas von Init über Goal, Shape und Run bis zur Pflege, mit Review als eigenem
+  Einstieg.
 ---
 
 # Arbeitsablauf
@@ -16,14 +17,16 @@ description: >
    `--limit <n>` bis zu `n`, und lässt jedes parallel von einem eigenen Lead als Subagent abarbeiten. Leads
    verteilen Aufträge an Worker und prüfen deren Ergebnisse; ein Integrator nimmt jede Übergabe ab und
    committet lokal. Der Lauf arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder
-   übergibt an `review` und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Push und Pull Requests
-   nur, wenn Nutzer- oder Projektanweisungen sie verlangen und erlauben; nie Veröffentlichung, Deployment oder
-   unumkehrbare Schritte.
-5. **Abnehmen:** `qatlas review` führt dich Schritt für Schritt, mit Ort und erwartetem Ergebnis, durch
-   konkrete Prüfungen und klärt einzeln die Entscheidungen und Handlungen, die nur der Nutzer treffen kann.
+   übergibt an `review`, nachdem integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf
+   ohne Rückfrage fort. Push und Pull Requests nur, wenn Nutzer- oder Projektanweisungen sie verlangen und
+   erlauben; nie Veröffentlichung, Deployment oder unumkehrbare Schritte.
 
 Jeder Schritt braucht einen eigenen Aufruf; keiner startet von selbst den nächsten. `goal` ist optional, und
 der direkte Einstieg mit `shape` ist gültig.
+
+`qatlas review` ist ein eigener Einstieg neben diesem Ablauf: Es legt einzeln vor, was nur der Nutzer
+entscheiden, prüfen oder tun kann, bei einer Prüfung Schritt für Schritt mit Ort und erwartetem Ergebnis,
+hält die Antwort fest und setzt den Status. Es setzt nichts um und integriert nichts.
 
 ## Ohne die Schleife
 

@@ -1,15 +1,14 @@
 ---
 description: >
-  Human-in-the-loop-Verfahren für einen Qatlas-Lauf: führt den Nutzer zügig durch konkrete Prüfungen und
-  schließt abgesicherte Entscheidungen, Abnahmen und Nutzeraktionen ab, ohne die inhaltliche Ausführung
-  fortzusetzen.
+  Eigenständiger Einstieg für offene Übergaben an den Nutzer: legt jede Entscheidung, Prüfung oder Handlung
+  aus dem Task als Karte vor, hält die Antwort fest und setzt den Status, ohne umzusetzen oder zu
+  integrieren.
 ---
 
 # Übergaben abschließen
 
-Offene menschliche Übergaben gehen hinein; abgeschlossene, wieder ausführbare oder bewusst beendete Tasks
-kommen heraus. Der Agent bereitet vor, was der Nutzer sonst selbst zusammentragen müsste, und führt ihn auf
-dem kürzesten Weg durch das, was nur er beurteilen kann.
+Lege dem Nutzer vor, was nur er entscheiden, prüfen oder tun kann, und halte seine Antwort fest. Er sucht und
+liest dafür keinen Task: Die Karte trägt alles, was er für die Antwort braucht.
 
 ## Aufruf
 
@@ -32,25 +31,22 @@ Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
 ## Queue aufbauen
 
 1. Bestimme das Planungssystem und den gewählten Scope.
-2. Baue die Queue aus `review` und ausdrücklich offenen Nutzerentscheidungen, -prüfungen oder -aktionen. Lass
-   keine Entwürfe reifen und ändere keinen Task mit laufendem Worker.
-3. Sammle aus dem aktuellen Eintrag jedes Tasks der Queue Stand, Nachweise, offene Frage, Empfehlung und
-   Folgen, und frage nichts, was der aktuelle Stand schon klärt.
+2. Baue die Queue aus den Tasks in `review`. Lass keine Entwürfe reifen und ändere keinen Task mit laufendem
+   Worker.
+3. Nimm jede Übergabe aus dem aktuellen Eintrag ihres Tasks, wie die Backlog-Norm sie verlangt. Ergänze
+   nichts aus Diff, Verlauf oder eigener Deutung und frage nichts, was der Eintrag schon klärt. Fehlt eine
+   Angabe, die der Nutzer für seine Antwort braucht, nenne sie auf der Karte als Lücke.
 4. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neues Review startet sauber; eine
    Fortsetzung führt nur den eindeutig zugewiesenen Entscheidungs-Diff fort.
 5. Ordne jede Übergabe ein. Eine **Prüfung** gibt es nur, wenn es ein konkretes Ergebnis gibt, das der
-   Nutzer ansehen, ausführen oder ausprobieren muss. Tasks, deren Fertigstellung vollständig belegt ist und
-   nur die förmliche Abnahme braucht, bilden eine **Sammelabnahme**: eine Zeile pro Task mit Thema und
-   Ergebnis und eine Frage, ob alle geschlossen werden sollen; der Nutzer kann einzelne ausnehmen. Alles
-   andere ist eine Entscheidung oder Nutzeraktion.
-6. Nenne nur die Anzahl der Tasks in der Queue, beginne dann mit der Sammelabnahme und lege danach jeweils
-   eine Karte vor.
+   Nutzer ansehen, ausführen oder ausprobieren muss. Alles andere ist eine Entscheidung oder Nutzeraktion.
+6. Nenne nur die Anzahl der Tasks in der Queue und lege dann jeweils eine Karte vor.
 
 ## Prüfung durchführen
 
-Bereite die Prüfung vollständig vor, bevor du den Nutzer ansprichst: arbeite aus Abnahmekriterien,
-Abschlussbericht und Diff heraus, was sich geändert hat, wo es sich zeigt und woran sich Erfolg zeigt. Lege
-nur vor, was der Nutzer sehen oder beurteilen muss; er wiederholt nicht, was Maschinen belegt haben.
+Nimm die Schritte der Prüfung aus der Übergabe: was sich geändert hat, wo es sich zeigt und woran sich
+Erfolg zeigt. Lege nur vor, was der Nutzer sehen oder beurteilen muss; er wiederholt nicht, was Maschinen
+belegt haben.
 
 Lege die Prüfung zuerst als Karte vor, deren Entscheidung ist, ob sie jetzt läuft: `Jetzt prüfen` mit Anzahl
 und Ort der Schritte oder `Überspringen`, wonach der Task unverändert in `review` bleibt. Zeige nach `Jetzt
