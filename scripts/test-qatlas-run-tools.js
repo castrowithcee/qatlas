@@ -799,6 +799,7 @@ try {
     const fm = `---\nbranch: main\nchecks:\n  - command: node test\n    exit: 0\n    tree: "${git(repo, 'rev-parse', 'main^{tree}')}"\n---\n`;
     const cleanEnv = { ...process.env };
     delete cleanEnv.CLAUDE_CODE_SESSION_ID;
+    delete cleanEnv.CLAUDE_PROJECT_DIR;
     const run = (...args) => spawnSync(process.execPath, [runner, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8', env: cleanEnv });
     const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
     const refused = (pattern, ...args) => { const res = run(...args); assert.strictEqual(res.status, 2, res.stdout); assert.match(res.stderr, pattern); };
@@ -964,6 +965,93 @@ try {
       allowed({});
       ok('begin', '--discard');
       assert.strictEqual('session' in lines().pop(), false);
+    }
+
+    // Spawn hook: while the run of the session is active, a subagent start needs a combination of the config.
+    {
+      const home = fs.mkdtempSync(path.join(root, 'home-'));
+      const config = path.join(home, '.qatlas', 'plugins', 'config.json');
+      const host = {
+        integrator: { model: null, effort: null }, lead: { model: 'opus', effort: 'high' },
+        worker: { light: { model: 'haiku', effort: null }, standard: { model: 'sonnet', effort: 'medium' }, demanding: { model: 'opus', effort: 'high' } },
+      };
+      const profiles = { light: 'a', standard: 'b', demanding: 'c' };
+      const configure = value => write(config, JSON.stringify({ format: 1, ...value }));
+      const hook = (call, more = {}, env = {}) => spawnSync(process.execPath, [runner, 'spawn-hook'], { encoding: 'utf8', cwd: root, env: { ...cleanEnv, HOME: home, ...env },
+        input: typeof call === 'string' ? call : JSON.stringify({ session_id: 's1', cwd: repo, tool_name: 'Agent', tool_input: { prompt: 'p', ...call }, ...more }) });
+      const allowed = (...args) => { const res = hook(...args); assert.strictEqual(res.status, 0, res.stderr); assert.strictEqual(res.stdout, '', JSON.stringify(args)); };
+      const denied = (...args) => {
+        const res = hook(...args);
+        assert.strictEqual(res.status, 0, res.stderr);
+        const output = JSON.parse(res.stdout).hookSpecificOutput;
+        assert.deepStrictEqual([output.hookEventName, output.permissionDecision], ['PreToolUse', 'deny'], JSON.stringify(args));
+        return output.permissionDecisionReason;
+      };
+      const lead = { subagent_type: 'general-purpose', model: 'opus', effort: 'high' };
+      const inLead = { agent_id: 'a1', agent_type: 'general-purpose' };
+      // Would be denied in an active run: no role carries this combination.
+      const stray = { subagent_type: 'Explore', model: 'haiku' };
+      const withSession = id => assert.strictEqual(spawnSync(process.execPath, [runner, 'begin', '--repo', repo, '--discard'],
+        { encoding: 'utf8', env: { ...cleanEnv, CLAUDE_CODE_SESSION_ID: id } }).status, 0);
+      configure({ run: { profiles, hosts: { 'claude-code': host } } });
+
+      // No run of this session: nothing is checked.
+      allowed(stray);
+      withSession('s1');
+      allowed(stray, { session_id: 'other' });
+
+      // Supervisor: lead and integrator with their role, everything else as a worker with a profile.
+      allowed(lead);
+      allowed({ subagent_type: 'general-purpose' });
+      allowed({ subagent_type: 'qatlas:worker', model: 'sonnet', effort: 'medium' });
+      allowed({ subagent_type: 'qatlas:worker', model: 'haiku' });
+      const reason = denied({ subagent_type: 'general-purpose', model: 'opus' });
+      assert.ok(reason.includes(config) && reason.includes('lead: model opus, effort high') && reason.includes('integrator: no model, no effort')
+        && reason.includes('standard: model sonnet, effort medium') && reason.includes('light: model haiku, no effort'), reason);
+      denied({ subagent_type: 'general-purpose', model: 'fable', effort: 'high' });
+      denied(stray);
+      denied({ subagent_type: 'fork' });
+      denied({ subagent_type: 'qatlas:worker' });
+      denied({ subagent_type: 'qatlas:worker', model: 'sonnet', effort: 'high' });
+      denied({ subagent_type: 'qatlas:worker', model: 'haiku', effort: 'low' });
+
+      // Lead or integrator: only workers. A worker starts nothing.
+      allowed({ subagent_type: 'qatlas:worker', model: 'opus', effort: 'high' }, inLead);
+      denied(lead, inLead);
+      denied({ subagent_type: 'general-purpose' }, inLead);
+      denied({ subagent_type: 'qatlas:worker', model: 'haiku' }, { agent_id: 'a2', agent_type: 'qatlas:worker' });
+
+      // A subagent in a task worktree, also of a nested folder, still belongs to the run.
+      const tree = path.join(root, 'tree-' + path.basename(repo));
+      git(repo, 'worktree', 'add', '-q', '-b', 'spawn-hook', tree);
+      denied({ subagent_type: 'qatlas:worker' }, { ...inLead, cwd: tree });
+      const outside = fs.mkdtempSync(path.join(root, 'no-git-'));
+      allowed({ subagent_type: 'qatlas:worker' }, { ...inLead, cwd: outside });
+      denied({ subagent_type: 'qatlas:worker' }, { ...inLead, cwd: outside }, { CLAUDE_PROJECT_DIR: repo });
+      git(repo, 'worktree', 'remove', '--force', tree);
+      git(repo, 'branch', '-q', '-D', 'spawn-hook');
+
+      // Other tools, broken input and a config without usable models for this host: nothing is checked.
+      allowed(stray, { tool_name: 'Bash' });
+      allowed('not json');
+      allowed(stray, { tool_input: undefined });
+      configure({ run: { 'test-slots': 2 } });
+      allowed(stray);
+      configure({ run: { profiles, hosts: { codex: host } } });
+      allowed(stray);
+      configure({ run: { profiles, hosts: { 'claude-code': { ...host, lead: 'opus' } } } });
+      allowed(stray);
+      configure({ team: { profiles, hosts: { 'claude-code': host } } });
+      allowed(stray);
+      fs.rmSync(config);
+      allowed(stray);
+
+      // An ended run checks nothing.
+      configure({ run: { profiles, hosts: { 'claude-code': host } } });
+      denied(stray);
+      ok('end');
+      allowed(stray);
+      ok('begin', '--discard');
     }
 
     // Low disk wakes the supervisor once per undershoot and re-arms after recovery.

@@ -113,6 +113,12 @@ const specification = specifications[block];
 if (!pluginRoot || !specification || (specification.scaffold && !scaffold)
   || (specification.repoMemory && !repoMemory)) process.exit(0);
 
+// Old forms of the user config are upgraded before anything of this version reads it.
+if (block === 'qatlas') {
+  try { require('../scripts/runtime/config-migrations.js').migrateUserConfig(); }
+  catch { /* a failed upgrade never blocks the session */ }
+}
+
 // The status line runs from a copy outside the versioned plugin path; keep it on this version.
 if (block === 'qatlas' && !isCodex) {
   try { refreshStatusline(pluginRoot); } catch { /* the status line never blocks the session */ }

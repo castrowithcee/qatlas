@@ -22,6 +22,11 @@
 //   qatlas-run.js stop-hook
 //     Stop hook of the host, input on stdin (no --repo). Blocks a stop once while the run of this session is
 //     active and no background work runs; allows it silently (exit 0) in every other case and on any error.
+//   qatlas-run.js spawn-hook
+//     PreToolUse hook of Claude Code for the Agent tool, input on stdin (no --repo). While the run of this
+//     session is active and run.hosts.claude-code of the user config is valid, denies a subagent start whose
+//     type, model and effort are not a combination listed there; allows it silently in every other case and
+//     on any error.
 
 const fs = require('fs');
 const path = require('path');
@@ -419,24 +424,70 @@ function validateHandover(text, repo) {
   checkTrees(head, `head ${head}`);
 }
 
+// Whether the session of a hook input has an active run. A subagent may sit in a task worktree, so the folder
+// of the call and the project folder count, each as its own worktree and as the main one.
+function sessionRuns(input) {
+  const roots = new Set();
+  for (const dir of [input.cwd, process.env.CLAUDE_PROJECT_DIR]) {
+    if (!dir) continue;
+    for (const [query, main] of [[['--show-toplevel'], false], [['--path-format=absolute', '--git-common-dir'], true]]) {
+      try {
+        const found = execFileSync('git', ['-C', dir, 'rev-parse', ...query],
+          { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000 }).trim();
+        roots.add(main ? path.dirname(found) : found);
+      } catch { /* no repo here */ }
+    }
+  }
+  return [...roots].some(root => {
+    const all = events(root);
+    if (!all.some(e => e.type === 'begin') || ended(all)) return false;
+    const started = all.filter(e => e.type === 'begin' || e.type === 'resume').pop();
+    return Boolean(started.session) && started.session === input.session_id;
+  });
+}
+
 // Any doubt or error allows the stop; the run is never held against the host's will beyond one nudge.
 function stopHook() {
   try {
     const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     if (!Array.isArray(input.background_tasks) || input.stop_hook_active === true) return;
     if (input.background_tasks.some(task => task && task.status === 'running')) return;
-    const top = execFileSync('git', ['-C', input.cwd, 'rev-parse', '--show-toplevel'],
-      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000 }).trim();
-    const all = events(top);
-    if (!all.some(e => e.type === 'begin') || ended(all)) return;
-    const started = all.filter(e => e.type === 'begin' || e.type === 'resume').pop();
-    if (!started.session || started.session !== input.session_id) return;
+    if (!sessionRuns(input)) return;
     out({ decision: 'block', reason: 'The run is still active and no background work is running: refill packages, start successors, or run end.' });
   } catch { /* allow the stop */ }
 }
 
+const WORKER_TYPE = 'qatlas:worker';
+
+// The model alone cannot be trusted to pass model and effort on every start: an omitted parameter silently
+// inherits the session's model. Only the supervisor starts leads and the integrator; a worker starts nothing.
+function spawnHook() {
+  try {
+    const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+    const call = input.tool_input;
+    if (input.tool_name !== 'Agent' || !call || !sessionRuns(input)) return;
+    const { readConfig } = require('../../../../../scripts/runtime/config-loader.js');
+    const state = readConfig();
+    const host = state.run && state.run.hosts ? state.run.hosts['claude-code'] : null;
+    if (!host || state.problems.some(problem => problem.startsWith(state.configFile + ': run.'))) return;
+    const same = slot => slot.model === (call.model ?? null) && slot.effort === (call.effort ?? null);
+    const worker = call.subagent_type === WORKER_TYPE;
+    // A fork ignores the model parameter and keeps the model of its parent.
+    const allowed = input.agent_type === WORKER_TYPE ? false
+      : worker ? Object.values(host.worker).some(same)
+        : !input.agent_id && call.subagent_type !== 'fork' && [host.lead, host.integrator].some(same);
+    if (allowed) return;
+    const show = ([name, slot]) => `${name}: ${slot.model === null ? 'no model' : 'model ' + slot.model}, ${slot.effort === null ? 'no effort' : 'effort ' + slot.effort}`;
+    out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason:
+      `Qatlas run: this subagent start matches no combination of run.hosts.claude-code in ${state.configFile}. `
+      + `Lead and integrator, started only by the supervisor with a general subagent type: ${[['lead', host.lead], ['integrator', host.integrator]].map(show).join('; ')}. `
+      + `Every other subagent, with subagent_type ${WORKER_TYPE}: ${Object.entries(host.worker).map(show).join('; ')}. `
+      + 'Omit a parameter listed as "no model" or "no effort". A worker starts no subagents.' } });
+  } catch { /* allow the start */ }
+}
+
 const commands = {
-  begin, 'stop-hook': stopHook, plan, answer, done, log: logEvent, report, end, wait,
+  begin, 'stop-hook': stopHook, 'spawn-hook': spawnHook, plan, answer, done, log: logEvent, report, end, wait,
   ask: () => raise('question', need('--question')[0]),
   handover: () => raise('handover', reportText(), need('--task')[0]),
   cut: () => cut(codeRepo(repoKey())),

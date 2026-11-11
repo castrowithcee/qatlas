@@ -110,7 +110,7 @@ const VALID_RUN = {
   profiles: { light: 'Narrow.', standard: 'Several steps.', demanding: 'Hard diagnosis.' },
   hosts: {
     'claude-code': {
-      integrator: null, lead: 'opus',
+      integrator: { model: null, effort: null }, lead: { model: 'opus', effort: 'high' },
       worker: {
         light: { model: 'haiku', effort: null },
         standard: { model: 'sonnet', effort: 'high' },
@@ -132,13 +132,77 @@ function testDoctorRunBlock() {
   assert.ok(!ok.stdout.includes('run'), ok.stdout);
   const incomplete = JSON.parse(JSON.stringify(VALID_RUN));
   delete incomplete.hosts['claude-code'].worker.demanding;
+  incomplete.hosts['claude-code'].lead = 'opus';
+  incomplete.hosts['claude-code'].worker.light.effort = 3;
   incomplete['test-slots'] = 0;
   write(config, { format: 1, run: incomplete });
   const bad = check().stdout;
   assert.ok(bad.includes('run.hosts.claude-code.worker.demanding needs model and effort'), bad);
+  assert.ok(bad.includes('run.hosts.claude-code.lead needs model and effort'), bad);
+  assert.ok(bad.includes('run.hosts.claude-code.worker.light needs model and effort'), bad);
+  assert.ok(!bad.includes('run.hosts.claude-code.integrator'), bad);
   assert.ok(bad.includes('run.test-slots needs a positive integer'), bad);
   write(config, { format: 1, team: VALID_RUN });
-  assert.ok(check().stdout.includes('unknown key team.'), 'The old team block is an unknown key.');
+  assert.ok(check().stdout.includes('unknown key team.'), 'Doctor only reads: the old team block is an unknown key.');
+}
+
+// The session start upgrades old forms of the user config silently, once, and touches nothing else.
+function testConfigMigration() {
+  const f = fixture('migration');
+  const config = path.join(f.home, '.qatlas', 'plugins', 'config.json');
+  const read = () => fs.readFileSync(config, 'utf8');
+  const old = JSON.parse(JSON.stringify(VALID_RUN));
+  old.hosts['claude-code'].lead = 'opus';
+  old.hosts['claude-code'].integrator = null;
+  old.hosts.codex = { ...VALID_RUN.hosts['claude-code'], lead: 'gpt-x' };
+
+  // The old block name and the bare role models, with the file's own indentation and key order.
+  write(config, JSON.stringify({ format: 1, memory: { enable: true }, team: old, statusline: {} }, null, 4) + '\n');
+  const output = hookOutput(f, 'qatlas');
+  assert.ok(!/migrat|team/i.test(output), 'The upgrade is silent.');
+  const upgraded = read();
+  assert.ok(upgraded.startsWith('{\n    "format": 1,'), 'The indentation survives.');
+  assert.ok(upgraded.endsWith('}\n'), 'The final newline survives.');
+  const value = JSON.parse(upgraded);
+  assert.deepStrictEqual(Object.keys(value), ['format', 'memory', 'run', 'statusline'], 'run takes the place of team.');
+  assert.deepStrictEqual(value.run.hosts['claude-code'].lead, { model: 'opus', effort: null });
+  assert.deepStrictEqual(value.run.hosts['claude-code'].integrator, { model: null, effort: null });
+  assert.deepStrictEqual(value.run.hosts.codex.lead, { model: 'gpt-x', effort: null });
+  assert.deepStrictEqual(value.run.hosts.codex.integrator, VALID_RUN.hosts['claude-code'].integrator);
+  assert.deepStrictEqual(value.run.hosts['claude-code'].worker, VALID_RUN.hosts['claude-code'].worker);
+  assert.deepStrictEqual(readConfigWithHome(f.home, f.project).problems, []);
+  assert.deepStrictEqual(fs.readdirSync(path.dirname(config)).filter(name => name.endsWith('.tmp')), []);
+
+  // A current file is not rewritten; Codex upgrades as well.
+  const past = new Date(Date.now() - 60000);
+  fs.utimesSync(config, past, past);
+  const before = fs.statSync(config);
+  hookOutput(f, 'qatlas');
+  assert.deepStrictEqual([fs.statSync(config).mtimeMs, fs.statSync(config).ino], [before.mtimeMs, before.ino],
+    'A current config stays untouched.');
+  write(config, { format: 1, team: { 'test-slots': 3 } });
+  hookOutput(f, 'qatlas', true);
+  assert.deepStrictEqual(JSON.parse(read()), { format: 1, run: { 'test-slots': 3 } });
+
+  // Both blocks at once, a foreign format and broken JSON are left to the user; only the qatlas block upgrades.
+  for (const text of ['{ "format": 1, "team": { "test-slots": 3 }, "run": {} }\n', '{ "format": 2, "team": {} }\n', '{ "format": 1, "team": \n']) {
+    write(config, text);
+    hookOutput(f, 'qatlas');
+    assert.strictEqual(read(), text);
+  }
+  write(config, { format: 1, team: {} });
+  hookOutput(f, 'memory');
+  hookOutput(f, 'library');
+  assert.ok(read().includes('"team"'));
+
+  // A config synced as a symlink keeps its link.
+  const real = path.join(f.root, 'synced.json');
+  write(real, { format: 1, team: { 'test-slots': 4 } });
+  fs.rmSync(config);
+  fs.symlinkSync(real, config);
+  hookOutput(f, 'qatlas');
+  assert.ok(fs.lstatSync(config).isSymbolicLink());
+  assert.deepStrictEqual(JSON.parse(fs.readFileSync(real, 'utf8')), { format: 1, run: { 'test-slots': 4 } });
 }
 
 function testProjectContext() {
@@ -435,12 +499,13 @@ function testStatuslineCodex() {
 try {
   testConfig();
   testDoctorRunBlock();
+  testConfigMigration();
   testProjectContext();
   testInit();
   testLibraryAndSubagent();
   testStatuslineRefresh();
   testStatuslineCodex();
-  process.stdout.write('✓ Qatlas init, doctor and context: 7 scenarios passed.\n');
+  process.stdout.write('✓ Qatlas init, doctor and context: 8 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

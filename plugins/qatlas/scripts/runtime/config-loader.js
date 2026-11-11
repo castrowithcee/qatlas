@@ -118,15 +118,13 @@ function runProblems(value) {
   if (!isObject(value.hosts) || !Object.keys(value.hosts).length) return [...problems, 'hosts is missing or empty.'];
   for (const [host, entry] of Object.entries(value.hosts)) {
     if (!isObject(entry)) { problems.push('hosts.' + host + ' must be an object.'); continue; }
-    for (const role of RUN_ROLES) {
-      if (entry[role] !== null && typeof entry[role] !== 'string') {
-        problems.push('hosts.' + host + '.' + role + ' needs a model or null.');
-      }
-    }
+    const slots = RUN_ROLES.map(role => [role, entry[role]]);
     for (const profile of RUN_PROFILES) {
-      const worker = isObject(entry.worker) ? entry.worker[profile] : undefined;
-      if (!isObject(worker) || !('model' in worker) || !('effort' in worker)) {
-        problems.push('hosts.' + host + '.worker.' + profile + ' needs model and effort.');
+      slots.push(['worker.' + profile, isObject(entry.worker) ? entry.worker[profile] : undefined]);
+    }
+    for (const [name, slot] of slots) {
+      if (!isObject(slot) || !['model', 'effort'].every(key => slot[key] === null || typeof slot[key] === 'string')) {
+        problems.push('hosts.' + host + '.' + name + ' needs model and effort, each text or null.');
       }
     }
   }
