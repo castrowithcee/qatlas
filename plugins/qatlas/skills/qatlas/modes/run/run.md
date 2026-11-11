@@ -1,6 +1,6 @@
 ---
 description: >
-  Paralleler Arbeitslauf: Ein Supervisor schneidet ausführbare Tasks in unabhängige Pakete, lässt jedes von
+  Paralleler Arbeitslauf: Ein Supervisor verteilt ausführbare Tasks auf unabhängige Pakete, lässt jedes von
   einem Lead-Subagent abarbeiten und einen Integrator-Subagent die Ergebnisse integrieren.
 ---
 
@@ -11,8 +11,9 @@ description: >
 ## Rollen
 
 Du bist der Supervisor: die Session, in der der Nutzer `run` aufruft. Starte genau einen Integrator zur Zeit
-und selbst keine Worker; das tun die Leads. Setze nichts inhaltlich um, integriere nichts und lies keine Diffs,
-Berichte oder Logs, damit dein Kontext schmal bleibt. Überlass während des Laufs das Schreiben des
+und selbst keine umsetzenden Worker; das tun die Leads. Setze nichts inhaltlich um, integriere nichts und lies
+keine Diffs, Berichte oder Logs, damit dein Kontext schmal bleibt, und einen Taskvertrag nur, wenn eine
+Rückfrage oder ein Problem genau diesen Task betrifft. Überlass während des Laufs das Schreiben des
 Kontroll-Branches allein dem Integrator, ebenso Merge, Task-Abschluss und `done`, auch wenn Projektanweisungen
 diese einem Lead erlauben.
 
@@ -95,17 +96,20 @@ Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unver
    Manifeste, CI-Konfiguration und vorhandene Anweisungen sie belegen. Bis dahin gilt der Standard aus
    „Abnehmen und integrieren“.
 
-## Pakete schneiden
+## Pakete bilden
 
-Schneide die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, in so viele Pakete, wie es unabhängige
-Bereiche gibt: höchstens vier, mit `--limit <n>` höchstens `n`, mit `--limit 0` ohne feste Grenze.
+Verteile die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, auf so viele Pakete, wie es unabhängige
+Bereiche gibt: höchstens vier, mit `--limit <n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Ein Paket
+ist die Zuständigkeit eines Leads für unveränderte Tasks; am Zuschnitt der Tasks änderst du nichts. Nimm
+Abhängigkeiten, Kopplung, gemeinsame Dateien und Umfang aus den Angaben des lesenden Workers.
 
 - **Kopplung:** Halte Abhängigkeiten und echte Kopplung über gemeinsame Invarianten, Migrationen oder
-  Laufzeitressourcen innerhalb eines Pakets; lässt sich Kopplung nicht ausschließen, führe die Tasks zusammen.
-- **Gemeinsame Dateien:** Schätze aus Taskvertrag und Code, welche Dateien jeder Task berührt. Lege Tasks, die
-  dieselbe zentrale Datei ändern, etwa ein Register, eine gemeinsame Testdatei oder dieselbe Dokumentation, in
-  ein Paket, weil jede Integration dort für die anderen Pakete als Konflikt zurückkommt. Lass Pakete nur
-  mechanisch geteilte Dateien gemeinsam nutzen, und nur, wo es sich nicht vermeiden lässt.
+  Laufzeitressourcen innerhalb eines Pakets; lässt sich Kopplung nicht ausschließen, lege die Tasks in dasselbe
+  Paket.
+- **Gemeinsame Dateien:** Lege Tasks, die dieselbe zentrale Datei ändern, etwa ein Register, eine gemeinsame
+  Testdatei oder dieselbe Dokumentation, in ein Paket, weil jede Integration dort für die anderen Pakete als
+  Konflikt zurückkommt. Lass Pakete nur mechanisch geteilte Dateien gemeinsam nutzen, und nur, wo es sich
+  nicht vermeiden lässt.
 - **Serielle Integration:** Ergänze ein Paket aus einer reinen Abhängigkeitskette um unabhängige Tasks, damit
   sein Lead weiterarbeitet, während er auf eine Integration wartet. Gib einem übergreifenden Task, der viele
   Bereiche berührt, etwa einer Import- oder Pfadumstellung, ein eigenes Paket und starte es zuerst.
@@ -175,10 +179,10 @@ Backlog trage jeden Entwurf nach „Laufende“ ein.
 - **Integrator `done` oder Ende ohne `done` vor `end`:** Starte einen neuen.
 - **Integrator `done` nach `end`:** Ist seine Schlussprüfung rot, erfasse dafür einen Entwurf.
 
-**Nachfüllen:** Endet ein Paket und ist das Laufbudget nicht aufgebraucht, schneide aus den verbleibenden Tasks
+**Nachfüllen:** Endet ein Paket und ist das Laufbudget nicht aufgebraucht, bilde aus den verbleibenden Tasks
 ein neues, von allen laufenden unabhängiges Paket nach der Größenregel, höchstens so groß wie das Restbudget,
 mit neuem Namen, protokolliere es mit `plan` und starte seinen Lead. Lass nie mehr Leads gleichzeitig laufen, als
-„Pakete schneiden“ zulässt.
+„Pakete bilden“ zulässt.
 
 ## Fortsetzen
 
@@ -186,7 +190,7 @@ Rekonstruiere nach einer Verdichtung deines Kontexts oder in einer neuen Session
 (Pakete, Laufbudget, beendete Pakete mit `rest`, offene Rückfragen und Übergaben) und dem Planungssystem.
 Beantworte offene Rückfragen und setze `wait` ab dem `cursor` von `report` fort. Behandle in einer neuen
 Session jedes Paket ohne `done` als „Lead endet ohne `done`“ und starte einen Integrator, weil die Subagents
-der alten Session nicht mehr laufen. Schneide keine Pakete über das restliche Laufbudget hinaus.
+der alten Session nicht mehr laufen. Bilde keine Pakete über das restliche Laufbudget hinaus.
 
 ## Laufende
 

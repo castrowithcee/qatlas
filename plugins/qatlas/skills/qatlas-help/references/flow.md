@@ -13,7 +13,7 @@ description: >
 3. **Shape:** `qatlas shape` hält bestätigtes Wissen aus dem geklärten Gesprächskontext fest und schneidet
    kleine, ausführungsreife Tasks zu; `qatlas shape <Datei>` tut das für eine Datei. `qatlas shape <Task>`
    schärft einen bestehenden Task, `qatlas shape backlog` ordnet bestehende Arbeit neu.
-4. **Run:** `qatlas run` schneidet die ausführbaren Tasks in bis zu vier unabhängige Pakete, mit
+4. **Run:** `qatlas run` verteilt die ausführbaren Tasks unverändert auf bis zu vier unabhängige Pakete, mit
    `--limit <n>` bis zu `n`, und lässt jedes parallel von einem eigenen Lead als Subagent abarbeiten. Leads
    verteilen Aufträge an Worker und prüfen deren Ergebnisse; ein Integrator nimmt jede Übergabe ab und
    committet lokal. Der Lauf arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder
