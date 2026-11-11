@@ -33,8 +33,9 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 
 ## Umsetzen
 
-Arbeite deine Tasks nacheinander ab. Darfst du Subagents starten, gib die Umsetzung nach „Einen Task
-ausführen“ an Worker. Sonst setze selbst um und befolge dort alles außer der Pflicht zu Workern.
+Arbeite deine Tasks nacheinander ab. Nennt dein Auftrag mehrere Tasks und darfst du Subagents starten, gib
+die Umsetzung nach „Einen Task ausführen“ an Worker. Sonst setze selbst um und befolge dort alles außer der
+Pflicht zu Workern.
 
 Beende einen Turn nur dann ohne Tool-Aufruf, wenn ein Worker von dir arbeitet oder ein eigener
 Hintergrundbefehl läuft; sonst wertet der Host den Turn als dein Ende und verlangt deine Schlussmeldung. Ein

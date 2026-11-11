@@ -14,12 +14,13 @@ description: >
    kleine, ausführungsreife Tasks zu; `qatlas shape <Datei>` tut das für eine Datei. `qatlas shape <Task>`
    schärft einen bestehenden Task, `qatlas shape backlog` ordnet bestehende Arbeit neu.
 4. **Run:** `qatlas run` verteilt die ausführbaren Tasks unverändert auf bis zu vier unabhängige Pakete, mit
-   `--limit <n>` bis zu `n`, und lässt jedes parallel von einem eigenen Lead als Subagent abarbeiten. Leads
-   verteilen Aufträge an Worker und prüfen deren Ergebnisse; ein Integrator nimmt jede Übergabe ab und
-   committet lokal. Der Lauf arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder
-   übergibt an `review`, nachdem integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf
-   ohne Rückfrage fort. Push und Pull Requests nur, wenn Nutzer- oder Projektanweisungen sie verlangen und
-   erlauben; nie Veröffentlichung, Deployment oder unumkehrbare Schritte.
+   `--limit <n>` bis zu `n`, und lässt jedes parallel von einem eigenen Lead als Subagent abarbeiten. Ein
+   Lead mit mehreren Tasks verteilt Aufträge an Worker und prüft deren Ergebnisse, ein Lead mit einem
+   einzelnen Task setzt selbst um; ein Integrator nimmt jede Übergabe ab und committet lokal. Der Lauf
+   arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder übergibt an `review`, nachdem
+   integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Push und
+   Pull Requests nur, wenn Nutzer- oder Projektanweisungen sie verlangen und erlauben; nie Veröffentlichung,
+   Deployment oder unumkehrbare Schritte.
 
 Jeder Schritt braucht einen eigenen Aufruf; keiner startet von selbst den nächsten. `goal` ist optional, und
 der direkte Einstieg mit `shape` ist gültig.
