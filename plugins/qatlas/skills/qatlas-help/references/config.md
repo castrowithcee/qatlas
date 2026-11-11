@@ -10,7 +10,7 @@ Standardwerten abweicht, und Init legt keine an. Eine fehlende Datei ist der Nor
 
 | Datei | Blöcke | Zweck |
 |---|---|---|
-| `~/.qatlas/plugins/config.json` | `protection`, `memory`, `statusline`, `team` | Nutzerweite Einstellungen für alle Projekte |
+| `~/.qatlas/plugins/config.json` | `protection`, `memory`, `statusline`, `run` | Nutzerweite Einstellungen für alle Projekte |
 | `<repo>/.qatlas/plugins/config.json` | `protection`, `memory` | Versionierte Projektwerte; ein gesetzter Wert überschreibt den nutzerweiten, ein fehlender erbt |
 
 Jede Datei trägt `"format": 1`; ohne diese Angabe ist sie ungültig. Ein Block in der falschen Datei und ein
@@ -46,9 +46,9 @@ wird erneut gemeldet. Ein Eintrag enthält nur Kennungen, keinen Klartext. Ihn l
 `node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <kennung>` an; die
 Kennung nennt der Befund in eckigen Klammern.
 
-## `statusline` und `team`
+## `statusline` und `run`
 
 Den Block `statusline` beschreibt [Statusline konfigurieren](../../qatlas-core/references/playbook-statusline.md),
-den Block `team` die [Team-Konfiguration](../../qatlas/modes/team/playbook-team-config.md).
+den Block `run` die [Lauf-Konfiguration](../../qatlas/modes/run/playbook-run-config.md).
 
 Zugangsdaten gehören nie in eine `config.json`.

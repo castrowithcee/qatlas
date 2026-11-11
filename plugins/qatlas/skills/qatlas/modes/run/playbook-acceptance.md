@@ -1,6 +1,6 @@
 ---
 description: >
-  Taskergebnisse im Team selbst abnehmen, Fehlschläge einordnen, höchstens zwei Korrekturen zulassen, die
+  Taskergebnisse im Lauf selbst abnehmen, Fehlschläge einordnen, höchstens zwei Korrekturen zulassen, die
   Dokumentationswirkung klären und das Ergebnis integrieren.
 ---
 
@@ -91,7 +91,7 @@ weiterlaufen.
 ## Dokumentationswirkung
 
 Entscheide als Lead über die Dokumentationswirkung jedes Tasks und nimm nötige Änderungen vor der Übergabe in
-den Task-Branch auf; prüfe sie als Integrator in der Abnahme. Der Aufruf von `team` gibt dafür nur
+den Task-Branch auf; prüfe sie als Integrator in der Abnahme. Der Aufruf von `run` gibt dafür nur
 Projektdokumentation mit `edit: shared` frei. Ändere keine Datei mit `edit: locked`, sondern lege eine nötige
 Änderung daran als Entscheidung vor: Hängt die Abnahme des Tasks an ihr, übergib ihn an `review`, sonst
 protokolliere sie als `entscheiden`, damit sie im Abschlussblock unter `Entscheiden` steht. Dabei gilt:

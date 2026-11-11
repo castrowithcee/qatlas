@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
-// Mechanical helper commands for qatlas team. All commands work
+// Mechanical helper commands for qatlas run. All commands work
 // in the git repo of --repo (default: current directory).
 // Usage:
-//   qatlas-team-tools.js probe --branch <branch> [--base <ref>] [--repo <path>]
+//   qatlas-run-tools.js probe --branch <branch> [--base <ref>] [--repo <path>]
 //     Dry-run merge: does <branch> merge into <base> cleanly (default: origin/HEAD).
 //     Output: {"result":"clean","base","branch","tree"} or {"result":"conflict",...,"files":[...]}.
 //     Exit: 0 clean, 1 conflict, 2 usage error, 3 check not possible.
-//   qatlas-team-tools.js ci-wait --pr <number> [--timeout <seconds>] [--interval <seconds>] [--repo <path>]
+//   qatlas-run-tools.js ci-wait --pr <number> [--timeout <seconds>] [--interval <seconds>] [--repo <path>]
 //     Waits via gh until no check of the pull request is running (default: timeout 3600, interval 20).
 //     Transient gh errors are retried, at most 5 in a row.
 //     A pull request without any check (gh "no checks reported", also an empty list) is not waited out: after
@@ -16,7 +16,7 @@
 //     the result is "none".
 //     Output: {"pr","result":"pass"|"fail"|"timeout"|"none","checks":[{name,bucket,link}],"retries"}.
 //     Exit: 0 pass, 1 fail, 4 timeout, 8 none (no CI), 2 usage error, 3 gh missing, not logged in or persistently failing.
-//   qatlas-team-tools.js land --pr <number> --report <file> [--no-ci] [--timeout <s>] [--interval <s>] [--repo <path>]
+//   qatlas-run-tools.js land --pr <number> --report <file> [--no-ci] [--timeout <s>] [--interval <s>] [--repo <path>]
 //     Integrates one pull request via gh: reads branch, pr-title and pr-body (and the optional head) from the
 //     report frontmatter, checks that the PR head is the head the report vouches for (frontmatter "head",
 //     else the local branch tip), waits for CI as ci-wait does, squash-merges with --match-head-commit (one
@@ -34,28 +34,28 @@
 //     merged | ci-fail | timeout | no-ci | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
 //     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed, 8 no-ci,
 //     2 usage error (also missing frontmatter or field), 3 gh/git check not possible.
-//   qatlas-team-tools.js proof --merge <sha> --head <sha> --base <branch> [--repo <path>]
+//   qatlas-run-tools.js proof --merge <sha> --head <sha> --base <branch> [--repo <path>]
 //     Squash evidence without gh, for a pull request merged by other means: fetches origin <base> and checks
 //     that the merge commit lies on it and carries exactly the change of the head (equal tree, else equal
 //     patch-id). Output: {"result":"proven","proof":"tree"|"patch-id","merge_sha","head"} or
 //     {"result":"unproven","reason",...}. Exit: 0 proven, 7 unproven, 2 usage error, 3 check not possible.
-//   qatlas-team-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
+//   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
-//     --slots, else team.test-slots in ~/.qatlas/plugins/config.json, else 2. Waiting callers are
+//     --slots, else run.test-slots in ~/.qatlas/plugins/config.json, else 2. Waiting callers are
 //     served in arrival order; --priority queues ahead of every caller without it.
 //     Locks live in the primary working tree so worktrees see them. No JSON output;
 //     the command exit code is passed through (signal: 128 plus signal number).
-//   qatlas-team-tools.js slot [--slots <count>] [--repo <path>] status
+//   qatlas-run-tools.js slot [--slots <count>] [--repo <path>] status
 //     Read-only view of the test slots; "status" without "--" (after "--" it is a command to run).
 //     Output: {"slots","busy":[{slot,pid,started,cwd,command,orphaned}],
 //     "waiting":[{priority,arrival,pid,cwd,command,orphaned}],
 //     "resources":[{"resource","busy":[{pid,started,cwd,command,orphaned}],"waiting":[...]}]} (resources with
 //     a holder or waiter only); unknown fields are null. Exit: 0, 3 no git repo.
-//   qatlas-team-tools.js slot [--priority] [--repo <path>] --resource <name> -- <command> [args...]
+//   qatlas-run-tools.js slot [--priority] [--repo <path>] --resource <name> -- <command> [args...]
 //     Like slot, but runs the command under a named exclusive resource (capacity 1) instead of a test
 //     slot, e.g. one e2e suite at a time. Each resource has its own queue; it does not occupy a test slot
 //     and ignores --slots. <name> matches [a-z0-9][a-z0-9-]*, else exit 2.
-//   qatlas-team-tools.js slot [--no-cache] [--max-age <hours>] [--input <path>]... ... -- <command> [args...]
+//   qatlas-run-tools.js slot [--no-cache] [--max-age <hours>] [--input <path>]... ... -- <command> [args...]
 //     Green results are reused: in a clean worktree (git status --porcelain --untracked-files=all empty,
 //     apart from the slot store and the --input paths) an exit-0 run is stored under the repo-wide slot
 //     store, keyed by the HEAD tree, the working directory relative to the worktree root, the command, the
@@ -72,11 +72,11 @@
 //     Dependencies, environment and ignored files that are not named are not part of the key.
 //     Every run that writes a record first removes the records older than the larger of 24 hours and
 //     --max-age; cleanup errors are ignored.
-//   qatlas-team-tools.js slot [--tree <sha>] [--max-age <hours>] [--repo <path>] results
+//   qatlas-run-tools.js slot [--tree <sha>] [--max-age <hours>] [--repo <path>] results
 //     Read-only: the valid records (younger than 24 hours, or --max-age) as {"results":[{command,cwd,
 //     resource,exit,tree,inputs,time,duration}]}, inputs being the named paths (empty if none), filtered by
 //     --tree (full or abbreviated, at least 7 characters) if given.
-//   qatlas-team-tools.js slot [--repo <path>] results --clear
+//   qatlas-run-tools.js slot [--repo <path>] results --clear
 //     Removes all records of the store. Exit 0, also without any.
 
 const fs = require('fs');
@@ -343,10 +343,10 @@ function slotCount() {
   const { readConfig } = require('../../../../../scripts/runtime/config-loader.js');
   const state = readConfig();
   if (state.userError) fail(state.configFile + ' not readable: ' + state.userError, 3);
-  const value = state.team ? state.team['test-slots'] : undefined;
+  const value = state.run ? state.run['test-slots'] : undefined;
   if (value === undefined) return 2;
   if (Number.isInteger(value) && value > 0) return value;
-  return fail('Invalid: team.test-slots in ' + state.configFile + ' needs a positive integer', 3);
+  return fail('Invalid: run.test-slots in ' + state.configFile + ' needs a positive integer', 3);
 }
 
 function alive(pid) {

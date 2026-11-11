@@ -1,6 +1,6 @@
 ---
 description: >
-  Integration eines Team-Tasks über Pull Requests, wenn Nutzer- oder Projektvorgaben es verlangen:
+  Integration eines Tasks über Pull Requests, wenn Nutzer- oder Projektvorgaben es verlangen:
   Rollen von Lead und Integrator, Plattformschritte, Arbeitsbasis, CI, Landen, Merge Queue, Zuschnitt für
   Squash-Merge und Abschluss.
 ---

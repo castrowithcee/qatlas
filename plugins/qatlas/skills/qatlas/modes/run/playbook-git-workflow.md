@@ -1,10 +1,10 @@
 ---
 description: >
-  Git-Workflow eines Team-Laufs: Zuständigkeit von Lead und Integrator, Worktrees und Kollisionsflächen,
+  Git-Workflow eines Laufs: Zuständigkeit von Lead und Integrator, Worktrees und Kollisionsflächen,
   Planungssystem, Commits und Checkpoints, Integration, Übergabe und Tasks über mehrere Repos.
 ---
 
-# Git-Workflow im Team
+# Git-Workflow im Lauf
 
 ## Zuständigkeit
 

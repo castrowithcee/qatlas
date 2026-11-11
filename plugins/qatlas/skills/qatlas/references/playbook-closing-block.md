@@ -1,6 +1,6 @@
 ---
 description: >
-  Gemeinsamer Abschluss von team und shape im Chat: Ergebnis, nummerierte, im Chat beantwortbare
+  Gemeinsamer Abschluss von run und shape im Chat: Ergebnis, nummerierte, im Chat beantwortbare
   Nutzerpunkte, neue Tasks, offene Risiken, Prozessverbesserungen, Kennzahlen und ungepushte Commits.
 ---
 
@@ -54,7 +54,7 @@ Weiter in einer neuen Session: <Modi>
 - **Kennzahlen:** Dauer und die von null verschiedenen Zahlen an Rückfragen, Nacharbeiten, Konflikten,
   Wiederholungen und Anstößen.
 - **Letzte Zeile:** nur Modi mit echter Arbeit: `review` für Tasks in `review`, `shape <eindeutiger Task>`
-  für einen Entwurf oder `shape backlog` für mehrere, `team <Scope>` für den ersten ausführbaren Scope nach
+  für einen Entwurf oder `shape backlog` für mehrere, `run <Scope>` für den ersten ausführbaren Scope nach
   `shape`. Eine neue Idee geht an `goal`. Starte keinen Modus selbst. Ist nichts offen, sagt das die
   Ankerzeile und die Zeile entfällt.
 

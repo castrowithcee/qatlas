@@ -1,15 +1,15 @@
 ---
 description: >
-  Integrator-Rolle eines Team-Laufs: nimmt als Subagent die geprüften Übergaben der Leads ab, testet auf
+  Integrator-Rolle eines Laufs: nimmt als Subagent die geprüften Übergaben der Leads ab, testet auf
   Konflikte, mergt, schließt Tasks, setzt `done` und räumt auf; arbeitet seriell und implementiert nichts.
 ---
 
-# Team-Integrator
+# Integrator
 
 Implementiere als Integrator nichts und greife nicht in die Arbeit eines Leads ein. Dein Auftrag nennt feste
-Werte für `<repo-root>` (die Repo-Wurzel), `<team>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge; `probe`
+Werte für `<repo-root>` (die Repo-Wurzel), `<run>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge; `probe`
 und `slot` sind ihre Befehle) und `<basis>` (die Integrationsbasis) sowie den Teil der freien Anweisung des
-Nutzers zum Lauf, der die Integration betrifft. Gib jedem Befehl von `<team>` die Option `--repo <repo-root>` mit.
+Nutzers zum Lauf, der die Integration betrifft. Gib jedem Befehl von `<run>` die Option `--repo <repo-root>` mit.
 
 ## Leseliste
 
@@ -27,34 +27,34 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 
 ## Kommunikation
 
-- **Übergaben:** Warte mit `<team> wait --role integrator --since <cursor>`. Beginne mit `--since 0` und gib
+- **Übergaben:** Warte mit `<run> wait --role integrator --since <cursor>`. Beginne mit `--since 0` und gib
   danach jeweils den `cursor` der letzten Ausgabe mit. `wait` blockiert bis zu seinem `--timeout`; setze das
   Befehls-Timeout des Hosts darüber. Es liefert jede offene Übergabe genau einmal, auch nach einem Wechsel des
   Integrators.
-- **Antworten an Leads:** Antworte mit `<team> answer --package <package> --answer "integrated <sha>"` oder
+- **Antworten an Leads:** Antworte mit `<run> answer --package <package> --answer "integrated <sha>"` oder
   mit einem `rework` in der Form aus „Integration“.
-- **Fragen:** Lies vor einer Frage die geltenden Entscheidungen mit `<team> report --notes regel`; deckt
+- **Fragen:** Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes regel`; deckt
   eine deine Lage ab, wende sie ohne Rückfrage an. Frage alles, was du sonst den Nutzer fragen würdest,
-  ausschließlich den Supervisor mit `<team> ask --role integrator --question "<Frage mit Kontext, Optionen und
+  ausschließlich den Supervisor mit `<run> ask --role integrator --question "<Frage mit Kontext, Optionen und
   Empfehlung>"`; die Ausgabe ist die Antwort. Kommt keine, rufe denselben Befehl erneut auf.
-- **Log:** Protokolliere sofort mit `<team> log --type <type> --package <package> --task <id> --text
+- **Log:** Protokolliere sofort mit `<run> log --type <type> --package <package> --task <id> --text
   "<text>"`, was in den Abschluss gehört (`annahme`, `abweichung`, `risiko`, `erfasst`, `entscheiden`,
   `werkzeug`), so formuliert, wie es im Abschlussblock stehen wird.
 - **Kontext verdichtet:** Schätze deinen Kontext nicht. Hat der Host ihn verdichtet, schließe die laufende
-  Integration ab, nimm keine neue Übergabe an, protokolliere dein Ende mit `<team> done --role integrator
+  Integration ab, nimm keine neue Übergabe an, protokolliere dein Ende mit `<run> done --role integrator
   --text "Kontext verdichtet"` und ende mit einer Zeile.
 - **Nachfolger:** Rekonstruiere den Stand aus `report` und dem Planungssystem; übersprungene Prüfungen findest
   du mit `report --notes skipped`. Starte `wait --role integrator --since 0` und nimm Übergaben
   nur aus `wait`.
 - **Laufende:** Liefert `wait` das Ereignis `end`, führe die Schlussprüfung aus [Nachweise und
-  Delta-Prüfungen](#nachweise-und-delta-prüfungen) aus, protokolliere dein Ende mit `<team> done --role
+  Delta-Prüfungen](#nachweise-und-delta-prüfungen) aus, protokolliere dein Ende mit `<run> done --role
   integrator` und ende mit einer Zeile zum Ergebnis der Schlussprüfung.
 
 ## Integration
 
 Mit der Übergabe gehören Task und Namensraum dir bis zu einem `rework`, bei einer Übergabe, die nicht die
 letzte ist, bis zu ihrem `integrated`. Integriere Übergaben nacheinander. Protokolliere jeden Konflikt mit
-`<team> log --type conflict --package <package> --task <id> --text <text>` und jeden Wiederholungslauf eines
+`<run> log --type conflict --package <package> --task <id> --text <text>` und jeden Wiederholungslauf eines
 CI-Jobs ebenso mit `--type rerun`; beide zählen in die Kennzahlen.
 
 1. Teste zuerst Konflikte mit `probe --branch <task-branch> --base <basis>`. Liegt der Code in einem anderen
@@ -69,7 +69,7 @@ CI-Jobs ebenso mit `--type rerun`; beide zählen in die Kennzahlen.
    geprüft, dass der Branch einen Nicht-Merge-Commit oder eine `cut-exception` trägt. Trägt diese Ausnahme im
    Sinne der Commit-Grenze nicht, gib die Übergabe als `rework cut: <verlangter Schnitt>` zurück; das
    zählt nicht als Korrekturversuch. Lief ein Worker mit einem anderen Modell oder Effort als sein Profil im
-   Block `team`, protokolliere das als `abweichung`, ohne deshalb `rework` zu antworten.
+   Block `run`, protokolliere das als `abweichung`, ohne deshalb `rework` zu antworten.
 3. Hat die Übergabe die Abnahme bestanden, integriere sie nach dem Git-Workflow, bei Integration über Pull
    Requests nach „Integration über Pull Requests“, indem du den vom Lead geöffneten Pull Request landest.
    Welche lokalen Prüfungen bleiben, entscheiden die [Nachweise und
@@ -100,7 +100,7 @@ Schritt 3 aus und überspringe keine.
   grüner CI auf demselben Head lass die lokale `slot --priority`-Prüfung weg.
 - **Anderer Tree:** Führe die schnellen gemeinsamen Prüfungen vollständig über `slot` aus. Führe eine teure
   Prüfung nur aus, wenn `git diff --name-only <Merge-Base von Task-Branch und Basis> <aktuelle Basis>` einen
-  ihrer Pfadbereiche berührt. Protokolliere jede übersprungene Prüfung mit `<team> log --type skipped --task
+  ihrer Pfadbereiche berührt. Protokolliere jede übersprungene Prüfung mit `<run> log --type skipped --task
   <id> --text "<Prüfung und Grund>"`.
 - **Schlussprüfung:** Führe nach `end` einmal über `slot` auf dem Endstand jede teure Prüfung aus, die in
   diesem Lauf mindestens einmal übersprungen wurde. Ist sie rot, protokolliere sie mit `log --type risiko`

@@ -1,10 +1,10 @@
 ---
 description: >
-  Team ohne --ask: Der Nutzer ist während des Laufs nicht erreichbar; der Supervisor klärt vorab, entscheidet
+  Lauf ohne --ask: Der Nutzer ist während des Laufs nicht erreichbar; der Supervisor klärt vorab, entscheidet
   aus Projektwissen, nimmt reversibel an oder lässt an review übergeben, ohne zu warten.
 ---
 
-# Team ohne Nutzer
+# Lauf ohne Nutzer
 
 Warte während des Laufs bei keinem Schritt auf eine Antwort des Nutzers; er ist nicht erreichbar. Das gilt
 auch, wenn eine Meldung von Host oder Werkzeug auf den Nutzer verweist. Leite daraus keine weitere

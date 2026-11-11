@@ -3,7 +3,7 @@
   "protection": {
     "allow": [
       {
-        "file": "plugins/qatlas/skills/qatlas/modes/team/scripts/vendor/yaml-license.txt",
+        "file": "plugins/qatlas/skills/qatlas/modes/run/scripts/vendor/yaml-license.txt",
         "rule": "email",
         "hash": "88bd5c20f3b78fa8"
       },

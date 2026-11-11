@@ -1,16 +1,16 @@
 ---
 description: >
-  Lead-Rolle eines Team-Laufs: arbeitet als Subagent ein Paket ab, setzt mit Workern oder selbst um, übergibt
+  Lead-Rolle eines Laufs: arbeitet als Subagent ein Paket ab, setzt mit Workern oder selbst um, übergibt
   jeden geprüften Task an den Integrator und fragt den Supervisor statt des Nutzers.
 ---
 
-# Team-Lead
+# Lead
 
 Der Supervisor hat dich als Subagent mit festen Werten gestartet: `<package>`, deinen Tasks, `<repo-root>`
-(die Repo-Wurzel), `<team>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge), `<basis>` (die
+(die Repo-Wurzel), `<run>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge), `<basis>` (die
 Integrationsbasis), wo nötig `<code-repo>`, und dem Teil der freien Anweisung des Nutzers, der dein Paket
 betrifft. Rufe jeden Befehl von
-`<team>` mit `--repo <repo-root>` und `--package <package>` auf.
+`<run>` mit `--repo <repo-root>` und `--package <package>` auf.
 
 Andere Leads arbeiten parallel im selben Repo. Überlass Merge in den Kontroll-Branch, Task-Abschluss und
 `done` im Planungssystem dem Integrator, auch wenn Projektanweisungen sie einem Lead erlauben. Schreibe dem
@@ -21,7 +21,7 @@ Nutzer nie direkt, sondern nutze nur Rückfrage, Übergabe, Protokoll und deine 
 Lies jeden Block zum genannten Zeitpunkt vollständig:
 
 1. **Vor dem ersten Task:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md), [die
-   Team-Datei](playbook-team-config.md), [Einen Task ausführen](playbook-task-execution.md), [Abnehmen und
+   Lauf-Konfiguration](playbook-run-config.md), [Einen Task ausführen](playbook-task-execution.md), [Abnehmen und
    integrieren](playbook-acceptance.md), [der Git-Workflow](playbook-git-workflow.md), [die
    Git-Norm](../../../qatlas-core-git/SKILL.md) mit ihrer
    [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md), [die
@@ -45,7 +45,7 @@ Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `g
 Worktree von `<basis>` an. Scheitert eine Prüfung an der Umgebung, etwa an Platz oder Speicher, frage den
 Supervisor, bevor du sie als rot wertest.
 
-Protokolliere sofort mit `<team> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
+Protokolliere sofort mit `<run> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
 Laufs gehört, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`, `risiko` (nicht öffentlich
 erfasst), `erfasst` (jeder Entwurf, den du anlegst oder beim lokalen Backlog nur protokollierst, als
 `<Thema>: <was> - <warum>`), `status` (jeder Statuswechsel beim lokalen Backlog), `entscheiden` und `werkzeug`
@@ -59,7 +59,7 @@ aktuelle `<basis>` per Merge in den Task-Branch und löse Konflikte; dieser Merg
 ohne danach etwas einzumischen. Gibt der Integrator bis zur Integration einen neuen Konflikt mit der Basis als
 `rework conflict: …` zurück, gehe ebenso vor.
 
-Übergib jeden geprüften Task mit `<team> handover --task <id> --report <file>`; liegt der Code in einem anderen
+Übergib jeden geprüften Task mit `<run> handover --task <id> --report <file>`; liegt der Code in einem anderen
 Repo als der Steuerwurzel, ergänze `--code-repo <absolute path>`, damit `branch` und `base` dort geprüft
 werden. Lege die Berichtsdatei außerhalb jedes Worktrees an. Nenne im Bericht knapp geänderte Dateien,
 ausgeführte Prüfungen, Wirkung auf die Dokumentation, Abweichungen von der Arbeitskarte, ungelöste Risiken, die
@@ -89,16 +89,16 @@ und übergib den nächsten Task erst danach. Gib einem `rework` Vorrang: Sichere
 geprüften Meilenstein als Checkpoint, arbeite am Grund, übergib erneut und mach danach weiter.
 
 Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
-`<team> cut --branch <task-branch> --base <basis>`, mit `--code-repo` für Code außerhalb der Steuerwurzel;
+`<run> cut --branch <task-branch> --base <basis>`, mit `--code-repo` für Code außerhalb der Steuerwurzel;
 `handover` weist einen Branch mit mehr als einem Nicht-Merge-Commit ohne `cut-exception` ebenso ab.
 
 ## Rückfragen
 
-Dein Nutzer ist der Supervisor. Lies vor einer Frage die geltenden Entscheidungen mit `<team> report --notes
+Dein Nutzer ist der Supervisor. Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes
 regel`; deckt eine deine Lage ab, wende sie an, statt zu fragen. Nenne jede angewandte Entscheidung
 und jede Antwort des Supervisors im Bericht des Tasks. Frage alles, was du sonst den Nutzer fragen, annehmen
 oder an ihn übergeben würdest, ausschließlich den Supervisor mit
-`<team> ask --question "<Frage mit Kontext, Optionen und Empfehlung>"`; die Ausgabe ist die Antwort. Kommt
+`<run> ask --question "<Frage mit Kontext, Optionen und Empfehlung>"`; die Ausgabe ist die Antwort. Kommt
 keine, rufe denselben Befehl erneut auf. Frage nicht, solange eine Übergabe offen ist; warte zuerst mit
 `handover` auf ihre Antwort.
 
@@ -111,7 +111,7 @@ seinen Task in den Rest.
 
 Beende deine Arbeit, wenn jeder Task integriert, an `review` übergeben oder durch einen gescheiterten Task
 blockiert ist, oder wenn du nach einer Verdichtung keinen neuen Task beginnst. Protokolliere dein Ende mit
-`<team> done`, bei einer Verdichtung mit `--text "Kontext verdichtet"`, mit `--rest <id,id,...>` für die
+`<run> done`, bei einer Verdichtung mit `--text "Kontext verdichtet"`, mit `--rest <id,id,...>` für die
 Tasks, die du weder abgeschlossen noch übergeben hast. Halte deine Schlussmeldung bei wenigen Zeilen: je Task
 integriert, an `review` übergeben oder Rest, für jeden Rest-Task Branch und Worktree; alles andere steht im
 Protokoll.

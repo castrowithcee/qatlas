@@ -43,7 +43,7 @@ Nachricht deshalb gezielt, verständlich, kompakt und effizient:
   Beschriftungen. Eine Vorlage legt Struktur und Reihenfolge fest, nicht den Wortlaut. Nur Bezeichner bleiben,
   wie sie sind: Befehle, Pfade, Modus- und Flag-Namen, Status, IDs und zitierte Ausgaben.
 - **Anker:** Beginne jeden Abschluss und jede Frage, die einen Lauf unterbricht, mit einer Zeile, die Projekt,
-  Modus und Stand nennt, etwa `shop-api · team · 2 von 10 erledigt · 2 Entscheidungen offen`.
+  Modus und Stand nennt, etwa `shop-api · run · 2 von 10 erledigt · 2 Entscheidungen offen`.
 - **Thema zuerst:** Benenne jeden Task, jedes Paket oder anderes Objekt mit seinem Thema in einfachen Worten;
   eine ID folgt nur als Verweis. Setze keine Kenntnis von Task, Board, Paket, Branch oder früherer Nachricht
   voraus.

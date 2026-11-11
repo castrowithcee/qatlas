@@ -5,7 +5,7 @@ description: >
   Tasks eigenständig ausführen und menschliche Übergaben abschließen. Ohne Modus nur die Modus-Karte zeigen.
   Nie automatisch starten.
 disable-model-invocation: true
-argument-hint: "[goal|shape|team|review] [idea|task|file|backlog] [--limit <n|0>] [--ask]"
+argument-hint: "[goal|shape|run|review] [idea|task|file|backlog] [--limit <n|0>] [--ask]"
 ---
 
 # Qatlas
@@ -20,7 +20,7 @@ Modus, beide vollständig. Die Modusdatei nennt jeden weiteren Block und wann du
 
 - **`goal`:** [Plan klären](modes/goal/goal.md).
 - **`shape`:** [Zuschneiden](modes/shape/shape.md).
-- **`team`:** [Team](modes/team/team.md).
+- **`run`:** [Run](modes/run/run.md).
 - **`review`:** [Übergaben abschließen](modes/review/review.md).
 
 ## Ohne Modus
@@ -34,6 +34,6 @@ nichts:
 Du musst einen Modus wählen. Einige Beispiele:  
 - `qatlas goal [Idee, Task oder Datei]`
 - `qatlas shape [Datei, Task oder Backlog]`
-- `qatlas team [Scope] [--limit <n|0>] [--ask]`
+- `qatlas run [Scope] [--limit <n|0>] [--ask]`
 - `qatlas review [Scope]`
 ```

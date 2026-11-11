@@ -9,7 +9,7 @@ description: >
 |---|---|
 | **qatlas goal [Idee, Task oder Datei]** | Erarbeitet im Gespräch einen Plan mit beantworteten Fragen, als Grundlage für Shape. |
 | **qatlas shape [Datei, Task oder Backlog]** | Hält bestätigtes Wissen aus dem Gesprächskontext oder einer Datei fest und schneidet kleine, ausführungsreife Tasks zu; mit einem Task oder `backlog [Scope]` schärft es bestehende Arbeit und repariert die Queue. |
-| **qatlas team [--limit <n\|0>] [--ask]** | Arbeitet bis zu vier unabhängige Batches mit je etwa fünf Tasks parallel als Subagents ab; `--limit <n>` erlaubt bis zu `n` Batches, `--limit 0` hebt die Grenze auf. |
+| **qatlas run [--limit <n\|0>] [--ask]** | Arbeitet bis zu vier unabhängige Batches mit je etwa fünf Tasks parallel als Subagents ab; `--limit <n>` erlaubt bis zu `n` Batches, `--limit 0` hebt die Grenze auf. |
 | **qatlas review** | Geht konkrete Prüfungen Schritt für Schritt durch und klärt Entscheidungen einzeln. |
 | **qatlas-work tree** | Zeigt Git-Worktrees, legt mit `new` einen an oder räumt sicher auf. |
 | **qatlas-core init** | Richtet Git-Repo, Projektzustand, Projektanweisungen und Library ein. |

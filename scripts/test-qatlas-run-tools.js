@@ -8,9 +8,9 @@ const path = require('path');
 const { execFileSync, spawn, spawnSync } = require('child_process');
 
 const skill = path.resolve(__dirname, '..', 'plugins', 'qatlas', 'skills', 'qatlas');
-const tools = path.join(skill, 'modes', 'team', 'scripts', 'qatlas-team-tools.js');
-const team = path.join(skill, 'modes', 'team', 'scripts', 'qatlas-team.js');
-const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-team-tools-'));
+const tools = path.join(skill, 'modes', 'run', 'scripts', 'qatlas-run-tools.js');
+const runner = path.join(skill, 'modes', 'run', 'scripts', 'qatlas-run.js');
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-run-tools-'));
 const gitDir = path.dirname(execFileSync('which', ['git'], { encoding: 'utf8' }).trim());
 
 // gh stub, steered by files in $STUB_DIR: view.json, checks.json, merge-mode (same|different),
@@ -140,18 +140,18 @@ function testSlotCount() {
   fs.mkdirSync(path.join(home, '.qatlas', 'plugins'), { recursive: true });
   fs.mkdirSync(repo);
   execFileSync('git', ['init', '-q', repo]);
-  const team = path.join(home, '.qatlas', 'plugins', 'config.json');
+  const cfg = path.join(home, '.qatlas', 'plugins', 'config.json');
   const status = () => spawnSync(process.execPath, [tools, 'slot', '--repo', repo, 'status'],
     { encoding: 'utf8', env: { ...process.env, HOME: home } });
   const slots = () => { const r = status(); assert.strictEqual(r.status, 0, r.stderr); return JSON.parse(r.stdout).slots; };
   assert.strictEqual(slots(), 2);
-  fs.writeFileSync(team, JSON.stringify({ format: 1, team: { 'test-slots': 5 } }));
+  fs.writeFileSync(cfg, JSON.stringify({ format: 1, run: { 'test-slots': 5 } }));
   assert.strictEqual(slots(), 5);
-  fs.writeFileSync(team, JSON.stringify({ format: 1 }));
+  fs.writeFileSync(cfg, JSON.stringify({ format: 1 }));
   assert.strictEqual(slots(), 2);
-  for (const bad of [{ format: 1, team: { 'test-slots': 0 } }, { format: 1, team: { 'test-slots': 'x' } },
-    { format: 2, team: { 'test-slots': 5 } }]) {
-    fs.writeFileSync(team, JSON.stringify(bad));
+  for (const bad of [{ format: 1, run: { 'test-slots': 0 } }, { format: 1, run: { 'test-slots': 'x' } },
+    { format: 2, run: { 'test-slots': 5 } }]) {
+    fs.writeFileSync(cfg, JSON.stringify(bad));
     const r = status();
     assert.strictEqual(r.status, 3, JSON.stringify(bad));
     assert.ok(r.stderr.includes('config.json'));
@@ -588,7 +588,7 @@ try {
 
   // validateHandover (shared frontmatter parser): two commits without cut-exception are rejected.
   c = setup('handover', { extra: ['d.txt'] });
-  r = spawnSync(process.execPath, [team, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
+  r = spawnSync(process.execPath, [runner, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
     '--report', c.report], { encoding: 'utf8', env: env(c.stubDir) });
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
@@ -663,7 +663,7 @@ try {
     const orig = c.report + '.orig';
     if (!fs.existsSync(orig)) fs.copyFileSync(c.report, orig);
     write(c.report, fs.readFileSync(orig, 'utf8').replace('last: true', 'last: true' + extra));
-    return spawnSync(process.execPath, [team, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
+    return spawnSync(process.execPath, [runner, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
       '--report', c.report, '--timeout', '0.1', ...more], { encoding: 'utf8', env: env(c.stubDir) });
   };
   c = setup('pr-handover');
@@ -708,7 +708,7 @@ try {
   const tree = git(c.repo, 'rev-parse', 'task^{tree}');
   const wrongTree = '1'.repeat(40);
   const entry = (t, exit = 0) => `  - command: node test\n    exit: ${exit}\n    tree: "${t}"\n`;
-  const handChecks = fm => { write(c.report, `---\n${fm}---\nbody\n`); return spawnSync(process.execPath, [team, 'handover', '--repo', c.repo,
+  const handChecks = fm => { write(c.report, `---\n${fm}---\nbody\n`); return spawnSync(process.execPath, [runner, 'handover', '--repo', c.repo,
     '--package', 'p', '--task', 't', '--report', c.report, '--timeout', '0.1'], { encoding: 'utf8', env: env(c.stubDir) }); };
   r = handChecks(`branch: task\nchecks:\n${entry(tree, 1)}`);
   assert.notStrictEqual(r.status, 2, r.stderr);
@@ -727,7 +727,7 @@ try {
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /"checks" is required/);
   write(c.report, 'no frontmatter\n');
-  r = spawnSync(process.execPath, [team, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
+  r = spawnSync(process.execPath, [runner, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
     '--report', c.report, '--timeout', '0.1'], { encoding: 'utf8', env: env(c.stubDir) });
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /must begin with YAML frontmatter/);
@@ -741,7 +741,7 @@ try {
 
   // Two milestones at the first push: cut rejects before the push, a handover with pushed = second milestone too.
   c = setup('cut', { extra: ['d.txt'] });
-  const cutRun = (cc, branch = 'task') => spawnSync(process.execPath, [team, 'cut', '--repo', cc.repo, '--branch', branch,
+  const cutRun = (cc, branch = 'task') => spawnSync(process.execPath, [runner, 'cut', '--repo', cc.repo, '--branch', branch,
     '--base', 'main'], { encoding: 'utf8', env: env(cc.stubDir) });
   r = cutRun(c);
   assert.strictEqual(r.status, 2);
@@ -772,7 +772,7 @@ try {
     git(path.join(ops, 'x'), 'branch', 'main', 'origin/main');
     return { ...code, ops, codeDir: path.join(ops, 'x') };
   };
-  const hand = (e, ...more) => spawnSync(process.execPath, [team, 'handover', '--repo', e.ops, '--package', 'p',
+  const hand = (e, ...more) => spawnSync(process.execPath, [runner, 'handover', '--repo', e.ops, '--package', 'p',
     '--task', 't', '--report', e.report, ...more], { encoding: 'utf8', env: env(e.stubDir) });
   c = embedded('embed-bad', ['d.txt']);
   r = hand(c, '--code-repo', c.codeDir);
@@ -791,13 +791,13 @@ try {
   r = hand(c, '--code-repo', c.codeDir, '--timeout', '0.1');
   assert.doesNotMatch(r.stderr, /Handover rejected/);
 
-  // Team mailbox: one open signal per sender, routing per role, run lifecycle. Plain files only, no host.
+  // Run mailbox: one open signal per sender, routing per role, run lifecycle. Plain files only, no host.
   {
-    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'team-')));
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'run-')));
     git(repo, 'init', '-q', '-b', 'main');
     commit(repo, 'a.txt', 'a\n');
     const fm = `---\nbranch: main\nchecks:\n  - command: node test\n    exit: 0\n    tree: "${git(repo, 'rev-parse', 'main^{tree}')}"\n---\n`;
-    const run = (...args) => spawnSync(process.execPath, [team, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8' });
+    const run = (...args) => spawnSync(process.execPath, [runner, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8' });
     const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
     const refused = (pattern, ...args) => { const res = run(...args); assert.strictEqual(res.status, 2, res.stdout); assert.match(res.stderr, pattern); };
     const types = res => res.events.map(e => e.type);
@@ -827,7 +827,7 @@ try {
     assert.deepStrictEqual(supervise(woke.cursor), { events: [], cursor: woke.cursor + 2, timeout: true });
 
     // Handover: only the integrator wakes; a changed report before any answer replaces the open one.
-    const report = path.join(root, 'team-report.md');
+    const report = path.join(root, 'run-report.md');
     write(report, fm + 'Report v1\n');
     assert.strictEqual(ok('handover', '--package', 'b', '--task', '3', '--report', report, '--timeout', '0.1').answer, null);
     write(report, fm + 'Report v2\n');
@@ -895,7 +895,7 @@ try {
     assert.strictEqual(last.ended, true);
     ok('begin');
     refused(/past the end of the log/, 'wait', '--since', String(last.cursor), '--timeout', '0.1');
-    assert.strictEqual(fs.readdirSync(path.join(repo, '.qatlas', 'local', 'team')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
+    assert.strictEqual(fs.readdirSync(path.join(repo, '.qatlas', 'local', 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
     ok('plan', '--budget', '1', '--package', 'z', '--tasks', '1');
     refused(/has not ended/, 'begin');
     ok('begin', '--discard');
@@ -909,7 +909,7 @@ try {
     assert.strictEqual(low(), 2);
   }
 
-  process.stdout.write('✓ Qatlas-Team-Tools: land, ci-wait, Team-Ablage und Handover-Prüfung erfolgreich.\n');
+  process.stdout.write('✓ Qatlas-Run-Tools: land, ci-wait, Run-Ablage und Handover-Prüfung erfolgreich.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

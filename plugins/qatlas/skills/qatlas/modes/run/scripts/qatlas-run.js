@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 'use strict';
 
-// File mailbox of a Qatlas team whose supervisor, leads and integrator run as subagents of one host session.
-// They talk only through the JSON-lines log <repo>/.qatlas/local/team/events.jsonl; `seq` is the line index,
+// File mailbox of a Qatlas run whose supervisor, leads and integrator run as subagents of one host session.
+// They talk only through the JSON-lines log <repo>/.qatlas/local/run/events.jsonl; `seq` is the line index,
 // derived on read. A sender is a lead (--package) or the integrator (--role integrator) and has at most one
 // open signal (question or handover) until it picks up the answer by repeating the same call.
 // wait wakes the supervisor on question, done and disk, the integrator on open handovers and end.
 // Usage:
-//   qatlas-team.js begin --repo <root> [--discard]
-//   qatlas-team.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>
-//   qatlas-team.js ask --repo <root> (--package <package> | --role integrator) --question <text> [--timeout <s>]
-//   qatlas-team.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
-//   qatlas-team.js answer --repo <root> (--package <package> | --role integrator) --answer <text>
-//   qatlas-team.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <s>] [--min-free <GB>]
-//   qatlas-team.js done --repo <root> (--package <package> [--rest <id,id,...>] | --role integrator) [--text <text>]
-//   qatlas-team.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
-//   qatlas-team.js report --repo <root> [--notes <type>]
-//   qatlas-team.js end --repo <root>
-//   qatlas-team.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
+//   qatlas-run.js begin --repo <root> [--discard]
+//   qatlas-run.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>
+//   qatlas-run.js ask --repo <root> (--package <package> | --role integrator) --question <text> [--timeout <s>]
+//   qatlas-run.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
+//   qatlas-run.js answer --repo <root> (--package <package> | --role integrator) --answer <text>
+//   qatlas-run.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <s>] [--min-free <GB>]
+//   qatlas-run.js done --repo <root> (--package <package> [--rest <id,id,...>] | --role integrator) [--text <text>]
+//   qatlas-run.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
+//   qatlas-run.js report --repo <root> [--notes <type>]
+//   qatlas-run.js end --repo <root>
+//   qatlas-run.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
 
 const fs = require('fs');
 const path = require('path');
@@ -45,7 +45,7 @@ const positive = (name, fallback) => {
   return value > 0 && Number.isFinite(value) ? value : fail(name + ' must be positive', 2);
 };
 const repoKey = () => fs.realpathSync(path.resolve(need('--repo')[0]));
-const runDir = repo => path.join(repo, '.qatlas', 'local', 'team');
+const runDir = repo => path.join(repo, '.qatlas', 'local', 'run');
 const eventsFile = repo => path.join(runDir(repo), 'events.jsonl');
 
 // O_APPEND keeps single-line appends atomic with several writers.

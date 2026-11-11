@@ -14,8 +14,8 @@ Verwende das vom Router aufgelöste `<plugin-root>` und keinen festen Installati
 node <plugin-root>/scripts/qatlas-doctor.js
 ```
 
-Den Block `team` der Konfiguration prüft das Skript nur auf Grundstruktur; ob Modell und Effort im
-aktuellen Host verfügbar sind, prüft erst `qatlas team`.
+Den Block `run` der Konfiguration prüft das Skript nur auf Grundstruktur; ob Modell und Effort im
+aktuellen Host verfügbar sind, prüft erst `qatlas run`.
 
 ## Bericht
 

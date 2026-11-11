@@ -1,6 +1,6 @@
 ---
 description: >
-  Einen Task eines Team-Pakets mit begrenzten Worker-Aufträgen umsetzen, die Worker überwachen und
+  Einen Task eines Pakets mit begrenzten Worker-Aufträgen umsetzen, die Worker überwachen und
   Nebenbefunde festhalten.
 ---
 

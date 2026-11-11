@@ -21,7 +21,7 @@ tatsächlich anstehenden Operationen.
 
 Ein direkter Aufruf umfasst nur das ausdrücklich verlangte Git-Ziel und die davon betroffenen Repos,
 Branches, Worktrees und Remotes. Erweitere einen Status-, Diff- oder Sync-Auftrag nicht von selbst um Commit,
-Push, Historienänderung oder einen Eingriff in ein benachbartes Repo. Bei `qatlas team` und `qatlas review`
+Push, Historienänderung oder einen Eingriff in ein benachbartes Repo. Bei `qatlas run` und `qatlas review`
 bestimmt der jeweilige Ablauf den Scope für lokale Commits und Integrationen; diese Git-Norm gilt zusätzlich.
 
 ## Immer gültig

@@ -1,10 +1,10 @@
 ---
 description: >
-  Team mit --ask: Der Nutzer ist während des Laufs erreichbar; der Supervisor legt ihm vor, was er nicht
+  Lauf mit --ask: Der Nutzer ist während des Laufs erreichbar; der Supervisor legt ihm vor, was er nicht
   selbst klären kann, und wartet auf die Antwort.
 ---
 
-# Team mit Nutzer
+# Lauf mit Nutzer
 
 Lass den Nutzer während des Laufs entscheiden und nimm nie an seiner Stelle etwas an. Was du nicht selbst
 klären kannst:

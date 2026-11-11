@@ -4,13 +4,13 @@ description: >
   einem Lead-Subagent abarbeiten und einen Integrator-Subagent die Ergebnisse integrieren.
 ---
 
-# Team
+# Run
 
-`team [Tasks oder Scope] [--limit <n|0>] [--ask]`
+`run [Tasks oder Scope] [--limit <n|0>] [--ask]`
 
 ## Rollen
 
-Du bist der Supervisor: die Session, in der der Nutzer `team` aufruft. Starte genau einen Integrator zur Zeit
+Du bist der Supervisor: die Session, in der der Nutzer `run` aufruft. Starte genau einen Integrator zur Zeit
 und selbst keine Worker; das tun die Leads. Setze nichts inhaltlich um, integriere nichts und lies keine Diffs,
 Berichte oder Logs, damit dein Kontext schmal bleibt. Überlass während des Laufs das Schreiben des
 Kontroll-Branches allein dem Integrator, ebenso Merge, Task-Abschluss und `done`, auch wenn Projektanweisungen
@@ -24,9 +24,9 @@ andere externe oder unumkehrbare Wirkung aus. Schreibe bei einem lokalen Backlog
 nach dem Ende des Integrators hinein; was du dazwischen schriebst, etwa einen Statuswechsel oder eine
 festgehaltene Antwort, protokolliere mit `log --type status`.
 
-`<team>` ist das Steuerskript `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team.js`, `<tools>`
-sind die Lauf-Werkzeuge `node <plugin-root>/skills/qatlas/modes/team/scripts/qatlas-team-tools.js` und
-`<plugin-root>` ist der `QATLAS PLUGIN ROOT` als absoluter Pfad. Gib jedem Befehl von `<team>` die Option
+`<run>` ist das Steuerskript `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run.js`, `<tools>`
+sind die Lauf-Werkzeuge `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run-tools.js` und
+`<plugin-root>` ist der `QATLAS PLUGIN ROOT` als absoluter Pfad. Gib jedem Befehl von `<run>` die Option
 `--repo <repo-root>` mit.
 
 ## Subagents starten
@@ -42,8 +42,8 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
 
 ## Leseliste
 
-1. **Vor dem ersten Schritt:** die Flag-Datei (ohne `--ask` [Team ohne Nutzer](flag-no-ask.md), mit `--ask`
-   [Team mit Nutzer](flag-ask.md)), [die Team-Datei](playbook-team-config.md), [die
+1. **Vor dem ersten Schritt:** die Flag-Datei (ohne `--ask` [Lauf ohne Nutzer](flag-no-ask.md), mit `--ask`
+   [Lauf mit Nutzer](flag-ask.md)), [die Lauf-Konfiguration](playbook-run-config.md), [die
    Backlog-Norm](../../../qatlas-core-backlog/SKILL.md) und [Tasks auswählen](playbook-task-selection.md).
 2. **Vor dem ersten eigenen Commit:** [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre
    [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md).
@@ -61,9 +61,9 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
    das nicht oder ist keiner genannt, starte nicht und nenne das Hindernis.
 2. **Planungssystem:** Ist ein vorgeschriebenes externes Planungssystem nicht erreichbar, starte nicht und
    nenne das Hindernis.
-3. **Voriger Lauf:** Zeigt `<team> report` einen `cursor` über 0 und `ended: false`, kläre mit dem Nutzer, ob
-   du den vorigen Lauf fortsetzt (siehe „Fortsetzen“) oder mit `<team> begin --discard` verwirfst. Sonst
-   beginne den Lauf mit `<team> begin`.
+3. **Voriger Lauf:** Zeigt `<run> report` einen `cursor` über 0 und `ended: false`, kläre mit dem Nutzer, ob
+   du den vorigen Lauf fortsetzt (siehe „Fortsetzen“) oder mit `<run> begin --discard` verwirfst. Sonst
+   beginne den Lauf mit `<run> begin`.
 4. **Basis:** Die Integrationsbasis `<basis>` ist bei Integration über Pull Requests `origin/<control-branch>`,
    sonst der lokale `<control-branch>`.
 5. **Testergebnisse:** Lösche die Testergebnisse des vorigen Laufs mit `<tools> slot results --clear --repo
@@ -95,7 +95,7 @@ Bereiche gibt: höchstens vier, mit `--limit <n>` höchstens `n`, mit `--limit 0
   spätere Läufe.
 
 Das Laufbudget ist die Summe der Paketgrößen zu Beginn; jeder abgeschlossene oder gesichert an `review`
-übergebene Task verbraucht einen Slot. Protokolliere jedes Paket mit `<team> plan --budget <n> --package
+übergebene Task verbraucht einen Slot. Protokolliere jedes Paket mit `<run> plan --budget <n> --package
 <package> --tasks <id,id,...>` und gib jedem späteren `plan` dasselbe Laufbudget mit. Sag dem Nutzer in einer
 Zeile, wie viele Tasks und Leads starten und wie hoch das Laufbudget ist, und starte direkt.
 
@@ -103,14 +103,14 @@ Zeile, wie viele Tasks und Leads starten und wie hoch das Laufbudget ist, und st
 
 Starte zuerst je Paket einen Lead mit diesem Auftrag:
 
-> Du bist der Lead des Pakets <package> eines Teams mit den Tasks <id,id,...>. Lies
-> `<plugin-root>/skills/qatlas/modes/team/lead.md` vollständig und arbeite danach. Steuerskript: `<team>`,
+> Du bist der Lead des Pakets <package> eines Laufs mit den Tasks <id,id,...>. Lies
+> `<plugin-root>/skills/qatlas/modes/run/lead.md` vollständig und arbeite danach. Steuerskript: `<run>`,
 > Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`, Integrationsbasis: `<basis>`.
 
 Starte danach den Integrator:
 
-> Du bist der Integrator eines Teams. Lies `<plugin-root>/skills/qatlas/modes/team/integrator.md` vollständig
-> und arbeite danach. Steuerskript: `<team>`, Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`,
+> Du bist der Integrator eines Laufs. Lies `<plugin-root>/skills/qatlas/modes/run/integrator.md` vollständig
+> und arbeite danach. Steuerskript: `<run>`, Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`,
 > Integrationsbasis: `<basis>`.
 
 Für einen Nachfolger ergänze den Hinweis, dass er übernimmt, beim Lead mit seinen verbleibenden Tasks. Gib
@@ -118,17 +118,17 @@ keinem Auftrag eigene Vorgaben zu Kontext oder vorzeitigem Ende mit.
 
 ## Überwachung
 
-Warte mit `<team> wait --since <cursor> --min-free <GB>`: zuerst `--since 0`, danach mit dem `cursor` der
+Warte mit `<run> wait --since <cursor> --min-free <GB>`: zuerst `--since 0`, danach mit dem `cursor` der
 letzten Ausgabe; `<GB>` ist der Schwellenwert aus „Freier Platz“. Führe `wait`, das bis zu seinem `--timeout`
 blockiert, im Hintergrund oder mit einem Befehls-Timeout des Hosts darüber aus. Überwache sonst nur über die
 Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore, Crons oder Warteschleifen.
 
-Protokolliere, was du selbst zum Abschlussblock beiträgst, sofort mit `<team> log --type <type> --package
+Protokolliere, was du selbst zum Abschlussblock beiträgst, sofort mit `<run> log --type <type> --package
 <package> --task <id> --text "<text>"`, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`,
 `risiko` (nicht öffentlich erfasst), `erfasst` (neuer Task), `entscheiden`, `regel` (geltende Entscheidung für
 alle) und `werkzeug` (Defekt des Steuerskripts oder der Lauf-Werkzeuge, mit Nachweis).
 
-- **`question`:** Antworte mit `<team> answer` an den Absender des Ereignisses (`--package <package>` oder
+- **`question`:** Antworte mit `<run> answer` an den Absender des Ereignisses (`--package <package>` oder
   `--role integrator`) und `--answer "<Antwort>"`: aus dem Projektwissen mit Quelle, sonst nach der
   Flag-Datei. Kann die Lage wiederkehren, etwa ein instabiler Test, protokolliere die Antwort einmal als
   `regel` mit `--text "<Lage>: <Entscheidung>"`.
@@ -146,7 +146,7 @@ Backlog trage jeden Entwurf nach „Laufende“ ein.
 
 - **Lead `done` mit `rest`:** Starte für dasselbe Paket einen Nachfolger mit genau den Tasks aus `rest`; er
   zählt weder gegen die Paketzahl noch gegen das Laufbudget.
-- **Lead endet ohne `done`:** Protokolliere es mit `<team> done --package <package> --rest <id,id,...>` für die
+- **Lead endet ohne `done`:** Protokolliere es mit `<run> done --package <package> --rest <id,id,...>` für die
   Tasks des Pakets, die `report` nicht als `integrated` führt, und starte einen Nachfolger wie bei `rest`.
   Endet auch er ohne `done`, sichere die offenen Tasks nach dem Git-Workflow als Übergabe an `review`.
 - **Integrator `done` oder Ende ohne `done` vor `end`:** Starte einen neuen.
@@ -159,7 +159,7 @@ mit neuem Namen, protokolliere es mit `plan` und starte seinen Lead. Lass nie me
 
 ## Fortsetzen
 
-Rekonstruiere nach einer Verdichtung deines Kontexts oder in einer neuen Session den Stand aus `<team> report`
+Rekonstruiere nach einer Verdichtung deines Kontexts oder in einer neuen Session den Stand aus `<run> report`
 (Pakete, Laufbudget, beendete Pakete mit `rest`, offene Rückfragen und Übergaben) und dem Planungssystem.
 Beantworte offene Rückfragen und setze `wait` ab dem `cursor` von `report` fort. Behandle in einer neuen
 Session jedes Paket ohne `done` als „Lead endet ohne `done`“ und starte einen Integrator, weil die Subagents
@@ -167,7 +167,7 @@ der alten Session nicht mehr laufen. Schneide keine Pakete über das restliche L
 
 ## Laufende
 
-Führe `<team> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket mit `done` ohne `rest` geendet hat
+Führe `<run> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket mit `done` ohne `rest` geendet hat
 oder gesichert ist und `report` keine offene Übergabe zeigt. Warte dann auf das `done` des Integrators nach
 seiner Schlussprüfung. Trage danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe
 ein (`status` und `erfasst` in den `notes` von `report`), führe die Bereinigungsschritte aus, die

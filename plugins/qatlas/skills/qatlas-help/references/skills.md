@@ -10,7 +10,7 @@ passt.
 
 ## Explizite Einstiegspunkte
 
-- **`qatlas`:** die Arbeitsschleife mit `goal`, `shape`, `team` und `review`.
+- **`qatlas`:** die Arbeitsschleife mit `goal`, `shape`, `run` und `review`.
 - **`qatlas-core`:** seltene Administration wie Einrichtung, Diagnose, Statusline und Wechsel des
   Planungssystems.
 - **`qatlas-work`:** einzelne Verfahren außerhalb der Schleife, etwa die Verwaltung von Git-Worktrees.

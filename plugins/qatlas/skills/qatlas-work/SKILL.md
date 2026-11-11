@@ -11,7 +11,7 @@ argument-hint: "[tree [new [Auftrag]|Auswahl|aufräumen]]"
 # Qatlas Work
 
 Dieser Router bündelt ausdrücklich gestartete Einzelarbeit außerhalb des Qatlas-Arbeitsloops.
-`qatlas team` verwaltet seine benötigten Worktrees selbst; ein zusätzlicher Work-Aufruf ist dafür unnötig.
+`qatlas run` verwaltet seine benötigten Worktrees selbst; ein zusätzlicher Work-Aufruf ist dafür unnötig.
 
 ## Ohne Argument
 

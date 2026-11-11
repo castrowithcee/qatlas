@@ -1,7 +1,7 @@
 ---
 description: >
   Vertrag für zentrale Git-Worktrees: Branch-Namen, Pfad, Kollisionen, Anlegen, Zuständigkeit und sicheres
-  Aufräumen, gemeinsam genutzt von Qatlas Work Tree und Qatlas Team.
+  Aufräumen, gemeinsam genutzt von Qatlas Work Tree und Qatlas Run.
 ---
 
 # Worktree-Vertrag
@@ -55,7 +55,7 @@ danach und räumt auf; der übergebende Lead rührt die übergebenen Branches un
    Prüfe mit `git merge-base --is-ancestor <branch> <target>`, ob die Branch-Spitze darin enthalten ist. Nach
    einem Squash-Merge schlägt diese Prüfung immer fehl; Integration bedeutet dann den Squash-Nachweis: Der
    Pull Request des Branches ist gemergt, sein Merge-Commit liegt auf dem Kontroll-Branch, und entweder hat
-   `qatlas-team-tools.js land` ihn mit `proof` `tree` oder `patch-id` belegt, oder
+   `qatlas-run-tools.js land` ihn mit `proof` `tree` oder `patch-id` belegt, oder
    `git rev-parse <merge-commit>^{tree}` ist gleich `git rev-parse <branch>^{tree}` der zuletzt geprüften,
    unveränderten Branch-Spitze. Ist der Arbeitsbaum nicht sauber, das Ziel nicht eindeutig festgestellt oder
    keiner der beiden Nachweise erbracht, entferne nichts und zeige den konkreten Stand. Beanspruchte Arbeit

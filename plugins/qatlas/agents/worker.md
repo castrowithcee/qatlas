@@ -1,7 +1,7 @@
 ---
 name: worker
 description: >
-  Führt genau einen abgegrenzten Worker-Auftrag aus einem ausdrücklich gestarteten Qatlas-Team aus.
+  Führt genau einen abgegrenzten Worker-Auftrag aus einem ausdrücklich gestarteten Qatlas-Lauf aus.
 ---
 
 # Qatlas-Worker

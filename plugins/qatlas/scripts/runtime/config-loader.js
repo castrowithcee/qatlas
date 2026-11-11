@@ -72,8 +72,8 @@ const PROTECTION_LEVELS = {
   secrets: ['block', 'allow'],
   'personal-data': ['block', 'ask', 'warn', 'allow'],
 };
-// statusline and team are user-wide; protection.allow is project-only and checked by the protection check.
-const USER_KEYS = new Set(['format', 'protection', 'memory', 'statusline', 'team']);
+// statusline and run are user-wide; protection.allow is project-only and checked by the protection check.
+const USER_KEYS = new Set(['format', 'protection', 'memory', 'statusline', 'run']);
 const PROJECT_KEYS = new Set(['format', 'protection', 'memory']);
 
 function locations(projectRoot = null) {
@@ -102,28 +102,28 @@ function readFile(file) {
   catch (error) { return { exists: true, value: null, error }; }
 }
 
-const TEAM_PROFILES = ['light', 'standard', 'demanding'];
-const TEAM_ROLES = ['integrator', 'lead'];
+const RUN_PROFILES = ['light', 'standard', 'demanding'];
+const RUN_ROLES = ['integrator', 'lead'];
 
-function teamProblems(value) {
+function runProblems(value) {
   const problems = [];
   if ('test-slots' in value && !(Number.isInteger(value['test-slots']) && value['test-slots'] > 0)) {
     problems.push('test-slots needs a positive integer.');
   }
   // Model settings are optional; profiles and hosts only come together.
   if (!('profiles' in value) && !('hosts' in value)) return problems;
-  if (!isObject(value.profiles) || !TEAM_PROFILES.every(name => typeof value.profiles[name] === 'string')) {
-    return [...problems, 'profiles needs the profiles ' + TEAM_PROFILES.join(', ') + ' as text.'];
+  if (!isObject(value.profiles) || !RUN_PROFILES.every(name => typeof value.profiles[name] === 'string')) {
+    return [...problems, 'profiles needs the profiles ' + RUN_PROFILES.join(', ') + ' as text.'];
   }
   if (!isObject(value.hosts) || !Object.keys(value.hosts).length) return [...problems, 'hosts is missing or empty.'];
   for (const [host, entry] of Object.entries(value.hosts)) {
     if (!isObject(entry)) { problems.push('hosts.' + host + ' must be an object.'); continue; }
-    for (const role of TEAM_ROLES) {
+    for (const role of RUN_ROLES) {
       if (entry[role] !== null && typeof entry[role] !== 'string') {
         problems.push('hosts.' + host + '.' + role + ' needs a model or null.');
       }
     }
-    for (const profile of TEAM_PROFILES) {
+    for (const profile of RUN_PROFILES) {
       const worker = isObject(entry.worker) ? entry.worker[profile] : undefined;
       if (!isObject(worker) || !('model' in worker) || !('effort' in worker)) {
         problems.push('hosts.' + host + '.worker.' + profile + ' needs model and effort.');
@@ -244,12 +244,12 @@ function readConfig(projectRoot = null) {
     problems.push(...issues.invalid);
     unknown.push(...issues.unknown);
   }
-  let team = null;
-  if (value.team !== undefined) {
-    if (!isObject(value.team)) problems.push(paths.configFile + ': team must be an object.');
+  let runBlock = null;
+  if (value.run !== undefined) {
+    if (!isObject(value.run)) problems.push(paths.configFile + ': run must be an object.');
     else {
-      team = value.team;
-      problems.push(...teamProblems(team).map(problem => paths.configFile + ': team.' + problem));
+      runBlock = value.run;
+      problems.push(...runProblems(runBlock).map(problem => paths.configFile + ': run.' + problem));
     }
   }
 
@@ -262,7 +262,7 @@ function readConfig(projectRoot = null) {
     userError: user.error ? user.error.message : null,
     statusline: normalizeStatusline(isObject(value.statusline) ? value.statusline : null),
     hasStatusline: isObject(value.statusline),
-    team,
+    run: runBlock,
   };
 }
 

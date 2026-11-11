@@ -105,7 +105,7 @@ function testConfig() {
   assert.strictEqual(state.statusline.widgets.context.bar.thresholds[1].from, 30);
 }
 
-const VALID_TEAM = {
+const VALID_RUN = {
   'test-slots': 2,
   profiles: { light: 'Narrow.', standard: 'Several steps.', demanding: 'Hard diagnosis.' },
   hosts: {
@@ -120,23 +120,25 @@ const VALID_TEAM = {
   },
 };
 
-function testDoctorTeamBlock() {
-  const f = fixture('doctor-team');
+function testDoctorRunBlock() {
+  const f = fixture('doctor-run');
   initProject(f);
   const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
   const config = path.join(f.home, '.qatlas', 'plugins', 'config.json');
   const check = () => runNode(doctor, ['--target', f.project], { cwd: f.project, home: f.home });
-  assert.ok(!check().stdout.includes('team'), 'The team block is optional.');
-  write(config, { format: 1, team: VALID_TEAM });
+  assert.ok(!check().stdout.includes('run'), 'The run block is optional.');
+  write(config, { format: 1, run: VALID_RUN });
   const ok = check();
-  assert.ok(!ok.stdout.includes('team'), ok.stdout);
-  const incomplete = JSON.parse(JSON.stringify(VALID_TEAM));
+  assert.ok(!ok.stdout.includes('run'), ok.stdout);
+  const incomplete = JSON.parse(JSON.stringify(VALID_RUN));
   delete incomplete.hosts['claude-code'].worker.demanding;
   incomplete['test-slots'] = 0;
-  write(config, { format: 1, team: incomplete });
+  write(config, { format: 1, run: incomplete });
   const bad = check().stdout;
-  assert.ok(bad.includes('team.hosts.claude-code.worker.demanding needs model and effort'), bad);
-  assert.ok(bad.includes('team.test-slots needs a positive integer'), bad);
+  assert.ok(bad.includes('run.hosts.claude-code.worker.demanding needs model and effort'), bad);
+  assert.ok(bad.includes('run.test-slots needs a positive integer'), bad);
+  write(config, { format: 1, team: VALID_RUN });
+  assert.ok(check().stdout.includes('unknown key team.'), 'The old team block is an unknown key.');
 }
 
 function testProjectContext() {
@@ -432,7 +434,7 @@ function testStatuslineCodex() {
 
 try {
   testConfig();
-  testDoctorTeamBlock();
+  testDoctorRunBlock();
   testProjectContext();
   testInit();
   testLibraryAndSubagent();

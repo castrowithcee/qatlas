@@ -1,17 +1,17 @@
 ---
 description: >
-  Den optionalen Block team der nutzerweiten config.json mit Test-Slots, Modell für Lead und Integrator und
+  Den optionalen Block run der nutzerweiten config.json mit Test-Slots, Modell für Lead und Integrator und
   Modell und Effort je Worker-Profil lesen, Subagents damit starten und den Block einrichten oder prüfen.
 ---
 
-# Team-Konfiguration
+# Lauf-Konfiguration
 
-Der Block `team` in `~/.qatlas/plugins/config.json` ist optional und gehört dem Nutzer; ändere ihn nur nach
+Der Block `run` in `~/.qatlas/plugins/config.json` ist optional und gehört dem Nutzer; ändere ihn nur nach
 seiner Zustimmung. Fehlt `hosts` oder dessen Abschnitt für den aktuellen Host, starte Leads und Integrator
 ohne explizites Modell und lass jeden Worker Modell und Effort seines Leads erben.
 
 ```json
-"team": {
+"run": {
   "test-slots": 2,
   "profiles": { "light": "<Beschreibung>", "standard": "<Beschreibung>", "demanding": "<Beschreibung>" },
   "hosts": {

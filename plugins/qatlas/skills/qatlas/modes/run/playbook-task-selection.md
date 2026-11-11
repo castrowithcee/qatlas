@@ -1,6 +1,6 @@
 ---
 description: >
-  Ausführbare Tasks eines Team-Laufs auswählen, ihre Zuständigkeit klären und die Auswahl bei jedem Nachfüllen
+  Ausführbare Tasks eines Laufs auswählen, ihre Zuständigkeit klären und die Auswahl bei jedem Nachfüllen
   neu bewerten.
 ---
 
