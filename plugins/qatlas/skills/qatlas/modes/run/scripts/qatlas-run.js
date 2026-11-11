@@ -19,6 +19,9 @@
 //   qatlas-run.js report --repo <root> [--notes <type>]
 //   qatlas-run.js end --repo <root>
 //   qatlas-run.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
+//   qatlas-run.js stop-hook
+//     Stop hook of the host, input on stdin (no --repo). Blocks a stop once while the run of this session is
+//     active and no background work runs; allows it silently (exit 0) in every other case and on any error.
 
 const fs = require('fs');
 const path = require('path');
@@ -53,7 +56,7 @@ const eventsFile = repo => path.join(runDir(repo), 'events.jsonl');
 function record(repo, type, fields = {}) {
   fs.mkdirSync(runDir(repo), { recursive: true });
   const entry = { at: new Date().toISOString(), type };
-  for (const key of ['sender', 'package', 'task', 'budget', 'tasks', 'rest', 'text', 'report']) if (fields[key]) entry[key] = fields[key];
+  for (const key of ['sender', 'package', 'task', 'budget', 'tasks', 'rest', 'text', 'report', 'session']) if (fields[key]) entry[key] = fields[key];
   fs.appendFileSync(eventsFile(repo), JSON.stringify(entry) + '\n');
 }
 
@@ -103,13 +106,13 @@ function begin() {
   const all = events(repo);
   if (all.length) {
     if (!ended(all) && !opts.includes('--discard')) {
-      record(repo, 'resume');
+      record(repo, 'resume', { session: process.env.CLAUDE_CODE_SESSION_ID });
       return out({ resumed: true, cursor: all.length + 1 });
     }
     fs.renameSync(eventsFile(repo), path.join(runDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
   }
   fs.rmSync(path.join(runDir(repo), 'disk-low'), { force: true });
-  record(repo, 'begin');
+  record(repo, 'begin', { session: process.env.CLAUDE_CODE_SESSION_ID });
   out({ begun: true, cursor: 1 });
 }
 
@@ -416,8 +419,24 @@ function validateHandover(text, repo) {
   checkTrees(head, `head ${head}`);
 }
 
+// Any doubt or error allows the stop; the run is never held against the host's will beyond one nudge.
+function stopHook() {
+  try {
+    const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+    if (!Array.isArray(input.background_tasks) || input.stop_hook_active === true) return;
+    if (input.background_tasks.some(task => task && task.status === 'running')) return;
+    const top = execFileSync('git', ['-C', input.cwd, 'rev-parse', '--show-toplevel'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000 }).trim();
+    const all = events(top);
+    if (!all.some(e => e.type === 'begin') || ended(all)) return;
+    const started = all.filter(e => e.type === 'begin' || e.type === 'resume').pop();
+    if (!started.session || started.session !== input.session_id) return;
+    out({ decision: 'block', reason: 'The run is still active and no background work is running: refill packages, start successors, or run end.' });
+  } catch { /* allow the stop */ }
+}
+
 const commands = {
-  begin, plan, answer, done, log: logEvent, report, end, wait,
+  begin, 'stop-hook': stopHook, plan, answer, done, log: logEvent, report, end, wait,
   ask: () => raise('question', need('--question')[0]),
   handover: () => raise('handover', reportText(), need('--task')[0]),
   cut: () => cut(codeRepo(repoKey())),

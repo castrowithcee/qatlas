@@ -797,7 +797,9 @@ try {
     git(repo, 'init', '-q', '-b', 'main');
     commit(repo, 'a.txt', 'a\n');
     const fm = `---\nbranch: main\nchecks:\n  - command: node test\n    exit: 0\n    tree: "${git(repo, 'rev-parse', 'main^{tree}')}"\n---\n`;
-    const run = (...args) => spawnSync(process.execPath, [runner, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8' });
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.CLAUDE_CODE_SESSION_ID;
+    const run = (...args) => spawnSync(process.execPath, [runner, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8', env: cleanEnv });
     const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
     const refused = (pattern, ...args) => { const res = run(...args); assert.strictEqual(res.status, 2, res.stdout); assert.match(res.stderr, pattern); };
     const types = res => res.events.map(e => e.type);
@@ -910,6 +912,59 @@ try {
     assert.deepStrictEqual(ok('begin', '--discard'), { begun: true, cursor: 1 });
     assert.strictEqual(archives(), 2);
     assert.deepStrictEqual(ok('report').packages, {});
+
+    // Stop hook: blocks only for the session of the active run without running background work.
+    {
+      const logFile = path.join(repo, '.qatlas', 'local', 'run', 'events.jsonl');
+      const lines = () => fs.readFileSync(logFile, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
+      const hook = (input, cwd = repo) => spawnSync(process.execPath, [runner, 'stop-hook'], { encoding: 'utf8', cwd: root, env: cleanEnv,
+        input: typeof input === 'string' ? input : JSON.stringify({ session_id: 's1', cwd, stop_hook_active: false, background_tasks: [], ...input }) });
+      const allowed = (input, cwd) => { const res = hook(input, cwd); assert.strictEqual(res.status, 0, res.stderr); assert.strictEqual(res.stdout, ''); };
+      const withSession = (id, ...args) => { const res = spawnSync(process.execPath, [runner, args[0], '--repo', repo, ...args.slice(1)],
+        { encoding: 'utf8', env: id ? { ...cleanEnv, CLAUDE_CODE_SESSION_ID: id } : cleanEnv }); assert.strictEqual(res.status, 0, res.stderr); };
+      ok('end');
+      withSession('s1', 'begin');
+      assert.strictEqual(lines().pop().session, 's1');
+      const res = hook({});
+      assert.strictEqual(res.status, 0);
+      const block = JSON.parse(res.stdout);
+      assert.deepStrictEqual(Object.keys(block).sort(), ['decision', 'reason']);
+      assert.strictEqual(block.decision, 'block');
+      assert.ok(block.reason);
+      allowed('not json');
+      allowed({ background_tasks: undefined });
+      allowed({ stop_hook_active: true });
+      allowed({ session_id: 'other' });
+      allowed({ session_id: undefined });
+      allowed({ background_tasks: [{ id: 'a', status: 'running' }] });
+      allowed({}, path.join(root, 'no-such-dir'));
+      allowed({}, fs.mkdtempSync(path.join(root, 'no-git-')));
+      // A git repo without a run log, and a log without begin (condition 3).
+      const other = fs.realpathSync(fs.mkdtempSync(path.join(root, 'no-run-')));
+      execFileSync('git', ['init', '-q', other]);
+      allowed({}, other);
+      fs.mkdirSync(path.join(other, '.qatlas', 'local', 'run'), { recursive: true });
+      fs.writeFileSync(path.join(other, '.qatlas', 'local', 'run', 'events.jsonl'), JSON.stringify({ type: 'resume', session: 's1' }) + '\n');
+      allowed({}, other);
+      allowed({ cwd: undefined });
+      // Resume records the new session; the old one no longer blocks.
+      withSession('s2', 'begin');
+      assert.strictEqual(lines().pop().type, 'resume');
+      assert.strictEqual(lines().pop().session, 's2');
+      allowed({ session_id: 's1' });
+      assert.strictEqual(JSON.parse(hook({ session_id: 's2' }).stdout).decision, 'block');
+      // Resume without the variable: no session, so no block.
+      withSession(null, 'begin');
+      assert.strictEqual('session' in lines().pop(), false);
+      allowed({ session_id: 's2' });
+      // An ended run allows the stop.
+      withSession('s1', 'begin', '--discard');
+      assert.strictEqual(JSON.parse(hook({}).stdout).decision, 'block');
+      ok('end');
+      allowed({});
+      ok('begin', '--discard');
+      assert.strictEqual('session' in lines().pop(), false);
+    }
 
     // Low disk wakes the supervisor once per undershoot and re-arms after recovery.
     const low = () => ok('wait', '--since', '0', '--timeout', '0.1', '--min-free', '1e12').events.length;

@@ -143,6 +143,8 @@ Warte mit `<run> wait --since <cursor> --min-free <GB>`: zuerst `--since 0`, dan
 letzten Ausgabe; `<GB>` ist der Schwellenwert aus „Freier Platz“. Führe `wait`, das bis zu seinem `--timeout`
 blockiert, im Hintergrund oder mit einem Befehls-Timeout des Hosts darüber aus. Überwache sonst nur über die
 Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore, Crons oder Warteschleifen.
+Blockiert ein Stop-Hook des Hosts dein Stoppen, weil der Lauf aktiv ist und keine Hintergrundarbeit läuft,
+fülle nach Lage Pakete nach, starte Nachfolger oder führe `<run> end` aus.
 
 Protokolliere, was du selbst zum Abschlussblock beiträgst, sofort mit `<run> log --type <type> --package
 <package> --task <id> --text "<text>"`, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`,
