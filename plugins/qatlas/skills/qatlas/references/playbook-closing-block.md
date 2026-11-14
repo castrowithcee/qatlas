@@ -16,7 +16,9 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 <Ergebnis: zwei bis vier Sätze dazu, was für den Nutzer jetzt anders ist.>
 
 **Entscheiden**
-1. <Thema> (#<ID>): <Kontext in einem Satz>. <Frage>? Empfehlung: <Option>, weil <Grund>.
+1. <Thema> (#<ID>)
+   <Funktion, Feature oder Fehler>: <was es im Produkt bewirkt und warum es gerade hängt>.
+   <Frage>? Empfehlung: <Option>, weil <Grund>.
 
 **Prüfen**
 2. <Thema> (#<ID>): <was, wo, woran sich Erfolg zeigt; wann, falls nicht jetzt>.
@@ -44,6 +46,9 @@ Weiter in einer neuen Session: <Modi>
 
 - **Ergebnis:** was jetzt funktioniert oder sich geändert hat, in den Begriffen des Nutzers; keine Liste von
   Paketen oder Tasks.
+- **Entscheiden:** so, dass der Nutzer ohne den Task antworten kann und seine Antwort den Task möglichst
+  ausführungsreif macht. Formuliere protokollierte Einträge dafür neu. Herleitung und technische Details
+  bleiben im Task.
 - **Angenommen:** nur Annahmen, deren Umkehr etwas ändern würde.
 - **Risiken:** nur Risiken, die nach dem Lauf noch offen sind, darunter ein unbehobenes Sicherheitsrisiko,
   das nicht öffentlich festgehalten werden darf. Was wie erwartet behandelt wurde, bleibt draußen;
