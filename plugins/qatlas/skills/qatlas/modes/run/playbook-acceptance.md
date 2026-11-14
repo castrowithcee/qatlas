@@ -41,8 +41,10 @@ wende sie statt beider Flake-Regeln oben an; zähle auch dann Rot nie als Grün.
 
 ## Teststrategie des Projekts
 
-Wie das Projekt testet, steht in `.qatlas-project/TESTING.md`; Qatlas legt nur den Nachweisvertrag fest.
-Fehlt die Datei, folge den Voreinstellungen der Anweisungen. Halte in jedem Projekt diesen Vertrag ein:
+Wie das Projekt testet, steht in `.qatlas-project/TESTING.md`. Fehlt sie, suche die Teststrategie in den
+übrigen Projektanweisungen und den Dateien, auf die sie verweisen, bevor du annimmst, dass es keine gibt.
+Qatlas legt nur den Nachweisvertrag fest. Findest du keine Teststrategie, folge den Voreinstellungen dieser
+Anweisungen. Halte in jedem Projekt diesen Vertrag ein:
 
 - Integriere nur einen nachweislich geprüften Stand.
 - Werte einen Nachweis nur für genau den Git-Tree, auf dem er entstand. Grünes CI auf dem übergebenen Head

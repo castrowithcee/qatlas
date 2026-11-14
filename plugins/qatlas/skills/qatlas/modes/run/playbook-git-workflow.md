@@ -9,14 +9,14 @@ description: >
 ## Zuständigkeit
 
 - **Kontroll-Branch:** der Branch, auf dem der Supervisor den Lauf beginnt und integrierte Ergebnisse landen.
-  Während Leads oder Integrator laufen, schreibt ihn nur der Integrator; sein Arbeitsbaum, normalerweise der
-  primäre, dient nur der Integration und den gemeinsamen Prüfungen. Behandle eine Änderung des Integrators dort
-  nie als fremde Änderung.
+  Während Leads oder Integrator laufen, schreibt ihn nur der Integrator, ohne Integrator nur der Lead; sein
+  Arbeitsbaum, normalerweise der primäre, dient nur der Integration und den gemeinsamen Prüfungen. Behandle
+  eine Änderung dieses Schreibers dort nie als fremde Änderung.
 - **Task-Branch:** die Arbeitslinie genau eines Tasks in einem eigenen Worktree nach dem Worktree-Vertrag;
   die Berechtigung des Laufs deckt ihr Anlegen ab. Er gehört dem Lead des Tasks, ab der Übergabe bis zur
   Antwort dem Integrator.
 - Als Lead: Schreibe nur in Branches und Worktrees deiner eigenen Tasks. Ziehe, wechsle und committe im
-  primären Arbeitsbaum nichts.
+  primären Arbeitsbaum nichts, außer ohne Integrator für die Integration.
 - Sorge dafür, dass ein Arbeitsbaum nie zwei gleichzeitige Schreiber hat und ein Branch nie in zwei Worktrees
   ausgecheckt ist. Auch ein Test-, Build- oder Formatierungslauf, der Dateien, Caches oder Ausgaben erzeugt,
   ist Schreiben.
@@ -36,13 +36,14 @@ Sicherheitsisolation, nenne einen separaten Clone oder eine Sandbox als Vorausse
 
 - **Extern:** Als Lead: Beanspruche jeden Task unmittelbar vor der ersten schreibenden Ausführung, setze
   `review`, `waiting` oder `draft` selbst und lege Entwürfe selbst an. Ist ein Task inzwischen fremd
-  beansprucht oder sein Anspruch unklar, ändere nichts daran und frage den Supervisor. `done` setzt nur der
-  Integrator, nach Integration und Nachweis auf dem Kontroll-Branch.
+  beansprucht oder sein Anspruch unklar, ändere nichts daran und frage den Supervisor. `done` setzt, wer
+  integriert, nach Integration und Nachweis auf dem Kontroll-Branch, einen Task ohne Dateiänderung der Lead
+  nach seiner Abnahme.
 - **Lokales Backlog im Repo:** Während Leads oder Integrator laufen, schreibt es nur der Integrator, auf dem
-  Kontroll-Branch. Das Paket im Steuerskript ist der Anspruch des Leads. Als Lead oder Supervisor: Was du
-  sonst ins Backlog schreiben würdest, protokolliere mit `log` (`status` für Statuswechsel samt Inhalt,
-  `erfasst` für Entwürfe), mit Task-Branch, Worktree-Pfad und Stand. Der Supervisor trägt es nach dem Ende
-  des Integrators ein.
+  Kontroll-Branch. Das Paket im Steuerskript ist der Anspruch des Leads. Als Lead, auch ohne Integrator, oder
+  Supervisor: Was du sonst ins Backlog schreiben würdest, protokolliere mit `log` (`status` für Statuswechsel
+  samt Inhalt, `erfasst` für Entwürfe), mit Task-Branch, Worktree-Pfad und Stand. Der Supervisor trägt es nach
+  dem Ende des letzten Subagents ein.
 
 ## Commits und Checkpoints
 

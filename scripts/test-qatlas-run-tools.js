@@ -917,10 +917,13 @@ try {
     woke = supervise(woke.cursor);
     assert.deepStrictEqual(types(woke), ['done']);
     assert.deepStrictEqual(woke.events[0].rest, ['2']);
-    // Conflicts count into the metrics and stay out of the notes.
+    // Conflicts and self-integrations count into the metrics and stay out of the notes.
     ok('log', '--type', 'conflict', '--package', 'b', '--task', '3', '--text', 'x.go');
+    ok('log', '--type', 'integrated', '--package', 'a', '--task', '1', '--text', 'def456');
     const rep = ok('report');
-    assert.deepStrictEqual(rep.log, { rerun: 0, conflict: 1 });
+    assert.deepStrictEqual(rep.log, { rerun: 0, conflict: 1, integrated: 1 });
+    assert.strictEqual(rep.tasks['1'].integrated, true);
+    assert.ok(!rep.notes.integrated);
     assert.deepStrictEqual([rep.ended, rep.budget, rep.open], [false, 3, []]);
     assert.deepStrictEqual(rep.packages, { a: { tasks: ['1', '2'], questions: 1, finished: 1, rest: ['2'] },
       b: { tasks: ['3'], questions: 0, finished: 0 } });

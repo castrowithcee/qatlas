@@ -1,7 +1,8 @@
 ---
 description: >
   Paralleler Arbeitslauf: Ein Supervisor verteilt ausführbare Tasks auf unabhängige Pakete, lässt jedes von
-  einem Lead-Subagent abarbeiten und einen Integrator-Subagent die Ergebnisse integrieren.
+  einem Lead-Subagent abarbeiten und bei parallelen Paketen einen Integrator-Subagent die Ergebnisse
+  integrieren.
 ---
 
 # Run
@@ -10,19 +11,19 @@ description: >
 
 ## Rollen
 
-Du bist der Supervisor: die Session, in der der Nutzer `run` aufruft. Starte genau einen Integrator zur Zeit
-und selbst keine umsetzenden Worker; das tun die Leads. Setze nichts inhaltlich um, integriere nichts und lies
-keine Diffs, Berichte oder Logs, damit dein Kontext schmal bleibt, und einen Taskvertrag nur, wenn eine
+Du bist der Supervisor: die Session, in der der Nutzer `run` aufruft. Starte höchstens einen Integrator zur
+Zeit und selbst keine umsetzenden Worker; das tun die Leads. Setze nichts inhaltlich um, integriere nichts und
+lies keine Diffs, Berichte oder Logs, damit dein Kontext schmal bleibt, und einen Taskvertrag nur, wenn eine
 Rückfrage oder ein Problem genau diesen Task betrifft. Überlass während des Laufs das Schreiben des
-Kontroll-Branches allein dem Integrator, ebenso Merge, Task-Abschluss und `done`, auch wenn Projektanweisungen
-diese einem Lead erlauben.
+Kontroll-Branches, Merge, Task-Abschluss und `done` allein dem Integrator oder, wo keiner läuft, dem Lead,
+auch wenn Projektanweisungen sie anders verteilen.
 
 Committe im gewählten Scope lokal und lass lokal integrieren, ohne nachzufragen. Pushe, öffne Pull Requests
 und merge sie nur, wenn Nutzer- oder Projektanweisungen es verlangen und erlauben. Protokolliere dann vor dem
 ersten Lead einmal als `regel`, welche Vorgabe Push, Pull Request und Merge erlaubt, mit ihrem Ort, und mit
 welchen Mitteln das Projekt sie ausführt; gleiche eine Warnung des Hosts zu einem Merge damit ab. Löse keine
 andere externe oder unumkehrbare Wirkung aus. Schreibe bei einem lokalen Backlog nur vor dem ersten Lead und
-nach dem Ende des Integrators hinein; was du dazwischen schriebst, etwa einen Statuswechsel oder eine
+nach dem Ende des letzten Subagents hinein; was du dazwischen schriebst, etwa einen Statuswechsel oder eine
 festgehaltene Antwort, protokolliere mit `log --type status`.
 
 `<run>` ist das Steuerskript `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run.js`, `<tools>`
@@ -90,19 +91,20 @@ Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unver
    sonst der lokale `<control-branch>`.
 5. **Testergebnisse:** Lösche die Testergebnisse des vorigen Laufs mit `<tools> slot results --clear --repo
    <code-repo>`; `<code-repo>` ist das Repo mit dem Code.
-6. **Teststrategie:** Fehlt `.qatlas-project/TESTING.md` in einem vorhandenen `.qatlas-project/`, lege sie
-   nicht selbst an. Lege im Abschlussblock unter `Entscheiden` einen Vorschlag vor, der die Fragen der
-   Teststrategie des Projekts aus [Abnehmen und integrieren](playbook-acceptance.md) beantwortet, soweit
-   Manifeste, CI-Konfiguration und vorhandene Anweisungen sie belegen. Bis dahin gilt der Standard aus
+6. **Teststrategie:** Fehlt `.qatlas-project/TESTING.md` in einem vorhandenen `.qatlas-project/` und nennen
+   auch die übrigen Projektanweisungen keine Teststrategie, lege sie nicht selbst an. Lege im Abschlussblock
+   unter `Entscheiden` einen Vorschlag vor, der die Fragen der Teststrategie des Projekts aus [Abnehmen und
+   integrieren](playbook-acceptance.md) beantwortet, soweit Manifeste, CI-Konfiguration und vorhandene
+   Anweisungen sie belegen. Bis dahin gilt der Standard aus
    „Abnehmen und integrieren“.
 
 ## Pakete bilden
 
-Verteile die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, auf Pakete: höchstens vier, mit
-`--limit <n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Bilde ein weiteres Paket erst, wenn die
-bestehenden nach der Größenregel gefüllt sind oder eine der folgenden Regeln es verlangt, und nur aus Tasks,
-die von ihnen unabhängig sind. Ein Paket ist die Zuständigkeit eines Leads für unveränderte Tasks; am
-Zuschnitt der Tasks änderst du nichts. Nimm Abhängigkeiten, Kopplung, gemeinsame Dateien und Umfang aus den
+Verteile die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, auf Pakete: höchstens vier, mit `--limit
+<n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Bilde ein weiteres Paket erst, wenn die bestehenden
+nach der Größenregel gefüllt sind oder eine der folgenden Regeln es verlangt, und nur aus Tasks, die von ihnen
+unabhängig sind. Ein Paket ist die Zuständigkeit eines Leads für unveränderte Tasks; am Zuschnitt der Tasks
+änderst du nichts. Nimm Abhängigkeiten, Kopplung, gemeinsame Dateien, geänderte Repos und Umfang aus den
 Angaben des lesenden Workers.
 
 - **Kopplung:** Halte Abhängigkeiten und echte Kopplung über gemeinsame Invarianten, Migrationen oder
@@ -128,13 +130,17 @@ Zeile, wie viele Tasks und Leads starten und wie hoch das Laufbudget ist, und st
 
 ## Leads und Integrator
 
+Ändern mindestens zwei Pakete Dateien im selben Repo, läuft der Lauf mit Integrator, sonst ohne; dann
+integriert jeder Lead seine Tasks selbst. Entscheide das beim Bilden der ersten Pakete für den ganzen Lauf und
+protokolliere es als `regel`.
+
 Starte zuerst je Paket einen Lead mit diesem Auftrag:
 
 > Du bist der Lead des Pakets <package> eines Laufs mit den Tasks <id,id,...>. Lies
 > `<plugin-root>/skills/qatlas/modes/run/lead.md` vollständig und arbeite danach. Steuerskript: `<run>`,
-> Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`, Integrationsbasis: `<basis>`.
+> Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`, Integrationsbasis: `<basis>`, Integrator: <ja|nein>.
 
-Starte danach den Integrator:
+Starte bei einem Lauf mit Integrator danach den Integrator:
 
 > Du bist der Integrator eines Laufs. Lies `<plugin-root>/skills/qatlas/modes/run/integrator.md` vollständig
 > und arbeite danach. Steuerskript: `<run>`, Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`,
@@ -179,7 +185,8 @@ Backlog trage jeden Entwurf nach „Laufende“ ein.
   Tasks des Pakets, die `report` nicht als `integrated` führt, und starte einen Nachfolger wie bei `rest`.
   Endet auch er ohne `done`, sichere die offenen Tasks nach dem Git-Workflow als Übergabe an `review`.
 - **Integrator `done` oder Ende ohne `done` vor `end`:** Starte einen neuen.
-- **Integrator `done` nach `end`:** Ist seine Schlussprüfung rot, erfasse dafür einen Entwurf.
+- **Rote Schlussprüfung:** Meldet sie das `done` des Integrators nach `end` oder, ohne Integrator, das eines
+  Leads, erfasse dafür einen Entwurf.
 
 **Nachfüllen:** Endet ein Paket und ist das Laufbudget nicht aufgebraucht, bilde aus den verbleibenden Tasks
 ein neues, von allen laufenden unabhängiges Paket nach der Größenregel, höchstens so groß wie das Restbudget,
@@ -191,17 +198,19 @@ mit neuem Namen, protokolliere es mit `plan` und starte seinen Lead. Lass nie me
 Rekonstruiere nach einer Verdichtung deines Kontexts oder in einer neuen Session den Stand aus `<run> report`
 (Pakete, Laufbudget, beendete Pakete mit `rest`, offene Rückfragen und Übergaben) und dem Planungssystem.
 Beantworte offene Rückfragen und setze `wait` ab dem `cursor` von `report` fort. Behandle in einer neuen
-Session jedes Paket ohne `done` als „Lead endet ohne `done`“ und starte einen Integrator, weil die Subagents
-der alten Session nicht mehr laufen. Bilde keine Pakete über das restliche Laufbudget hinaus.
+Session jedes Paket ohne `done` als „Lead endet ohne `done`“ und starte bei einem Lauf mit Integrator einen
+neuen, weil die Subagents der alten Session nicht mehr laufen. Bilde keine Pakete über das restliche
+Laufbudget hinaus.
 
 ## Laufende
 
 Führe `<run> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket mit `done` ohne `rest` geendet hat
-oder gesichert ist und `report` keine offene Übergabe zeigt. Warte dann auf das `done` des Integrators nach
-seiner Schlussprüfung. Trage danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe
-ein (`status` und `erfasst` in den `notes` von `report`), führe die Bereinigungsschritte aus, die
-Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Schließe dann
-mit genau einem Abschlussblock über alle Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz
-unter `Verbesserungen`, Kennzahlen aus den Zählungen und dem Block `time` von `report`, mit `--code-repo
-<code-repo>` für Code außerhalb der Steuerwurzel. Halte die Antworten des Nutzers darauf
-selbst fest, weil die Zuständigkeit des Integrators mit dem Lauf endet.
+oder gesichert ist und `report` keine offene Übergabe zeigt. Warte dann bei einem Lauf mit Integrator auf sein
+`done` nach seiner Schlussprüfung; ohne Integrator hat der letzte Lead sie vor seinem `done` ausgeführt. Trage
+danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein (`status` und `erfasst` in
+den `notes` von `report`), führe die Bereinigungsschritte aus, die Projektanweisungen für das Ende eines Laufs
+nennen, und committe die entstandenen Änderungen. Schließe dann mit genau einem Abschlussblock über alle
+Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz unter `Verbesserungen`, Kennzahlen aus
+den Zählungen und dem Block `time` von `report`, mit `--code-repo <code-repo>` für Code außerhalb der
+Steuerwurzel. Halte die Antworten des Nutzers darauf selbst fest, weil die Zuständigkeit der Subagents mit dem
+Lauf endet.

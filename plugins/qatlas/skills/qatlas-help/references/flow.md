@@ -16,7 +16,8 @@ description: >
 4. **Run:** `qatlas run` verteilt die ausführbaren Tasks unverändert auf bis zu vier unabhängige Pakete, mit
    `--limit <n>` bis zu `n`, und lässt jedes parallel von einem eigenen Lead als Subagent abarbeiten. Ein
    Lead mit mehreren Tasks verteilt Aufträge an Worker und prüft deren Ergebnisse, ein Lead mit einem
-   einzelnen Task setzt selbst um; ein Integrator nimmt jede Übergabe ab und committet lokal. Der Lauf
+   einzelnen Task setzt selbst um. Ändern mehrere Pakete Dateien im selben Repo, nimmt ein Integrator jede
+   Übergabe ab und committet lokal; sonst integriert jeder Lead selbst. Der Lauf
    arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder übergibt an `review`, nachdem
    integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Push und
    Pull Requests nur, wenn Nutzer- oder Projektanweisungen sie verlangen und erlauben; nie Veröffentlichung,

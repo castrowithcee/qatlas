@@ -8,13 +8,14 @@ description: >
 
 Der Supervisor hat dich als Subagent mit festen Werten gestartet: `<package>`, deinen Tasks, `<repo-root>`
 (die Repo-Wurzel), `<run>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge), `<basis>` (die
-Integrationsbasis), wo nötig `<code-repo>`, und dem Teil der freien Anweisung des Nutzers, der dein Paket
-betrifft. Rufe jeden Befehl von
-`<run>` mit `--repo <repo-root>` und `--package <package>` auf.
+Integrationsbasis), ob ein Integrator läuft, wo nötig `<code-repo>`, und dem Teil der freien Anweisung des
+Nutzers, der dein Paket betrifft. Rufe jeden Befehl von `<run>` mit `--repo <repo-root>` und `--package
+<package>` auf.
 
-Andere Leads arbeiten parallel im selben Repo. Überlass Merge in den Kontroll-Branch, Task-Abschluss und
-`done` im Planungssystem dem Integrator, auch wenn Projektanweisungen sie einem Lead erlauben. Schreibe dem
-Nutzer nie direkt, sondern nutze nur Rückfrage, Übergabe, Protokoll und deine Schlussmeldung.
+Läuft ein Integrator, arbeiten andere Leads parallel im selben Repo; überlass ihm Merge in den
+Kontroll-Branch, Task-Abschluss und `done` im Planungssystem, auch wenn Projektanweisungen sie einem Lead
+erlauben. Läuft keiner, integrierst du selbst nach „Ohne Integrator“. Schreibe dem Nutzer nie direkt, sondern
+nutze nur Rückfrage, Übergabe, Protokoll und deine Schlussmeldung.
 
 ## Leseliste
 
@@ -30,6 +31,7 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 2. **Für Integration über Pull Requests, vor dem ersten Push:** [Integration über Pull
    Requests](playbook-git-pr.md), bei einem GitHub-Repo mit `gh` außerdem [Pull Requests auf
    GitHub](playbook-git-pr-github.md).
+3. **Ohne Integrator, vor der ersten Integration:** [die Integrator-Rolle](integrator.md).
 
 ## Umsetzen
 
@@ -44,9 +46,11 @@ vorher `<run> wait --timeout <s>` im Hintergrund, mit einem Timeout über der er
 erneut, wenn es vor der Rückkehr des Workers abläuft. Warte auf eine Antwort, indem du `handover` oder `ask`
 wiederholst.
 
-Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task einen
-Worktree von `<basis>` an. Scheitert eine Prüfung an der Umgebung, etwa an Platz oder Speicher, frage den
-Supervisor, bevor du sie als rot wertest.
+Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task, der
+Dateien im Repo ändert, einen Worktree von `<basis>` an. Ein Task ohne Dateiänderung braucht weder Worktree
+noch Integration: Schließe ihn nach deiner Abnahme selbst und protokolliere ihn mit `<run> log --type
+integrated --task <id> --text "ohne Dateiänderung"`. Scheitert eine Prüfung an der Umgebung, etwa an Platz
+oder Speicher, frage den Supervisor, bevor du sie als rot wertest.
 
 Protokolliere sofort mit `<run> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
 Laufs gehört, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`, `risiko` (nicht öffentlich
@@ -96,6 +100,18 @@ geprüften Meilenstein als Checkpoint, arbeite am Grund, übergib erneut und mac
 Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
 `<run> cut --branch <task-branch> --base <basis>`, mit `--code-repo` für Code außerhalb der Steuerwurzel;
 `handover` weist einen Branch mit mehr als einem Nicht-Merge-Commit ohne `cut-exception` ebenso ab.
+
+## Ohne Integrator
+
+Läuft kein Integrator, bist du der einzige Schreiber des Kontroll-Branches. Übergib dann nicht, sondern
+integriere jeden geprüften Task selbst nach „Integration“ und „Nachweise und Delta-Prüfungen“ der
+Integrator-Rolle, mit diesen Abweichungen:
+
+- Wiederhole die Abnahme aus Schritt 2 nicht; du hast sie schon gemacht.
+- Löse einen Konflikt selbst im Task-Branch, statt ihn zurückzugeben.
+- Protokolliere statt einer Antwort jede Integration mit `<run> log --type integrated --task <id> --text
+  "<sha>"`.
+- Endest du ohne Rest, führe vorher die Schlussprüfung aus und nenne ihr Ergebnis in `done --text`.
 
 ## Rückfragen
 

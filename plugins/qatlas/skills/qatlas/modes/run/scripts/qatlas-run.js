@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// File mailbox of a Qatlas run whose supervisor, leads and integrator run as subagents of one host session.
+// File mailbox of a Qatlas run whose supervisor, leads and, for parallel packages, integrator run as subagents
+// of one host session.
 // They talk only through the JSON-lines log <repo>/.qatlas/local/run/events.jsonl; `seq` is the line index,
 // derived on read. A sender is a lead (--package) or the integrator (--role integrator) and has at most one
 // open signal (question or handover) until it picks up the answer by repeating the same call.
@@ -20,6 +21,7 @@
 //     Output: {"answered","timeout"}; the answer itself is collected by repeating ask or handover.
 //   qatlas-run.js done --repo <root> (--package <package> [--rest <id,id,...>] | --role integrator) [--text <text>]
 //   qatlas-run.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
+//     Type integrated: a lead without integrator records a task it finished itself; report counts it as integrated.
 //   qatlas-run.js report --repo <root> [--code-repo <path>] [--notes <type>]
 //     "time" sums, in seconds since begin: the commands run through slot in the repo of the code ("checks",
 //     of them "red", "checking", and "queued" for a free slot) and the waits from a handover to its answer
@@ -314,7 +316,7 @@ function report() {
   const packages = {};
   const tasks = {};
   const integrator = { questions: 0, finished: 0 };
-  const counts = { rerun: 0, conflict: 0 };
+  const counts = { rerun: 0, conflict: 0, integrated: 0 };
   const notes = {};
   const since = {};
   let budget = null;
@@ -333,6 +335,10 @@ function report() {
     const own = lead || (e.sender === INTEGRATOR ? integrator : null);
     if (e.type === 'question' && own) own.questions++;
     if (e.type === 'done' && own) { own.finished++; if (lead) lead.rest = e.rest || []; }
+    if (e.type === 'integrated' && e.task) {
+      (tasks[e.task] ||= { package: e.package, integrated: false, cycle: null, wait: null, rework: 0, handovers: 0 }).integrated = true;
+      continue;
+    }
     if (!e.task || !SIGNAL.has(e.type)) continue;
     const t = tasks[e.task] ||= { package: e.sender, integrated: false, cycle: null, wait: null, rework: 0, handovers: 0 };
     if (e.type === 'handover') {

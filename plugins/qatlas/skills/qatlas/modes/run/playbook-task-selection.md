@@ -19,8 +19,9 @@ Commit- noch als Subagent-Zahl und passe es nicht an die Zahl der `next`-Tasks a
 4. Lies die gewählten Tasks nicht selbst. Ein einzelner Task bildet ohne Lesen ein Paket. Gib mehrere einem
    lesenden Worker mit dem Profil `standard`, der jeden gewählten Task und seine echten Blocker vollständig
    liest, keine weiteren Kandidaten, und je Task in einer Zeile zurückgibt: Abhängigkeiten, Kopplung mit
-   anderen gewählten Tasks samt Grund, zentrale Dateien, die er mit anderen teilt, Umfang und eine konkrete
-   offene Vertragsfrage oder fehlende externe Voraussetzung, auf die er beim Lesen stößt.
+   anderen gewählten Tasks samt Grund, zentrale Dateien, die er mit anderen teilt, das Repo, dessen Dateien er
+   ändert, oder keines, Umfang und eine konkrete offene Vertragsfrage oder fehlende externe Voraussetzung, auf
+   die er beim Lesen stößt.
 5. Werte `ready` und `next` als belegte Ausführungsreife und prüfe sie weder selbst noch über einen Subagent
    erneut. Meldet der lesende Worker eine konkrete offene Vertragsfrage oder eine fehlende externe
    Voraussetzung, setze den Task nach der Backlog-Norm auf `draft` oder `waiting`, nenne ihn im Abschlussblock
