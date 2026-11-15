@@ -15,6 +15,6 @@ OIDC-Anbieter sind nur Kandidaten, wenn ihr konkreter Zweck im Projekt besteht. 
 ein Plugin in einem vorhandenen Host oder ein anders gebautes Projekt braucht nicht diesen Kandidaten.
 
 Beginne mit möglichst wenigen Deployables. Eine separate API folgt einer unabhängigen Client- oder
-Bereitstellungsgrenze; ein Worker folgt langer oder wiederholbarer Arbeit; Cache und Queue brauchen je
+Bereitstellungsgrenze. Ein Worker folgt langer oder wiederholbarer Arbeit. Cache und Queue brauchen je
 einen benannten aktuellen Bedarf. Prüfe die heutigen Fähigkeiten, Versionen und Betriebsfolgen der
 gewählten Technologien anhand ihrer offiziellen Quellen, bevor du eine Empfehlung aussprichst.

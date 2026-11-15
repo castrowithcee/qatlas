@@ -6,7 +6,7 @@ description: >
 
 # Host-Plugin-Perspektive
 
-Ein Plugin erweitert ein vorhandenes System; dessen aktuelle Verträge und die Daten des Nutzers sind die
+Ein Plugin erweitert ein vorhandenes System. Dessen aktuelle Verträge und die Daten des Nutzers sind die
 erste Architekturgrenze. Prüfe:
 
 - Welche Host-APIs, Ereignisse, UI-Flächen und Lebenszyklusregeln tragen die gewünschte Funktion?

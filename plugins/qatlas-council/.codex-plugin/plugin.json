@@ -11,7 +11,7 @@
   "interface": {
     "displayName": "Qatlas Council",
     "shortDescription": "Ideen und Architektur unabhängig prüfen",
-    "longDescription": "Optionales Qatlas-Pack für ausdrücklich gestartete Beratung durch mehrere unabhängige Subagents. Der allgemeine Einstieg prüft Ideen und Vorhaben; arch prüft technische Architektur in drei Phasen und lädt nur passende Plattformperspektiven. Council empfiehlt im Gespräch. Qatlas Shape dokumentiert bestätigte Entscheidungen und plant Arbeit. Erfordert qatlas.",
+    "longDescription": "Optionales Qatlas-Pack für ausdrücklich gestartete Beratung durch mehrere unabhängige Subagents. Der allgemeine Einstieg prüft Ideen und Vorhaben. Der Modus arch prüft technische Architektur in drei Phasen und lädt nur passende Plattformperspektiven. Council empfiehlt im Gespräch. Qatlas Shape dokumentiert bestätigte Entscheidungen und plant Arbeit. Erfordert qatlas.",
     "developerName": "Qatlas",
     "category": "Productivity",
     "capabilities": ["Instructions", "Multi-agent orchestration"],

@@ -6,7 +6,7 @@ description: >
 
 # Architektur beraten
 
-Prüfe mit `arch`, wie ein Vorhaben technisch tragfähig umgesetzt werden kann; verweise eine offene Frage nach
+Prüfe mit `arch`, wie ein Vorhaben technisch tragfähig umgesetzt werden kann. Verweise eine offene Frage nach
 seinem Nutzen an die allgemeine Council-Beratung. Behandle vorhandenen Stack, bestätigte Architektur und
 Projektgrenzen als Eingang, nicht als Anlass für eine Migration. Passe Tiefe und Rollen an die Entscheidung
 an.
@@ -22,7 +22,7 @@ an.
    wo sie für das Vorhaben relevant sind. Benenne Alternativen mit ihren Kosten und Risiken. Eine
    Komponentenliste ist noch keine Architekturbegründung.
 3. **Stack und Bereitschaft:** Vergleiche konkrete Technologien erst gegen die geklärten Anforderungen
-   und die gewählte Struktur. Nutze bestehende tragfähige Technik zuerst; bei einem neuen Stack sind
+   und die gewählte Struktur. Nutze bestehende tragfähige Technik zuerst. Bei einem neuen Stack sind
    Plattformvorgaben, Teamfähigkeit, Wartung, Betrieb und Kosten Entscheidungskriterien. Fordere für
    kritische Annahmen einen Spike oder Test. Prüfe Produktionsreife nur, wenn ein produktiver Einsatz
    Gegenstand der Frage ist.

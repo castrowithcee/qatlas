@@ -2,7 +2,7 @@
 name: qatlas-council
 description: >
   Startet ausschließlich auf ausdrücklichen Aufruf eine Beratung durch mehrere unabhängige Subagents.
-  Ohne Modus für Ideen und Vorhaben; mit arch für technische Architekturentscheidungen.
+  Ohne Modus für Ideen und Vorhaben, mit arch für technische Architekturentscheidungen.
 disable-model-invocation: true
 argument-hint: "[arch] [Idee oder Entscheidungsfrage]"
 ---

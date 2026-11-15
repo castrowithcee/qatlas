@@ -42,7 +42,7 @@ Blickwinkel und markiert Abhängigkeiten zu anderen, statt deren Gebiet still zu
 | Challenger | Welche plausible Gegenhypothese, kleinere Alternative oder Abbruchbedingung fehlt? |
 
 Setze einen Challenger bei einer folgenreichen Ja-nein-Entscheidung ein, einen Researcher bei schwacher
-Evidenz; stelle bei einer offenen Ideensuche Begünstigte und alternative Wege voran. Gib eine Rolle nie als
+Evidenz. Stelle bei einer offenen Ideensuche Begünstigte und alternative Wege voran. Gib eine Rolle nie als
 Berufsqualifikation oder Freigabebefugnis aus.
 
 ## Ergebnis
