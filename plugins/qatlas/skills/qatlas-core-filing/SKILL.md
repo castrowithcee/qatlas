@@ -26,8 +26,7 @@ festen Ordner, und jede nimmt nur ihre Aufgabe oder ihre Typen auf.
   ihren lokalen Geltungsbereich.
 - Inhaltsdateien im Wissensraum beginnen mit dem Frontmatter-`type`; nur Tasks tragen zusätzlich eine ID.
 - Daten werden als `YYYY-MM-DD` geschrieben. Chronologische Dateien dürfen mit diesem Datum beginnen.
-- ä, ö, ü und ß werden in deutschen Dateien direkt geschrieben. Gedankenstriche (lang oder halblang) sind
-  als Satzzeichen tabu.
+- ä, ö, ü und ß werden in deutschen Dateien direkt geschrieben.
 
 ## Verweise
 

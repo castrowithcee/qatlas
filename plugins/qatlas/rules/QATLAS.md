@@ -32,3 +32,7 @@ und führe ihn von dort aus.
 
 Der Chat folgt der Sprache der ersten Nutzernachricht. Eine dauerhafte Spracheinstellung verwaltet der Nutzer
 in seiner gerätelokalen Agentendatei. Qatlas schreibt sie nicht.
+
+Schreibe deutsche Texte im Chat wie in Dateien ohne Gedankenstrich und ohne Semikolon als Satzzeichen. Beide
+sind englische Muster. Setze für eine eigenständige Aussage einen Punkt und beginne einen neuen Satz, verbinde
+Abhängiges mit Komma und Konjunktion und leite eine Erläuterung oder Folge mit Doppelpunkt ein.
