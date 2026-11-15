@@ -15,16 +15,16 @@ edit: shared
 - **Anbieter und Objekt:** <anbieter, owner oder workspace, projekt oder datenbank>
 - **Arbeitspakete:** <objekttyp und fachlicher container>
 - **Entwürfe:** <wo unausgereifte ideen leben und wann sie zu arbeit werden>
-- **Status:** <feldname>; `<wert>` = <bedeutung>, ...
+- **Status:** <feldname>: `<wert>` = <bedeutung>, ...
 - **Abschluss:** <wie ein erledigter, verworfener oder doppelter task im system geschlossen wird und wie der
   status diesem zustand im selben schritt folgt>
 - **Aktueller Datensatz:** <objekt oder felder mit dem eigenständig ausführbaren aktuellen taskvertrag,
   der geltende vorgaben konkret statt nur als quellenlinks enthält>
-- **Historie:** <kanal für kommentare oder verlauf; nicht maßgeblich und nur bei begründetem bedarf lesen>
+- **Historie:** <kanal für kommentare oder verlauf, nicht maßgeblich und nur bei begründetem bedarf lesen>
 - **Lesepolitik:** <für übersichten nur titel, status, kurzstand, reihenfolge, abhängigkeiten und
-  eigentümerschaft; vollständiger aktueller datensatz nur für ausgewählte tasks und echte blocker; historie nur
+  eigentümerschaft. Vollständiger aktueller datensatz nur für ausgewählte tasks und echte blocker. Historie nur
   bei widerspruch, fehlender begründung, auditbedarf oder ausdrücklichem verweis, begrenzt nach zeitraum,
-  cursor oder letzten einträgen; der neueste eintrag allein ist nie die wahrheit>
+  cursor oder letzten einträgen. Der neueste eintrag allein ist nie die wahrheit>
 - **Schreibweg:** <bevorzugtes tool oder api und nötige laufzeitvoraussetzung, keine secrets>
 - **Betriebsgrenzen:** <knappe ständig nötige rate-, batch- oder capability-hinweise>
 - **Lokaler Spiegel:** keiner

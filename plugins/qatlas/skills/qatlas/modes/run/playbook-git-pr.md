@@ -8,9 +8,9 @@ description: >
 # Integration über Pull Requests
 
 Wende dieses Verfahren nur an, wenn `.qatlas-project/CONTRIBUTING.md` oder Nutzer- oder Projektvorgaben eine
-Integration über Pull Requests verlangen, zum Beispiel bei einem geschützten Kontroll-Branch; erkenne das an
+Integration über Pull Requests verlangen, zum Beispiel bei einem geschützten Kontroll-Branch. Erkenne das an
 diesen Vorgaben, nicht durch Raten. Dieses Verfahren ändert keine Berechtigung: Pushe, öffne einen Pull
-Request oder merge nur, wenn Nutzer- oder Projektvorgaben dazu berechtigen; der Aufruf eines Modus berechtigt
+Request oder merge nur, wenn Nutzer- oder Projektvorgaben dazu berechtigen. Der Aufruf eines Modus berechtigt
 zu keinem davon. Fehlen solche Vorgaben, beende den Task ohne Push mit einem integrationsreifen, lokal
 gesicherten Task-Branch als Übergabe an `review` nach dem [Git-Workflow](playbook-git-workflow.md).
 
@@ -20,7 +20,7 @@ Request auf GitLab. Als Lead: Pushe deinen Task-Branch, öffne den Pull Request,
 ## Plattformschritte
 
 Entnimm den Projektvorgaben die Plattform und die Mittel für Push, Öffnen eines Pull Requests, Warten auf CI,
-Merge und Löschen des Remote-Branches; für ein GitHub-Repo mit verfügbarem `gh` genügen die GitHub-Helfer
+Merge und Löschen des Remote-Branches. Für ein GitHub-Repo mit verfügbarem `gh` genügen die GitHub-Helfer
 auch ohne eine solche Angabe. Prüfe vor dem ersten Push oder der ersten Landung, dass diese Mittel verfügbar
 und für Push, Pull Request und Merge berechtigt sind, und stelle im Ziel-Repo fest, ob eine Merge Queue aktiv
 ist und ob der Branch-Schutz vor dem Merge einen aktuellen Stand verlangt. Fehlt ein Mittel oder seine
@@ -28,12 +28,12 @@ Berechtigung, starte nicht und kläre es mit dem Nutzer, als Lead oder Integrato
 bei beiden Plattformschritten, gleich mit welchen Mitteln, diesen Vertrag ein:
 
 - **Auf CI warten:** Warte, bis jede Prüfung des Pull Requests beendet ist. Ohne jede Prüfung hat das Projekt
-  keine CI; dann ist der grüne vollständige lokale Test der Nachweis.
+  keine CI. Dann ist der grüne vollständige lokale Test der Nachweis.
 - **Landen:** Bestätige, dass der Head des Pull Requests der übergebene Stand, dessen konfliktfreier Nachzug
   auf die Basis oder dessen Nachzug mit einem Konflikt ist, den du als Integrator nach deiner Rolle selbst
   gelöst hast, warte auf CI, führe genau diesen Head per Squash-Merge zusammen und belege, dass
   der Squash-Commit die geprüfte Änderung trägt, ohne eigenen Helfer der Plattform mit `<tools> proof --merge
-  <sha> --head <sha> --base <control-branch>`. Lösche erst dann den Remote-Branch; hat die Plattform ihn beim
+  <sha> --head <sha> --base <control-branch>`. Lösche erst dann den Remote-Branch. Hat die Plattform ihn beim
   Merge schon gelöscht, ist das kein Fehler. Lande ohne CI erst, wenn der gemergte Stand durch den grünen
   vollständigen lokalen Test bestätigt ist.
 
@@ -41,13 +41,13 @@ bei beiden Plattformschritten, gleich mit welchen Mitteln, diesen Vertrag ein:
 
 - **Zuschnitt für Squash-Merge:** Teile einen Task in so viele Pull Requests, wie die Commit-Grenze der
   Git-Norm ([Commit-Grenzen](../../../qatlas-core-git/references/commit-boundaries.md)) für ein
-  zusammengeführtes Review verlangt; bündle nie unabhängige Meilensteine in einem Pull Request. Gib jedem
+  zusammengeführtes Review verlangt. Bündle nie unabhängige Meilensteine in einem Pull Request. Gib jedem
   Pull Request einen eigenen Task-Branch desselben Tasks mit eigenem Slug. Sorge dafür, dass ein
   vorbereitender Pull Request, zum Beispiel ein mechanisches Refactoring, vor der darauf aufbauenden Änderung
   integriert wird. Als Lead: Prüfe vor dem ersten Push den gesamten Diff des Pull Requests gegen die
   Commit-Grenze und teile ihn vorher.
 - **CI:** Schreibe gepushte Historie nie um und rebase nie einen gepushten Branch. Als Lead: Behebe eine rote
-  CI selbst mit Folge-Commits; sie zählen nicht gegen den Zuschnitt. Übergib jeden Pull Request eines Tasks
+  CI selbst mit Folge-Commits. Sie zählen nicht gegen den Zuschnitt. Übergib jeden Pull Request eines Tasks
   einzeln und nur mit grüner CI oder, ohne CI, mit dem grünen vollständigen lokalen Test.
 - **Landen:** Als Integrator: Öffne keinen Pull Request, sondern lande den des Leads. Verlangt der
   Branch-Schutz einen aktuellen Stand, ziehe die Basis konfliktfrei nach und warte erneut auf CI. Ist im
@@ -56,5 +56,5 @@ bei beiden Plattformschritten, gleich mit welchen Mitteln, diesen Vertrag ein:
   `done`, wenn alle seine Pull Requests gemergt sind und die Abnahme auf dem neuen `origin/<control-branch>`
   belegt ist.
 - **Abhängige Arbeit:** Beginne einen abhängigen Task oder Pull Request nur vom integrierten
-  `origin/<control-branch>`, nie auf einem Vorgänger-Branch, der nicht integriert ist; ein Squash-Merge
+  `origin/<control-branch>`, nie auf einem Vorgänger-Branch, der nicht integriert ist. Ein Squash-Merge
   schließt gestapelte Branches aus.

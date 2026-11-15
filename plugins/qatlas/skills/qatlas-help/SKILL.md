@@ -2,7 +2,7 @@
 name: qatlas-help
 description: >
   Begleitet auf ausdrücklichen Aufruf durch Qatlas wie ein Handbuch im Gespräch: Einführung, Arbeitsablauf,
-  Skills, Konfiguration und Befehlskarte. Ohne Argument ein Themenmenü; danach freie Nachfragen. Ändert
+  Skills, Konfiguration und Befehlskarte. Ohne Argument ein Themenmenü, danach freie Nachfragen. Ändert
   nichts.
 disable-model-invocation: true
 argument-hint: "[intro|flow|skills|config|card]"
@@ -12,11 +12,11 @@ argument-hint: "[intro|flow|skills|config|card]"
 
 Begleite den Nutzer durch Qatlas wie ein Handbuch im Gespräch. Erkläre einfach und ohne vorausgesetztes
 Wissen, beginne mit dem Wesentlichen und vertiefe nur auf Nachfrage. Ändere keinen Zustand und führe keinen
-Befehl aus; nenne stattdessen den passenden Aufruf.
+Befehl aus. Nenne stattdessen den passenden Aufruf.
 
 ## Ohne Argument
 
-Antworte ausschließlich mit diesem Menü als gerendertes Markdown in der Gesprächssprache; Struktur und
+Antworte ausschließlich mit diesem Menü als gerendertes Markdown in der Gesprächssprache. Struktur und
 Bezeichner bleiben:
 
 ### Qatlas-Hilfe
@@ -36,7 +36,7 @@ Aufruf: `qatlas-help <thema>`
 ## Thema wählen
 
 Lies vor der Antwort vollständig die Referenz des gewählten Themas und gib ihren Inhalt in eigenen, knappen
-Worten wieder; `card` gibst du vollständig in der Gesprächssprache aus, Struktur und Bezeichner bleiben:
+Worten wieder. `card` gibst du vollständig in der Gesprächssprache aus, Struktur und Bezeichner bleiben:
 
 - `intro`: [Einführung](references/intro.md)
 - `flow`: [Arbeitsablauf](references/flow.md)

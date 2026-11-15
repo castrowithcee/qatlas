@@ -10,7 +10,7 @@ status: active        # active | final | archived
 
 <!-- Kanonische Vorlage für einen Projektkopf im lokalen Qatlas-Backlog. Nach
 .qatlas-project/backlog/<project>/README.md kopieren und vor dem Schreiben alle Platzhalter ersetzen. Tasks
-bekommen eigene Dateien; Reihenfolge und Abhängigkeiten werden hier zusammengeführt. -->
+bekommen eigene Dateien. Reihenfolge und Abhängigkeiten werden hier zusammengeführt. -->
 
 ## Plan
 <!-- Link auf .qatlas-project/plans/plan-<slug>.md, der Ziel und Umfang enthält. Ohne Plan: Ergebnis,

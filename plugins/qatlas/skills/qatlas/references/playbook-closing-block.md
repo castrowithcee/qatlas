@@ -21,19 +21,19 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
    <Frage>? Empfehlung: <Option>, weil <Grund>.
 
 **Prüfen**
-2. <Thema> (#<ID>): <was, wo, woran sich Erfolg zeigt; wann, falls nicht jetzt>.
+2. <Thema> (#<ID>): <was, wo, woran sich Erfolg zeigt und wann, falls nicht jetzt>.
 
 **Angenommen**
-3. <Thema> (#<ID>): <Annahme>, weil <Grund>; sie zurückzunehmen hätte <Folge>.
+3. <Thema> (#<ID>): <Annahme>, weil <Grund>. Sie zurückzunehmen hätte <Folge>.
 
 **Handeln**
 - <Thema> (#<ID>): <Aktion mit genauem Ort oder Befehl>.
 
 **Neu**
-- <Thema> (#<ID>): <was> - <warum es nötig ist>.
+- <Thema> (#<ID>): <was>. <Warum es nötig ist>.
 
 **Risiken**
-- <Risiko>: <Folge> - <nötige Aktion oder Entscheidung>.
+- <Risiko>: <Folge>. <Nötige Aktion oder Entscheidung>.
 
 **Verbesserungen**
 - <Schwäche des Verfahrens mit ihrem Nachweis>: <konkreter Ansatz>.
@@ -44,18 +44,18 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 Weiter in einer neuen Session: <Modi>
 ```
 
-- **Ergebnis:** was jetzt funktioniert oder sich geändert hat, in den Begriffen des Nutzers; keine Liste von
+- **Ergebnis:** was jetzt funktioniert oder sich geändert hat, in den Begriffen des Nutzers, keine Liste von
   Paketen oder Tasks.
 - **Entscheiden:** so, dass der Nutzer ohne den Task antworten kann und seine Antwort den Task möglichst
   ausführungsreif macht. Formuliere protokollierte Einträge dafür neu. Herleitung und technische Details
   bleiben im Task.
 - **Angenommen:** nur Annahmen, deren Umkehr etwas ändern würde.
 - **Risiken:** nur Risiken, die nach dem Lauf noch offen sind, darunter ein unbehobenes Sicherheitsrisiko,
-  das nicht öffentlich festgehalten werden darf. Was wie erwartet behandelt wurde, bleibt draußen;
+  das nicht öffentlich festgehalten werden darf. Was wie erwartet behandelt wurde, bleibt draußen.
   Code-Stellen gehören in den Task.
 - **Verbesserungen:** Muster dieses Laufs bei Zuschnitt, Taskverträgen, Prüfungen oder Umgebung, abgeleitet
   aus Korrekturen, Nacharbeiten, Konflikten, Wiederholungen, Anstößen, Stillständen, Rückfragen und
-  Abweichungen; nur mit konkretem Ansatz, keine Produktideen.
+  Abweichungen, nur mit konkretem Ansatz, keine Produktideen.
 - **Kennzahlen:** Dauer und die von null verschiedenen Zahlen an Rückfragen, Nacharbeiten, Konflikten,
   Wiederholungen und Anstößen. Macht Warten einen wesentlichen Teil der Dauer aus, nenne dahinter die Zeit in
   Prüfungen mit der Zahl der Durchläufe und der roten davon, die Wartezeit auf Test-Slots und die Wartezeit
@@ -68,6 +68,6 @@ Weiter in einer neuen Session: <Modi>
 ## Antworten in diesem Chat
 
 Der Nutzer antwortet meist sofort. Halte jeden beantworteten Punkt vor Sessionende nach den
-Aufzeichnungsregeln von [Entscheidungen vorlegen](playbook-decision-card.md) fest; kläre nur einen
+Aufzeichnungsregeln von [Entscheidungen vorlegen](playbook-decision-card.md) fest. Kläre nur einen
 mehrdeutigen Punkt. Bringe daraus folgende Dateiänderungen in einen weiteren lokalen Commit pro betroffenem
 Repo, pushe nichts und bestätige in einer Zeile, was festgehalten wurde.

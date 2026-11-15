@@ -26,12 +26,12 @@ Optionale `tags` sind eine Liste kleingeschriebener Kebab-Case-Werte, kein zweit
 ## Typen
 
 `type` sagt, wie eine Datei zu behandeln ist, ohne ihren Inhalt zu lesen. Prüfe die Fragen in dieser
-Reihenfolge; der erste Treffer entscheidet:
+Reihenfolge. Der erste Treffer entscheidet:
 
 | Reihenfolge | `type` | Frage | Standard-`edit` |
 |---|---|---|---|
 | 1 | `task` | Ist es ein Arbeitspaket, das erledigt werden soll? | `shared` |
-| 2 | `meta` | Ist es eine Datei, die existiert, weil Qatlas sie ins Projekt bringt: Navigation, Index, Planungseintrag oder Scope-Rahmen? | `shared`; `FRAMEWORK.md` `locked` |
+| 2 | `meta` | Ist es eine Datei, die existiert, weil Qatlas sie ins Projekt bringt: Navigation, Index, Planungseintrag oder Scope-Rahmen? | `shared`, für `FRAMEWORK.md` `locked` |
 | 3 | `plan` | Ist es ein Vorhaben, das abgeschlossen werden kann? | `shared` |
 | 4 | `policy` | Bindet es alle, die in seinem Geltungsbereich arbeiten, Mensch oder Agent, bis der Nutzer es ändert? | `locked` |
 | 5 | `playbook` | Beschreibt es Schritte, wie etwas zu tun ist, für Mensch oder Agent? | `shared` |
@@ -40,7 +40,7 @@ Reihenfolge; der erste Treffer entscheidet:
 | 8 | `knowledge` | Alles andere: Fachwissen, Synthese, Beschreibung der aktuellen Architektur. | `shared` |
 
 - **Plan oder Policy:** Ein Plan hat ein Ende. Er hält ein Vorhaben („Mountainbike kaufen“) als Referenz
-  fest; die daraus geschnittenen Tasks bestimmen die konkrete Arbeit. Eine Policy hat kein Ende. Sie gilt
+  fest. Die daraus geschnittenen Tasks bestimmen die konkrete Arbeit. Eine Policy hat kein Ende. Sie gilt
   („das Fahrrad ist rot“) und bindet jedes spätere Vorhaben, bis der Nutzer sie ändert. Was ein Plan
   dauerhaft festlegt, wird zur Policy, und der Plan verlinkt sie, statt sie zu wiederholen.
 - **Was eine Policy enthält:** eine einzelne festgelegte Wahl („die Datenbank ist Postgres“) ebenso wie ein
@@ -53,15 +53,15 @@ Reihenfolge; der erste Treffer entscheidet:
 
 Repo-Wissen hat Vorrang vor Trainingswissen. `fact` bleibt an seine externe Quelle gebunden, eine Projekt-
 oder Library-`policy` an eine Entscheidung des Nutzers. Der Agent hält eine eigene Entscheidung nie als
-`policy` fest; eine offene Frage bleibt in ihrem Plan oder Task, bis der Nutzer sie entscheidet.
+`policy` fest. Eine offene Frage bleibt in ihrem Plan oder Task, bis der Nutzer sie entscheidet.
 
 ## Bearbeitungsrechte
 
 `edit` legt die zulässige Pflege unabhängig vom `type` fest. `edit: locked` schützt Policies und wirklich
-normative oder anweisende Inhalte; ändere sie nur mit Freigabe und an Ort und Stelle. `edit: shared` lässt
+normative oder anweisende Inhalte. Ändere sie nur mit Freigabe und an Ort und Stelle. `edit: shared` lässt
 Agent und Nutzer die Datei im autorisierten Ablauf pflegen, ändert aber nie die Absicht des Projekts ohne
 passende Entscheidung des Nutzers. Folge dem Standard aus der Tabelle und weiche nur mit benanntem Grund ab.
-Entferne ein bestehendes `locked` nie pauschal; ordne Inhalte nach ihrem Inhalt ein und hole die nötige
+Entferne ein bestehendes `locked` nie pauschal. Ordne Inhalte nach ihrem Inhalt ein und hole die nötige
 Freigabe ein. Weder Umbenennen, Verschieben, `type`, Ordner noch bloßes Lesen ändern Bearbeitungsrechte,
 Geltungsbereich oder Rang einer Aussage.
 
@@ -71,7 +71,7 @@ Geltungsbereich oder Rang einer Aussage.
 
 | `type` | Zusätzliche Felder |
 |---|---|
-| `meta` | keine; ein Projektkopf im lokalen Backlog ergänzt `status` |
+| `meta` | keine, nur ein Projektkopf im lokalen Backlog ergänzt `status` |
 | `task` | `status` |
 | `plan` | `status` (`active` oder `done`) |
 | `policy` | optional `paths` |
@@ -79,7 +79,7 @@ Geltungsbereich oder Rang einer Aussage.
 | `fact` | optional `source` |
 
 Task-Statuswerte gehören zum Vertrag des lokalen Backlogs. Ein Plan ist `done`, sobald er erfüllt oder
-verworfen ist; er leitet dann keine laufende Arbeit mehr, und was daraus gilt, steht in den reservierten
+verworfen ist. Er leitet dann keine laufende Arbeit mehr, und was daraus gilt, steht in den reservierten
 Dateien.
 Feste `meta`-Ziele sind `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, ein Projektkopf im lokalen Backlog und eine
 `FRAMEWORK.md` außerhalb des Wissensraums. Die reservierten Root-Dateien tragen ihren Inhaltstyp:
@@ -93,7 +93,7 @@ Vorlagen im Besitz des Nutzers.
 ## Änderungen
 
 Es gibt genau eine gültige Datei pro Gegenstand, nie eine Kopie mit einer Version im Namen. Eine Datei wird
-an Ort und Stelle geändert; Git bewahrt ihre früheren Stände.
+an Ort und Stelle geändert. Git bewahrt ihre früheren Stände.
 
 - Eine Policy ändert sich nur auf Entscheidung des Nutzers. Eine Datei pro Kontext darf um weitere Policies
   desselben Kontexts wachsen.

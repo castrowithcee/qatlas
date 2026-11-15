@@ -22,7 +22,7 @@ tatsächlich anstehenden Operationen.
 Ein direkter Aufruf umfasst nur das ausdrücklich verlangte Git-Ziel und die davon betroffenen Repos,
 Branches, Worktrees und Remotes. Erweitere einen Status-, Diff- oder Sync-Auftrag nicht von selbst um Commit,
 Push, Historienänderung oder einen Eingriff in ein benachbartes Repo. Bei `qatlas run` und `qatlas review`
-bestimmt der jeweilige Ablauf den Scope für lokale Commits und Integrationen; diese Git-Norm gilt zusätzlich.
+bestimmt der jeweilige Ablauf den Scope für lokale Commits und Integrationen. Diese Git-Norm gilt zusätzlich.
 
 ## Immer gültig
 
@@ -40,7 +40,7 @@ bestimmt der jeweilige Ablauf den Scope für lokale Commits und Integrationen; d
 ## Operation wählen
 
 Lies vor jeder anstehenden Operation deren Referenz vollständig. Gibt ein ausdrücklich gestartetes
-Qatlas-Verfahren einen eigenen Git-Ablauf vor, ersetzt dieser Zustand und Branches; lies dann nur Commit und
+Qatlas-Verfahren einen eigenen Git-Ablauf vor, ersetzt dieser Zustand und Branches. Lies dann nur Commit und
 bei Bedarf Historie.
 
 - `status`, `sync`: [Zustand und Synchronisierung](references/playbook-state.md)

@@ -3,7 +3,7 @@ name: qatlas-work
 description: >
   Bündelt auf ausdrücklichen Aufruf ausführbare Einzelverfahren außerhalb des Qatlas-Arbeitsloops.
   `tree` zeigt gemeinsame Git-Worktrees, legt einen für einen Auftrag an oder räumt ihn sicher auf.
-  Ohne Argument nur die verfügbaren Modi zeigen; niemals automatisch starten.
+  Ohne Argument nur die verfügbaren Modi zeigen, niemals automatisch starten.
 disable-model-invocation: true
 argument-hint: "[tree [new [Auftrag]|Auswahl|aufräumen]]"
 ---
@@ -11,7 +11,7 @@ argument-hint: "[tree [new [Auftrag]|Auswahl|aufräumen]]"
 # Qatlas Work
 
 Dieser Router bündelt ausdrücklich gestartete Einzelarbeit außerhalb des Qatlas-Arbeitsloops.
-`qatlas run` verwaltet seine benötigten Worktrees selbst; ein zusätzlicher Work-Aufruf ist dafür unnötig.
+`qatlas run` verwaltet seine benötigten Worktrees selbst. Ein zusätzlicher Work-Aufruf ist dafür unnötig.
 
 ## Ohne Argument
 

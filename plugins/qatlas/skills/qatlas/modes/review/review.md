@@ -20,7 +20,7 @@ Integration, externe Wirkungen und Pushes bleiben außen vor.
 
 ## Leseliste
 
-Die Blöcke wiederholen nichts aus dieser Datei und nichts voneinander; was du nicht liest, fehlt in diesem
+Die Blöcke wiederholen nichts aus dieser Datei und nichts voneinander: Was du nicht liest, fehlt in diesem
 Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
 
 1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md).
@@ -36,7 +36,7 @@ Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
 3. Nimm jede Übergabe aus dem aktuellen Eintrag ihres Tasks, wie die Backlog-Norm sie verlangt. Ergänze
    nichts aus Diff, Verlauf oder eigener Deutung und frage nichts, was der Eintrag schon klärt. Fehlt eine
    Angabe, die der Nutzer für seine Antwort braucht, nenne sie auf der Karte als Lücke.
-4. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neues Review startet sauber; eine
+4. Prüfe bei Git Root, Branch, Upstream, Worktrees und Status. Ein neues Review startet sauber. Eine
    Fortsetzung führt nur den eindeutig zugewiesenen Entscheidungs-Diff fort.
 5. Ordne jede Übergabe ein. Eine **Prüfung** gibt es nur, wenn es ein konkretes Ergebnis gibt, das der
    Nutzer ansehen, ausführen oder ausprobieren muss. Alles andere ist eine Entscheidung oder Nutzeraktion.
@@ -45,7 +45,7 @@ Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
 ## Prüfung durchführen
 
 Nimm die Schritte der Prüfung aus der Übergabe: was sich geändert hat, wo es sich zeigt und woran sich
-Erfolg zeigt. Lege nur vor, was der Nutzer sehen oder beurteilen muss; er wiederholt nicht, was Maschinen
+Erfolg zeigt. Lege nur vor, was der Nutzer sehen oder beurteilen muss. Er wiederholt nicht, was Maschinen
 belegt haben.
 
 Lege die Prüfung zuerst als Karte vor, deren Entscheidung ist, ob sie jetzt läuft: `Jetzt prüfen` mit Anzahl
@@ -62,7 +62,7 @@ Erwartet: <das beobachtbare Ergebnis>
 Antwort: ok, die Abweichung beschreiben oder überspringen.
 ```
 
-- Ein Schritt ist eine Aktion mit einem beobachtbaren Ergebnis; fasse zusammen, was der Nutzer in einem
+- Ein Schritt ist eine Aktion mit einem beobachtbaren Ergebnis. Fasse zusammen, was der Nutzer in einem
   Zug prüfen kann. Er trägt keinen Hintergrund und keine Auswertung des Laufs.
 - Nach `ok` folgt der nächste Schritt ohne Zwischenbericht.
 - Nach einem Überspringen bleibt der Task unverändert in `review` und du gehst zum nächsten Task. Behandle
@@ -76,6 +76,6 @@ Antwort: ok, die Abweichung beschreiben oder überspringen.
 Halte jede Antwort und jedes Prüfergebnis so fest, wie es das Vorlegen von Entscheidungen beschreibt. Lege
 keinen Zwischencommit an und prüfe nach jeder Antwort, dass der Steuerungs-Branch nicht von jemand anderem
 geändert wurde. Erst wenn jede Übergabe der Ausgangs-Queue abgeschlossen oder übersprungen ist, lies den
-vollständigen Diff und lege nach der Git-Norm genau einen lokalen Sammelcommit pro betroffenem Repo an; der
+vollständigen Diff und lege nach der Git-Norm genau einen lokalen Sammelcommit pro betroffenem Repo an. Der
 ausdrückliche Aufruf ersetzt die vorherige Freigabe seiner Nachricht. Zeige danach Nachricht und ID. Bei
 offenem Rest oder vorzeitigem Ende wird nichts committet. Pushe nichts.

@@ -15,15 +15,15 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
 
 1. Lies vor jedem Commit den gesamten Diff genau dieses Repos. Stage bewusst und führe nie ungesehen
    `git add -A` aus. Fremde oder nicht zuordenbare Änderungen bleiben ungestagt. Schneide jeden Commit als
-   kohärenten, prüfbaren Zustand; bei Zweifel über den Zuschnitt oder bei Checkpoints gilt die
+   kohärenten, prüfbaren Zustand. Bei Zweifel über den Zuschnitt oder bei Checkpoints gilt die
    [Commitgrenze](commit-boundaries.md).
-2. Führe nach dem Staging `node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root>` aus;
+2. Führe nach dem Staging `node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root>` aus.
    `<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`, ohne Hook drei Ebenen über diesem
-   Ordner. Exit `0` heißt weiter; nenne dabei ausgegebene `warn`-Befunde. Exit `1` heißt nicht committen und
+   Ordner. Exit `0` heißt weiter. Nenne dabei ausgegebene `warn`-Befunde. Exit `1` heißt nicht committen und
    den Befund melden. Exit `2` heißt vor dem Commit im Gespräch nachfragen. Exit `3` heißt, dass die Prüfung
-   nicht laufen konnte; committe nicht und melde den Grund. In einem autonomen Lauf stoppt jeder Exit außer
+   nicht laufen konnte. Committe nicht und melde den Grund. In einem autonomen Lauf stoppt jeder Exit außer
    `0` nur den betroffenen Task. Führe die Prüfung als eigenen Befehl aus und werte ihren Exit-Code aus,
-   bevor du committest; verkette sie nie in einem Befehl mit `git commit`.
+   bevor du committest. Verkette sie nie in einem Befehl mit `git commit`.
    Bestätigt der Nutzer einen `personal-data`-Befund mit `ask` (Exit `2`) oder `warn` ausdrücklich als
    Fehlalarm, trage ihn mit derselben Prüfung samt `--target <repo-root>` und zusätzlich `--allow <kennung>`
    ein (die Kennung steht in eckigen Klammern im Befund), stage die Freigabedatei mit und prüfe erneut. Trage
@@ -32,9 +32,10 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
    sich ändert, und nur das nötige Warum, Risiko oder die Einschränkung. Die vorhandene Repo-Konvention
    geht jeder folgenden Vorgabe vor:
    - Standard ist ein kurzer, für sich verständlicher Betreff im Imperativ, der eine abgeschlossene
-     Änderung nennt. Richtwert sind etwa 50 Zeichen; über 72 nur, wenn die Konvention es verlangt.
+     Änderung nennt. Richtwert sind etwa 50 Zeichen. Länger als 72 wird er nur, wenn die Konvention es
+     verlangt.
    - Ergänze einen Body, wenn ein nicht offensichtliches Warum, Risiko, eine Migration oder Einschränkung
-     für das spätere Verständnis nötig ist. Er ist so lang wie diese Begründung und nicht länger; es gibt
+     für das spätere Verständnis nötig ist. Er ist so lang wie diese Begründung und nicht länger. Es gibt
      keine feste Zeilen- oder Punktgrenze, die sie abschneidet.
    - Schreibe keine Sessionchronik, Dateitour, Testergebnisliste oder offene Folgearbeit hinein. Was über
      den Commit hinausreicht, gehört in die betroffene Dokumentation, Entscheidung, Aufgabe, Pull Request

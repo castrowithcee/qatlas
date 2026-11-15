@@ -33,5 +33,5 @@ für diesen Scope autorisiert sind. Sichere vor Übergabe oder Pause einen wiede
   ihn als unfertig aus. Er landet nie unbereinigt auf einem gemeinsamen Branch.
 - Vor gemeinsamer Integration wird ein Checkpoint entweder nach [Historie](history.md) zu sinnvollen Commits
   im Sinne der Commitgrenze bereinigt oder ausdrücklich als wertvolle Zwischenstufe erhalten.
-- Ohne Commit-Autorisierung bleibt ein Zwischenstand uncommittet in seinem Arbeitsbaum; berichte Branch,
+- Ohne Commit-Autorisierung bleibt ein Zwischenstand uncommittet in seinem Arbeitsbaum. Berichte Branch,
   Worktree und Zustand bei der Übergabe.

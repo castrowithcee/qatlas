@@ -13,7 +13,7 @@ Nimm als Lead die Ergebnisse deiner Worker ab, bevor du einen Task übergibst. N
 
 Werte eine Erfolgsmeldung des Umsetzers nicht als Beweis der Fertigstellung. Prüfe Ergebnis, Diff und
 Nachweise selbst und über die Kriterien hinaus auch, ob das Ergebnis das Ziel des Tasks inhaltlich erfüllt.
-Gleiche jede Abnahme und jede übergreifende Sicherheitsgrenze mit dem tatsächlichen Verhalten ab; grüne
+Gleiche jede Abnahme und jede übergreifende Sicherheitsgrenze mit dem tatsächlichen Verhalten ab. Grüne
 Standardtests ersetzen weder ausdrücklich vereinbarte Randfälle noch einen Referenzvergleich. Prüfe
 übergreifende Invarianten spätestens dann erneut, wenn alle Meilensteine integriert sind. Ordne jeden
 Fehlschlag ein:
@@ -37,7 +37,7 @@ Fehlschlag ein:
   Wiederholungslauf erneut fehl, behandle das als Lösungsfehler.
 
 Behandle jeden anderen CI-Fehlschlag als Lösungsfehler. Nennt die Projektstrategie eine eigene Flake-Regel,
-wende sie statt beider Flake-Regeln oben an; zähle auch dann Rot nie als Grün.
+wende sie statt beider Flake-Regeln oben an. Zähle auch dann Rot nie als Grün.
 
 ## Teststrategie des Projekts
 
@@ -71,7 +71,7 @@ diese:
 Der erste Umsetzungsversuch zählt nicht als Korrektur, ebenso wenig seine geplante Fortsetzung nach einem
 geprüften und gesicherten Meilenstein. Lass danach insgesamt höchstens zwei gezielte Korrekturversuche pro
 Task zu, auch wenn mehrere Abnahmekriterien betroffen sind. Jede Korrektur braucht neuen Nachweis und eine
-daraus abgeleitete Änderung; bloßes Umformulieren, ein anderer Subagent oder eine neue Session setzt den
+daraus abgeleitete Änderung. Bloßes Umformulieren, ein anderer Subagent oder eine neue Session setzt den
 Zähler nicht zurück.
 
 Ist das Kriterium nach der zweiten Korrektur weiterhin nicht erfüllt:
@@ -83,13 +83,13 @@ Ist das Kriterium nach der zweiten Korrektur weiterhin nicht erfüllt:
    Vorgehenswechsel, Scope oder Verschiebung.
 4. Starte keinen Prüfer und keinen Ersatz-Subagent als verdeckte dritte Korrekturrunde.
 
-Beginne keinen übrigen Task, der von diesem Ergebnis abhängt; lass nur nachweislich unabhängige Tasks
+Beginne keinen übrigen Task, der von diesem Ergebnis abhängt. Lass nur nachweislich unabhängige Tasks
 weiterlaufen.
 
 ## Dokumentationswirkung
 
 Entscheide als Lead über die Dokumentationswirkung jedes Tasks und nimm nötige Änderungen vor der Übergabe in
-den Task-Branch auf; prüfe sie als Integrator in der Abnahme. Der Aufruf von `run` gibt dafür nur
+den Task-Branch auf. Prüfe sie als Integrator in der Abnahme. Der Aufruf von `run` gibt dafür nur
 Projektdokumentation mit `edit: shared` frei. Ändere keine Datei mit `edit: locked`, sondern lege eine nötige
 Änderung daran als Entscheidung vor: Hängt die Abnahme des Tasks an ihr, übergib ihn an `review`, sonst
 protokolliere sie als `entscheiden`, damit sie im Abschlussblock unter `Entscheiden` steht. Dabei gilt:
@@ -104,18 +104,18 @@ protokolliere sie als `entscheiden`, damit sie im Abschlussblock unter `Entschei
   verborgene Kopplung offen, die solche Arbeit binden muss, halte das in der bestehenden
   Projektdokumentation mit der kleinsten nötigen Aussage fest, vorzugsweise bei den betroffenen
   Entscheidungen, Anforderungen oder dem Domänenwissen in `.qatlas-project/`. Behandle die Aussage dann als
-  geänderte maßgebliche Grundlage; ein Abschlussbericht allein genügt dafür nicht.
+  geänderte maßgebliche Grundlage. Ein Abschlussbericht allein genügt dafür nicht.
 - Widerspricht maßgebliche inhaltliche Dokumentation dem beabsichtigten Ergebnis und könnte sie eine
   Nutzerentscheidung ausdrücken, setze den Task auf `review`, statt eine Seite stillschweigend zu
   überschreiben.
-- Ändere inhaltlich unbeteiligte fehlerhafte Dokumentation nicht beiläufig; behandle sie als Nebenbefund.
+- Ändere inhaltlich unbeteiligte fehlerhafte Dokumentation nicht beiläufig. Behandle sie als Nebenbefund.
 - Behandle eine erklärte Dokumentationswirkung `Ändern` oder `Prüfen` als Abnahmekriterium. Lass `Keine` nur
   gelten, wenn der tatsächliche Diff keine verwandte Aussage entwertet.
 
 ## Integrieren und abschließen
 
 Integriere als Integrator die Übergabe nach dem Git-Workflow, führe ihre gemeinsamen Prüfungen aus und halte
-den Abschlussbericht aus dem Bericht des Leads nach dem maßgeblichen Vertrag am Task fest; ein gültiger
+den Abschlussbericht aus dem Bericht des Leads nach dem maßgeblichen Vertrag am Task fest. Ein gültiger
 tree-gebundener Nachweis desselben Trees zählt als diese Prüfung. Setze `done` nur, wenn alle Kriterien auf
 dem Kontroll-Branch belegt sind, und gleiche dabei den tatsächlichen Diff und das entstandene Verhalten mit
 der Ausführungsgrundlage ab.
@@ -136,5 +136,5 @@ Wähle den Status und schreibe die Übergabe nach „Übergabe an den Nutzer“ 
 `review` zuerst den Supervisor, außer der Taskvertrag selbst weist die Prüfung dem Nutzer zu. Verhindert eine
 externe Voraussetzung, Ressource oder Umgebung das Weiterarbeiten, gehört der Task nach dem maßgeblichen
 Statusmodell auf `waiting`. Schreibe den Status nur so, wie „Planungssystem“ im Git-Workflow es regelt. Ändere
-den Status nicht wegen einer nicht erfüllten internen Task-Abhängigkeit; die Reihenfolge im Planungssystem
+den Status nicht wegen einer nicht erfüllten internen Task-Abhängigkeit. Die Reihenfolge im Planungssystem
 genügt.

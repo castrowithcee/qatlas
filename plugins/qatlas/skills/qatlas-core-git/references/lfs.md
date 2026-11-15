@@ -12,5 +12,5 @@ LFS oder einen Dateispeicher.
 
 Prüfe vor LFS-Nutzung, ob `git-lfs` installiert ist. Wenn nicht, nenne die Voraussetzung, dass es auf jedem
 Gerät vorhanden sein muss. Die Pfadzuordnung liegt in `.gitattributes` und reist mit dem Repo. Führe LFS
-nicht eigenmächtig neu ein; eine Migration bestehender Dateien in LFS kann Historie umschreiben und folgt
+nicht eigenmächtig neu ein. Eine Migration bestehender Dateien in LFS kann Historie umschreiben und folgt
 dann [Historie](history.md).

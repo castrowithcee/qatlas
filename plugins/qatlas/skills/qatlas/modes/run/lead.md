@@ -12,7 +12,7 @@ Integrationsbasis), ob ein Integrator läuft, wo nötig `<code-repo>`, und dem T
 Nutzers, der dein Paket betrifft. Rufe jeden Befehl von `<run>` mit `--repo <repo-root>` und `--package
 <package>` auf.
 
-Läuft ein Integrator, arbeiten andere Leads parallel im selben Repo; überlass ihm Merge in den
+Läuft ein Integrator, arbeiten andere Leads parallel im selben Repo. Überlass ihm Merge in den
 Kontroll-Branch, Task-Abschluss und `done` im Planungssystem, auch wenn Projektanweisungen sie einem Lead
 erlauben. Läuft keiner, integrierst du selbst nach „Ohne Integrator“. Schreibe dem Nutzer nie direkt, sondern
 nutze nur Rückfrage, Übergabe, Protokoll und deine Schlussmeldung.
@@ -39,12 +39,12 @@ Arbeite deine Tasks nacheinander ab. Nennt dein Auftrag mehrere Tasks und darfst
 die Umsetzung nach „Einen Task ausführen“ an Worker. Sonst setze selbst um und befolge dort alles außer der
 Pflicht zu Workern.
 
-Beende einen Turn nur dann ohne Tool-Aufruf, wenn ein eigener Hintergrundbefehl läuft; sonst wertet der Host
-den Turn als dein Ende und verlangt deine Schlussmeldung. Ein Worker allein genügt dafür nicht, weil er als
-angehalten gilt, sobald er auf eigene Hintergrundarbeit wartet. Wartest du nur auf einen Worker, starte deshalb
-vorher `<run> wait --timeout <s>` im Hintergrund, mit einem Timeout über der erwarteten Dauer, und starte es
-erneut, wenn es vor der Rückkehr des Workers abläuft. Warte auf eine Antwort, indem du `handover` oder `ask`
-wiederholst.
+Beende einen Turn nur dann ohne Tool-Aufruf, wenn ein eigener Hintergrundbefehl läuft, denn sonst wertet der
+Host den Turn als dein Ende und verlangt deine Schlussmeldung. Ein Worker allein genügt dafür nicht, weil er
+als angehalten gilt, sobald er auf eigene Hintergrundarbeit wartet. Wartest du nur auf einen Worker, starte
+deshalb vorher `<run> wait --timeout <s>` im Hintergrund, mit einem Timeout über der erwarteten Dauer, und
+starte es erneut, wenn es vor der Rückkehr des Workers abläuft. Warte auf eine Antwort, indem du `handover`
+oder `ask` wiederholst.
 
 Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task, der
 Dateien im Repo ändert, einen Worktree von `<basis>` an. Ein Task ohne Dateiänderung braucht weder Worktree
@@ -55,28 +55,28 @@ oder Speicher, frage den Supervisor, bevor du sie als rot wertest.
 Protokolliere sofort mit `<run> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
 Laufs gehört, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`, `risiko` (nicht öffentlich
 erfasst), `erfasst` (jeder Entwurf, den du anlegst oder beim lokalen Backlog nur protokollierst, als
-`<Thema>: <was> - <warum>`), `status` (jeder Statuswechsel beim lokalen Backlog), `entscheiden` und `werkzeug`
+`<Thema>: <was>. <Warum>.`), `status` (jeder Statuswechsel beim lokalen Backlog), `entscheiden` und `werkzeug`
 (Defekt des Steuerskripts oder der Lauf-Werkzeuge, mit Nachweis).
 
 ## Übergeben
 
 Lass die vollständige Übergabeprüfung lokal nur einmal grün laufen. Hole deshalb unmittelbar vor ihr die
-aktuelle `<basis>` per Merge in den Task-Branch und löse Konflikte; dieser Merge-Commit ist keine fremde
+aktuelle `<basis>` per Merge in den Task-Branch und löse Konflikte. Dieser Merge-Commit ist keine fremde
 Änderung. Übergib genau den Stand, auf dem die Übergabeprüfungen der Teststrategie des Projekts grün waren,
 ohne danach etwas einzumischen. Gibt der Integrator bis zur Integration einen neuen Konflikt mit der Basis als
 `rework conflict: …` zurück, gehe ebenso vor. Hat er einen Konflikt selbst gelöst, trägt dein Task-Branch
-seinen Merge-Commit der Basis; auch der ist keine fremde Änderung.
+seinen Merge-Commit der Basis. Auch der ist keine fremde Änderung.
 
-Übergib jeden geprüften Task mit `<run> handover --task <id> --report <file>`; liegt der Code in einem anderen
+Übergib jeden geprüften Task mit `<run> handover --task <id> --report <file>`. Liegt der Code in einem anderen
 Repo als der Steuerwurzel, ergänze `--code-repo <absolute path>`, damit `branch` und `base` dort geprüft
 werden. Lege die Berichtsdatei außerhalb jedes Worktrees an. Nenne im Bericht knapp geänderte Dateien,
 ausgeführte Prüfungen, Wirkung auf die Dokumentation, Abweichungen von der Arbeitskarte, ungelöste Risiken, die
 verwendeten Worker-Profile mit Modell und Effort, Branches und Commits, ob diese Übergabe die letzte des
-Tasks ist und ob danach eine Prüfung des Nutzers offen bleibt; lass Rohlogs draußen.
+Tasks ist und ob danach eine Prüfung des Nutzers offen bleibt. Lass Rohlogs draußen.
 
 Beginne jeden Bericht mit YAML-Frontmatter (`---` in der ersten Zeile) mit `checks`: ein Eintrag pro
 vollständiger Prüfung der Übergabe, jeweils mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der
-übergebenen Branch-Spitze, z. B. aus `git rev-parse <branch>^{tree}` oder `slot results --tree`); `handover`
+übergebenen Branch-Spitze, z. B. aus `git rev-parse <branch>^{tree}` oder `slot results --tree`). `handover`
 weist jeden anderen `tree` zurück. Ein Eintrag darf von einem anderen Nachweisweg stammen, den das Projekt
 nennt, immer mit seinem `tree`. Ergänze ohne Integration über Pull Requests `branch`, bei Integration über Pull
 Requests die Felder `pr-title` (eine nicht leere Zeile), `pr-body` (nicht leer, meist ein `|`-Blockskalar),
@@ -84,22 +84,23 @@ Requests die Felder `pr-title` (eine nicht leere Zeile), `pr-body` (nicht leer, 
 Spitze des übergebenen Pull Requests) und `pushed` (SHA beim ersten Push), die SHAs in Anführungszeichen, und
 bei einer Ausnahme von der Zuschnittsregel `cut-exception: <Grund>`.
 
-Die Antwort lautet `integrated <sha>` oder `rework <Grund>`; nur ein `rework` ohne `conflict:` oder `cut:`
-zählt als Korrekturversuch. Kommt keine, rufe denselben Befehl mit unverändertem Bericht erneut auf; so holst
-du sie auch ab, wenn der Integrator Branch und Worktree schon entfernt hat. Fass Task, Branches und Worktree bis zur Antwort nicht an. Arbeite nach `rework` am Grund und
-übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe nicht die letzte war.
+Die Antwort lautet `integrated <sha>` oder `rework <Grund>`. Nur ein `rework` ohne `conflict:` oder `cut:`
+zählt als Korrekturversuch. Kommt keine, rufe denselben Befehl mit unverändertem Bericht erneut auf. So holst
+du sie auch ab, wenn der Integrator Branch und Worktree schon entfernt hat. Fass Task, Branches und Worktree
+bis zur Antwort nicht an. Arbeite nach `rework` am Grund und übergib erneut. Setze den Task nach `integrated`
+fort, wenn die Übergabe nicht die letzte war.
 
 Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn von der neuen `<basis>`.
 Solange du nur wartest, auf die Antwort einer Übergabe, auf einen Worker oder auf eine lange eigene Prüfung,
 darfst du von der aktuellen `<basis>` aus einen nachweislich unabhängigen Task dieses Pakets beginnen, etwa
-den zweiten Zweig einer Kette, deren gemeinsamer Vorgänger integriert ist; ein übergebener Task gilt dann als
+den zweiten Zweig einer Kette, deren gemeinsamer Vorgänger integriert ist. Ein übergebener Task gilt dann als
 sicher übergeben. Rufe bei offener Übergabe an jedem Zwischenstand, mindestens nach jeder Rückkehr eines
 Workers, `handover` erneut mit `--timeout 10` auf, bis die Antwort da ist, und übergib den nächsten Task erst
-danach. Gib einem `rework` Vorrang: Sichere den laufenden Task am nächsten
-geprüften Meilenstein als Checkpoint, arbeite am Grund, übergib erneut und mach danach weiter.
+danach. Gib einem `rework` Vorrang: Sichere den laufenden Task am nächsten geprüften Meilenstein als
+Checkpoint, arbeite am Grund, übergib erneut und mach danach weiter.
 
 Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
-`<run> cut --branch <task-branch> --base <basis>`, mit `--code-repo` für Code außerhalb der Steuerwurzel;
+`<run> cut --branch <task-branch> --base <basis>`, mit `--code-repo` für Code außerhalb der Steuerwurzel.
 `handover` weist einen Branch mit mehr als einem Nicht-Merge-Commit ohne `cut-exception` ebenso ab.
 
 ## Ohne Integrator
@@ -108,7 +109,7 @@ Läuft kein Integrator, bist du der einzige Schreiber des Kontroll-Branches. Üb
 integriere jeden geprüften Task selbst nach „Integration“ und „Nachweise und Delta-Prüfungen“ der
 Integrator-Rolle, mit diesen Abweichungen:
 
-- Wiederhole die Abnahme aus Schritt 2 nicht; du hast sie schon gemacht.
+- Wiederhole die Abnahme aus Schritt 2 nicht, denn du hast sie schon gemacht.
 - Löse einen Konflikt selbst im Task-Branch, statt ihn zurückzugeben.
 - Protokolliere statt einer Antwort jede Integration mit `<run> log --type integrated --task <id> --text
   "<sha>"`.
@@ -117,29 +118,29 @@ Integrator-Rolle, mit diesen Abweichungen:
 ## Rückfragen
 
 Dein Nutzer ist der Supervisor. Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes
-regel`; deckt eine deine Lage ab, wende sie an, statt zu fragen. Nenne jede angewandte Entscheidung
+regel`. Deckt eine deine Lage ab, wende sie an, statt zu fragen. Nenne jede angewandte Entscheidung
 und jede Antwort des Supervisors im Bericht des Tasks. Frage alles, was du sonst den Nutzer fragen, annehmen
 oder an ihn übergeben würdest, ausschließlich den Supervisor mit
-`<run> ask --question "<Frage mit Kontext, Optionen und Empfehlung>"`; die Ausgabe ist die Antwort. Kommt
-keine, rufe denselben Befehl erneut auf. Frage nicht, solange eine Übergabe offen ist; warte zuerst mit
+`<run> ask --question "<Frage mit Kontext, Optionen und Empfehlung>"`. Die Ausgabe ist die Antwort. Kommt
+keine, rufe denselben Befehl erneut auf. Frage nicht, solange eine Übergabe offen ist. Warte zuerst mit
 `handover` auf ihre Antwort.
 
 ## Ende
 
 Schätze deinen Kontext nicht: Ohne Messwert des Hosts lässt sich seine Füllung nicht beurteilen. Beginne nur
 dann keinen neuen Task, wenn der Host deinen Kontext schon verdichtet hat. Warte auch dann auf die Antworten
-offener Übergaben; sichere ein `rework`, das danach eintrifft, als Checkpoint am bestehenden Ort und nimm
+offener Übergaben. Sichere ein `rework`, das danach eintrifft, als Checkpoint am bestehenden Ort und nimm
 seinen Task in den Rest.
 
 Beende deine Arbeit, wenn jeder Task integriert, an `review` übergeben oder durch einen gescheiterten Task
 blockiert ist, oder wenn du nach einer Verdichtung keinen neuen Task beginnst. Protokolliere dein Ende mit
 `<run> done`, bei einer Verdichtung mit `--text "Kontext verdichtet"`, mit `--rest <id,id,...>` für die
 Tasks, die du weder abgeschlossen noch übergeben hast. Halte deine Schlussmeldung bei wenigen Zeilen: je Task
-integriert, an `review` übergeben oder Rest, für jeden Rest-Task Branch und Worktree; alles andere steht im
+integriert, an `review` übergeben oder Rest, für jeden Rest-Task Branch und Worktree. Alles andere steht im
 Protokoll.
 
 **Nachfolger:** Übernimmst du ein Paket, übernimm Branches und Worktrees eines Tasks erst, wenn kein laufender
-oder unbekannter Worker sie nutzt und die Branches den in Task oder Protokoll genannten Stand tragen; das Ende
+oder unbekannter Worker sie nutzt und die Branches den in Task oder Protokoll genannten Stand tragen. Das Ende
 deines Vorgängers allein belegt das nicht. Kläre eine Abweichung vor jeder Änderung mit dem Supervisor. Nenne
 übernommene Branches und Worktrees, die inzwischen integriert sind, in deiner Schlussmeldung zur Bereinigung
 über `qatlas-work tree`. Zeigt `report` unter `open` eine offene Rückfrage oder Übergabe deines Pakets, rufe

@@ -9,11 +9,11 @@ description: >
 ## Zuständigkeit
 
 - **Kontroll-Branch:** der Branch, auf dem der Supervisor den Lauf beginnt und integrierte Ergebnisse landen.
-  Während Leads oder Integrator laufen, schreibt ihn nur der Integrator, ohne Integrator nur der Lead; sein
+  Während Leads oder Integrator laufen, schreibt ihn nur der Integrator, ohne Integrator nur der Lead. Sein
   Arbeitsbaum, normalerweise der primäre, dient nur der Integration und den gemeinsamen Prüfungen. Behandle
   eine Änderung dieses Schreibers dort nie als fremde Änderung.
-- **Task-Branch:** die Arbeitslinie genau eines Tasks in einem eigenen Worktree nach dem Worktree-Vertrag;
-  die Berechtigung des Laufs deckt ihr Anlegen ab. Er gehört dem Lead des Tasks, ab der Übergabe bis zur
+- **Task-Branch:** die Arbeitslinie genau eines Tasks in einem eigenen Worktree nach dem Worktree-Vertrag.
+  Die Berechtigung des Laufs deckt ihr Anlegen ab. Er gehört dem Lead des Tasks, ab der Übergabe bis zur
   Antwort dem Integrator.
 - Als Lead: Schreibe nur in Branches und Worktrees deiner eigenen Tasks. Ziehe, wechsle und committe im
   primären Arbeitsbaum nichts, außer ohne Integrator für die Integration.
@@ -26,7 +26,7 @@ description: >
 ## Kollisionsflächen
 
 Ein Worktree trennt nur Arbeitsdateien, Index und `HEAD`. Refs, Objekte, Stash, Hooks und Repo-Konfiguration
-teilen sich alle Worktrees eines Repos; Ports, Datenbanken, Build-Ausgaben, Caches und ignorierte Dateien sind
+teilen sich alle Worktrees eines Repos. Ports, Datenbanken, Build-Ausgaben, Caches und ignorierte Dateien sind
 weitere Kollisionsflächen. Nutzt du als Lead eine solche Fläche parallel zu anderen, verwende eine eigene
 Instanz oder serialisiere ihre Nutzung über `slot --resource`. Braucht ein Werkzeug echte Repo- oder
 Sicherheitsisolation, nenne einen separaten Clone oder eine Sandbox als Voraussetzung. Lassen sich fremde
@@ -73,5 +73,5 @@ Sicherheitsisolation, nenne einen separaten Clone oder eine Sandbox als Vorausse
 ## Tasks über mehrere Repos
 
 Integriere zuerst das Repo mit der Pull-Request-Pflicht, dann den Anteil desselben Tasks im anderen Repo per
-Fast-Forward, sonst per Merge-Commit; rebase keine fremden Branches. Ungepushte Commits erscheinen gebündelt
+Fast-Forward, sonst per Merge-Commit. Rebase keine fremden Branches. Ungepushte Commits erscheinen gebündelt
 unter „Nicht gepusht“ im Abschlussblock.

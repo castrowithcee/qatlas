@@ -96,5 +96,5 @@ Nach der Bestätigung gib ein kompaktes Goal-Briefing ausschließlich im Chat au
 - nur ausdrücklich zurückgestellte oder erst beim Zuschnitt beantwortbare Fragen, jeweils mit Grund.
 
 Biete danach einmal an, das Briefing als Datei abzulegen, damit eine andere Session es mit `shape <Datei>`
-zuschneiden kann; in dieser Session genügt `shape` ohne Scope. Ohne Zustimmung legst du nichts an. Schließe
+zuschneiden kann. In dieser Session genügt `shape` ohne Scope. Ohne Zustimmung legst du nichts an. Schließe
 danach und führe nichts aus.

@@ -15,7 +15,7 @@ passive Infrastruktur und startet ohne eindeutigen Modus keine Änderung.
 
 ## Ohne Argument
 
-Antworte nur mit der folgenden Karte als gerendertes Markdown in der Gesprächssprache; Struktur und Bezeichner
+Antworte nur mit der folgenden Karte als gerendertes Markdown in der Gesprächssprache. Struktur und Bezeichner
 bleiben. Lies keine Modus-Referenz und ändere keinen Zustand.
 
 ### Qatlas Core
@@ -31,7 +31,7 @@ Aufruf: `qatlas-core <argument>`
 
 ## Modus wählen
 
-`<plugin-root>` ist die im Sessionkontext genannte `QATLAS PLUGIN ROOT`; ohne Hook liegt sie zwei Ebenen
+`<plugin-root>` ist die im Sessionkontext genannte `QATLAS PLUGIN ROOT`. Ohne Hook liegt sie zwei Ebenen
 über dieser `SKILL.md`. Setze dieses aufgelöste Root immer in die gewählte Referenz ein.
 
 - **`init`:** Lies [Qatlas einrichten](references/playbook-init.md) vollständig und führe nur dieses

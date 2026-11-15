@@ -24,7 +24,7 @@ festen Ordner, und jede nimmt nur ihre Aufgabe oder ihre Typen auf.
   `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md`,
   `CONTRIBUTING.md`, `FRAMEWORK.md` und `INDEX.md`. Bestehende Funktionsdateien behalten ihren Zweck und
   ihren lokalen Geltungsbereich.
-- Inhaltsdateien im Wissensraum beginnen mit dem Frontmatter-`type`; nur Tasks tragen zusätzlich eine ID.
+- Inhaltsdateien im Wissensraum beginnen mit dem Frontmatter-`type`. Nur Tasks tragen zusätzlich eine ID.
 - Daten werden als `YYYY-MM-DD` geschrieben. Chronologische Dateien dürfen mit diesem Datum beginnen.
 - ä, ö, ü und ß werden in deutschen Dateien direkt geschrieben.
 

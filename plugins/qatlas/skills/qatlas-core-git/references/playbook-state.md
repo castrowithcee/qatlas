@@ -6,7 +6,7 @@ description: >
 
 # Zustand und Synchronisierung
 
-1. Ermittle Branch, Upstream und vorhandene Remotes; nimm weder `origin` noch `main` pauschal an.
+1. Ermittle Branch, Upstream und vorhandene Remotes. Nimm weder `origin` noch `main` pauschal an.
 2. Führe `git worktree list --porcelain` aus und berücksichtige benachbarte Worktrees.
 3. Prüfe `git status` und bei einem Status- oder Diffauftrag die passenden Diffs für gestagte und ungestagte
    Änderungen.

@@ -24,7 +24,7 @@ Zuschnitt.
 
 ## Leseliste
 
-Die Blöcke wiederholen nichts aus dieser Datei und nichts voneinander; was du nicht liest, fehlt in diesem
+Die Blöcke wiederholen nichts aus dieser Datei und nichts voneinander: Was du nicht liest, fehlt in diesem
 Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
 
 1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md).
@@ -51,7 +51,7 @@ einen kurzlebigen Zwischenstand rechtfertigen, nie das Ziel selbst.
 Trenne eigenständig abnehmbare Ergebnisse schon hier in eigene Tasks. Mehrere unabhängige
 Tool- oder Endpunktgruppen, unterschiedliche Risiko- und Berechtigungsgrenzen oder ein erwarteter Umfang, der einen
 Worker über viele Umsetzungs- und Prüfschritte bindet, sind Signale zum Teilen.
-Mehr als etwa drei bis vier neue Operationen oder erwartete 500 bis 800 neue Zeilen dienen als Prüfwert; die Zahlen sind keine starre
+Mehr als etwa drei bis vier neue Operationen oder erwartete 500 bis 800 neue Zeilen dienen als Prüfwert. Die Zahlen sind keine starre
 Grenze. Halte eng gekoppelte Schritte zusammen, wenn getrennte Abnahme künstlich wäre.
 Jedes Paket braucht eine eigene beobachtbare Fertigstellung und einen konkreten Prüfweg und hinterlässt einen konsistenten Zustand.
 Plane die Integration und die inhaltliche Reihenfolge zwischen abhängigen Paketen.

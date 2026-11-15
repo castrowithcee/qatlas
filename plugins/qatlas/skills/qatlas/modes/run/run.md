@@ -12,7 +12,7 @@ description: >
 ## Rollen
 
 Du bist der Supervisor: die Session, in der der Nutzer `run` aufruft. Starte höchstens einen Integrator zur
-Zeit und selbst keine umsetzenden Worker; das tun die Leads. Setze nichts inhaltlich um, integriere nichts und
+Zeit und selbst keine umsetzenden Worker. Das tun die Leads. Setze nichts inhaltlich um, integriere nichts und
 lies keine Diffs, Berichte oder Logs, damit dein Kontext schmal bleibt, und einen Taskvertrag nur, wenn eine
 Rückfrage oder ein Problem genau diesen Task betrifft. Überlass während des Laufs das Schreiben des
 Kontroll-Branches, Merge, Task-Abschluss und `done` allein dem Integrator oder, wo keiner läuft, dem Lead,
@@ -21,9 +21,9 @@ auch wenn Projektanweisungen sie anders verteilen.
 Committe im gewählten Scope lokal und lass lokal integrieren, ohne nachzufragen. Pushe, öffne Pull Requests
 und merge sie nur, wenn Nutzer- oder Projektanweisungen es verlangen und erlauben. Protokolliere dann vor dem
 ersten Lead einmal als `regel`, welche Vorgabe Push, Pull Request und Merge erlaubt, mit ihrem Ort, und mit
-welchen Mitteln das Projekt sie ausführt; gleiche eine Warnung des Hosts zu einem Merge damit ab. Löse keine
+welchen Mitteln das Projekt sie ausführt. Gleiche eine Warnung des Hosts zu einem Merge damit ab. Löse keine
 andere externe oder unumkehrbare Wirkung aus. Schreibe bei einem lokalen Backlog nur vor dem ersten Lead und
-nach dem Ende des letzten Subagents hinein; was du dazwischen schriebst, etwa einen Statuswechsel oder eine
+nach dem Ende des letzten Subagents hinein. Was du dazwischen schriebst, etwa einen Statuswechsel oder eine
 festgehaltene Antwort, protokolliere mit `log --type status`.
 
 `<run>` ist das Steuerskript `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run.js`, `<tools>`
@@ -35,9 +35,10 @@ sind die Lauf-Werkzeuge `node <plugin-root>/skills/qatlas/modes/run/scripts/qatl
 
 Starte Leads und Integrator als Subagents im Hintergrund, damit du für den Nutzer ansprechbar bleibst. Nimm in
 Claude Code die Subagent-Typen `qatlas:lead` und `qatlas:integrator`, sonst einen allgemeinen Subagent-Typ des
-Hosts, nie den Worker-Typ, weil beide committen und ein Lead Worker startet, wo der Host es erlaubt.
-Ergänze nichts, was Berechtigungen, Sandbox oder Freigaben lockert; Subagents arbeiten unter den
-Berechtigungen dieser Session, und ihre Freigabe-Abfragen erreichen den Nutzer hier. Kann der Host keine Subagents starten, starte nicht und nenne das Hindernis.
+Hosts, nie den Worker-Typ, weil beide committen und ein Lead Worker startet, wo der Host es erlaubt. Ergänze
+nichts, was Berechtigungen, Sandbox oder Freigaben lockert. Subagents arbeiten unter den Berechtigungen dieser
+Session, und ihre Freigabe-Abfragen erreichen den Nutzer hier. Kann der Host keine Subagents starten, starte
+nicht und nenne das Hindernis.
 
 Setze in jedem Auftrag alle Platzhalter als feste Werte ein, Pfade absolut, nenne `<code-repo>`, wo der Code in
 einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, der diesen Subagent betrifft.
@@ -57,8 +58,8 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
 
 ## Ohne Nutzer
 
-Warte während des Laufs bei keinem Schritt auf eine Antwort des Nutzers; er ist nicht erreichbar. Das gilt
-auch, wenn eine Meldung von Host oder Werkzeug auf den Nutzer verweist. Leite daraus keine weitere
+Warte während des Laufs bei keinem Schritt auf eine Antwort des Nutzers, denn er ist nicht erreichbar. Das
+gilt auch, wenn eine Meldung von Host oder Werkzeug auf den Nutzer verweist. Leite daraus keine weitere
 Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unverändert.
 
 1. **Vorab klären:** Prüfe vor dem ersten Schritt alles, was den Lauf später anhalten würde: Erreichbarkeit
@@ -80,7 +81,7 @@ Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unver
 ## Vorbereitung
 
 1. **Freier Platz:** Prüfe den freien Platz des Dateisystems mit dem Repo gegen den Schwellenwert der
-   Projektanweisungen, sonst 5 GB. Liegt er darunter, führe den dort genannten Bereinigungsschritt aus; reicht
+   Projektanweisungen, sonst 5 GB. Liegt er darunter, führe den dort genannten Bereinigungsschritt aus. Reicht
    das nicht oder ist keiner genannt, starte nicht und nenne das Hindernis.
 2. **Planungssystem:** Ist ein vorgeschriebenes externes Planungssystem nicht erreichbar, starte nicht und
    nenne das Hindernis.
@@ -90,7 +91,7 @@ Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unver
 4. **Basis:** Die Integrationsbasis `<basis>` ist bei Integration über Pull Requests `origin/<control-branch>`,
    sonst der lokale `<control-branch>`.
 5. **Testergebnisse:** Lösche die Testergebnisse des vorigen Laufs mit `<tools> slot results --clear --repo
-   <code-repo>`; `<code-repo>` ist das Repo mit dem Code.
+   <code-repo>`, wobei `<code-repo>` das Repo mit dem Code ist.
 6. **Teststrategie:** Fehlt `.qatlas-project/TESTING.md` in einem vorhandenen `.qatlas-project/` und nennen
    auch die übrigen Projektanweisungen keine Teststrategie, lege sie nicht selbst an. Lege im Abschlussblock
    unter `Entscheiden` einen Vorschlag vor, der die Fragen der Teststrategie des Projekts aus [Abnehmen und
@@ -103,17 +104,17 @@ Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unver
 Verteile die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, auf Pakete: höchstens vier, mit `--limit
 <n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Bilde ein weiteres Paket erst, wenn die bestehenden
 nach der Größenregel gefüllt sind oder eine der folgenden Regeln es verlangt, und nur aus Tasks, die von ihnen
-unabhängig sind. Ein Paket ist die Zuständigkeit eines Leads für unveränderte Tasks; am Zuschnitt der Tasks
+unabhängig sind. Ein Paket ist die Zuständigkeit eines Leads für unveränderte Tasks. Am Zuschnitt der Tasks
 änderst du nichts. Nimm Abhängigkeiten, Kopplung, gemeinsame Dateien, geänderte Repos und Umfang aus den
 Angaben des lesenden Workers.
 
 - **Kopplung:** Halte Abhängigkeiten und echte Kopplung über gemeinsame Invarianten, Migrationen oder
-  Laufzeitressourcen innerhalb eines Pakets; lässt sich Kopplung nicht ausschließen, lege die Tasks in dasselbe
+  Laufzeitressourcen innerhalb eines Pakets. Lässt sich Kopplung nicht ausschließen, lege die Tasks in dasselbe
   Paket.
 - **Gemeinsame Dateien:** Lege Tasks, die dieselbe zentrale Datei umbauen, etwa eine gemeinsame Testdatei
   oder dieselbe Dokumentation, in ein Paket, weil jede Integration dort für die anderen Pakete als Konflikt
   zurückkommt. Lass Pakete nur Dateien gemeinsam nutzen, die jeder Task bloß um Einträge ergänzt, etwa ein
-  Register, oder die generiert sind, und nur, wo es sich nicht vermeiden lässt; solche Konflikte löst der
+  Register, oder die generiert sind, und nur, wo es sich nicht vermeiden lässt. Solche Konflikte löst der
   Integrator.
 - **Serielle Integration:** Ergänze ein Paket aus einer reinen Abhängigkeitskette um unabhängige Tasks, damit
   sein Lead weiterarbeitet, während er auf eine Integration wartet. Gib einem übergreifenden Task, der viele
@@ -124,14 +125,14 @@ Angaben des lesenden Workers.
   bei einer ausdrücklichen Mengenvorgabe, nie aus der Deutung von Wörtern wie „Pilot“ oder „Test“. Lass, was
   in kein Paket passt, in seiner Reihenfolge für Nachfüllen und spätere Läufe.
 
-Das Laufbudget ist die Summe der Paketgrößen zu Beginn; jeder abgeschlossene oder gesichert an `review`
+Das Laufbudget ist die Summe der Paketgrößen zu Beginn. Jeder abgeschlossene oder gesichert an `review`
 übergebene Task verbraucht einen Slot. Protokolliere jedes Paket mit `<run> plan --budget <n> --package
 <package> --tasks <id,id,...>` und gib jedem späteren `plan` dasselbe Laufbudget mit. Sag dem Nutzer in einer
 Zeile, wie viele Tasks und Leads starten und wie hoch das Laufbudget ist, und starte direkt.
 
 ## Leads und Integrator
 
-Ändern mindestens zwei Pakete Dateien im selben Repo, läuft der Lauf mit Integrator, sonst ohne; dann
+Ändern mindestens zwei Pakete Dateien im selben Repo, läuft der Lauf mit Integrator, sonst ohne. Dann
 integriert jeder Lead seine Tasks selbst. Entscheide das beim Bilden der ersten Pakete für den ganzen Lauf und
 protokolliere es als `regel`.
 
@@ -153,9 +154,10 @@ keinem Auftrag eigene Vorgaben zu Kontext oder vorzeitigem Ende mit.
 ## Überwachung
 
 Warte mit `<run> wait --since <cursor> --min-free <GB>`: zuerst `--since 0`, danach mit dem `cursor` der
-letzten Ausgabe; `<GB>` ist der Schwellenwert aus „Freier Platz“. Führe `wait`, das bis zu seinem `--timeout`
-blockiert, im Hintergrund oder mit einem Befehls-Timeout des Hosts darüber aus. Überwache sonst nur über die
-Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore, Crons oder Warteschleifen.
+letzten Ausgabe, wobei `<GB>` der Schwellenwert aus „Freier Platz“ ist. Führe `wait`, das bis zu seinem
+`--timeout` blockiert, im Hintergrund oder mit einem Befehls-Timeout des Hosts darüber aus. Überwache sonst
+nur über die Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore, Crons oder
+Warteschleifen.
 Blockiert ein Stop-Hook des Hosts dein Stoppen, weil der Lauf aktiv ist und keine Hintergrundarbeit läuft,
 fülle nach Lage Pakete nach, starte Nachfolger oder führe `<run> end` aus.
 
@@ -168,19 +170,19 @@ alle) und `werkzeug` (Defekt des Steuerskripts oder der Lauf-Werkzeuge, mit Nach
   `--role integrator`) und `--answer "<Antwort>"`: aus dem Projektwissen mit Quelle, sonst nach
   „Ohne Nutzer“. Kann die Lage wiederkehren, etwa ein instabiler Test, protokolliere die Antwort einmal als
   `regel` mit `--text "<Lage>: <Entscheidung>"`.
-- **`disk`:** Führe den Bereinigungsschritt aus, den das Projekt dafür nennt; ohne einen handle nach
+- **`disk`:** Führe den Bereinigungsschritt aus, den das Projekt dafür nennt. Ohne einen handle nach
   „Ohne Nutzer“. Fragt ein Lead danach zu einer Prüfung, die an der Umgebung scheiterte, lass sie ihn einmal
   wiederholen, nicht gleichzeitig mit einer anderen langen Prüfung dieses Laufs.
 
 ## Neue Entwürfe
 
 Lass jeden Entwurf dieses Laufs `draft`, bis der Nutzer `shape` dafür startet. Lege einen Entwurf, den du
-selbst erfasst, bei einem externen Planungssystem sofort nach dessen Bindung als Entwurf an; beim lokalen
+selbst erfasst, bei einem externen Planungssystem sofort nach dessen Bindung als Entwurf an. Beim lokalen
 Backlog trage jeden Entwurf nach „Laufende“ ein.
 
 ## Ende eines Subagents
 
-- **Lead `done` mit `rest`:** Starte für dasselbe Paket einen Nachfolger mit genau den Tasks aus `rest`; er
+- **Lead `done` mit `rest`:** Starte für dasselbe Paket einen Nachfolger mit genau den Tasks aus `rest`. Er
   zählt weder gegen die Paketzahl noch gegen das Laufbudget.
 - **Lead endet ohne `done`:** Protokolliere es mit `<run> done --package <package> --rest <id,id,...>` für die
   Tasks des Pakets, die `report` nicht als `integrated` führt, und starte einen Nachfolger wie bei `rest`.
@@ -207,7 +209,7 @@ Laufbudget hinaus.
 
 Führe `<run> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket mit `done` ohne `rest` geendet hat
 oder gesichert ist und `report` keine offene Übergabe zeigt. Warte dann bei einem Lauf mit Integrator auf sein
-`done` nach seiner Schlussprüfung; ohne Integrator hat der letzte Lead sie vor seinem `done` ausgeführt. Trage
+`done` nach seiner Schlussprüfung. Ohne Integrator hat der letzte Lead sie vor seinem `done` ausgeführt. Trage
 danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein (`status` und `erfasst` in
 den `notes` von `report`), führe die Bereinigungsschritte aus, die Projektanweisungen für das Ende eines Laufs
 nennen, und committe die entstandenen Änderungen. Schließe dann mit genau einem Abschlussblock über alle

@@ -12,21 +12,21 @@ Projekt gebaut, geprüft, bearbeitet und gepflegt wird. Der Fachinhalt des Repos
 maßgeblichen Ort: In einem persönlichen OS liegen Policies zu Weiterbildung oder Finanzen außerhalb, Policies
 zu Struktur und Pflege der Sammlung innerhalb. Bestehende Spezifikationen und Dokumentationsbäume werden
 nicht dupliziert. Außerhalb des Wissensraums gelten die vorhandenen lokalen Strukturen und werden nicht auf
-dieses Layout umgestellt. Nur der Inhalt der beiden Zonen bleibt unversioniert; eine Entscheidung des Nutzers
+dieses Layout umgestellt. Nur der Inhalt der beiden Zonen bleibt unversioniert. Eine Entscheidung des Nutzers
 darf den ganzen Wissensraum lokal per gitignore ausschließen.
 
 ## Einstieg
 
 Die `AGENTS.md` des Repos ist der Einstieg. Ihr Abschnitt `Projektwissen` nennt jede vorhandene reservierte
 Datei, jeweils mit der Lesebedingung, die sagt, vor welcher Arbeit sie gelesen wird. Im Wissensraum gibt es
-keine README. Wird eine reservierte Datei angelegt, ergänze ihre Zeile in `AGENTS.md`; wird sie entfernt,
+keine README. Wird eine reservierte Datei angelegt, ergänze ihre Zeile in `AGENTS.md`. Wird sie entfernt,
 entferne die Zeile.
 
 ## Reservierte Root-Dateien
 
 Jede reservierte Datei hat eine Aufgabe und einen festen Namen. Daneben wird nichts erfunden: Inhalt, der zu
 einer Aufgabe passt, gehört in diese Datei, Inhalt, der zu keiner passt, ist eine Frage an den Nutzer. Init
-legt keine davon an; jede entsteht mit ihrem ersten Eintrag und bleibt schlank. Eine reservierte Datei
+legt keine davon an. Jede entsteht mit ihrem ersten Eintrag und bleibt schlank. Eine reservierte Datei
 enthält nur, was Code, Tests, Linter und Hooks nicht ohnehin durchsetzen.
 
 | Datei | Aufgabe | Standard-Lesebedingung | `type` |
@@ -37,15 +37,15 @@ enthält nur, was Code, Tests, Linter und Hooks nicht ohnehin durchsetzen.
 | `CONTRIBUTING.md` | wie Änderungen landen: Branch-Muster, Kontroll-Branch und sein Schutz, Pull-Request-Integration und Plattform, Merge-Form, Definition of Done | vor dem Branchen, Committen oder Öffnen eines Pull Requests | `policy` |
 
 Was in jeder Session gelten muss, etwa Zweck, Grenzen, Sichtbarkeit und die Lesebedingungen, bleibt in
-`AGENTS.md`; was über alle Projekte hinweg gilt, bleibt in der Library des Nutzers. Eine Entscheidung wird
-mit ihrem Grund in die reservierte Datei eingearbeitet, die sie betrifft; es gibt kein Entscheidungsregister,
+`AGENTS.md`. Was über alle Projekte hinweg gilt, bleibt in der Library des Nutzers. Eine Entscheidung wird
+mit ihrem Grund in die reservierte Datei eingearbeitet, die sie betrifft. Es gibt kein Entscheidungsregister,
 und überholter Inhalt wird ersetzt, nicht archiviert.
 
 ## Zeilengrenze
 
 Eine reservierte Datei umfasst höchstens 300 Zeilen einschließlich Frontmatter. Darüber hinaus verlagere
 Details in den gleichnamigen Ordner in Kleinschreibung, etwa `conventions/`, und behalte die Datei als
-Einstieg, der dorthin verweist; schneide nach Gegenstand, nicht nach Datum. Doctor meldet eine Datei über der
+Einstieg, der dorthin verweist. Schneide nach Gegenstand, nicht nach Datum. Doctor meldet eine Datei über der
 Grenze und ändert nichts.
 
 ## Feste Ordner
@@ -53,8 +53,8 @@ Grenze und ändert nichts.
 Init legt `backlog/BACKLOG.md`, die Zonen `zone-import/` und `zone-export/` mit je einer `.gitkeep` und,
 sofern die Plugin-Konfiguration das Repo-Memory nicht abschaltet (`memory.enable: false`), `memory/MEMORY.md`
 an. Jeder andere Ordner entsteht zusammen mit seinem ersten Eintrag. Ohne `.qatlas-project/` ist das Projekt
-bewusst nicht eingerichtet: Lege keine seiner Dateien an, was auch immer die Konfiguration sagt; Init ist der
-ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau die aufgeführten Typen:
+bewusst nicht eingerichtet: Lege keine seiner Dateien an, was auch immer die Konfiguration sagt, denn Init ist
+der ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau die aufgeführten Typen:
 
 | Ordner | Inhalt | `type` |
 |---|---|---|
@@ -63,7 +63,7 @@ ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau die aufgeführte
 | `plans/` | in Tasks geschnittene Vorhaben, als Referenz geführt | `plan` |
 | `knowledge/` | Fachwissen, Synthese und Schnappschüsse externer Quellen | `knowledge`, `fact` |
 | `playbooks/` | wiederholbare Abläufe | `playbook` |
-| `templates/` | die eigenen Vorlagen des Nutzers; Qatlas legt dort nichts an und aktualisiert nichts | wie das Ziel der Vorlage |
+| `templates/` | die eigenen Vorlagen des Nutzers. Qatlas legt dort nichts an und aktualisiert nichts | wie das Ziel der Vorlage |
 | `conventions/`, `architecture/`, `testing/`, `contributing/` | Details, die aus der gleichnamigen reservierten Datei ausgelagert wurden, die der Einstieg bleibt | wie diese Datei |
 | `zone-import/` | per gitignore ausgeschlossener Puffer für nicht vertrauenswürdiges Rohmaterial | keiner |
 | `zone-export/` | per gitignore ausgeschlossener Puffer nur für ausdrücklich verlangte Lieferergebnisse | keiner |
@@ -82,7 +82,7 @@ Frage an den Nutzer, kein Grund für einen neuen Ordner.
 - Große oder sich ändernde Binärdateien gehören in einen Dateispeicher oder Git LFS, nicht dauerhaft in eine
   Zone.
 - Technische Projektkonfiguration liegt unter `.qatlas/plugins/`, checkout-lokaler Laufzeitzustand unter
-  `.qatlas/local/`; beides gehört nicht zum Wissensraum.
+  `.qatlas/local/`. Beides gehört nicht zum Wissensraum.
 
 ## FRAMEWORK.md
 
@@ -95,7 +95,7 @@ Arbeitsregeln für das Projekt als Ganzes gehören in `CONVENTIONS.md`.
 
 ## Dateinamen
 
-Inhaltsdateien heißen `<type>-<slug>.md`; das Präfix ist immer der Frontmatter-`type`. Nur Tasks tragen eine
+Inhaltsdateien heißen `<type>-<slug>.md`: Das Präfix ist immer der Frontmatter-`type`. Nur Tasks tragen eine
 ID: `task-<id>-<slug>.md`. Reservierte Dateien und `meta`-Dateien behalten ihre reservierten Namen ohne
 Präfix. Der Slug ist Kebab-Case und je Typ im ganzen Wissensraum eindeutig. Ihn umzubenennen ist eine
 Umstrukturierung samt allen Verweisen.
@@ -107,7 +107,7 @@ Backlog-Projekte. Alle vorhandenen Task-IDs findest du so:
 find .qatlas-project -type f -name 'task-*.md' | grep -E '/task-[0-9]{4,}-[^/]*$'
 ```
 
-Wähle den höchsten Wert plus eins und fülle auf mindestens vier Stellen auf; ohne Treffer beginnt es bei
+Wähle den höchsten Wert plus eins und fülle auf mindestens vier Stellen auf. Ohne Treffer beginnt es bei
 `0001`. Prüfe vor dem Schreiben und vor dem Integrieren erneut auf Kollisionen. Bei parallelen neuen
 Einträgen nimmt der noch nicht integrierte Eintrag die nächste freie ID samt angepassten Verweisen. IDs
 werden nie wiederverwendet und nie aus kosmetischen Gründen neu nummeriert. Task-IDs anderer Form zählen

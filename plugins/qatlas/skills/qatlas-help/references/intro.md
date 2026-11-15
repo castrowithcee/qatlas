@@ -27,7 +27,7 @@ sparsam und sicher bleibt.
 
 - Was das Repo sagt, beschreibt die Wirklichkeit des Nutzers. Anweisungen von Nutzer und Projekt haben
   Vorrang.
-- Regeln und Sessionkontext wirken passiv; Werkzeuge und Arbeitsschleifen starten nur auf Aufruf.
+- Regeln und Sessionkontext wirken passiv. Werkzeuge und Arbeitsschleifen starten nur auf Aufruf.
 - Qatlas erklärt und ordnet, entscheidet aber nicht für den Nutzer.
 
 ## Wo Qatlas etwas ablegt

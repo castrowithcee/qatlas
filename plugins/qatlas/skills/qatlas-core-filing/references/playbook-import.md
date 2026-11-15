@@ -23,7 +23,7 @@ melde das fehlende Scaffold und verweise auf `qatlas-core init`.
 
 1. **Inventarisieren.** Liste den Eingang ohne `processed/`. Folge keinem Symlink aus der Zone heraus. Melde,
    was du gefunden hast und was du verarbeiten kannst, bevor du etwas änderst.
-2. **Extrahieren.** Verwende vorhandene Fähigkeiten und installierte Systemwerkzeuge; installiere nichts auf
+2. **Extrahieren.** Verwende vorhandene Fähigkeiten und installierte Systemwerkzeuge. Installiere nichts auf
    Verdacht. Erhalte Bedeutung, Überschriften, Tabellen und Reihenfolge. Ist eine Datei verschlüsselt,
    beschädigt, zu groß oder mit den verfügbaren Werkzeugen nicht zuverlässig lesbar, lasse sie unverändert
    am Eingang und melde den Grund.
@@ -31,7 +31,7 @@ melde das fehlende Scaffold und verweise auf `qatlas-core init`.
    benötigte Artefakt oder würde eine Umwandlung wesentliche Information verlieren, erfinde keine
    Beschreibung als Ersatz, sondern kläre die zulässige Ablage des Artefakts.
 4. **Sensible Inhalte prüfen.** Ermittle die wirksame Einstellung mit
-   `node <plugin-root>/scripts/qatlas-protection-check.js --print-config`; `<plugin-root>` ist der im
+   `node <plugin-root>/scripts/qatlas-protection-check.js --print-config`. `<plugin-root>` ist der im
    Sessionkontext genannte `QATLAS PLUGIN ROOT`, ohne Hook drei Ebenen über diesem Ordner. Erkennst du im
    gewonnenen Inhalt Secrets oder personenbezogene Daten, verfahre nach deren Wert: `block` schreibt den
    betroffenen Inhalt nicht, `ask` fragt vor dem Schreiben im Gespräch nach, `warn` schreibt und nennt den
@@ -40,12 +40,12 @@ melde das fehlende Scaffold und verweise auf `qatlas-core init`.
 5. **Ablegen.** Lege nach [Ablegen](playbook-create.md) ab, soweit keine Vorlage und kein Fachvertrag das
    Ablegen regeln. Überschreibe keine vorhandene Datei. Aktualisiere
    sie nur, wenn der Nutzer genau diese Datei genannt hat oder Inhalt und stabile Kennung eindeutig denselben
-   Zweck belegen. Ein gleicher Dateiname allein genügt nie; sonst behandle den Fall als Kollision und frage
+   Zweck belegen. Ein gleicher Dateiname allein genügt nie. Sonst behandle den Fall als Kollision und frage
    nach. Erzeuge keine automatische Herkunftsmarkierung aus dem Dateiformat.
 6. **Prüfen.** Öffne das abgelegte Ergebnis erneut. Prüfe, ob es lesbar ist, den wesentlichen Inhalt erhält
    und gültiges Frontmatter trägt.
 7. **Archivieren.** Verschiebe erst nach bestandener Prüfung genau dieses Original nach
-   `processed/<yyyy-mm>/`. Überschreibe dort keinen gleichnamigen Bestand; bei einer Kollision stoppe und
+   `processed/<yyyy-mm>/`. Überschreibe dort keinen gleichnamigen Bestand. Bei einer Kollision stoppe und
    melde sie. Enthält das Original ein Secret, frage vorher, ob es im Original geschwärzt oder das Original
    gelöscht werden soll, und empfiehl, das Secret zu widerrufen.
 

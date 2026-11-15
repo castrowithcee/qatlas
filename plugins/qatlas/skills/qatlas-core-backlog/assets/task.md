@@ -32,7 +32,7 @@ Ausführung nötigen Inhalt zusammenfassen, nicht umfangreich duplizieren. -->
 ## Ausführungsgrundlage
 <!-- Belegter Ist-Stand für Arbeit an einem vorhandenen System. Bei einer Aufgabe ohne vorhandenen Bestand
 den nicht anwendbaren Punkt mit Begründung kennzeichnen. Erwartete Änderungsflächen sind eine begründete
-Arbeitskarte, keine starre Allowlist; Scope-in und Scope-out bleiben die Autorität. -->
+Arbeitskarte, keine starre Allowlist. Scope-in und Scope-out bleiben die Autorität. -->
 
 - **Ausgangszustand:** <Wie verhält sich der relevante Bestand heute?>
 - **Bestehende Einstiegspunkte:** <Welche Komponenten, Pfade oder Schnittstellen tragen das Verhalten?>

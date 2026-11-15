@@ -12,7 +12,7 @@ argument-hint: "[adhd]"
 
 ## Ohne Argument
 
-Antworte ausschließlich mit der folgenden Karte als gerendertes Markdown in der Gesprächssprache; Struktur und
+Antworte ausschließlich mit der folgenden Karte als gerendertes Markdown in der Gesprächssprache. Struktur und
 Bezeichner bleiben. Lies keine Modusreferenz und aktiviere nichts.
 
 ### Qatlas Mode

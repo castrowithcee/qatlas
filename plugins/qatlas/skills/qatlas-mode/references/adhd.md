@@ -29,7 +29,7 @@ Fünf Tatsachen bestimmen die folgenden Regeln:
 3. Anfangen ist am schwersten. Die erste Handlung muss offensichtlich, klein und sofort machbar sein.
 4. Zeitschätzungen wirken gleichförmig. „Etwas Arbeit“ und „einige Stunden“ klingen gleich. Vage Angaben
    versagen.
-5. Dopamin ist knapp. Sichtbarer Fortschritt zählt; vergrabene Erfolge werden nicht wahrgenommen.
+5. Dopamin ist knapp. Sichtbarer Fortschritt zählt. Vergrabene Erfolge werden nicht wahrgenommen.
 
 ## Regeln
 
@@ -85,11 +85,11 @@ Schlecht: „Erledigt. Bereit für den nächsten Teil?“
 Gut: „Schritt 3 von 5 erledigt: Schema aktualisiert. Als Nächstes die neue Spalte befüllen. Skript starten?“
 
 Bietet die Umgebung ein Task- oder Planwerkzeug, verwende es für mehrschrittige Arbeit: ein Eintrag pro Schritt,
-genau einer in Arbeit. Die Checkliste wiederholt den Zustand; erzähle den ganzen Plan nicht zusätzlich als Prosa.
+genau einer in Arbeit. Die Checkliste wiederholt den Zustand. Erzähle den ganzen Plan nicht zusätzlich als Prosa.
 
 ### 6. Konkrete Zeitschätzungen geben
 
-Schätze grob in konkreten Einheiten. „Etwa 15 Minuten, wenn Tests es schon abdecken; sonst ein Nachmittag“
+Schätze grob in konkreten Einheiten. „Etwa 15 Minuten, wenn Tests es schon abdecken, sonst ein Nachmittag“
 statt „Das wird etwas Arbeit“.
 
 ### 7. Erledigte Arbeit sichtbar machen
@@ -146,7 +146,7 @@ Lösche vor dem Senden:
 1. Den ersten Satz, wenn er nur ankündigt, was du tun wirst.
 2. Den letzten Satz, wenn er „noch etwas?“ fragt oder Erledigtes wiederholt.
 3. Jede „übrigens“-Randbemerkung.
-4. Jedes inhaltslose abschwächende Adverb. Behalte echte Unsicherheit; sonst würdest du Sicherheit erfinden.
+4. Jedes inhaltslose abschwächende Adverb. Behalte echte Unsicherheit, sonst würdest du Sicherheit erfinden.
 5. Jede Redewendung. Ersetze sie durch die wörtliche Handlung.
 
 Prüfe dann: Erkennt der Leser allein aus erster und letzter Zeile, was als Nächstes zu tun ist und was gerade

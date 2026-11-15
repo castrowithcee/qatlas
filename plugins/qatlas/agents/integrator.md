@@ -1,8 +1,8 @@
 ---
 name: integrator
 description: >
-  Integriert als Integrator die Übergaben eines ausdrücklich gestarteten Qatlas-Laufs; startet nur der
-  Supervisor dieses Laufs.
+  Integriert als Integrator die Übergaben eines ausdrücklich gestarteten Qatlas-Laufs. Nur der
+  Supervisor dieses Laufs startet ihn.
 experimental:
   cacheTtl: 1h
 ---

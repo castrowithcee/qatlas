@@ -31,7 +31,7 @@ Anweisungen und prüfbare Abnahme. Quellenlinks dienen der Prüfung und ersetzen
 ein autorisierter Arbeitsmodus eine maßgebliche Grundlage, prüfe die betroffenen offenen Tasks auf veraltete
 Anweisungen. Ändere weder Ziel noch Abnahmekriterien stillschweigend.
 
-Nutze installierte Plugins und deren Skills, wenn ihre Methode zur Aufgabe passt; Gespräch, Planungssystem und
+Nutze installierte Plugins und deren Skills, wenn ihre Methode zur Aufgabe passt. Gespräch, Planungssystem und
 Status bleiben beim Modus.
 
 ## Mit dem Nutzer sprechen
@@ -48,8 +48,8 @@ Nachricht deshalb gezielt, verständlich, kompakt und effizient:
   wie sie sind: Befehle, Pfade, Modus- und Flag-Namen, Status, IDs und zitierte Ausgaben.
 - **Anker:** Beginne jeden Abschluss und jede Frage, die einen Lauf unterbricht, mit einer Zeile, die Projekt,
   Modus und Stand nennt, etwa `shop-api · run · 2 von 10 erledigt · 2 Entscheidungen offen`.
-- **Thema zuerst:** Benenne jeden Task, jedes Paket oder anderes Objekt mit seinem Thema in einfachen Worten;
-  eine ID folgt nur als Verweis. Setze keine Kenntnis von Task, Board, Paket, Branch oder früherer Nachricht
+- **Thema zuerst:** Benenne jeden Task, jedes Paket oder anderes Objekt mit seinem Thema in einfachen Worten.
+  Eine ID folgt nur als Verweis. Setze keine Kenntnis von Task, Board, Paket, Branch oder früherer Nachricht
   voraus.
 - **Nur, was zählt:** Melde, was Handeln des Nutzers braucht oder elementare Änderungen mitzieht. Erwartete
   Sorgfalt wie grüne Prüfungen, Leak-Prüfungen, Aufräumen oder Pflege des Planungssystems bleibt weg, außer

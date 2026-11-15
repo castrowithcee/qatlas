@@ -16,11 +16,11 @@ Ohne `new` oder einen erkennbaren Aufräumauftrag ändert der Aufruf nichts:
 1. Ermittle mit `git worktree list --porcelain` den primären, den aktuellen und alle weiteren Worktrees.
 2. Prüfe für jeden erreichbaren Worktree Branch, Status und Upstream. Erfinde für nicht erreichbare Pfade
    keinen Zustand.
-3. Zeige eine nummerierte Liste. Jede Zeile nennt Zweck, Branch, Zustand und absoluten Pfad; markiere den
+3. Zeige eine nummerierte Liste. Jede Zeile nennt Zweck, Branch, Zustand und absoluten Pfad. Markiere den
    aktuellen und den primären Arbeitsbaum.
 
 Die Nummer ist nur ein Griff für die gerade gezeigte Liste. Lies das Register vor einer späteren Änderung
-erneut und prüfe, dass die Nummer noch denselben Pfad und Branch bezeichnet; sonst zeige die neue Liste und
+erneut und prüfe, dass die Nummer noch denselben Pfad und Branch bezeichnet. Sonst zeige die neue Liste und
 ändere nichts.
 
 ## Anlegen

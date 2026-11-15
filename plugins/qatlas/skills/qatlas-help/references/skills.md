@@ -30,7 +30,7 @@ Jeder Core-Skill lädt zuerst nur seinen kurzen Kern und liest Details für die 
 
 ## Optionale Packs
 
-- **`qatlas-dev`:** Methode für Codearbeit, die kleinste Änderung, die den Task vollständig löst;
+- **`qatlas-dev`:** Methode für Codearbeit, die kleinste Änderung, die den Task vollständig löst.
   `qatlas-dev-review` prüft eine Änderung und `qatlas-dev-audit` ein ganzes Repo.
 - **`qatlas-design`:** Art Direction und ein strikter Hausstil für Webseiten und App-Screens, geprüft in einem
   echten Browser.

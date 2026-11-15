@@ -13,7 +13,7 @@ description: >
 - Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `README.md`. Sein Slug ist
   Kebab-Case, beginnt nicht mit `task-` und ist nicht `done`. Setzt das Projekt einen Plan um, verlinkt sein
   Kopf auf `.qatlas-project/plans/plan-<slug>.md`, statt Ziel und Umfang zu wiederholen.
-- Die Ordnerzugehörigkeit bestimmt die Projektzugehörigkeit; es gibt kein Feld `project:`.
+- Die Ordnerzugehörigkeit bestimmt die Projektzugehörigkeit. Es gibt kein Feld `project:`.
 - Echte Abhängigkeiten und Reihenfolge stehen im Roster, für Tasks eines Projekts in dessen `README.md`. Ein
   Link ersetzt keinen Kontext, den der Task braucht, um eigenständig ausgeführt zu werden.
 
@@ -30,10 +30,10 @@ bleibt in einem vollständigen Lesen eigenständig ausführbar:
 - Bei Arbeit an einem bestehenden System hält der Task die Ausführungsbasis nach der Ausführungsreife der
   Backlog-Norm fest.
 - Der Abschnitt `Abschlussbericht` ist die einzige statusabhängige Übergabestelle. Ersetze und verdichte
-  seinen bisherigen Inhalt bei einem Übergang, statt Laufberichte oder erledigte Review-Karten anzuhängen;
-  nach einer Klärung bleibt nur ein noch nötiger aktueller Stand oder `- Keine.`. Er enthält:
-  - bei `review` nur die aktuelle Übergabe an den Nutzer nach der Backlog-Norm;
-  - bei `waiting` Grund, Wiederaufnahmesignal, verifizierten Stand und nächsten Schritt;
+  seinen bisherigen Inhalt bei einem Übergang, statt Laufberichte oder erledigte Review-Karten anzuhängen.
+  Nach einer Klärung bleibt nur ein noch nötiger aktueller Stand oder `- Keine.`. Er enthält:
+  - bei `review` nur die aktuelle Übergabe an den Nutzer nach der Backlog-Norm,
+  - bei `waiting` Grund, Wiederaufnahmesignal, verifizierten Stand und nächsten Schritt,
   - bei `done` `- Keine.` oder nur wichtige Entscheidungen, Auffälligkeiten, Risiken, Warnungen und
     Abweichungen sowie die Orte, an denen dauerhafte Projektwahrheiten oder falsch gewordene Dokumentation
     aktualisiert wurden. Nenne jeden dieser Punkte auch im abschließenden Chat.
@@ -44,12 +44,12 @@ bleibt in einem vollständigen Lesen eigenständig ausführbar:
   duplizieren. Alle Grenzen und Entscheidungen, die für die konkrete Ausführung nötig sind, bleiben im Task.
 
 Schneide nie nach einer harten Token-, Zeilen- oder Zeichengrenze. Lässt sich selbst der noch gültige
-Taskvertrag nicht mehr in einer Session ausführen, schneide die verbleibende Arbeit bewusst neu; entferne
+Taskvertrag nicht mehr in einer Session ausführen, schneide die verbleibende Arbeit bewusst neu. Entferne
 keine bindende Entscheidung und keinen nötigen Grund nur für eine kleinere Datei.
 
 Lies vor einem neuen Task [die kanonische Task-Vorlage](../assets/task.md) vollständig, vor einem neuen
 Projektkopf zusätzlich [die kanonische Projektvorlage](../assets/project-readme.md). Vorlagen und dieser
-Vertrag gelten unabhängig davon, wie ein Task entsteht; Nutzervorlagen unter `.qatlas-project/templates/`
+Vertrag gelten unabhängig davon, wie ein Task entsteht. Nutzervorlagen unter `.qatlas-project/templates/`
 ersetzen sie nicht.
 
 ## Status und Zuständigkeit
@@ -74,7 +74,7 @@ Zulässige Rück- und Übergabewege:
   Zuständigkeit und versetze den Task nach seinem tatsächlichen nächsten Schritt in einen anderen Status.
 - `review`: Der nächste Schritt ist eine konkrete Entscheidung, Prüfung oder Handlung des Nutzers.
 - `waiting`: Eine externe Voraussetzung, Ressource oder ein externes Ereignis verhindert das Weiterarbeiten.
-  Grund und Wiederaufnahmesignal müssen konkret sein; eine unfertige interne Task-Abhängigkeit allein genügt
+  Grund und Wiederaufnahmesignal müssen konkret sein. Eine unfertige interne Task-Abhängigkeit allein genügt
   nicht.
 - `done`: Abnahmekriterien erfüllt, vereinbarte Prüfungen verifiziert, Dokumentationsauswirkung erledigt und
   keine offene Frage.
@@ -88,7 +88,7 @@ keine Ausführung. Die Größe des Horizonts bestimmt weder die Parallelität no
 Laufs.
 
 Jeder Task trägt genau einen Status. Im lokalen Backlog ist `next` kein zusätzliches Queue-Feld neben
-`ready`; es ersetzt `ready`, solange der Task zum nächsten Horizont gehört. Inhaltlich impliziert `next`
+`ready`. Es ersetzt `ready`, solange der Task zum nächsten Horizont gehört. Inhaltlich impliziert `next`
 weiterhin die volle Ausführungsreife von `ready`.
 
 Setze einen beanspruchten Task unmittelbar vor der ersten schreibenden Ausführung auf `in-progress` und
@@ -106,8 +106,8 @@ lebt, nicht dass ein Worker daran arbeitet.
 
 `BACKLOG.md` ist die einzige Übersicht. Sie enthält eine Zeile pro unfertigem Root-Task und Projekt: Link,
 Status und Kurzstand. Projektzeilen verweisen auf ihre `README.md`. Innerhalb einer für den Gegenstand
-zulässigen Reihenfolge stehen Tasks als `review`, `in-progress`, `next`, `waiting`, `ready`, `draft`;
-Projektzeilen folgen ihrer Gegenstandsreihenfolge. Fertige Root-Tasks entfallen; Projekte dürfen ihren
+zulässigen Reihenfolge stehen Tasks als `review`, `in-progress`, `next`, `waiting`, `ready`, `draft`.
+Projektzeilen folgen ihrer Gegenstandsreihenfolge. Fertige Root-Tasks entfallen. Projekte dürfen ihren
 Aufbauverlauf behalten.
 
 ## Ideen
@@ -115,5 +115,5 @@ Aufbauverlauf behalten.
 `IDEAS.md` ist das getrennte Inventar unverbindlicher Ideen und wird mit der ersten Idee angelegt. Sie
 trägt keine Task-IDs, Datumsfelder oder Status. Wird eine Idee bewusst zu Arbeit, lege zuerst den
 vollständigen Task oder das vollständige Projekt an und entferne dann den übernommenen Ideeneintrag. Bei
-einem externen Planungssystem gibt es keine `IDEAS.md`; Ideen gehen an das Entwurfsobjekt, das die Bindung
+einem externen Planungssystem gibt es keine `IDEAS.md`. Ideen gehen an das Entwurfsobjekt, das die Bindung
 nennt.

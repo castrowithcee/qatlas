@@ -37,9 +37,9 @@ Wähle für jeden Auftrag ein Profil, zuerst `light`: ein enger Auftrag mit klar
 Prüfung. Nimm `standard` bei mehreren abhängigen Schritten oder technischen Abwägungen und `demanding` für eine
 belegt schwierige Diagnose oder eine eng gekoppelte Umsetzung, die sich sinnvoll nicht weiter teilen lässt,
 nie wegen des Umfangs allein. Du musst dafür nicht erst einen kleinen Worker scheitern lassen. Begründe
-`standard` und `demanding` vor dem Start kurz; setze das Korrekturbudget bei einem Modellwechsel nicht zurück.
+`standard` und `demanding` vor dem Start kurz. Setze das Korrekturbudget bei einem Modellwechsel nicht zurück.
 
-Der Taskvertrag ist der Auftrag; verfasse ihn nicht neu. Nenne dem Worker Task-ID und Titel und den Leseweg
+Der Taskvertrag ist der Auftrag. Verfasse ihn nicht neu. Nenne dem Worker Task-ID und Titel und den Leseweg
 zum aktuellen Eintrag: beim lokalen Backlog den Pfad der Task-Datei, bei einem externen Planungssystem den
 Leseaufruf, mit dem du den Task selbst gelesen hast. Kann ein Worker den Task so nicht lesen, gib ihm den
 aktuellen Eintrag wörtlich mit. Ergänze nur, was der Vertrag nicht enthält, und gib keine Geheimnisse weiter:
@@ -58,18 +58,18 @@ aktuellen Eintrag wörtlich mit. Ergänze nur, was der Vertrag nicht enthält, u
 - **Worker-Profil:** gewähltes Profil mit Modell, Effort oder dessen fehlender Unterstützung und, bei
   `standard` oder `demanding`, der Grund.
 
-Grenzen, Stoppbedingung und Rückgabe des Workers stehen in `<plugin-root>/agents/worker.md`; wiederhole sie
+Grenzen, Stoppbedingung und Rückgabe des Workers stehen in `<plugin-root>/agents/worker.md`. Wiederhole sie
 nicht. Lädt der Host diese Datei nicht selbst, wie Claude Code über den Subagent-Typ `qatlas:worker`, weise den
 Worker an, sie zuerst vollständig zu lesen. Übernimm die Nacharbeit zu seinen Dokumentationsbefunden nach
 „Dokumentationswirkung“ in „Abnehmen und integrieren“.
 
 Setze für einen kleinen Task normalerweise einen Worker ein. Braucht derselbe Task berechtigt mehrere
 getrennte Rollen oder Zielbereiche, setze mehrere ein. Lass schreibende Worker nacheinander arbeiten, nie
-gleichzeitig; nur schreibgeschützte Analysen und Reviews dürfen parallel laufen, solange sie nachweislich
+gleichzeitig. Nur schreibgeschützte Analysen und Reviews dürfen parallel laufen, solange sie nachweislich
 nichts verändern. Achte darauf, dass sich die Aufträge nachweislich ergänzen, keine konkurrierenden Lösungen
 bauen und zusammen im Korrekturbudget dieses einen Tasks bleiben.
 
-Führe lokale Nachweise über `<tools> slot -- <test command>` aus; `slot` begrenzt gleichzeitige Testläufe
+Führe lokale Nachweise über `<tools> slot -- <test command>` aus: `slot` begrenzt gleichzeitige Testläufe
 auf dem ganzen Host und verwendet einen grünen Nachweis desselben Trees wieder. Entnimm Projektwerte für Gültigkeit,
 unversionierte Eingaben, Slot-Anzahl und exklusive Ressourcen der Teststrategie des Projekts in „Abnehmen und
 integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl, den die Projektvorgaben einer
@@ -77,11 +77,11 @@ exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. 
 selbst über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer
 Abschlussmeldung, und warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von
 Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die im Vordergrund
-innerhalb des höchsten Befehls-Timeouts des Hosts enden; ein Worker, der auf eigene Hintergrundarbeit wartet,
+innerhalb des höchsten Befehls-Timeouts des Hosts enden. Ein Worker, der auf eigene Hintergrundarbeit wartet,
 gilt dem Host als angehalten.
 
 Nenne im Bericht des Tasks für jeden Worker Profil, Modell und Effort. Meldet der Host die tatsächliche
-Kombination nicht zurück, nenne die angeforderte und kennzeichne sie mit „angefordert“; halte nur bei einer
+Kombination nicht zurück, nenne die angeforderte und kennzeichne sie mit „angefordert“. Halte nur bei einer
 belegten Abweichung an.
 
 ## Worker überwachen
@@ -92,7 +92,7 @@ ohne Fortschritt hängt oder eine ausgeschlossene Wirkung vorbereitet. Begrenze 
 statt mit weiteren unspezifischen Prompts Tokens zu verbrennen.
 
 Bricht der Host einen Worker mit einer Sicherheitsmeldung ab, starte den Auftrag nicht erneut mit demselben
-Modell. Starte ihn einmal mit einem eingetragenen Profil eines anderen Modells neu; der Abbruch zählt nicht als
+Modell. Starte ihn einmal mit einem eingetragenen Profil eines anderen Modells neu. Der Abbruch zählt nicht als
 Korrekturversuch. Bricht auch dieser Worker ab, übergib den Task an `review`.
 
 ## Nebenbefunde festhalten
@@ -105,11 +105,11 @@ Laufs das Anlegen weiterer Arbeit nicht einschließt:
 - ein mögliches oder bestätigtes Sicherheitsrisiko,
 - nachweislich falsche Dokumentation.
 
-Nenne im Entwurf den Befund, den Ort, den Nachweis und den Task, bei dem er gefunden wurde; unterstützt das
+Nenne im Entwurf den Befund, den Ort, den Nachweis und den Task, bei dem er gefunden wurde. Unterstützt das
 Planungssystem Labels, gib ihm `run-fund`. Überlass Ausarbeitung, Zuschnitt und Reife `shape`. Deckt ein
 bestehender Task den Befund bereits ab, lege nichts an und nenne diesen Task. Fasse dasselbe Muster an
 mehreren Stellen in einem Entwurf zusammen. Halte Verbesserungsideen, Refactoring, Stilfragen und mögliche
-Erweiterungen nicht fest; sie sind keine Nebenbefunde.
+Erweiterungen nicht fest, denn sie sind keine Nebenbefunde.
 
 Lass ein unbehobenes Sicherheitsrisiko nie an einen öffentlich einsehbaren Ort gelangen, weder in
 Planungssystem, Task, Bericht, Commit-Nachricht, Branch-Namen, Pull Request noch Kommentar. Beurteile dafür die

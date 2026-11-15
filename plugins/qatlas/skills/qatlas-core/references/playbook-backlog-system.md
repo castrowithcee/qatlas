@@ -17,16 +17,16 @@ die Zustimmung des Nutzers ein.
 
 1. Fehlt das Qatlas-Scaffold, stoppe und verweise auf `qatlas-core init`.
 2. Bestimme Quelle, Ziel und gewünschte Richtung. Unterstütze lokal nach extern, extern nach lokal und
-   extern nach extern; unterstelle keinen Anbieter aus einem vorhandenen Git-Remote.
+   extern nach extern. Unterstelle keinen Anbieter aus einem vorhandenen Git-Remote.
 3. Erhebe für jede externe Seite aus offizieller Dokumentation, verfügbaren Tools und einer kleinen lesenden
    Probe:
 
 | Bereich | Zu klären |
 |---|---|
 | Autorität | Welcher Container oder Datensatz ist maßgeblich und wie wird er eindeutig adressiert? |
-| Arbeitseintrag | Task, Issue, Karte, Datenbankzeile oder anderes Objekt; Drafts getrennt oder gleichartig? |
+| Arbeitseintrag | Task, Issue, Karte, Datenbankzeile oder anderes Objekt? Drafts getrennt oder gleichartig? |
 | Schema | Titel, Beschreibung, Status, Typ, Labels, Verantwortliche, Termine, Beziehungen, Archivierung und Sichtbarkeit. |
-| Schnittstelle | CLI, REST, GraphQL, SDK, MCP oder Export; Lese-, Schreib- und Batch-Fähigkeit getrennt. |
+| Schnittstelle | CLI, REST, GraphQL, SDK, MCP oder Export. Lese-, Schreib- und Batch-Fähigkeit getrennt. |
 | Authentifizierung | Unterstützte Tokenarten, minimale Berechtigungen, Ablauf, Rotation und sichere Speicherung. |
 | Grenzen | Primäre und sekundäre Limits, Pagination, maximale Batch- und Payload-Größe, Concurrency und Retries. |
 | Lücken | Nicht automatisierbare Ansichten, Regeln, Formeln, Anhänge, Kommentare oder Historie. |
@@ -44,12 +44,12 @@ Leite die kleinste Zielkonfiguration ab, die den Arbeitsfluss vollständig träg
 
 1. genau ein Statusfeld für die lokale Task-Zustandsmenge `draft | ready | next | in-progress | review |
    waiting | done`, extern etwa `Draft`, `Ready`, `Next`, `In progress`, `Review`, `Waiting` und `Done`, oder
-   eine bestätigte bedeutungsgleiche Abbildung; Projektstatus wie `active | final | archived` sind davon
-   getrennt und werden nicht auf Taskstatus abgebildet;
-2. ein Arbeitseintrag mit Titel und vollständigem aktuellem Taskvertrag;
+   eine bestätigte bedeutungsgleiche Abbildung, wobei Projektstatus wie `active | final | archived` davon
+   getrennt sind und nicht auf Taskstatus abgebildet werden,
+2. ein Arbeitseintrag mit Titel und vollständigem aktuellem Taskvertrag,
 3. eine Gesamtansicht und gefilterte Ansichten für die nächste Queue, laufende, zu prüfende und ruhende
-   Arbeit, sofern das Ziel Ansichten automatisierbar unterstützt;
-4. Labels oder Zusatzfelder nur für tatsächlich genutzte Typen, Bereiche oder Prioritäten;
+   Arbeit, sofern das Ziel Ansichten automatisierbar unterstützt,
+4. Labels oder Zusatzfelder nur für tatsächlich genutzte Typen, Bereiche oder Prioritäten,
 5. keine Automationen, Formeln oder Workflows ohne konkreten Bedarf.
 
 Kann eine Konfiguration nicht über die verfügbare Schnittstelle angelegt werden, erstelle eine kurze
@@ -66,11 +66,11 @@ Trenne im Ziel Ist-Stand und Historie:
 
 Zeige vor schreibenden Migrationsschritten kompakt:
 
-- Quelle, Ziel und künftig maßgebliche Autorität;
-- Anzahl und Arten der zu übernehmenden Einträge;
-- Feld- und Statusmapping einschließlich nicht abbildbarer Werte;
-- Umgang mit Drafts, Abhängigkeiten, Anhängen, Kommentaren, Historie und abgeschlossenen Einträgen;
-- Zielkonfiguration, benötigte Berechtigungen, bekannte API-Grenzen und geschätztes Request-Budget;
+- Quelle, Ziel und künftig maßgebliche Autorität,
+- Anzahl und Arten der zu übernehmenden Einträge,
+- Feld- und Statusmapping einschließlich nicht abbildbarer Werte,
+- Umgang mit Drafts, Abhängigkeiten, Anhängen, Kommentaren, Historie und abgeschlossenen Einträgen,
+- Zielkonfiguration, benötigte Berechtigungen, bekannte API-Grenzen und geschätztes Request-Budget,
 - Idempotenzschlüssel, Verifikation, Rückweg und den Umgang mit der bisherigen Quelle.
 
 Frage nur nach Entscheidungen, die sich nicht aus Repo, Quelle oder Ziel ableiten lassen.
@@ -88,24 +88,24 @@ geprüfte Schritte.
    Informationsverlust möglich ist.
 2. Löse unveränderliche IDs, Felddefinitionen und Auswahlwerte einmal auf. Bündele nur unabhängige Abfragen
    und Mutationen in kontrollierten, beobachtbaren Blöcken unter den dokumentierten Größen-, Rate-, Timeout-
-   und Inhaltsgrenzen; ein großer Request ist kein Selbstzweck.
+   und Inhaltsgrenzen. Ein großer Request ist kein Selbstzweck.
 3. Erzeuge Zielobjekte idempotent mit stabilen Quell-IDs als Schlüssel. Kann das Ziel keinen versteckten
    Schlüssel tragen, halte während des Laufs eine nicht versionierte Zuordnung von Quell-ID zu Ziel-ID, ohne
    Zugangsdaten oder unnötige personenbezogene Rohdaten. Übernimm in den aktuellen Zieldatensatz nur
    weiterhin gültigen Taskvertrag, Entscheidungen und aktuelle Übergabe. Arbeite die geltenden
-   Entscheidungen, Konventionen und Anforderungen als konkrete Taskanweisungen und überprüfbare Abnahme ein;
-   Quellenlinks allein genügen nicht. Migriere eine fachlich benötigte Chronologie getrennt, statt frühere
-   Laufberichte in den Pflichtkontext des Tasks zu verkleben.
+   Entscheidungen, Konventionen und Anforderungen als konkrete Taskanweisungen und überprüfbare Abnahme ein,
+   denn Quellenlinks allein genügen nicht. Migriere eine fachlich benötigte Chronologie getrennt, statt
+   frühere Laufberichte in den Pflichtkontext des Tasks zu verkleben.
 4. Verifiziere nach jedem Block Fehler, Anzahl und Stichproben. Bei Rate-Limit oder Teilfehler stoppe,
    beachte Retry- und Reset-Hinweise, warte mit exponentiellem Backoff mit Obergrenze, erhalte die Zuordnung
    und wiederhole einen Block nie blind vollständig.
 5. Ändere oder entferne die Quelle erst, wenn das Ziel vollständig verifiziert und der Nutzer dem Umschalten
-   zugestimmt hat. Ein alter lokaler Backlog darf nicht als zweites aktives System liegen bleiben; archiviere
+   zugestimmt hat. Ein alter lokaler Backlog darf nicht als zweites aktives System liegen bleiben. Archiviere
    oder entferne ihn nur nach ausdrücklicher Freigabe.
 
 Für das lokale Ziel lies vollständig
 [den lokalen Backlog-Vertrag](../../qatlas-core-backlog/references/local-backlog.md) und instanziiere danach
-die dort genannten kanonischen Vorlagen. Importierte Tasks erhalten kollisionsgeprüfte lokale IDs; externe
+die dort genannten kanonischen Vorlagen. Importierte Tasks erhalten kollisionsgeprüfte lokale IDs. Externe
 IDs bleiben nur als knapper Herkunftshinweis erhalten, wenn sie für Rückverfolgung oder Links nötig sind.
 
 ## 4. Bindung umschalten
@@ -122,9 +122,9 @@ genau eine Autoritätsaussage und kein zweites Anbieterhandbuch im Repo.
 Vergleiche Quell- und Zielanzahl nach Typ und Status, prüfe eine Stichprobe vollständig und bestätige, dass
 alle Links in der neuen Bindung erreichbar sind. Berichte:
 
-- migrierte, übersprungene und fehlgeschlagene Einträge;
-- bewusst nicht übernommene Daten und verbleibende manuelle Konfiguration;
-- das neue maßgebliche System und den Rückweg;
+- migrierte, übersprungene und fehlgeschlagene Einträge,
+- bewusst nicht übernommene Daten und verbleibende manuelle Konfiguration,
+- das neue maßgebliche System und den Rückweg,
 - verbliebene Quellartefakte, die noch nicht freigegeben archiviert oder entfernt wurden.
 
 Ein Systemwechsel ist erst abgeschlossen, wenn die Bindung stimmt, das Ziel verifiziert ist und kein

@@ -14,7 +14,7 @@ Projektvorgaben haben Vorrang.
 - Bei lokaler Autorität ist `BACKLOG.md` der Roster des Qatlas-Backlogs.
 - Bei externer Autorität enthält `BACKLOG.md` den prominenten Link und die knappe dauerhafte Bindung, die
   Planungs-, Orchestrierungs- und Taskarbeit zum richtigen Objekt, Statusmodell und Schreibweg führt. Folge
-  ausschließlich dieser Bindung; der lokale Backlog wird dann nicht als Spiegel gepflegt.
+  ausschließlich dieser Bindung. Der lokale Backlog wird dann nicht als Spiegel gepflegt.
 - Widersprechen sich native Projektanweisungen und `BACKLOG.md`, ändere nichts und kläre, welche Aussage
   aktualisiert werden muss.
 - Ein Wechsel oder eine Migration des maßgeblichen Systems erfolgt nur auf ausdrücklichen Aufruf von
@@ -42,14 +42,14 @@ beschaffbar.
 
 `review` heißt in jedem Planungssystem: Der Task ist vollständig beschrieben, und nur eine Entscheidung,
 Prüfung oder Handlung des Nutzers steht aus. Ist offen, was entstehen soll (Ergebnis, Scope, Vorgehen oder
-Abnahme), ist der Task `draft`. Der Task bleibt dabei eine Einheit; lege für einen offenen Rest keinen neuen
+Abnahme), ist der Task `draft`. Der Task bleibt dabei eine Einheit. Lege für einen offenen Rest keinen neuen
 Task an.
 
 Schreibe im selben Schritt, in dem du einen Task auf `review` setzt, die Übergabe in seinen aktuellen
 Eintrag, so vollständig, dass der Nutzer ohne Task, Diff und Verlauf antworten kann:
 
-- **Offener Punkt:** die eine Entscheidung, Prüfung oder Handlung; bei einer Prüfung Ort, Aktion und
-  erwartetes Ergebnis je Schritt, bei einer Handlung Ort oder Befehl und der erwartete Nachweis.
+- **Offener Punkt:** die eine Entscheidung, Prüfung oder Handlung. Bei einer Prüfung gehören Ort, Aktion
+  und erwartetes Ergebnis je Schritt dazu, bei einer Handlung Ort oder Befehl und der erwartete Nachweis.
 - **Belegter Stand:** was erledigt und geprüft ist und ob es integriert ist, sonst Branch, Worktree und Stand
   der nicht integrierten Arbeit.
 - **Empfehlung:** bei einer Entscheidung die Optionen mit ihrer Folge und die begründete Empfehlung.
