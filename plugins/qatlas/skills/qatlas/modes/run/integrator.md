@@ -53,23 +53,30 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 ## Integration
 
 Mit der Übergabe gehören Task und Namensraum dir bis zu einem `rework`, bei einer Übergabe, die nicht die
-letzte ist, bis zu ihrem `integrated`. Integriere Übergaben nacheinander. Protokolliere jeden Konflikt mit
-`<run> log --type conflict --package <package> --task <id> --text <text>` und jeden Wiederholungslauf eines
-CI-Jobs ebenso mit `--type rerun`; beide zählen in die Kennzahlen.
+letzte ist, bis zu ihrem `integrated`. Integriere Übergaben nacheinander. Protokolliere jeden Konflikt, auch
+einen selbst gelösten, mit `<run> log --type conflict --package <package> --task <id> --text <text>` und
+jeden Wiederholungslauf eines CI-Jobs ebenso mit `--type rerun`; beide zählen in die Kennzahlen.
 
 1. Teste zuerst Konflikte mit `probe --branch <task-branch> --base <basis>`. Liegt der Code in einem anderen
    Repo als der Steuerwurzel, gib es hier und bei der Landung mit `--repo <code-repo>` mit; `<basis>` und der
-   Kontroll-Branch beziehen sich dann auf dieses Repo. Gib einen Konflikt, auch einen, der erst beim späteren
-   Nachziehen der Basis entsteht, ohne vorherige Abnahme als `rework conflict: <Dateien>` zurück; er zählt
-   nicht als Korrekturversuch. Löse Konflikte nie selbst. Nur wenn der Lead nicht mehr verfügbar ist, sichere
-   den Task stattdessen nach dem Git-Workflow als Übergabe an `review`.
-2. Prüfe ohne Konflikt Diff, Nachweis, Abnahme und Dokumentationswirkung selbst, wie „Abnehmen und
-   integrieren“ es beschreibt. Gib inhaltlichen Korrekturbedarf als `rework <Grund>` zurück; er zählt als
-   Korrekturversuch nach der Regel von höchstens zwei Korrekturen. Bei Pull Requests hat `handover` bereits
-   geprüft, dass der Branch einen Nicht-Merge-Commit oder eine `cut-exception` trägt. Trägt diese Ausnahme im
-   Sinne der Commit-Grenze nicht, gib die Übergabe als `rework cut: <verlangter Schnitt>` zurück; das
-   zählt nicht als Korrekturversuch. Lief ein Worker mit einem anderen Modell oder Effort als sein Profil im
-   Block `run`, protokolliere das als `abweichung`, ohne deshalb `rework` zu antworten.
+   Kontroll-Branch beziehen sich dann auf dieses Repo. Löse einen Konflikt nur dann selbst, wenn beide Seiten
+   an jeder Konfliktstelle bloß Einträge ergänzen, etwa in einem Register oder einer Liste erwarteter
+   Testwerte, oder einen daraus abgeleiteten Wert anpassen, etwa einen Zähler, oder wenn die Datei generiert
+   ist: Merke dir die Merge-Base von Task-Branch und `<basis>` als Bezugspunkt der Delta-Prüfungen und hole
+   `<basis>` im Worktree des Tasks per Merge in den Task-Branch. Übernimm an jeder Konfliktstelle die
+   Einträge beider Seiten, bestimme abgeleitete Werte daraus neu, erzeuge eine generierte Datei mit dem
+   Befehl des Projekts neu und ändere sonst nichts. Pushe den Merge-Commit bei Integration über Pull Requests
+   in den Branch des Pull Requests. Der Stand ist danach ein anderer Tree als der übergebene. Gib jeden
+   anderen Konflikt, auch einen, der erst beim späteren Nachziehen der Basis entsteht, ohne vorherige Abnahme
+   als `rework conflict: <Dateien>` zurück; er zählt nicht als Korrekturversuch. Nur wenn der Lead nicht mehr
+   verfügbar ist, sichere den Task stattdessen nach dem Git-Workflow als Übergabe an `review`.
+2. Prüfe ohne Konflikt oder nach deiner Lösung Diff, Nachweis, Abnahme und Dokumentationswirkung selbst, wie
+   „Abnehmen und integrieren“ es beschreibt. Gib inhaltlichen Korrekturbedarf als `rework <Grund>` zurück; er
+   zählt als Korrekturversuch nach der Regel von höchstens zwei Korrekturen. Bei Pull Requests hat `handover`
+   bereits geprüft, dass der Branch einen Nicht-Merge-Commit oder eine `cut-exception` trägt. Trägt diese
+   Ausnahme im Sinne der Commit-Grenze nicht, gib die Übergabe als `rework cut: <verlangter Schnitt>` zurück;
+   das zählt nicht als Korrekturversuch. Lief ein Worker mit einem anderen Modell oder Effort als sein Profil
+   im Block `run`, protokolliere das als `abweichung`, ohne deshalb `rework` zu antworten.
 3. Hat die Übergabe die Abnahme bestanden, integriere sie nach dem Git-Workflow, bei Integration über Pull
    Requests nach „Integration über Pull Requests“, indem du den vom Lead geöffneten Pull Request landest.
    Welche lokalen Prüfungen bleiben, entscheiden die [Nachweise und
@@ -101,8 +108,9 @@ Schritt 3 aus und überspringe keine.
   grüner CI auf demselben Head lass die lokale `slot --priority`-Prüfung weg.
 - **Anderer Tree:** Führe die schnellen gemeinsamen Prüfungen vollständig über `slot` aus. Führe eine teure
   Prüfung nur aus, wenn `git diff --name-only <Merge-Base von Task-Branch und Basis> <aktuelle Basis>` einen
-  ihrer Pfadbereiche berührt. Protokolliere jede übersprungene Prüfung mit `<run> log --type skipped --task
-  <id> --text "<Prüfung und Grund>"`.
+  ihrer Pfadbereiche berührt; nimm nach einem selbst gelösten Konflikt die Merge-Base von vor deinem Merge.
+  Protokolliere jede übersprungene Prüfung mit `<run> log --type skipped --task <id> --text "<Prüfung und
+  Grund>"`.
 - **Schlussprüfung:** Führe nach `end` einmal über `slot` auf dem Endstand jede teure Prüfung aus, die in
   diesem Lauf mindestens einmal übersprungen wurde, und jede Prüfung, die das Projekt für das Ende eines Laufs
   verlangt. Suche diese von den nativen Anweisungen des Projekts aus dort, wo es seine Prüfungen beschreibt;

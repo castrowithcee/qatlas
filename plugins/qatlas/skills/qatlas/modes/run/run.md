@@ -110,10 +110,11 @@ Angaben des lesenden Workers.
 - **Kopplung:** Halte Abhängigkeiten und echte Kopplung über gemeinsame Invarianten, Migrationen oder
   Laufzeitressourcen innerhalb eines Pakets; lässt sich Kopplung nicht ausschließen, lege die Tasks in dasselbe
   Paket.
-- **Gemeinsame Dateien:** Lege Tasks, die dieselbe zentrale Datei ändern, etwa ein Register, eine gemeinsame
-  Testdatei oder dieselbe Dokumentation, in ein Paket, weil jede Integration dort für die anderen Pakete als
-  Konflikt zurückkommt. Lass Pakete nur mechanisch geteilte Dateien gemeinsam nutzen, und nur, wo es sich
-  nicht vermeiden lässt.
+- **Gemeinsame Dateien:** Lege Tasks, die dieselbe zentrale Datei umbauen, etwa eine gemeinsame Testdatei
+  oder dieselbe Dokumentation, in ein Paket, weil jede Integration dort für die anderen Pakete als Konflikt
+  zurückkommt. Lass Pakete nur Dateien gemeinsam nutzen, die jeder Task bloß um Einträge ergänzt, etwa ein
+  Register, oder die generiert sind, und nur, wo es sich nicht vermeiden lässt; solche Konflikte löst der
+  Integrator.
 - **Serielle Integration:** Ergänze ein Paket aus einer reinen Abhängigkeitskette um unabhängige Tasks, damit
   sein Lead weiterarbeitet, während er auf eine Integration wartet. Gib einem übergreifenden Task, der viele
   Bereiche berührt, etwa einer Import- oder Pfadumstellung, ein eigenes Paket und starte es zuerst.

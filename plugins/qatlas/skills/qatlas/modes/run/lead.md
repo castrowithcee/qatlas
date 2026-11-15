@@ -64,7 +64,8 @@ Lass die vollständige Übergabeprüfung lokal nur einmal grün laufen. Hole des
 aktuelle `<basis>` per Merge in den Task-Branch und löse Konflikte; dieser Merge-Commit ist keine fremde
 Änderung. Übergib genau den Stand, auf dem die Übergabeprüfungen der Teststrategie des Projekts grün waren,
 ohne danach etwas einzumischen. Gibt der Integrator bis zur Integration einen neuen Konflikt mit der Basis als
-`rework conflict: …` zurück, gehe ebenso vor.
+`rework conflict: …` zurück, gehe ebenso vor. Hat er einen Konflikt selbst gelöst, trägt dein Task-Branch
+seinen Merge-Commit der Basis; auch der ist keine fremde Änderung.
 
 Übergib jeden geprüften Task mit `<run> handover --task <id> --report <file>`; liegt der Code in einem anderen
 Repo als der Steuerwurzel, ergänze `--code-repo <absolute path>`, damit `branch` und `base` dort geprüft

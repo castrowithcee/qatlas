@@ -683,6 +683,34 @@ try {
   assert.strictEqual(land(c).status, 5);
   assert.deepStrictEqual(mergeCalls(c), []);
 
+  // Conflict resolved by the merger: the merge of the base is accepted only with --resolved, also as local tip.
+  c = setup('remote-resolved', { moved: true, extra: ['c.txt'] });
+  updated = remoteUpdate(c, other => {
+    assert.throws(() => git(other, 'merge', '-q', '--no-edit', 'origin/main'));
+    write(path.join(other, 'c.txt'), 'c\nc.txt\n');
+    git(other, 'add', 'c.txt');
+    git(other, 'commit', '-q', '--no-edit');
+  });
+  write(c.report, fs.readFileSync(c.report, 'utf8').replace('last: true', `last: true\nhead: ${c.sha}`));
+  r = land(c);
+  assert.strictEqual(r.status, 5);
+  assert.match(json(r).reason, /conflicts between its parents/);
+  git(c.repo, 'pull', '-q', 'origin', 'task');
+  r = land(c);
+  assert.strictEqual(r.status, 5);
+  assert.match(json(r).reason, /report head differs from branch/);
+  assert.deepStrictEqual(mergeCalls(c), []);
+  r = landWith(c, '--resolved');
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(json(r).result, 'merged');
+  mergeArgs = JSON.parse(mergeCalls(c)[0]);
+  assert.strictEqual(mergeArgs[mergeArgs.indexOf('--match-head-commit') + 1], updated);
+  // --resolved does not cover a new own commit.
+  c = setup('resolved-own-commit', { moved: true });
+  remoteUpdate(c, other => { git(other, 'merge', '-q', '--no-edit', 'origin/main'); commit(other, 'e.txt', 'e\n'); });
+  assert.strictEqual(landWith(c, '--resolved').status, 5);
+  assert.deepStrictEqual(mergeCalls(c), []);
+
   // Handover of an open PR: pr/head/pushed. First push carries the cut check, a CI fix after it passes.
   const handover = (c, extra, ...more) => {
     const orig = c.report + '.orig';

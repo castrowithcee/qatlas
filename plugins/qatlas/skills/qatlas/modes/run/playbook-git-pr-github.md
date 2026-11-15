@@ -16,7 +16,8 @@ Helfern der Lauf-Werkzeuge `<tools>` aus.
   Kontrollverzeichnisses. `land` prüft den Head, wartet wie `ci-wait` auf CI, führt per Squash-Merge
   zusammen, belegt den Squash und löscht den Remote-Branch; nutze sein `proof`-Ergebnis als Squash-Nachweis
   für das Aufräumen lokaler Worktrees und Branches. Bei Exit 8 (`no-ci`) bestätige den gemergten Stand, wie
-  das Landen ohne CI es verlangt, und rufe `land … --no-ci` auf.
+  das Landen ohne CI es verlangt, und rufe `land … --no-ci` auf. Hast du einen Konflikt selbst gelöst, ergänze
+  `--resolved`, damit `land` deinen Merge-Commit der Basis als Head annimmt.
 - **Aktueller Stand:** Verlangt der Branch-Schutz ihn, ziehe mit `gh pr update-branch <n>` nach; `land`
   akzeptiert dann den Remote-Head.
 - **Merge Queue:** Ist sie aktiv, nutze nicht `land`: Reihe den Pull Request ein und lösche den Remote-Branch
