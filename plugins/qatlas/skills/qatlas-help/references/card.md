@@ -15,7 +15,6 @@ description: >
 | **qatlas-core init** | Richtet Git-Repo, Projektzustand, Projektanweisungen und Library ein. |
 | **qatlas-core doctor** | Prüft Abhängigkeiten, Scaffold und Library, ohne etwas zu reparieren. |
 | **qatlas-core statusline** | Konfiguriert oder entfernt die Statusline des aktuellen Hosts. |
-| **qatlas-core backlog-system** | Wechselt oder migriert das maßgebliche Planungssystem. |
 | **qatlas-mode adhd** | Gestaltet die Zusammenarbeit für den Rest der Session so, dass ein Leser mit ADHS danach handeln kann. |
 | **qatlas-help [Thema]** | Führt wie ein Handbuch durch Qatlas. |
 | **qatlas-dev [lite\|full\|ultra\|off]** | Setzt die Stufe der Code-Methode für die Session oder schaltet sie ab. |

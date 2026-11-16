@@ -78,7 +78,7 @@ Geltungsbereich oder Rang einer Aussage.
 | `playbook`, `knowledge`, `memory` | keine |
 | `fact` | optional `source` |
 
-Task-Statuswerte gehören zum Vertrag des lokalen Backlogs. Ein Plan ist `done`, sobald er erfüllt oder
+Die Task-Statuswerte legt die Backlog-Norm fest. Ein Plan ist `done`, sobald er erfüllt oder
 verworfen ist. Er leitet dann keine laufende Arbeit mehr, und was daraus gilt, steht in den reservierten
 Dateien.
 Feste `meta`-Ziele sind `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, ein Projektkopf im lokalen Backlog und eine

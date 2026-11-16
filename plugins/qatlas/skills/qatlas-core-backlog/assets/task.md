@@ -3,7 +3,7 @@ description: >
   <Worum geht es bei dieser Aufgabe? Ein Satz.>
 type: task
 edit: shared
-status: draft         # draft | ready | next | in-progress | review | waiting | done
+status: draft         # draft | ready | in-progress | review | waiting | done
 ---
 
 # Aufgabe: <Titel>

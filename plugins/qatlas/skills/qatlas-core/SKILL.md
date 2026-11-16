@@ -2,10 +2,10 @@
 name: qatlas-core
 description: >
   Bündelt ausdrücklich aufgerufene Qatlas-Kernadministration: ein Projekt einrichten, den Projektzustand
-  diagnostizieren, die Statusline konfigurieren oder das maßgebliche Planungssystem wechseln.
+  diagnostizieren oder die Statusline konfigurieren.
   Ohne Argument eine kompakte Karte der verfügbaren Modi zeigen und nichts ausführen.
 disable-model-invocation: true
-argument-hint: "[init|doctor|statusline|backlog-system] [Argumente]"
+argument-hint: "[init|doctor|statusline] [Argumente]"
 ---
 
 # Qatlas-Core
@@ -25,7 +25,6 @@ bleiben. Lies keine Modus-Referenz und ändere keinen Zustand.
 | `init` | Richtet Qatlas und seinen Projektzustand ein. |
 | `doctor` | Prüft Qatlas, Scaffold und Abhängigkeiten des Projekts, ohne zu reparieren. |
 | `statusline` | Richtet die Statusline des aktuellen Hosts ein, passt sie an oder entfernt sie. |
-| `backlog-system` | Wechselt oder migriert das maßgebliche Planungssystem eines Projekts. |
 
 Aufruf: `qatlas-core <argument>`
 
@@ -40,9 +39,6 @@ Aufruf: `qatlas-core <argument>`
   Verfahren aus.
 - **`statusline [Argumente]`:** Lies [Statusline konfigurieren](references/playbook-statusline.md)
   vollständig und führe nur dieses Verfahren mit den übrigen Argumenten aus.
-- **`backlog-system [Quelle] [Ziel]`:** Lies [Planungssystem
-  wechseln](references/playbook-backlog-system.md) vollständig und führe nur dieses Verfahren mit den
-  übrigen Argumenten aus.
 
 Ist ein übergebenes Argument mehrdeutig, nenne die passenden Optionen in je einem kurzen Satz und frage genau
 eine ab. Ist es unbekannt, zeige die kompakte Karte und nenne das unbekannte Argument in einem Satz. Nimm

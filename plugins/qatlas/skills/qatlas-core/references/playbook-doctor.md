@@ -17,6 +17,16 @@ node <plugin-root>/scripts/qatlas-doctor.js
 Den Block `run` der Konfiguration prüft das Skript nur auf Grundstruktur. Ob Modell und Effort im
 aktuellen Host verfügbar sind, prüft erst `qatlas run`.
 
+## Planungssystem
+
+Prüfe `.qatlas-project/backlog/BACKLOG.md` lesend gegen [die
+Backlog-Norm](../../qatlas-core-backlog/SKILL.md), eine externe Bindung zusätzlich gegen deren
+Bindungsvorlage. Melde als Hinweis:
+
+- jede fehlende Antwort, jeden Status außerhalb der Norm und jeden nicht eindeutig erkennbaren Status,
+- gewachsenen Inhalt: bei einer Bindung alles über eine Zeile je Antwort hinaus, etwa Begründung, Anleitung,
+  Anbieterwissen oder Verlauf, bei einem Roster erledigte Tasks und mehr als eine Zeile je Eintrag.
+
 ## Bericht
 
 Fasse die Befunde nach Priorität zusammen: Blocker, fehlende Projektbestandteile, Hinweise. Erfinde keine

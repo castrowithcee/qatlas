@@ -32,6 +32,13 @@ Ergänze darüber hinaus nichts und stelle dazu keine Fragen. `AGENTS.md` wächs
 reservierte Datei des Wissensraums bekommt ihre Zeile unter `Projektwissen`, sobald sie mit ihrem ersten
 Eintrag entsteht.
 
+## Planungssystem
+
+Hat das Skript `BACKLOG.md` neu angelegt und nennen die globale Arbeitsvereinbarung, eine ihrer
+Lesebedingungen oder die Projektanweisungen eine Vorgabe zum Planungssystem, binde das Projekt nach
+[der Backlog-Norm](../../qatlas-core-backlog/SKILL.md) daran. Nur dieser Schritt braucht die Zustimmung des
+Nutzers. Ohne Vorgabe bleibt der lokale Backlog.
+
 ## Übergabe
 
 Nenne nur, was angelegt wurde, und jeden Punkt unter `PROBLEMS`. Nach der ersten Einrichtung genügen diese

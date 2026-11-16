@@ -11,8 +11,7 @@ passt.
 ## Explizite Einstiegspunkte
 
 - **`qatlas`:** die Arbeitsschleife mit `goal`, `shape`, `run` und `review`.
-- **`qatlas-core`:** seltene Administration wie Einrichtung, Diagnose, Statusline und Wechsel des
-  Planungssystems.
+- **`qatlas-core`:** seltene Administration wie Einrichtung, Diagnose und Statusline.
 - **`qatlas-work`:** einzelne Verfahren außerhalb der Schleife, etwa die Verwaltung von Git-Worktrees.
 - **`qatlas-mode`:** Zusammenarbeitsmodi für den Rest der Session, etwa für Leser mit ADHS.
 - **`qatlas-help`:** dieses Handbuch.
@@ -23,7 +22,7 @@ passt.
 |---|---|---|
 | `qatlas-core-navigation` | eine Anfrage Kontext aus dem Repo braucht | Findet Wissen über Einstiegspunkte, Lesebedingungen und Frontmatter |
 | `qatlas-core-filing` | Dateien angelegt, geändert, verschoben oder importiert werden | Setzt Ort, Name, Kennung und Frontmatter und hält Verweise konsistent |
-| `qatlas-core-backlog` | Planungs- oder Taskarbeit ansteht | Arbeitet im einzigen maßgeblichen Planungssystem nach dessen Regeln |
+| `qatlas-core-backlog` | Planungs- oder Taskarbeit ansteht | Arbeitet im einzigen maßgeblichen Planungssystem nach dessen Regeln und bindet oder wechselt es auf Auftrag |
 | `qatlas-core-git` | in einem Repo gearbeitet wird oder Commits und Pushes anstehen | Prüft den Zustand, schützt parallele Arbeit und hält Commits sauber |
 
 Jeder Core-Skill lädt zuerst nur seinen kurzen Kern und liest Details für die konkrete Operation.
