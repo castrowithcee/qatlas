@@ -52,6 +52,8 @@ Zulässige Wege:
   bestimmt die Reihenfolge des Planungssystems. Ordne sie nicht stillschweigend um. Zurückgestellte, weiter
   ausführbare Arbeit bleibt `ready` und rückt in dieser Reihenfolge nach hinten.
 - Technische Schwierigkeit allein macht einen Task weder zu `draft`, `review` noch `waiting`.
+- Ein Arbeitspaket ohne erkennbaren Status hat keinen. Behandle es nicht als `draft`, wähle es nicht aus und
+  setze ihm ohne Auftrag keinen Status. Nenne die Anzahl, wo sie für Auswahl oder Übersicht zählt.
 
 ## Ausführungsreife
 
@@ -94,6 +96,8 @@ Eintrag, so vollständig, dass der Nutzer ohne Task, Diff und Verlauf antworten 
   Planungssystem, aus einer lesenden Probe des Systems, zuletzt durch eine gebündelte Rückfrage. Unterstelle
   keinen Anbieter aus einem vorhandenen Git-Remote. Lege die fertige Bindung vor und schreibe sie nach
   Zustimmung.
+- Wählt der Nutzer GitHub-Issues ohne eigene Vorgabe, lege [die Startvorlage für
+  GitHub-Issues](assets/external-binding-github.md) als Ausgangspunkt vor, nicht als Standard.
 - Prüfe `BACKLOG.md` bei Taskarbeit nicht auf Vollständigkeit. Fehlt die Antwort für den anstehenden
   Schritt, rate nicht und nenne den fehlenden Punkt. Die Zeile ergänzt nur, wer mit dem Nutzer spricht, nach
   dessen Zustimmung.
