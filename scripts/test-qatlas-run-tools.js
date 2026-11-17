@@ -908,12 +908,20 @@ try {
     refused(/open handover of task 3/, 'handover', '--package', 'b', '--task', '4', '--report', report, '--timeout', '0.1');
     let integ = integrate(0);
     assert.deepStrictEqual(types(integ), ['handover']);
+    // A cursor past the handover (e.g. a skipped one) no longer wakes on it, but the queue still lists it.
+    const later = integrate(integ.cursor);
+    assert.deepStrictEqual([types(later), later.queue.map(q => [q.sender, q.task, q.report])],
+      [[], [['b', '3', integ.events[0].report]]]);
+    assert.ok(!('queue' in supervise(0)));
+    // log returns no cursor, so a wait cannot continue from it and skip a handover.
+    assert.deepStrictEqual(ok('log', '--type', 'conflict', '--package', 'b', '--task', '3', '--text', 'probe'), { logged: 'conflict' });
     assert.strictEqual(fs.readFileSync(integ.events[0].report, 'utf8'), fm + 'Report v2\n');
     assert.deepStrictEqual(types(supervise(woke.cursor)), []);
     refused(/only "integrated <sha>" or "rework <reason>"/, 'answer', '--package', 'b', '--answer', 'fine');
     ok('answer', '--package', 'b', '--answer', 'rework fix the test');
     // Answered: offered no more, and even a changed report now only collects the answer.
     assert.deepStrictEqual(types(integrate(0)), []);
+    assert.deepStrictEqual(integrate(0).queue, []);
     write(report, fm + 'Report v3\n');
     assert.strictEqual(ok('handover', '--package', 'b', '--task', '3', '--report', report, '--timeout', '0.1').answer, 'rework fix the test');
     // A resubmission after a picked rework is a new open handover, offered exactly once.
@@ -949,7 +957,7 @@ try {
     ok('log', '--type', 'conflict', '--package', 'b', '--task', '3', '--text', 'x.go');
     ok('log', '--type', 'integrated', '--package', 'a', '--task', '1', '--text', 'def456');
     const rep = ok('report');
-    assert.deepStrictEqual(rep.log, { rerun: 0, conflict: 1, integrated: 1 });
+    assert.deepStrictEqual(rep.log, { rerun: 0, conflict: 2, integrated: 1 });
     assert.strictEqual(rep.tasks['1'].integrated, true);
     assert.ok(!rep.notes.integrated);
     assert.deepStrictEqual([rep.ended, rep.budget, rep.open], [false, 3, []]);

@@ -28,9 +28,11 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 ## Kommunikation
 
 - **Übergaben:** Warte mit `<run> wait --role integrator --since <cursor>`. Beginne mit `--since 0` und gib
-  danach jeweils den `cursor` der letzten Ausgabe mit. `wait` blockiert bis zu seinem `--timeout`. Setze das
-  Befehls-Timeout des Hosts darüber. Es liefert jede offene Übergabe genau einmal, auch nach einem Wechsel des
-  Integrators.
+  danach jeweils den `cursor` der letzten Ausgabe von `wait` mit. `wait` blockiert bis zu seinem `--timeout`,
+  solange keine neue Übergabe und kein Laufende eintrifft. Setze das Befehls-Timeout des Hosts darüber. Unter
+  `queue` nennt jede Ausgabe alle offenen, unbeantworteten Übergaben, die älteste zuerst, auch nach einem
+  Wechsel des Integrators. Nimm als nächste Übergabe immer die älteste aus `queue`, die du noch nicht
+  integrierst.
 - **Antworten an Leads:** Antworte mit `<run> answer --package <package> --answer "integrated <sha>"` oder
   mit einem `rework` in der Form aus „Integration“.
 - **Fragen:** Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes regel`. Deckt

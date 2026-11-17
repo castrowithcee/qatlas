@@ -7,7 +7,8 @@
 // derived on read. A sender is a lead (--package) or the integrator (--role integrator) and has at most one
 // open signal (question or handover) until it picks up the answer by repeating the same call.
 // wait wakes the supervisor on question, done and disk, the integrator on open handovers and end, and a lead
-// on the answer to its open signal.
+// on the answer to its open signal. The integrator's wait also lists every open unanswered handover as "queue",
+// so a handover it skipped or forgot is offered again.
 // Usage:
 //   qatlas-run.js begin --repo <root> [--discard]
 //     Resumes an unfinished run; --discard archives it and starts anew.
@@ -16,6 +17,7 @@
 //   qatlas-run.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
 //   qatlas-run.js answer --repo <root> (--package <package> | --role integrator) --answer <text>
 //   qatlas-run.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <s>] [--min-free <GB>]
+//     Output: {"events","cursor","timeout"}, for the integrator also "queue" (oldest first).
 //   qatlas-run.js wait --repo <root> --package <package> [--timeout <s>]
 //     Blocks a lead until its open question or handover is answered or the timeout passes.
 //     Output: {"answered","timeout"}; the answer itself is collected by repeating ask or handover.
@@ -265,11 +267,13 @@ async function wait() {
     // A new run starts a new log, so an old cursor would match nothing and wait would hang silently.
     if (since > all.length) fail(`--since ${since} is past the end of the log (${all.length} events); a new run started, pass --since 0`, 2);
     const open = role === INTEGRATOR ? openSignals(all) : null;
-    const wakes = e => (open
-      ? e.type === 'end' || (e.type === 'handover' && open.get(e.sender)?.seq === e.seq && open.get(e.sender).answer === null)
-      : SUPERVISOR_WAKES.has(e.type));
+    const queued = e => e.type === 'handover' && open.get(e.sender)?.seq === e.seq && open.get(e.sender).answer === null;
+    const wakes = e => (open ? e.type === 'end' || queued(e) : SUPERVISOR_WAKES.has(e.type));
     const hits = all.filter(e => e.seq >= since && wakes(e));
-    if (hits.length || Date.now() >= end) return out({ events: hits, cursor: all.length, timeout: !hits.length });
+    if (hits.length || Date.now() >= end) {
+      const queue = open ? { queue: all.filter(queued).map(({ seq, at, sender, task, report }) => ({ seq, at, sender, task, report })) } : {};
+      return out({ events: hits, ...queue, cursor: all.length, timeout: !hits.length });
+    }
     await sleep(2000);
   }
 }
@@ -289,7 +293,8 @@ function logEvent() {
   if (!/^[a-z][a-z0-9-]*$/.test(type)) fail('--type must match [a-z][a-z0-9-]*', 2);
   if (RESERVED.has(type)) fail('Reserved event type: ' + type, 2);
   record(repo, type, { package: flag('--package'), task: flag('--task'), text: flag('--text') });
-  out({ logged: type, cursor: events(repo).length });
+  // No cursor: continuing a wait from it would skip events that arrived since that wait.
+  out({ logged: type });
 }
 
 function end() {
