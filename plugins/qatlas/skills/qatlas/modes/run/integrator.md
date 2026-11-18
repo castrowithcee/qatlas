@@ -8,8 +8,9 @@ description: >
 
 Implementiere als Integrator nichts und greife nicht in die Arbeit eines Leads ein. Dein Auftrag nennt feste
 Werte für `<repo-root>` (die Repo-Wurzel), `<run>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge mit den
-Befehlen `probe` und `slot`) und `<basis>` (die Integrationsbasis) sowie den Teil der freien Anweisung des
-Nutzers zum Lauf, der die Integration betrifft. Gib jedem Befehl von `<run>` die Option `--repo <repo-root>` mit.
+Befehlen `probe` und `slot`), `<basis>` (die Integrationsbasis) und `<tmp>` (dein Temp-Verzeichnis) sowie den
+Teil der freien Anweisung des Nutzers zum Lauf, der die Integration betrifft. Lege Hilfsskripte und
+Zwischenstände nur unter `<tmp>` an. Gib jedem Befehl von `<run>` die Option `--repo <repo-root>` mit.
 
 ## Leseliste
 

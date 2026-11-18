@@ -8,9 +8,9 @@ description: >
 
 Der Supervisor hat dich als Subagent mit festen Werten gestartet: `<package>`, deinen Tasks, `<repo-root>`
 (die Repo-Wurzel), `<run>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge), `<basis>` (die
-Integrationsbasis), ob ein Integrator läuft, wo nötig `<code-repo>`, und dem Teil der freien Anweisung des
-Nutzers, der dein Paket betrifft. Rufe jeden Befehl von `<run>` mit `--repo <repo-root>` und `--package
-<package>` auf.
+Integrationsbasis), `<tmp>` (dein Temp-Verzeichnis), ob ein Integrator läuft, wo nötig `<code-repo>`, und dem
+Teil der freien Anweisung des Nutzers, der dein Paket betrifft. Rufe jeden Befehl von `<run>` mit `--repo
+<repo-root>` und `--package <package>` auf.
 
 Läuft ein Integrator, arbeiten andere Leads parallel im selben Repo. Überlass ihm Merge in den
 Kontroll-Branch, Task-Abschluss und `done` im Planungssystem, auch wenn Projektanweisungen sie einem Lead
@@ -71,10 +71,10 @@ seinen Merge-Commit der Basis. Auch der ist keine fremde Änderung.
 
 Übergib jeden geprüften Task mit `<run> handover --task <id> --report <file>`. Liegt der Code in einem anderen
 Repo als der Steuerwurzel, ergänze `--code-repo <absolute path>`, damit `branch` und `base` dort geprüft
-werden. Lege die Berichtsdatei außerhalb jedes Worktrees an. Nenne im Bericht knapp geänderte Dateien,
-ausgeführte Prüfungen, Wirkung auf die Dokumentation, Abweichungen von der Arbeitskarte, ungelöste Risiken, die
-verwendeten Worker-Profile mit Modell und Effort, Branches und Commits, ob diese Übergabe die letzte des
-Tasks ist und ob danach eine Prüfung des Nutzers offen bleibt. Lass Rohlogs draußen.
+werden. Lege temporäre Dateien einschließlich der Berichtsdatei nur unter `<tmp>` an. Nenne im Bericht knapp
+geänderte Dateien, ausgeführte Prüfungen, Wirkung auf die Dokumentation, Abweichungen von der Arbeitskarte,
+ungelöste Risiken, die verwendeten Worker-Profile mit Modell und Effort, Branches und Commits, ob diese
+Übergabe die letzte des Tasks ist und ob danach eine Prüfung des Nutzers offen bleibt. Lass Rohlogs draußen.
 
 Beginne jeden Bericht mit YAML-Frontmatter (`---` in der ersten Zeile) mit `checks`: ein Eintrag pro
 vollständiger Prüfung der Übergabe, jeweils mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der

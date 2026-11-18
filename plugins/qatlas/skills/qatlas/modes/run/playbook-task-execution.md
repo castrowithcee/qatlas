@@ -44,7 +44,8 @@ zum aktuellen Eintrag: beim lokalen Backlog den Pfad der Task-Datei, bei einem e
 Leseaufruf, mit dem du den Task selbst gelesen hast. Kann ein Worker den Task so nicht lesen, gib ihm den
 aktuellen Eintrag wörtlich mit. Ergänze nur, was der Vertrag nicht enthält, und gib keine Geheimnisse weiter:
 
-- **Arbeitsort:** Worktree und Branch.
+- **Arbeitsort:** Worktree und Branch sowie ein eigenes Unterverzeichnis von `<tmp>` für temporäre Dateien des
+  Workers.
 - **Meilenstein:** bei einem geteilten Task der Teil dieses Workers mit seinen Abnahmekriterien und Prüfungen
   und dem, was späteren Aufträgen bleibt.
 - **Abweichungen:** wo der geprüfte Stand des Repos von der Ausführungsgrundlage des Tasks abweicht, und jede

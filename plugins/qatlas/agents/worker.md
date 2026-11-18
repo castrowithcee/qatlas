@@ -28,6 +28,7 @@ den Befund zurück. Erweitere den Vertrag nicht selbst.
   einer Prüfung, die länger laufen kann, ein Befehls-Timeout über ihrer erwarteten Dauer mit, damit der Host
   sie nicht in den Hintergrund verschiebt. Reicht das höchste Timeout des Hosts nicht, führe sie nicht aus und
   nenne sie in der Rückgabe als offen.
+- Lege temporäre Dateien nur in dem Verzeichnis an, das der Auftrag nennt.
 - Behebe nichts außerhalb des Scopes.
 - Lässt der Vertrag eine Ziel- oder Berechtigungsgrenze offen, wähle die engere Lesart und nenne sie in der
   Rückgabe. Weite Zugriff oder Wirkung nie aus eigener Auslegung aus.

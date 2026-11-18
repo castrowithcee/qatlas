@@ -978,7 +978,11 @@ try {
     // An unfinished run is resumed: nothing is archived, the events stay and resume is no note.
     const archives = () => fs.readdirSync(path.join(repo, '.qatlas', 'local', 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length;
     assert.strictEqual(archives(), 0);
+    const tmpFile = path.join(repo, '.qatlas', 'local', 'run', 'tmp', 'a', 'x.txt');
+    fs.mkdirSync(path.dirname(tmpFile), { recursive: true });
+    fs.writeFileSync(tmpFile, '');
     assert.deepStrictEqual(ok('begin'), { resumed: true, cursor: rep.cursor + 1 });
+    assert.ok(fs.existsSync(tmpFile), 'resume keeps run/tmp');
     const resumed = ok('report');
     assert.deepStrictEqual([resumed.cursor, resumed.ended, resumed.packages, resumed.notes], [rep.cursor + 1, false, rep.packages, rep.notes]);
     assert.strictEqual(archives(), 0);
@@ -990,13 +994,17 @@ try {
     const last = ok('report');
     assert.strictEqual(last.ended, true);
     ok('begin');
+    assert.ok(!fs.existsSync(path.dirname(path.dirname(tmpFile))), 'new run clears run/tmp');
     refused(/past the end of the log/, 'wait', '--since', String(last.cursor), '--timeout', '0.1');
     assert.strictEqual(fs.readdirSync(path.join(repo, '.qatlas', 'local', 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
     ok('plan', '--budget', '1', '--package', 'z', '--tasks', '1');
     assert.strictEqual(ok('begin').resumed, true);
     assert.deepStrictEqual(Object.keys(ok('report').packages), ['z']);
     assert.strictEqual(archives(), 1);
+    fs.mkdirSync(path.dirname(tmpFile), { recursive: true });
+    fs.writeFileSync(tmpFile, '');
     assert.deepStrictEqual(ok('begin', '--discard'), { begun: true, cursor: 1 });
+    assert.ok(!fs.existsSync(path.dirname(path.dirname(tmpFile))), 'discard clears run/tmp');
     assert.strictEqual(archives(), 2);
     assert.deepStrictEqual(ok('report').packages, {});
 

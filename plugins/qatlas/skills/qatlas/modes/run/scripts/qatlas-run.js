@@ -133,6 +133,7 @@ function begin() {
     fs.renameSync(eventsFile(repo), path.join(runDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
   }
   fs.rmSync(path.join(runDir(repo), 'disk-low'), { force: true });
+  fs.rmSync(path.join(runDir(repo), 'tmp'), { recursive: true, force: true });
   excludeLocal(repo);
   record(repo, 'begin', { session: process.env.CLAUDE_CODE_SESSION_ID });
   out({ begun: true, cursor: 1 });

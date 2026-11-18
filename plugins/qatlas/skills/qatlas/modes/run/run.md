@@ -140,13 +140,17 @@ Starte zuerst je Paket einen Lead mit diesem Auftrag:
 
 > Du bist der Lead des Pakets <package> eines Laufs mit den Tasks <id,id,...>. Lies
 > `<plugin-root>/skills/qatlas/modes/run/lead.md` vollständig und arbeite danach. Steuerskript: `<run>`,
-> Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`, Integrationsbasis: `<basis>`, Integrator: <ja|nein>.
+> Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`, Integrationsbasis: `<basis>`, Integrator: <ja|nein>,
+> Temp-Verzeichnis: `<tmp>`.
 
 Starte bei einem Lauf mit Integrator danach den Integrator:
 
 > Du bist der Integrator eines Laufs. Lies `<plugin-root>/skills/qatlas/modes/run/integrator.md` vollständig
 > und arbeite danach. Steuerskript: `<run>`, Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`,
-> Integrationsbasis: `<basis>`.
+> Integrationsbasis: `<basis>`, Temp-Verzeichnis: `<tmp>`.
+
+Setze `<tmp>` auf `<repo-root>/.qatlas/local/run/tmp/<package>/` beim Lead und auf
+`<repo-root>/.qatlas/local/run/tmp/integrator/` beim Integrator. Ein Nachfolger erhält dasselbe Verzeichnis.
 
 Für einen Nachfolger ergänze den Hinweis, dass er übernimmt, beim Lead mit seinen verbleibenden Tasks. Gib
 keinem Auftrag eigene Vorgaben zu Kontext oder vorzeitigem Ende mit.
