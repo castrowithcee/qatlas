@@ -154,10 +154,11 @@ keinem Auftrag eigene Vorgaben zu Kontext oder vorzeitigem Ende mit.
 ## Überwachung
 
 Warte mit `<run> wait --since <cursor> --min-free <GB>`: zuerst `--since 0`, danach mit dem `cursor` der
-letzten Ausgabe, wobei `<GB>` der Schwellenwert aus „Freier Platz“ ist. Führe `wait`, das bis zu seinem
-`--timeout` blockiert, im Hintergrund oder mit einem Befehls-Timeout des Hosts darüber aus. Überwache sonst
-nur über die Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore, Crons oder
-Warteschleifen.
+letzten Ausgabe, wobei `<GB>` der Schwellenwert aus „Freier Platz“ ist. Führe `wait` als Hintergrundbefehl
+aus, dessen Abschluss der Host meldet, ohne eigenes `--timeout`. Kennt dein Host keine solchen
+Hintergrundbefehle, führe es im Vordergrund aus, mit `--timeout` knapp unter dem höchsten Befehls-Timeout des
+Hosts. Überwache sonst nur über die Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore,
+Crons oder Warteschleifen.
 Blockiert ein Stop-Hook des Hosts dein Stoppen, weil der Lauf aktiv ist und keine Hintergrundarbeit läuft,
 fülle nach Lage Pakete nach, starte Nachfolger oder führe `<run> end` aus.
 

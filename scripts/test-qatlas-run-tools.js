@@ -876,6 +876,18 @@ try {
     assert.deepStrictEqual(ok('wait', '--package', 'a', '--timeout', '5'), { answered: true, timeout: false });
     assert.deepStrictEqual(ok('wait', '--package', 'b', '--timeout', '0.1'), { answered: false, timeout: true });
     refused(/not both/, 'wait', '--package', 'a', '--role', 'integrator');
+    // Without --timeout every wait form defaults to 3000 s. A preload replaces the clock and setTimeout, so the
+    // idle wait runs on virtual time and the test reads how far it advanced.
+    const preload = path.join(repo, '..', 'fake-clock.js');
+    fs.writeFileSync(preload, "let skew = 0; const now = Date.now.bind(Date); Date.now = () => now() + skew;\n"
+      + "global.setTimeout = (fn, ms) => { skew += ms; return setImmediate(fn); };\n"
+      + "process.on('exit', () => process.stderr.write(String(skew)));\n");
+    const end = String(ok('wait', '--since', '0', '--timeout', '0.1', '--min-free', '0.000001').cursor);
+    for (const form of [['--since', end, '--min-free', '0.000001'], ['--role', 'integrator', '--since', end], ['--package', 'b']]) {
+      const res = spawnSync(process.execPath, ['--require', preload, runner, 'wait', '--repo', repo, ...form], { encoding: 'utf8', env: cleanEnv });
+      assert.strictEqual(res.status, 0, res.stderr);
+      assert.ok(res.stderr >= 3000000 && res.stderr < 3010000, `default timeout of ${form[0]}: ${res.stderr} ms`);
+    }
     assert.strictEqual(ok('ask', '--package', 'a', '--question', 'Q1?', '--timeout', '0.1').answer, 'A1');
     refused(/No open question or handover of a/, 'answer', '--package', 'a', '--answer', 'A3');
     assert.deepStrictEqual(supervise(woke.cursor), { events: [], cursor: woke.cursor + 2, timeout: true });

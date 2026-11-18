@@ -17,6 +17,7 @@
 //   qatlas-run.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
 //   qatlas-run.js answer --repo <root> (--package <package> | --role integrator) --answer <text>
 //   qatlas-run.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <s>] [--min-free <GB>]
+//     Both wait forms default to 3000 s; wait returns at once on an event, so only idle wakeups depend on it.
 //     Output: {"events","cursor","timeout"}, for the integrator also "queue" (oldest first).
 //   qatlas-run.js wait --repo <root> --package <package> [--timeout <s>]
 //     Blocks a lead until its open question or handover is answered or the timeout passes.
@@ -59,6 +60,9 @@ const flag = name => { const i = opts.indexOf(name); return i >= 0 ? opts[i + 1]
 const out = value => process.stdout.write(JSON.stringify(value) + '\n');
 const fail = (message, code = 1) => { process.stderr.write(message + '\n'); process.exit(code); };
 const need = (...names) => names.map(name => flag(name) || fail('Missing: ' + name, 2));
+// Default timeout of every wait form: just under the one-hour cache lifetime of lead and integrator, so an
+// idle wait wakes rarely, never lets the cache expire, and still returns at once on any event.
+const WAIT_TIMEOUT = 3000;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const positive = (name, fallback) => {
   if (flag(name) === null) return fallback;
@@ -240,7 +244,7 @@ function checkDisk(repo, minFree) {
 
 async function waitLead(repo, name) {
   if (name === INTEGRATOR) fail('Reserved package name: integrator', 2);
-  const end = Date.now() + positive('--timeout', 600) * 1000;
+  const end = Date.now() + positive('--timeout', WAIT_TIMEOUT) * 1000;
   for (;;) {
     const open = openSignals(events(repo)).get(name);
     const answered = Boolean(open && open.answer !== null);
@@ -259,7 +263,7 @@ async function wait() {
   if (role !== 'supervisor' && role !== INTEGRATOR) fail('--role must be supervisor or integrator', 2);
   const since = Number(flag('--since') ?? 0);
   if (!Number.isInteger(since) || since < 0) fail('--since must be an integer from 0', 2);
-  const end = Date.now() + positive('--timeout', 600) * 1000;
+  const end = Date.now() + positive('--timeout', WAIT_TIMEOUT) * 1000;
   const minFree = positive('--min-free', 5);
   for (;;) {
     if (role === 'supervisor') checkDisk(repo, minFree);

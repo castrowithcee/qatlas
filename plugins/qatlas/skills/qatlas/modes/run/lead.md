@@ -41,10 +41,12 @@ Pflicht zu Workern.
 
 Beende einen Turn nur dann ohne Tool-Aufruf, wenn ein eigener Hintergrundbefehl läuft, denn sonst wertet der
 Host den Turn als dein Ende und verlangt deine Schlussmeldung. Ein Worker allein genügt dafür nicht, weil er
-als angehalten gilt, sobald er auf eigene Hintergrundarbeit wartet. Wartest du nur auf einen Worker, starte
-deshalb vorher `<run> wait --timeout <s>` im Hintergrund, mit einem Timeout über der erwarteten Dauer, und
-starte es erneut, wenn es vor der Rückkehr des Workers abläuft. Warte auf eine Antwort, indem du `handover`
-oder `ask` wiederholst.
+als angehalten gilt, sobald er auf eigene Hintergrundarbeit wartet. Warte deshalb im Leerlauf, auf einen
+Worker wie auf die Antwort einer Übergabe oder Rückfrage, mit `<run> wait --package <package>` als
+Hintergrundbefehl, dessen Abschluss der Host meldet, ohne eigenes `--timeout`. Starte ihn erneut, wenn er vor
+dem Ereignis abläuft. Kennt dein Host keine solchen Hintergrundbefehle, führe ihn im Vordergrund aus, mit
+`--timeout` knapp unter dem höchsten Befehls-Timeout des Hosts. Hole eine Antwort danach durch Wiederholen von
+`handover` oder `ask` ab.
 
 Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task, der
 Dateien im Repo ändert, einen Worktree von `<basis>` an. Ein Task ohne Dateiänderung braucht weder Worktree
@@ -85,10 +87,10 @@ Spitze des übergebenen Pull Requests) und `pushed` (SHA beim ersten Push), die 
 bei einer Ausnahme von der Zuschnittsregel `cut-exception: <Grund>`.
 
 Die Antwort lautet `integrated <sha>` oder `rework <Grund>`. Nur ein `rework` ohne `conflict:` oder `cut:`
-zählt als Korrekturversuch. Kommt keine, rufe denselben Befehl mit unverändertem Bericht erneut auf. So holst
-du sie auch ab, wenn der Integrator Branch und Worktree schon entfernt hat. Fass Task, Branches und Worktree
-bis zur Antwort nicht an. Arbeite nach `rework` am Grund und übergib erneut. Setze den Task nach `integrated`
-fort, wenn die Übergabe nicht die letzte war.
+zählt als Korrekturversuch. Kommt keine, warte nach der Regel aus „Umsetzen“ und rufe denselben Befehl mit
+unverändertem Bericht erneut auf. So holst du sie auch ab, wenn der Integrator Branch und Worktree schon
+entfernt hat. Fass Task, Branches und Worktree bis zur Antwort nicht an. Arbeite nach `rework` am Grund und
+übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe nicht die letzte war.
 
 Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn von der neuen `<basis>`.
 Solange du nur wartest, auf die Antwort einer Übergabe, auf einen Worker oder auf eine lange eigene Prüfung,
@@ -118,12 +120,11 @@ Integrator-Rolle, mit diesen Abweichungen:
 ## Rückfragen
 
 Dein Nutzer ist der Supervisor. Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes
-regel`. Deckt eine deine Lage ab, wende sie an, statt zu fragen. Nenne jede angewandte Entscheidung
-und jede Antwort des Supervisors im Bericht des Tasks. Frage alles, was du sonst den Nutzer fragen, annehmen
-oder an ihn übergeben würdest, ausschließlich den Supervisor mit
-`<run> ask --question "<Frage mit Kontext, Optionen und Empfehlung>"`. Die Ausgabe ist die Antwort. Kommt
-keine, rufe denselben Befehl erneut auf. Frage nicht, solange eine Übergabe offen ist. Warte zuerst mit
-`handover` auf ihre Antwort.
+regel`. Deckt eine deine Lage ab, wende sie an, statt zu fragen. Nenne jede angewandte Entscheidung und jede
+Antwort des Supervisors im Bericht des Tasks. Frage alles, was du sonst den Nutzer fragen, annehmen oder an
+ihn übergeben würdest, ausschließlich den Supervisor mit `<run> ask --question "<Frage mit Kontext, Optionen
+und Empfehlung>"`. Die Ausgabe ist die Antwort. Kommt keine, warte nach der Regel aus „Umsetzen“ und rufe
+denselben Befehl erneut auf. Frage nicht, solange eine Übergabe offen ist. Warte zuerst auf ihre Antwort.
 
 ## Ende
 
