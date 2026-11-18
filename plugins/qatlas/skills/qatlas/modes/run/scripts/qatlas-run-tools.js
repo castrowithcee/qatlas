@@ -8,21 +8,13 @@
 //     Dry-run merge: does <branch> merge into <base> cleanly (default: origin/HEAD).
 //     Output: {"result":"clean","base","branch","tree"} or {"result":"conflict",...,"files":[...]}.
 //     Exit: 0 clean, 1 conflict, 2 usage error, 3 check not possible.
-//   qatlas-run-tools.js ci-wait --pr <number> [--timeout <seconds>] [--interval <seconds>] [--repo <path>]
-//     Waits via gh until no check of the pull request is running (default: timeout 3600, interval 20).
-//     Transient gh errors are retried, at most 5 in a row.
-//     A pull request without any check (gh "no checks reported", also an empty list) is not waited out: after
-//     3 consecutive such polls (two intervals, since gh can report it briefly right after the PR is opened)
-//     the result is "none".
-//     Output: {"pr","result":"pass"|"fail"|"timeout"|"none","checks":[{name,bucket,link}],"retries"}.
-//     Exit: 0 pass, 1 fail, 4 timeout, 8 none (no CI), 2 usage error, 3 gh missing, not logged in or persistently failing.
 //   qatlas-run-tools.js land --pr <number> --report <file> [--no-ci] [--resolved] [--timeout <s>] [--interval <s>]
 //       [--repo <path>]
 //     Integrates one pull request via gh: reads branch, pr-title and pr-body (and the optional head) from the
 //     report frontmatter, checks that the PR head is the head the report vouches for (frontmatter "head",
-//     else the local branch tip), waits for CI as ci-wait does, squash-merges with --match-head-commit (one
-//     retry), proves the squash (merge tree equals PR head tree, else equal patch-id) and only then deletes
-//     the remote branch. Does not open PRs or touch local worktrees/branches.
+//     else the local branch tip), waits until no check of the PR is running (transient gh errors are retried,
+//     at most 5 in a row), squash-merges with --match-head-commit (one retry), proves the squash (merge tree
+//     equals PR head tree, else equal patch-id) and only then deletes the remote branch. Does not open PRs or touch local worktrees/branches.
 //     A PR head ahead of the vouched head is accepted if the vouched head is its ancestor and the commits in
 //     between are merge commits or already on origin/<base> (e.g. GitHub "Update branch"); any new own
 //     commit stays head-mismatch, as does a merge whose tree is not the conflict-free merge of its two
@@ -30,8 +22,9 @@
 //     deletion then use the PR head.
 //     With --resolved the merger confirms that a merge in between carries its own resolution of a conflict
 //     with the base: the tree of such a merge is not checked, and the local branch tip may be the PR head.
-//     Without any check (see ci-wait) land does not merge: result "no-ci". With --no-ci the merger confirms
-//     that the merged state was tested locally with the project tests or that a valid taken-over evidence
+//     Without any check (gh "no checks reported" or an empty list, on 3 consecutive polls since gh can report
+//     it briefly right after the PR is opened) land does not merge: result "no-ci". With --no-ci the merger
+//     confirms that the merged state was tested locally with the project tests or that a valid taken-over evidence
 //     covers its tree; land then merges without CI. Checks that do exist are still waited for.
 //     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|null,"branch_deleted",...}; result is
 //     merged | ci-fail | timeout | no-ci | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
@@ -215,16 +208,6 @@ function waitForChecks(pr, timeout, interval) {
     if (Date.now() + interval > deadline) return { state: 'timeout', checks: view(checks), retries };
     sleep(interval);
   }
-}
-
-function ciWait() {
-  const [pr] = need('--pr');
-  if (!/^\d+$/.test(pr)) fail('Invalid: --pr needs a number', 2);
-  const timeout = number('--timeout', 3600) * 1000;
-  const interval = number('--interval', 20) * 1000;
-  const { state, checks, retries } = waitForChecks(pr, timeout, interval);
-  out({ pr: Number(pr), result: state, checks, retries });
-  if (state !== 'pass') process.exit({ fail: 1, timeout: 4, none: 8 }[state]);
 }
 
 const LAND_EXIT = { merged: 0, 'ci-fail': 1, timeout: 4, 'head-mismatch': 5, 'merge-failed': 6, 'proof-failed': 7, 'no-ci': 8 };
@@ -679,6 +662,6 @@ function slot() {
   });
 }
 
-const commands = { probe, 'ci-wait': ciWait, land, proof, slot };
+const commands = { probe, land, proof, slot };
 if (!commands[command]) fail('Commands: ' + Object.keys(commands).join(', '), 2);
 commands[command]();

@@ -118,8 +118,6 @@ const proof = (c, ...args) => spawnSync(process.execPath, [tools, 'proof', '--re
 const mergeCalls = c => { try { return fs.readFileSync(path.join(c.stubDir, 'merge-calls'), 'utf8').trim().split('\n'); } catch { return []; } };
 const landWith = (c, ...more) => spawnSync(process.execPath, [tools, 'land', '--pr', '16', '--report', c.report,
   '--interval', '0.1', '--timeout', '30', '--repo', c.repo, ...more], { encoding: 'utf8', env: env(c.stubDir) });
-const ciWait = c => spawnSync(process.execPath, [tools, 'ci-wait', '--pr', '16', '--interval', '0.1', '--timeout', '30', '--repo', c.repo],
-  { encoding: 'utf8', env: env(c.stubDir) });
 // Remote branch update (as GitHub "Update branch" or a push): clone, run fn, push to task and pull/16/head.
 const remoteUpdate = (c, fn) => {
   const other = path.join(path.dirname(c.repo), 'updater');
@@ -597,20 +595,6 @@ try {
   assert.strictEqual(land(c).status, 2);
   assert.deepStrictEqual(mergeCalls(c), []);
 
-  // ci-wait keeps its output shape and exit codes.
-  c = setup('ci-wait-green');
-  r = spawnSync(process.execPath, [tools, 'ci-wait', '--pr', '16', '--interval', '0.1', '--repo', c.repo],
-    { encoding: 'utf8', env: env(c.stubDir) });
-  assert.strictEqual(r.status, 0);
-  assert.strictEqual(r.stdout,
-    '{"pr":16,"result":"pass","checks":[{"name":"build","bucket":"pass","link":"http://x/1"}],"retries":0}\n');
-  c = setup('ci-wait-red', { checks: red });
-  r = spawnSync(process.execPath, [tools, 'ci-wait', '--pr', '16', '--interval', '0.1', '--repo', c.repo],
-    { encoding: 'utf8', env: env(c.stubDir) });
-  assert.strictEqual(r.status, 1);
-  assert.strictEqual(r.stdout,
-    '{"pr":16,"result":"fail","checks":[{"name":"build","bucket":"fail","link":"http://x/1"}],"retries":0}\n');
-
   // validateHandover (shared frontmatter parser): two commits without cut-exception are rejected.
   c = setup('handover', { extra: ['d.txt'] });
   r = spawnSync(process.execPath, [runner, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
@@ -618,12 +602,9 @@ try {
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /Handover rejected: branch task has 2 non-merge commits over main/);
 
-  // No CI: ci-wait and land report it at once (debounce: 3 polls), land merges only with --no-ci.
+  // No CI: land reports it at once (debounce: 3 polls) and merges only with --no-ci.
   const quick = (fn, c) => { const t = Date.now(); const res = fn(c); assert.ok(Date.now() - t < 10000, 'no CI must not wait out the timeout'); return res; };
   c = setup('no-ci', { checks: null });
-  r = quick(ciWait, c);
-  assert.strictEqual(r.status, 8);
-  assert.strictEqual(r.stdout, '{"pr":16,"result":"none","checks":[],"retries":0}\n');
   r = quick(landWith, c);
   assert.strictEqual(r.status, 8, r.stderr);
   assert.strictEqual(json(r).result, 'no-ci');
@@ -1161,7 +1142,7 @@ try {
     assert.strictEqual(low(), 2);
   }
 
-  process.stdout.write('✓ Qatlas-Run-Tools: land, ci-wait, Run-Ablage und Handover-Prüfung erfolgreich.\n');
+  process.stdout.write('✓ Qatlas-Run-Tools: land, Run-Ablage und Handover-Prüfung erfolgreich.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

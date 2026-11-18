@@ -15,7 +15,7 @@ zu keinem davon. Fehlen solche Vorgaben, beende den Task ohne Push mit einem int
 gesicherten Task-Branch als Übergabe an `review` nach dem [Git-Workflow](playbook-git-workflow.md).
 
 Ein Pull Request steht für die Review-Anfrage der Code-Plattform des Projekts, zum Beispiel einen Merge
-Request auf GitLab. Als Lead: Pushe deinen Task-Branch, öffne den Pull Request, warte auf CI und übergib ihn.
+Request auf GitLab. Als Lead: Pushe deinen Task-Branch, öffne den Pull Request und übergib ihn.
 
 ## Plattformschritte
 
@@ -27,8 +27,8 @@ ist und ob der Branch-Schutz vor dem Merge einen aktuellen Stand verlangt. Fehlt
 Berechtigung, starte nicht und kläre es mit dem Nutzer, als Lead oder Integrator über den Supervisor. Halte
 bei beiden Plattformschritten, gleich mit welchen Mitteln, diesen Vertrag ein:
 
-- **Auf CI warten:** Warte, bis jede Prüfung des Pull Requests beendet ist. Ohne jede Prüfung hat das Projekt
-  keine CI. Dann ist der grüne vollständige lokale Test der Nachweis.
+- **Auf CI warten (Integrator):** Warte, bis jede Prüfung des Pull Requests beendet ist. Ohne jede Prüfung
+  hat das Projekt keine CI. Dann ist der grüne vollständige lokale Test der Nachweis.
 - **Landen:** Bestätige, dass der Head des Pull Requests der übergebene Stand, dessen konfliktfreier Nachzug
   auf die Basis oder dessen Nachzug mit einem Konflikt ist, den du als Integrator nach deiner Rolle selbst
   gelöst hast, warte auf CI, führe genau diesen Head per Squash-Merge zusammen und belege, dass
@@ -46,9 +46,11 @@ bei beiden Plattformschritten, gleich mit welchen Mitteln, diesen Vertrag ein:
   vorbereitender Pull Request, zum Beispiel ein mechanisches Refactoring, vor der darauf aufbauenden Änderung
   integriert wird. Als Lead: Prüfe vor dem ersten Push den gesamten Diff des Pull Requests gegen die
   Commit-Grenze und teile ihn vorher.
-- **CI:** Schreibe gepushte Historie nie um und rebase nie einen gepushten Branch. Als Lead: Behebe eine rote
-  CI selbst mit Folge-Commits. Sie zählen nicht gegen den Zuschnitt. Übergib jeden Pull Request eines Tasks
-  einzeln und nur mit grüner CI oder, ohne CI, mit dem grünen vollständigen lokalen Test.
+- **CI:** Schreibe gepushte Historie nie um und rebase nie einen gepushten Branch. Als Lead: Übergib jeden
+  Pull Request eines Tasks einzeln mit dem grünen vollständigen lokalen Test auf dem gepushten Head, ohne auf
+  CI zu warten. Zieh nicht erneut nach, wenn nach dem Test ein Konflikt mit der Basis entsteht. Meldet der
+  Integrator eine rote CI, behebe sie mit Folge-Commits, die nicht gegen den Zuschnitt zählen, und übergib
+  erneut.
 - **Landen:** Als Integrator: Öffne keinen Pull Request, sondern lande den des Leads. Verlangt der
   Branch-Schutz einen aktuellen Stand, ziehe die Basis konfliktfrei nach und warte erneut auf CI. Ist im
   Ziel-Repo eine Merge Queue aktiv, integriere über sie, statt selbst die Basis nachzuziehen.

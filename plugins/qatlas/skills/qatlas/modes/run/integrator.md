@@ -86,7 +86,10 @@ jeden Wiederholungslauf eines CI-Jobs ebenso mit `--type rerun`. Beide zählen i
    Bereiche über `slot --priority` und überlass die volle Breite der CI. Ohne CI teste den gemergten Stand
    selbst mit den Projekttests über `slot` oder übernimm vor der Landung einen gültigen Nachweis nach
    demselben Abschnitt. Führe jeden Befehl, den die Projektanweisungen einer exklusiven Ressource zuordnen,
-   über `slot --resource <name> -- <command>` aus.
+   über `slot --resource <name> -- <command>` aus. Schlägt die CI beim Landen fehl, ordne den Fehlschlag
+   nach „Abnahme prüfen“ in [Abnehmen und integrieren](playbook-acceptance.md) ein und wende bei einem Flake
+   dessen Regel zum Wiederholungslauf an. Gib jeden anderen Fehlschlag als `rework <Grund>` mit dem
+   fehlschlagenden Job zurück. Er zählt als Korrekturversuch.
 4. Erlauben Nutzer- oder Projektanweisungen, den Kontroll-Branch zu pushen, pushe ihn direkt nach der
    Landung, nie erzwungen. Sonst lass ihn lokal, bis der Lauf endet. Ist es die letzte Übergabe des Tasks,
    schließe ihn danach im Planungssystem und setze ihn auf `done`. Fehlt nur noch die Prüfung des Nutzers,
