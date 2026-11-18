@@ -65,6 +65,9 @@ jeden neuen Vertrag und hinterlasse keinen leeren Resttask.
   an und halte die Frage im inhaltlich passenden Abschnitt fest. Lege keine allgemeine Sammlung offener Fragen an.
 - Arbeite geklärte Antworten an ihrem inhaltlichen Platz ein, entferne überholte Alternativen und setze
   `ready` erst, wenn die Ausführungsreife erreicht ist.
+- Lies jeden Ist-Wert der Ausführungsgrundlage, etwa Standardwerte, Grenzen, Namen oder Pfade, im aktuellen
+  Code oder in der aktuellen Konfiguration ab. Übernimm ihn nicht aus Gedächtnis, Gespräch, Plan oder
+  älteren Tasks.
 - Übernimm die für den Gegenstand geltenden Vorgaben nach dem gemeinsamen Vertrag.
   Eine vollständige Wiederholung der Projektdokumentation ist ebenso falsch wie ein bloßer Link.
 - Benenne übergreifende Sicherheits- und Zielgrenzen ausdrücklich, wo sie gelten,
