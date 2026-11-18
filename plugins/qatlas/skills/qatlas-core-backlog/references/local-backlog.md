@@ -8,11 +8,11 @@ description: >
 ## Tasks und Projekte
 
 - Ein Task ist eine eigenständig in einer Session erledigbare Arbeitseinheit in
-  `.qatlas-project/backlog/task-<id>-<slug>.md`. Die ID folgt den Task-IDs des
+  `.qatlas-brain/backlog/task-<id>-<slug>.md`. Die ID folgt den Task-IDs des
   [Projekt-Wissensraums](../../qatlas-core-filing/references/structure.md).
 - Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `README.md`. Sein Slug ist
   Kebab-Case, beginnt nicht mit `task-` und ist nicht `done`. Setzt das Projekt einen Plan um, verlinkt sein
-  Kopf auf `.qatlas-project/plans/plan-<slug>.md`, statt Ziel und Umfang zu wiederholen.
+  Kopf auf `.qatlas-brain/plans/plan-<slug>.md`, statt Ziel und Umfang zu wiederholen.
 - Die Ordnerzugehörigkeit bestimmt die Projektzugehörigkeit. Es gibt kein Feld `project:`.
 - Echte Abhängigkeiten und Reihenfolge stehen im Roster, für Tasks eines Projekts in dessen `README.md`. Ein
   Link ersetzt keinen Kontext, den der Task braucht, um eigenständig ausgeführt zu werden.
@@ -25,7 +25,7 @@ bleibt in einem vollständigen Lesen eigenständig ausführbar:
 - Warum, Ergebnis, Scope, geltende Leitplanken, Abhängigkeiten, aktueller Ansatz und Abnahmekriterien
   enthalten nur Aussagen, die noch gelten. Arbeite eine entschiedene Entscheidung an ihrer richtigen Stelle
   ein und entferne dadurch überholte Alternativen. Eine Entscheidung, die über den Task hinaus bindet, wird
-  in die reservierte Datei von `.qatlas-project/` eingearbeitet, die sie betrifft, oder in `AGENTS.md`, wenn
+  in die reservierte Datei von `.qatlas-brain/` eingearbeitet, die sie betrifft, oder in `AGENTS.md`, wenn
   sie in jeder Session gelten muss.
 - Bei Arbeit an einem bestehenden System hält der Task die Ausführungsbasis nach der Ausführungsreife der
   Backlog-Norm fest.
@@ -49,7 +49,7 @@ keine bindende Entscheidung und keinen nötigen Grund nur für eine kleinere Dat
 
 Lies vor einem neuen Task [die kanonische Task-Vorlage](../assets/task.md) vollständig, vor einem neuen
 Projektkopf zusätzlich [die kanonische Projektvorlage](../assets/project-readme.md). Vorlagen und dieser
-Vertrag gelten unabhängig davon, wie ein Task entsteht. Nutzervorlagen unter `.qatlas-project/templates/`
+Vertrag gelten unabhängig davon, wie ein Task entsteht. Nutzervorlagen unter `.qatlas-brain/templates/`
 ersetzen sie nicht.
 
 ## Status

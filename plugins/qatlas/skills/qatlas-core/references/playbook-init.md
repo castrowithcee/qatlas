@@ -26,7 +26,7 @@ Windows kann ein frisch installiertes Node ein neues Terminal brauchen.
 Dateien, die das Skript neu angelegt hat, sind der eigene Text des Nutzers und bekommen seine Sprache:
 `AGENTS.md` folgt der Sprache der vorhandenen Dokumentation des Repos, sonst der Gesprächssprache.
 `~/qatlas/AGENTS.qatlas.md` und `~/qatlas/README.md` folgen der Gesprächssprache. Übersetze eine solche Datei
-bei Bedarf vollständig und behalte ihre Struktur. Die Seeds unter `.qatlas-project/` bleiben, wie sie sind.
+bei Bedarf vollständig und behalte ihre Struktur. Die Seeds unter `.qatlas-brain/` bleiben, wie sie sind.
 
 Ergänze darüber hinaus nichts und stelle dazu keine Fragen. `AGENTS.md` wächst mit dem Projekt: Eine
 reservierte Datei des Wissensraums bekommt ihre Zeile unter `Projektwissen`, sobald sie mit ihrem ersten
@@ -44,9 +44,9 @@ Nutzers. Ohne Vorgabe bleibt der lokale Backlog.
 Nenne nur, was angelegt wurde, und jeden Punkt unter `PROBLEMS`. Nach der ersten Einrichtung genügen diese
 Orientierungspunkte:
 
-- `AGENTS.md` trägt die Projektanweisungen und ist der Einstieg in `.qatlas-project/`. `CLAUDE.md` bindet sie
+- `AGENTS.md` trägt die Projektanweisungen und ist der Einstieg in `.qatlas-brain/`. `CLAUDE.md` bindet sie
   für Claude ein. `README.md` ist der kompakte Projektkopf und wächst mit dem Projekt.
-- `.qatlas-project/` trägt den Wegweiser zum maßgeblichen Planungssystem, die beiden unversionierten Zonen
+- `.qatlas-brain/` trägt den Wegweiser zum maßgeblichen Planungssystem, die beiden unversionierten Zonen
   `zone-import/` für Rohmaterial und `zone-export/` für verlangte Lieferergebnisse und, sofern die
   Konfiguration Repo-Memory nicht abschaltet, den Memory-Index. Seine reservierten Dateien `CONVENTIONS.md`,
   `ARCHITECTURE.md`, `TESTING.md` und `CONTRIBUTING.md` sowie seine Ordner entstehen mit ihrem ersten

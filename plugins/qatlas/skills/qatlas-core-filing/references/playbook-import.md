@@ -1,12 +1,12 @@
 ---
 description: >
-  Ablauf für Rohmaterial aus .qatlas-project/zone-import/: inventarisieren, extrahieren, nach protection
+  Ablauf für Rohmaterial aus .qatlas-brain/zone-import/: inventarisieren, extrahieren, nach protection
   prüfen, ablegen, verifizieren und das Original archivieren.
 ---
 
 # Importieren
 
-Fehlt `.qatlas-project/zone-import/`, suche nicht an anderen Orten nach vermeintlichen Eingängen, sondern
+Fehlt `.qatlas-brain/zone-import/`, suche nicht an anderen Orten nach vermeintlichen Eingängen, sondern
 melde das fehlende Scaffold und verweise auf `qatlas-core init`.
 
 ## Invarianten

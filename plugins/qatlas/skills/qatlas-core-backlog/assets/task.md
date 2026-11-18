@@ -8,8 +8,8 @@ status: draft         # draft | ready | in-progress | review | waiting | done
 
 # Aufgabe: <Titel>
 
-<!-- Nach .qatlas-project/backlog/task-<id>-<slug>.md oder
-.qatlas-project/backlog/<project>/task-<id>-<slug>.md kopieren und vor dem Schreiben alle Platzhalter
+<!-- Nach .qatlas-brain/backlog/task-<id>-<slug>.md oder
+.qatlas-brain/backlog/<project>/task-<id>-<slug>.md kopieren und vor dem Schreiben alle Platzhalter
 ersetzen. -->
 
 ## Warum

@@ -3,7 +3,7 @@ name: qatlas-core-filing
 description: >
   Dateien nach den Regeln anlegen, benennen, ablegen, umbenennen, verschieben, zusammenführen, aufwerten,
   archivieren oder löschen, Markdown-Inhalte ändern, Verweise einfügen und Rohmaterial aus
-  .qatlas-project/zone-import/ verarbeiten, sobald der Nutzer es ankündigt oder den Pfad nennt: legt Ort,
+  .qatlas-brain/zone-import/ verarbeiten, sobald der Nutzer es ankündigt oder den Pfad nennt: legt Ort,
   Namen, Typ und Frontmatter fest und hält Navigation und Verweise konsistent, einschließlich der
   reservierten Dateien CONVENTIONS.md, ARCHITECTURE.md, TESTING.md und CONTRIBUTING.md des Wissensraums.
   Nicht für reines Lesen, für Codeänderungen in bestehenden Dateien oder für Konvertierungen außerhalb der
@@ -13,7 +13,7 @@ description: >
 # qatlas-core-filing
 
 Der Ort einer Datei folgt dem Gegenstand ihrer Aussage. Weder Markdown noch Agentenleserschaft noch
-Gewohnheit entscheiden ihn allein. Innerhalb von `.qatlas-project/` entscheiden die reservierten Dateien und
+Gewohnheit entscheiden ihn allein. Innerhalb von `.qatlas-brain/` entscheiden die reservierten Dateien und
 festen Ordner, und jede nimmt nur ihre Aufgabe oder ihre Typen auf.
 
 ## Namen und Format

@@ -35,14 +35,14 @@ for (const item of plan(target)) missing.push(item.shown + ' is missing; qatlas-
 
 // Reserved root files stay lean; beyond the limit their details move into the folder of the same name.
 for (const name of ['CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md']) {
-  const file = path.join(target, '.qatlas-project', name);
+  const file = path.join(target, '.qatlas-brain', name);
   if (!fs.existsSync(file)) continue;
   let lines;
   try { lines = fs.readFileSync(file, 'utf8').split(/\r?\n/); }
-  catch (error) { missing.push('.qatlas-project/' + name + ' is not readable: ' + error.message); continue; }
+  catch (error) { missing.push('.qatlas-brain/' + name + ' is not readable: ' + error.message); continue; }
   if (lines.at(-1) === '') lines.pop();
   if (lines.length > 300) {
-    notes.push('.qatlas-project/' + name + ' has ' + lines.length + ' lines, limit 300. Move details into '
+    notes.push('.qatlas-brain/' + name + ' has ' + lines.length + ' lines, limit 300. Move details into '
       + name.replace('.md', '').toLowerCase() + '/ and keep the file as the entry.');
   }
 }

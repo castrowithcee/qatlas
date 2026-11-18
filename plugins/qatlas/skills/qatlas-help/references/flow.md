@@ -38,4 +38,4 @@ nach den Regeln ab, arbeitet im maßgeblichen Planungssystem und prüft Git vor 
 
 ## Pflege
 
-Der Nutzer legt Rohmaterial in `.qatlas-project/zone-import/` ab und kündigt es an.
+Der Nutzer legt Rohmaterial in `.qatlas-brain/zone-import/` ab und kündigt es an.

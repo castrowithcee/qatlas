@@ -10,6 +10,7 @@ const path = require('path');
 let refreshStatusline = () => {};
 try { ({ refreshStatusline } = require('../scripts/qatlas-statusline-claude.js')); }
 catch { /* a missing refresh must not block the rules */ }
+const { BRAIN, LEGACY, migrateBrain } = require('../scripts/runtime/brain-migration.js');
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || process.env.PLUGIN_ROOT || '';
 const isCodex = Boolean(process.env.PLUGIN_ROOT);
@@ -26,20 +27,20 @@ function startDir() {
   return process.cwd();
 }
 
-// A session may start in a subfolder: the project root is the nearest ancestor with .qatlas-project/,
-// searched up to the enclosing git root; without one the start folder stays the root.
+// A session may start in a subfolder: the project root is the nearest ancestor with .qatlas-brain/ or its
+// old name, searched up to the enclosing git root; without one the start folder stays the root.
 function resolveRoot(start) {
   let dir = path.resolve(start);
   for (;;) {
-    if (hasScaffold(dir)) return dir;
+    if (hasScaffold(dir) || hasScaffold(dir, LEGACY)) return dir;
     const parent = path.dirname(dir);
     if (fs.existsSync(path.join(dir, '.git')) || parent === dir) return path.resolve(start);
     dir = parent;
   }
 }
 
-function hasScaffold(dir) {
-  try { return fs.statSync(path.join(dir, '.qatlas-project')).isDirectory(); }
+function hasScaffold(dir, name = BRAIN) {
+  try { return fs.statSync(path.join(dir, name)).isDirectory(); }
   catch { return false; }
 }
 
@@ -84,6 +85,17 @@ function bodyOf(file) {
     .trim();
 }
 
+// Every project block moves a folder of the old name first, so none of them misses the scaffold. The block
+// that did the move reports it; a blocked move is reported once, by the rule block.
+let migration = '';
+if (block !== 'subagent') {
+  try {
+    const result = migrateBrain(root) || {};
+    migration = result.note || (block === 'qatlas' && result.problem) || '';
+  } catch { /* a failed move never blocks the session */ }
+}
+const quiet = () => (migration ? emit(migration) : process.exit(0));
+
 const scaffold = hasScaffold(root);
 
 // Repo memory is on unless the configuration disables it; a broken config means on.
@@ -100,18 +112,18 @@ const specifications = {
   },
   memory: {
     kind: 'PROJECT-STATE', name: 'MEMORY',
-    file: path.join(root, '.qatlas-project', 'memory', 'MEMORY.md'), scaffold: true, project: true,
+    file: path.join(root, BRAIN, 'memory', 'MEMORY.md'), scaffold: true, project: true,
     repoMemory: true,
   },
   'project-backlog': {
     kind: 'PROJECT-STATE', name: 'BACKLOG',
-    file: path.join(root, '.qatlas-project', 'backlog', 'BACKLOG.md'), scaffold: true, project: true,
+    file: path.join(root, BRAIN, 'backlog', 'BACKLOG.md'), scaffold: true, project: true,
   },
 };
 
 const specification = specifications[block];
-if (!pluginRoot || !specification || (specification.scaffold && !scaffold)
-  || (specification.repoMemory && !repoMemory)) process.exit(0);
+if (!pluginRoot || !specification) process.exit(0);
+if ((specification.scaffold && !scaffold) || (specification.repoMemory && !repoMemory)) quiet();
 
 // Old forms of the user config are upgraded before anything of this version reads it.
 if (block === 'qatlas') {
@@ -126,7 +138,7 @@ if (block === 'qatlas' && !isCodex) {
 
 let body;
 try { body = bodyOf(specification.file).replace(/<plugin-root>/g, portable(pluginRoot)); }
-catch { process.exit(0); }
+catch { quiet(); }
 
 const lines = [
   `QATLAS-${specification.kind}: ${specification.name}`,
@@ -142,9 +154,9 @@ lines.push('', body);
 
 if (block === 'qatlas') {
   lines.push('', scaffold
-    ? 'QATLAS SCAFFOLD: yes (.qatlas-project/ exists; AGENTS.md is the entry; backlog is injected separately; '
+    ? 'QATLAS SCAFFOLD: yes (.qatlas-brain/ exists; AGENTS.md is the entry; backlog is injected separately; '
       + (repoMemory ? 'memory index too)' : 'repo memory is disabled)')
-    : 'QATLAS SCAFFOLD: no (no .qatlas-project/, so no local backlog and no repo memory)');
+    : 'QATLAS SCAFFOLD: no (no .qatlas-brain/, so no local backlog and no repo memory)');
   lines.push('QATLAS PLUGIN ROOT: ' + portable(pluginRoot)
     + ' (version-bound source of rules, skills and scripts)');
   if (!scaffold) {
@@ -160,9 +172,10 @@ if (block === 'subagent') {
   if (library.length) lines.push('', ...library);
 }
 
-const BUDGET = 9000;
+const tail = migration && '\n\n' + migration;
+const BUDGET = 9000 - tail.length;
 const full = lines.join('\n');
 const suffix = '\n\nQATLAS BLOCK TRUNCATED: read the complete SOURCE above before working.';
 const context = full.length <= BUDGET ? full : full.slice(0, BUDGET - suffix.length) + suffix;
 
-emit(context, specification.event);
+emit(context + tail, specification.event);

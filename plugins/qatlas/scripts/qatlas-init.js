@@ -10,6 +10,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { readConfig } = require('./runtime/config-loader.js');
+const { BRAIN, migrateBrain } = require('./runtime/brain-migration.js');
 
 const bundle = path.resolve(__dirname, '..', 'scaffold');
 
@@ -54,9 +55,9 @@ function plan(target) {
     ...walk(path.join(bundle, 'library')).map(rel => ({
       from: path.join(bundle, 'library', rel), to: path.join(os.homedir(), 'qatlas', rel), shown: '~/qatlas/' + rel,
     })),
-    ...walk(path.join(bundle, '.qatlas-project')).filter(rel => memory || !rel.startsWith('memory/')).map(rel => ({
-      from: path.join(bundle, '.qatlas-project', rel), to: path.join(target, '.qatlas-project', rel),
-      shown: '.qatlas-project/' + rel,
+    ...walk(path.join(bundle, BRAIN)).filter(rel => memory || !rel.startsWith('memory/')).map(rel => ({
+      from: path.join(bundle, BRAIN, rel), to: path.join(target, BRAIN, rel),
+      shown: BRAIN + '/' + rel,
     })),
   ];
   const missing = copies.filter(item => !fs.existsSync(item.to));
@@ -107,6 +108,11 @@ function main() {
     if (git(['init', '-q', target]) === null) problems.push('git: git init failed in ' + target + '.');
     else created.push('git repo');
   }
+
+  // Where no session start hook ran, a folder of the old name is moved here, before the plan reads it.
+  const migration = migrateBrain(target) || {};
+  if (migration.note) created.push(BRAIN + '/ (renamed from the old folder name)');
+  if (migration.problem) problems.push(migration.problem);
 
   for (const item of plan(target)) {
     try { apply(item); created.push(item.shown); }

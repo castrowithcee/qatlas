@@ -92,7 +92,7 @@ Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unver
    sonst der lokale `<control-branch>`.
 5. **Testergebnisse:** Lösche die Testergebnisse des vorigen Laufs mit `<tools> slot results --clear --repo
    <code-repo>`, wobei `<code-repo>` das Repo mit dem Code ist.
-6. **Teststrategie:** Fehlt `.qatlas-project/TESTING.md` in einem vorhandenen `.qatlas-project/` und nennen
+6. **Teststrategie:** Fehlt `.qatlas-brain/TESTING.md` in einem vorhandenen `.qatlas-brain/` und nennen
    auch die übrigen Projektanweisungen keine Teststrategie, lege sie nicht selbst an. Lege im Abschlussblock
    unter `Entscheiden` einen Vorschlag vor, der die Fragen der Teststrategie des Projekts aus [Abnehmen und
    integrieren](playbook-acceptance.md) beantwortet, soweit Manifeste, CI-Konfiguration und vorhandene

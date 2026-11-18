@@ -41,7 +41,7 @@ wende sie statt beider Flake-Regeln oben an. Zähle auch dann Rot nie als Grün.
 
 ## Teststrategie des Projekts
 
-Wie das Projekt testet, steht in `.qatlas-project/TESTING.md`. Fehlt sie, suche die Teststrategie in den
+Wie das Projekt testet, steht in `.qatlas-brain/TESTING.md`. Fehlt sie, suche die Teststrategie in den
 übrigen Projektanweisungen und den Dateien, auf die sie verweisen, bevor du annimmst, dass es keine gibt.
 Qatlas legt nur den Nachweisvertrag fest. Findest du keine Teststrategie, folge den Voreinstellungen dieser
 Anweisungen. Halte in jedem Projekt diesen Vertrag ein:
@@ -103,7 +103,7 @@ protokolliere sie als `entscheiden`, damit sie im Abschlussblock unter `Entschei
 - Führt die Umsetzung eine übergreifende Verpflichtung für künftige Arbeit im Scope ein oder legt sie eine
   verborgene Kopplung offen, die solche Arbeit binden muss, halte das in der bestehenden
   Projektdokumentation mit der kleinsten nötigen Aussage fest, vorzugsweise bei den betroffenen
-  Entscheidungen, Anforderungen oder dem Domänenwissen in `.qatlas-project/`. Behandle die Aussage dann als
+  Entscheidungen, Anforderungen oder dem Domänenwissen in `.qatlas-brain/`. Behandle die Aussage dann als
   geänderte maßgebliche Grundlage. Ein Abschlussbericht allein genügt dafür nicht.
 - Widerspricht maßgebliche inhaltliche Dokumentation dem beabsichtigten Ergebnis und könnte sie eine
   Nutzerentscheidung ausdrücken, setze den Task auf `review`, statt eine Seite stillschweigend zu

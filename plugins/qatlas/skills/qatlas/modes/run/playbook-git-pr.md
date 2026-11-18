@@ -7,7 +7,7 @@ description: >
 
 # Integration über Pull Requests
 
-Wende dieses Verfahren nur an, wenn `.qatlas-project/CONTRIBUTING.md` oder Nutzer- oder Projektvorgaben eine
+Wende dieses Verfahren nur an, wenn `.qatlas-brain/CONTRIBUTING.md` oder Nutzer- oder Projektvorgaben eine
 Integration über Pull Requests verlangen, zum Beispiel bei einem geschützten Kontroll-Branch. Erkenne das an
 diesen Vorgaben, nicht durch Raten. Dieses Verfahren ändert keine Berechtigung: Pushe, öffne einen Pull
 Request oder merge nur, wenn Nutzer- oder Projektvorgaben dazu berechtigen. Der Aufruf eines Modus berechtigt

@@ -34,10 +34,10 @@ sparsam und sicher bleibt.
 
 | Ort | Inhalt |
 |---|---|
-| `.qatlas-project/` im Repo | Projektzustand: die reservierten Dateien `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md` und `CONTRIBUTING.md`, Wissen, Memory, der Backlog-Wegweiser sowie `zone-import/` und `zone-export/` als flüchtige Puffer |
+| `.qatlas-brain/` im Repo | Projektzustand: die reservierten Dateien `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md` und `CONTRIBUTING.md`, Wissen, Memory, der Backlog-Wegweiser sowie `zone-import/` und `zone-export/` als flüchtige Puffer |
 | `.qatlas/plugins/config.json` im Repo | Projektkonfiguration einschließlich der Freigaben der Schutzprüfung |
 | `~/qatlas/` | die eigene Library des Nutzers mit der globalen Arbeitsvereinbarung in `AGENTS.qatlas.md` |
 | `~/.qatlas/` | technischer Zustand wie globale Konfiguration, Statusline und Worktrees |
 
 `AGENTS.md` im Repo bleibt die native Projektanweisung: Zweck, Projektregeln und die Lesebedingungen, die in
-`.qatlas-project/` verweisen.
+`.qatlas-brain/` verweisen.

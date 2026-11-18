@@ -34,8 +34,8 @@ Lege auch keinen Entwurf oder Gesprächsmitschnitt ab. Beginne keine Umsetzung u
 Halte das Ergebnis vollständig im Gespräch. Zustimmung zum Plan autorisiert weder dauerhafte
 Dokumentation noch Planung oder Umsetzung. Starte keinen weiteren Modus selbst.
 Einzige Ausnahme: Stimmt der Nutzer dem Angebot aus „Abschluss“ zu oder verlangt er es von sich aus,
-schreibe das bestätigte Goal-Briefing in eine Datei: nach `.qatlas-project/zone-export/goal-<slug>.md`, ohne
-`.qatlas-project/` an den Ort, den er nennt.
+schreibe das bestätigte Goal-Briefing in eine Datei: nach `.qatlas-brain/zone-export/goal-<slug>.md`, ohne
+`.qatlas-brain/` an den Ort, den er nennt.
 
 ## Eingang verstehen
 
@@ -51,7 +51,7 @@ Kläre zuerst, wie reif der Eingang ist:
 Ein Task oder eine Datei darf eine ungeklärte Richtungsentscheidung enthalten. Kläre sie im Plan mit dem Nutzer.
 
 Prüfe die vom Nutzer vorgegebene Dokumentation und suche bei Bedarf nach bereits festgehaltenem Wissen in
-`.qatlas-project/`, damit du Fragen selbst beantworten und Entscheidungen fundiert vorlegen kannst.
+`.qatlas-brain/`, damit du Fragen selbst beantworten und Entscheidungen fundiert vorlegen kannst.
 Die Tiefenanalyse für den Taskschnitt bleibt bei `shape`. Prüfe jede Aussage auf Geltung für den konkreten Gegenstand.
 
 ## Plan entwickeln

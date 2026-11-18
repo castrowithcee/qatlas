@@ -33,7 +33,7 @@ ist. Ist die Nutzerdatei kein gültiges JSON oder fehlt ihr `"format": 1`, stopp
 | `protection.secrets` | beide | `block` oder `allow` für Secrets vor dem Commit, Standard `block` |
 | `protection.personal-data` | beide | `block`, `ask`, `warn` oder `allow` für personenbezogene Daten, Standard `ask` |
 | `protection.allow` | Projekt | Freigaben bestätigter Fehlalarme |
-| `memory.enable` | beide | `false` schaltet das Repo-Memory unter `.qatlas-project/memory/` ab, Standard `true` |
+| `memory.enable` | beide | `false` schaltet das Repo-Memory unter `.qatlas-brain/memory/` ab, Standard `true` |
 
 `block` verhindert den Schritt, `ask` fragt vorher, `warn` meldet nur, `allow` prüft nicht. Eine bestandene
 Prüfung bleibt stumm. Ob ein Repo öffentlich oder privat ist, leitet Qatlas nicht ab. Die Projektkonfiguration

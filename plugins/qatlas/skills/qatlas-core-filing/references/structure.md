@@ -1,13 +1,13 @@
 ---
 description: >
-  Aufbau des Projekt-Wissensraums .qatlas-project/: AGENTS.md als Einstieg, die reservierten Root-Dateien mit
+  Aufbau des Projekt-Wissensraums .qatlas-brain/: AGENTS.md als Einstieg, die reservierten Root-Dateien mit
   ihrer Aufgabe und Lesebedingung, die festen Ordner mit ihren Typen, das Verbot weiterer Ordner, die
   Zeilengrenze, Zonen, FRAMEWORK.md außerhalb des Raums, Dateinamen und Task-IDs.
 ---
 
 # Projekt-Wissensraum
 
-`.qatlas-project/` ist der versionierte, im Repo geführte Stand von Wissen und Arbeit. Er hält fest, wie das
+`.qatlas-brain/` ist der versionierte, im Repo geführte Stand von Wissen und Arbeit. Er hält fest, wie das
 Projekt gebaut, geprüft, bearbeitet und gepflegt wird. Der Fachinhalt des Repos bleibt an seinem
 maßgeblichen Ort: In einem persönlichen OS liegen Policies zu Weiterbildung oder Finanzen außerhalb, Policies
 zu Struktur und Pflege der Sammlung innerhalb. Bestehende Spezifikationen und Dokumentationsbäume werden
@@ -52,7 +52,7 @@ Grenze und ändert nichts.
 
 Init legt `backlog/BACKLOG.md`, die Zonen `zone-import/` und `zone-export/` mit je einer `.gitkeep` und,
 sofern die Plugin-Konfiguration das Repo-Memory nicht abschaltet (`memory.enable: false`), `memory/MEMORY.md`
-an. Jeder andere Ordner entsteht zusammen mit seinem ersten Eintrag. Ohne `.qatlas-project/` ist das Projekt
+an. Jeder andere Ordner entsteht zusammen mit seinem ersten Eintrag. Ohne `.qatlas-brain/` ist das Projekt
 bewusst nicht eingerichtet: Lege keine seiner Dateien an, was auch immer die Konfiguration sagt, denn Init ist
 der ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau die aufgeführten Typen:
 
@@ -104,7 +104,7 @@ Die Task-ID ist eine fortlaufende Dezimalzahl über den ganzen Wissensraum, eins
 Backlog-Projekte. Alle vorhandenen Task-IDs findest du so:
 
 ```sh
-find .qatlas-project -type f -name 'task-*.md' | grep -E '/task-[0-9]{4,}-[^/]*$'
+find .qatlas-brain -type f -name 'task-*.md' | grep -E '/task-[0-9]{4,}-[^/]*$'
 ```
 
 Wähle den höchsten Wert plus eins und fülle auf mindestens vier Stellen auf. Ohne Treffer beginnt es bei

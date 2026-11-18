@@ -9,7 +9,7 @@ description: >
 
 # qatlas-core-backlog
 
-`.qatlas-project/backlog/BACKLOG.md` nennt immer das einzige maßgebliche Planungssystem. Nutzer- oder
+`.qatlas-brain/backlog/BACKLOG.md` nennt immer das einzige maßgebliche Planungssystem. Nutzer- oder
 Projektvorgaben haben Vorrang.
 
 - Bei lokaler Autorität ist `BACKLOG.md` der Roster des Qatlas-Backlogs.

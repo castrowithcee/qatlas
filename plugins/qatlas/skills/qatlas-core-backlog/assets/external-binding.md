@@ -26,7 +26,7 @@ edit: shared
 - **Lesepolitik:** <was eine übersicht liest und wann der vollständige datensatz oder die historie>
 - **Lokaler Spiegel:** keiner
 
-<!-- Nach .qatlas-project/backlog/BACKLOG.md kopieren, alle Platzhalter ersetzen und diesen Kommentar
+<!-- Nach .qatlas-brain/backlog/BACKLOG.md kopieren, alle Platzhalter ersetzen und diesen Kommentar
      entfernen. Die Datei wird in jeder Session geladen: eine Zeile je Antwort, ohne Begründung, Anleitung
      oder Anbieterwissen.
      - Ein Merkmal ist, was das System am Arbeitspaket selbst zeigt: Feld, Label, Typ, offen oder geschlossen.

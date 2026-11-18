@@ -29,6 +29,6 @@ edit: shared
   ausgewählte Issues, Kommentare nur bei Widerspruch oder ausdrücklichem Verweis.
 - **Lokaler Spiegel:** keiner
 
-<!-- Ein Start, kein Standard. Nach .qatlas-project/backlog/BACKLOG.md kopieren, Platzhalter ersetzen, an die
+<!-- Ein Start, kein Standard. Nach .qatlas-brain/backlog/BACKLOG.md kopieren, Platzhalter ersetzen, an die
      Arbeitsweise des Nutzers anpassen und diesen Kommentar entfernen. Lies davor die Bindungsvorlage
      external-binding.md, ihre Regeln gelten auch hier. -->

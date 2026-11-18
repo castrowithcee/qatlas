@@ -207,8 +207,8 @@ function testConfigMigration() {
 
 function testProjectContext() {
   const f = fixture('context');
-  write(path.join(f.project, '.qatlas-project', 'memory', 'MEMORY.md'), '# Memory\n');
-  write(path.join(f.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), '---\ntype: meta\nedit: shared\n---\n# Backlog\n');
+  write(path.join(f.project, '.qatlas-brain', 'memory', 'MEMORY.md'), '# Memory\n');
+  write(path.join(f.project, '.qatlas-brain', 'backlog', 'BACKLOG.md'), '---\ntype: meta\nedit: shared\n---\n# Backlog\n');
   assert.strictEqual(hookOutput(f, 'project-backlog'), hookOutput(f, 'project-backlog', true));
   assert.ok(hookOutput(f, 'memory').includes('# Memory'));
   assert.ok(hookOutput(f, 'project-backlog').includes('# Backlog'));
@@ -216,25 +216,25 @@ function testProjectContext() {
   assert.ok(hookOutput(f, 'qatlas').includes('QATLAS SCAFFOLD: yes'));
 
   const missing = fixture('context-missing');
-  fs.mkdirSync(path.join(missing.project, '.qatlas-project'));
+  fs.mkdirSync(path.join(missing.project, '.qatlas-brain'));
   assert.strictEqual(hookOutput(missing, 'project-backlog'), '', 'A missing index yields no output.');
-  assert.deepStrictEqual(fs.readdirSync(path.join(missing.project, '.qatlas-project')), [],
+  assert.deepStrictEqual(fs.readdirSync(path.join(missing.project, '.qatlas-brain')), [],
     'The session start writes nothing into the repo.');
 
   const unreadable = fixture('context-unreadable');
-  fs.mkdirSync(path.join(unreadable.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), { recursive: true });
+  fs.mkdirSync(path.join(unreadable.project, '.qatlas-brain', 'backlog', 'BACKLOG.md'), { recursive: true });
   assert.strictEqual(hookOutput(unreadable, 'project-backlog'), '', 'An unreadable index yields no output.');
 
   const huge = fixture('context-huge');
-  write(path.join(huge.project, '.qatlas-project', 'backlog', 'BACKLOG.md'),
+  write(path.join(huge.project, '.qatlas-brain', 'backlog', 'BACKLOG.md'),
     Array.from({ length: 1200 }, (_, index) => 'Line ' + index).join('\n') + '\nEND-OF-FILE\n');
   const hugeOutput = hookOutput(huge, 'project-backlog');
   assert.ok(hugeOutput.includes('QATLAS BLOCK TRUNCATED'));
   assert.ok(!hugeOutput.includes('END-OF-FILE'));
 
   const disabled = fixture('context-memory-off');
-  write(path.join(disabled.project, '.qatlas-project', 'memory', 'MEMORY.md'), '# Memory\n');
-  write(path.join(disabled.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), '# Backlog\n');
+  write(path.join(disabled.project, '.qatlas-brain', 'memory', 'MEMORY.md'), '# Memory\n');
+  write(path.join(disabled.project, '.qatlas-brain', 'backlog', 'BACKLOG.md'), '# Backlog\n');
   write(path.join(disabled.project, '.qatlas', 'plugins', 'config.json'), { format: 1, memory: { enable: false } });
   assert.strictEqual(hookOutput(disabled, 'memory'), '', 'Disabled repo memory is not injected.');
   assert.ok(hookOutput(disabled, 'project-backlog').includes('# Backlog'));
@@ -243,7 +243,7 @@ function testProjectContext() {
 
   const nested = fixture('context-subfolder');
   initProject(nested);
-  write(path.join(nested.project, '.qatlas-project', 'backlog', 'BACKLOG.md'), '# Backlog\n');
+  write(path.join(nested.project, '.qatlas-brain', 'backlog', 'BACKLOG.md'), '# Backlog\n');
   const nestedDir = path.join(nested.project, 'src');
   fs.mkdirSync(nestedDir);
   for (const codex of [false, true]) {
@@ -258,6 +258,93 @@ function testProjectContext() {
   assert.ok(ambientOutput.includes('QATLAS SCAFFOLD: no'));
   assert.ok(ambientOutput.includes('qatlas-core init'));
   assert.strictEqual(hookOutput(ambient, 'project-backlog'), '');
+}
+
+function testBrainMigration() {
+  const legacy = dir => path.join(dir, '.qatlas-project');
+  const brain = dir => path.join(dir, '.qatlas-brain');
+  const read = file => fs.readFileSync(file, 'utf8');
+
+  // Any project block moves the folder, reports it and leaves foreign content alone.
+  const f = fixture('brain');
+  write(path.join(legacy(f.project), 'backlog', 'BACKLOG.md'), '# Backlog\nSee .qatlas-project/plans/ first.\n');
+  write(path.join(legacy(f.project), 'memory', 'MEMORY.md'), '# Memory\n');
+  write(path.join(legacy(f.project), 'zone-import', 'raw.md'), 'Raw .qatlas-project/ text.\n');
+  write(path.join(legacy(f.project), 'knowledge', 'blob.bin'), '.qatlas-project\u0000');
+  write(path.join(f.project, 'AGENTS.md'), 'Read .qatlas-project/TESTING.md, not .qatlas-projects/.\n');
+  write(path.join(f.project, '.gitignore'), '/.qatlas-project/zone-import/*\n');
+  write(path.join(f.project, 'README.md'), 'State lives in .qatlas-project/.\n');
+  const backlog = hookOutput(f, 'project-backlog');
+  assert.ok(backlog.includes('See .qatlas-brain/plans/ first.'), backlog);
+  assert.ok(backlog.includes('QATLAS MIGRATION: '), backlog);
+  assert.strictEqual(fs.existsSync(legacy(f.project)), false);
+  assert.strictEqual(read(path.join(f.project, 'AGENTS.md')), 'Read .qatlas-brain/TESTING.md, not .qatlas-projects/.\n');
+  assert.strictEqual(read(path.join(f.project, '.gitignore')), '/.qatlas-brain/zone-import/*\n');
+  assert.strictEqual(read(path.join(brain(f.project), 'zone-import', 'raw.md')), 'Raw .qatlas-project/ text.\n',
+    'Zone content is user material and stays untouched.');
+  assert.strictEqual(read(path.join(brain(f.project), 'knowledge', 'blob.bin')), '.qatlas-project\u0000');
+  assert.strictEqual(read(path.join(f.project, 'README.md')), 'State lives in .qatlas-project/.\n',
+    'Files outside the folder, AGENTS.md, CLAUDE.md and .gitignore are left to the agent.');
+  assert.deepStrictEqual(fs.readdirSync(path.join(brain(f.project), 'backlog')), ['BACKLOG.md'],
+    'The atomic write leaves no temporary file.');
+  const second = hookOutput(f, 'qatlas');
+  assert.ok(second.includes('QATLAS SCAFFOLD: yes') && !second.includes('QATLAS MIGRATION'), 'The move happens once.');
+
+  // A block without output of its own still reports the move.
+  const silent = fixture('brain-silent');
+  fs.mkdirSync(legacy(silent.project));
+  assert.ok(hookOutput(silent, 'memory').startsWith('QATLAS MIGRATION: '));
+  assert.ok(fs.existsSync(brain(silent.project)));
+
+  // A session started in a subfolder finds the old folder at the project root.
+  const nested = fixture('brain-subfolder');
+  initProject(nested);
+  write(path.join(legacy(nested.project), 'backlog', 'BACKLOG.md'), '# Backlog\n');
+  const sub = path.join(nested.project, 'src');
+  fs.mkdirSync(sub);
+  const fromSub = runNode(path.join(pluginRoot, 'hooks', 'qatlas-context.js'), ['qatlas'], { cwd: sub, home: nested.home });
+  assert.ok(fromSub.stdout.includes('QATLAS SCAFFOLD: yes') && fromSub.stdout.includes('QATLAS MIGRATION: '), fromSub.stdout);
+  assert.ok(fs.existsSync(path.join(brain(nested.project), 'backlog', 'BACKLOG.md')));
+
+  // Both folders: nothing moves, and only the rule block reports it.
+  const both = fixture('brain-both');
+  write(path.join(legacy(both.project), 'backlog', 'BACKLOG.md'), '# Old\n');
+  write(path.join(brain(both.project), 'backlog', 'BACKLOG.md'), '# New\n');
+  write(path.join(both.project, 'AGENTS.md'), 'Read .qatlas-project/TESTING.md.\n');
+  assert.ok(hookOutput(both, 'qatlas').includes('QATLAS MIGRATION BLOCKED: '));
+  const kept = hookOutput(both, 'project-backlog');
+  assert.ok(kept.includes('# New') && !kept.includes('QATLAS MIGRATION'), kept);
+  assert.strictEqual(read(path.join(legacy(both.project), 'backlog', 'BACKLOG.md')), '# Old\n');
+  assert.strictEqual(read(path.join(both.project, 'AGENTS.md')), 'Read .qatlas-project/TESTING.md.\n');
+
+  // The hooks of one session start run in parallel: one moves, the others read the result.
+  const race = fixture('brain-race');
+  write(path.join(legacy(race.project), 'backlog', 'BACKLOG.md'), '# Backlog\n');
+  write(path.join(legacy(race.project), 'memory', 'MEMORY.md'), '# Memory\n');
+  const script = path.join(pluginRoot, 'hooks', 'qatlas-context.js');
+  const blocks = ['qatlas', 'memory', 'project-backlog'];
+  const parallel = spawnSync('sh', ['-c', blocks.map(name =>
+    '"$NODE" "$SCRIPT" ' + name + ' > "$OUT/' + name + '" &').join(' ') + ' wait'], {
+    cwd: race.project, encoding: 'utf8',
+    env: { ...process.env, HOME: race.home, CLAUDE_PLUGIN_ROOT: pluginRoot, NODE: process.execPath, SCRIPT: script, OUT: race.root },
+  });
+  assert.strictEqual(parallel.status, 0, parallel.stderr);
+  const outputs = blocks.map(name => read(path.join(race.root, name)));
+  assert.ok(outputs[0].includes('QATLAS SCAFFOLD: yes'), outputs[0]);
+  assert.ok(outputs[1].includes('# Memory') && outputs[2].includes('# Backlog'), 'No block misses the scaffold.');
+  assert.strictEqual(outputs.filter(text => text.includes('QATLAS MIGRATION: ')).length, 1, 'Exactly one block reports.');
+  assert.ok(!outputs.join('').includes('MIGRATION BLOCKED'));
+
+  // Init moves an old folder itself instead of seeding a second one.
+  const init = fixture('brain-init');
+  initProject(init);
+  write(path.join(legacy(init.project), 'backlog', 'BACKLOG.md'), '# Own\n');
+  const result = runNode(path.join(pluginRoot, 'scripts', 'qatlas-init.js'), ['--target', init.project], {
+    cwd: init.project, home: init.home,
+  });
+  assert.ok(result.stdout.includes('- .qatlas-brain/ (renamed from the old folder name)'), result.stdout);
+  assert.strictEqual(fs.existsSync(legacy(init.project)), false);
+  assert.strictEqual(read(path.join(brain(init.project), 'backlog', 'BACKLOG.md')), '# Own\n');
 }
 
 function testLibraryAndSubagent() {
@@ -319,12 +406,12 @@ function testInit() {
   assert.ok(first.stdout.includes('- git repo') && first.stdout.includes('git identity: user.name and user.email'),
     first.stdout);
   assert.ok(fs.existsSync(path.join(f.project, '.git')), 'Init runs git init without asking.');
-  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-project')).sort(),
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain')).sort(),
     ['backlog', 'memory', 'zone-export', 'zone-import']);
-  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-project', 'backlog')), ['BACKLOG.md']);
-  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-project', 'memory')), ['MEMORY.md']);
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain', 'backlog')), ['BACKLOG.md']);
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain', 'memory')), ['MEMORY.md']);
   for (const zone of ['zone-import', 'zone-export']) {
-    assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-project', zone)), ['.gitkeep']);
+    assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain', zone)), ['.gitkeep']);
   }
   assert.strictEqual(fs.readFileSync(path.join(f.project, 'CLAUDE.md'), 'utf8'), '@AGENTS.md\n');
   assert.ok(fs.readFileSync(path.join(f.project, 'AGENTS.md'), 'utf8').includes('## Projektwissen'));
@@ -334,7 +421,7 @@ function testInit() {
     'A project configuration arises only on request.');
   const ignore = fs.readFileSync(path.join(f.project, '.gitignore'), 'utf8');
   assert.ok(ignore.startsWith('# foreign\n/custom/\n'));
-  for (const rule of ['/.qatlas-project/zone-import/*', '/.qatlas-project/zone-export/*', '/.qatlas/local/']) {
+  for (const rule of ['/.qatlas-brain/zone-import/*', '/.qatlas-brain/zone-export/*', '/.qatlas/local/']) {
     assert.ok(ignore.includes(rule), rule);
   }
 
@@ -342,7 +429,7 @@ function testInit() {
   spawnSync('git', ['-C', f.project, 'config', 'user.email', 'qatlas@example.invalid']);
   assert.strictEqual(run(doctor).stdout.trim(), 'OK: nothing missing.');
 
-  const backlog = path.join(f.project, '.qatlas-project', 'backlog', 'BACKLOG.md');
+  const backlog = path.join(f.project, '.qatlas-brain', 'backlog', 'BACKLOG.md');
   write(backlog, '# External\nhttps://example.invalid/project\nNo local tasks.\n');
   write(path.join(f.project, 'AGENTS.md'), '# Own\n');
   const second = run(init);
@@ -352,9 +439,9 @@ function testInit() {
   assert.strictEqual(fs.readFileSync(path.join(f.project, 'AGENTS.md'), 'utf8'), '# Own\n');
   assert.strictEqual(fs.readFileSync(path.join(f.project, '.gitignore'), 'utf8'), ignore, 'Rules are added once.');
 
-  const memoryDir = path.join(f.project, '.qatlas-project', 'memory');
+  const memoryDir = path.join(f.project, '.qatlas-brain', 'memory');
   fs.rmSync(memoryDir, { recursive: true });
-  assert.ok(run(doctor).stdout.includes('.qatlas-project/memory/MEMORY.md is missing'));
+  assert.ok(run(doctor).stdout.includes('.qatlas-brain/memory/MEMORY.md is missing'));
   run(init);
   assert.ok(fs.existsSync(path.join(memoryDir, 'MEMORY.md')), 'With repo memory enabled, the index seed is restored.');
 
@@ -367,9 +454,9 @@ function testInit() {
   fs.mkdirSync(sub, { recursive: true });
   const fromSub = runNode(init, ['--target', sub], { cwd: sub, home: f.home });
   assert.strictEqual(fromSub.status, 0, fromSub.stdout);
-  assert.strictEqual(fs.existsSync(path.join(f.project, 'src', '.qatlas-project')), false,
+  assert.strictEqual(fs.existsSync(path.join(f.project, 'src', '.qatlas-brain')), false,
     'Init inside a repo works on its root, never on a subfolder.');
-  assert.strictEqual(fs.existsSync(path.join(sub, '.qatlas-project')), false);
+  assert.strictEqual(fs.existsSync(path.join(sub, '.qatlas-brain')), false);
   assert.strictEqual(fs.existsSync(path.join(sub, 'AGENTS.md')), false);
 
   const agentsOnly = fixture('init-agents-only');
@@ -501,11 +588,12 @@ try {
   testDoctorRunBlock();
   testConfigMigration();
   testProjectContext();
+  testBrainMigration();
   testInit();
   testLibraryAndSubagent();
   testStatuslineRefresh();
   testStatuslineCodex();
-  process.stdout.write('✓ Qatlas init, doctor and context: 8 scenarios passed.\n');
+  process.stdout.write('✓ Qatlas init, doctor and context: 9 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

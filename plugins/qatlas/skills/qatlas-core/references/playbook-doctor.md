@@ -19,7 +19,7 @@ aktuellen Host verfügbar sind, prüft erst `qatlas run`.
 
 ## Planungssystem
 
-Prüfe `.qatlas-project/backlog/BACKLOG.md` lesend gegen [die
+Prüfe `.qatlas-brain/backlog/BACKLOG.md` lesend gegen [die
 Backlog-Norm](../../qatlas-core-backlog/SKILL.md), eine externe Bindung zusätzlich gegen deren
 Bindungsvorlage. Melde als Hinweis:
 

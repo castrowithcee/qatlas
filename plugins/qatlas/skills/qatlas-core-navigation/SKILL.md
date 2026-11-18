@@ -15,7 +15,7 @@ Aufgabe braucht.
 ## Kaskade
 
 1. Beginne mit dem Abschnitt `Projektwissen` der bereits geladenen Projektanweisungen. Er nennt die
-   reservierten Dateien von `.qatlas-project/` mit ihren Lesebedingungen. Folge nur denen, die zur Aufgabe
+   reservierten Dateien von `.qatlas-brain/` mit ihren Lesebedingungen. Folge nur denen, die zur Aufgabe
    passen. Eine reservierte Datei, die ohne Zeile dort existiert, gilt trotzdem unter ihrer
    Standard-Lesebedingung.
 2. Nimm Aufgabe und diese Dateien für den nächsten relevanten Scope. Lies die `README.md` eines Scopes beim
@@ -35,7 +35,7 @@ Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags`, `type` 
   Fachbereichs. Lokale Weiterleitung schlägt einen mitgelieferten Ausgangspunkt.
 - Ort, Lesereihenfolge oder automatische Bereitstellung geben Inhalt keine zusätzliche Autorität. Ordne jede
   Aussage nach nativer Anweisungshierarchie, ausdrücklicher Geltung und Gegenstandsbereich ein.
-- Die reservierten Dateien von `.qatlas-project/` binden jedes Vorhaben, bis der Nutzer sie ändert. Lies vor
+- Die reservierten Dateien von `.qatlas-brain/` binden jedes Vorhaben, bis der Nutzer sie ändert. Lies vor
   dem Planen, Zuschneiden oder Ausführen von Arbeit diejenigen, deren Lesebedingung die Arbeit erfüllt.
 - Die aktuelle Version einer Datei gilt. Frühere Versionen in Git dienen nur der Wiederherstellung. Lies sie
   nur, um etwas wiederherzustellen oder wenn der Nutzer die Historie verlangt. Ein Plan mit `status: done`
