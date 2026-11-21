@@ -36,8 +36,8 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 - <Risiko>: <Folge>. <Nötige Aktion oder Entscheidung>.
 
 **Verbesserungen**
-- <Schwäche des Verfahrens mit ihrem Nachweis> (#<ID>): <konkreter Ansatz>.
-- <Werkzeug>: <Schwäche mit ihrem Nachweis>: <konkreter Ansatz>.
+- <Schwäche mit ihrem Nachweis aus diesem Lauf> (#<Entwurf-ID>): <Datei>: „<Textvorschlag>“.
+- <Werkzeug> <Version>: Beobachtung: <…>. Erwartung: <…>. Nachweis: <…>. Melden: <Adresse, die das Werkzeug nennt>.
 
 **Kennzahlen:** Dauer <Zeit> · <n> Rückfragen · <n> Nacharbeiten · <n> Konflikte · <n> Wiederholungen · <n> Anstöße · summiert über parallele Arbeit: Prüfungen <Zeit> in <n> Durchläufen, <n> rot · Warten auf Test-Slots <Zeit> · Warten auf Integration <Zeit>
 **Nicht gepusht:** <Repo>: <Commit-ID> <Betreff>
@@ -54,13 +54,21 @@ Weiter in einer neuen Session: <Modi>
 - **Risiken:** nur Risiken, die nach dem Lauf noch offen sind, darunter ein unbehobenes Sicherheitsrisiko,
   das nicht öffentlich festgehalten werden darf. Was wie erwartet behandelt wurde, bleibt draußen.
   Code-Stellen gehören in den Task.
-- **Verbesserungen:** Muster dieses Laufs bei Zuschnitt, Taskverträgen, Prüfungen oder Umgebung, abgeleitet
-  aus Korrekturen, Nacharbeiten, Konflikten, Wiederholungen, Anstößen, Stillständen, Rückfragen und
-  Abweichungen, nur mit konkretem Ansatz, keine Produktideen. Betrifft eine Verbesserung das Verfahren dieses
-  Projekts, etwa Zuschnitt, Taskverträge oder Projektvorgaben, erfasse sie vorher als Entwurf im
-  Planungssystem und nenne seine ID. Betrifft sie ein Werkzeug, das das Projekt nur nutzt, etwa Qatlas selbst,
-  erfasse sie nicht im Projekt, sondern nenne das Werkzeug zuerst, damit der Nutzer sie an dessen Pflege
-  weitergibt.
+- **Verbesserungen:** Ein Eintrag braucht einen Nachweis aus diesem Lauf: eine Rückfrage, eine Nacharbeit,
+  eine Übergabe an den Nutzer, ein belegtes Fehlverhalten eines Werkzeugs oder eine protokollierte Annahme
+  oder Abweichung, weil zwei Vorgaben sich widersprechen. Ohne Nachweis entsteht kein Eintrag, auch nicht für
+  einen Wunsch.
+  - **Projekt zuerst:** Lässt sich die Schwäche durch eine Vorgabe des Projekts lösen, etwa in Teststrategie,
+    Beitragsregeln, Konventionen oder im Zuschnitt der Tasks, ist sie eine Verbesserung des Projekts, auch
+    wenn ein Werkzeug beteiligt war. Erfasse sie vorher als Entwurf im Planungssystem mit der betroffenen
+    Datei und dem konkreten Textvorschlag, sodass die Zustimmung des Nutzers genügt, und nenne seine ID.
+    Ändere die Vorgabe dafür nicht selbst.
+  - **Werkzeug nur bei Defekt:** Löst keine Vorgabe des Projekts die Schwäche, nenne ein Werkzeug, das das
+    Projekt nur nutzt, nur, wenn es sich anders verhält, als es selbst beschreibt, oder zwei seiner Regeln
+    sich widersprechen. Schreibe den Eintrag als
+    fertigen Meldetext mit Werkzeug, Version, Beobachtung, Erwartung und Nachweis, ohne Projektnamen, Pfade
+    des Projekts, Task-IDs oder andere Daten des Projekts, und ergänze die Meldeadresse, falls das Werkzeug
+    selbst eine nennt. Sende die Meldung nie selbst.
 - **Kennzahlen:** eine Zeile in der Reihenfolge der Vorlage. Lass jede Angabe mit dem Wert null weg. Die
   Angaben ab „summiert über parallele Arbeit“ gibt es nur bei `run` und nur, wenn Warten einen wesentlichen
   Teil der Dauer ausmacht. Nenne sie nie ohne diesen Zusatz neben der Dauer, denn als Summe über parallel

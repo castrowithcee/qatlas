@@ -43,7 +43,7 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
   Empfehlung>"`. Die Ausgabe ist die Antwort. Kommt keine, rufe denselben Befehl erneut auf.
 - **Log:** Protokolliere sofort mit `<run> log --type <type> --package <package> --task <id> --text
   "<text>"`, was in den Abschluss gehört (`annahme`, `abweichung`, `risiko`, `erfasst`, `entscheiden`,
-  `werkzeug`), so formuliert, wie es im Abschlussblock stehen wird.
+  `werkzeug` wie in [der Lead-Rolle](lead.md#umsetzen)), so formuliert, wie es im Abschlussblock stehen wird.
 - **Kontext verdichtet:** Schätze deinen Kontext nicht. Hat der Host ihn nach dem Merkmal aus [der
   Lead-Rolle](lead.md#ende) verdichtet, schließe die laufende Integration ab, nimm keine neue Übergabe an,
   protokolliere dein Ende mit `<run> done --role integrator --text "Kontext verdichtet"` und ende mit einer
