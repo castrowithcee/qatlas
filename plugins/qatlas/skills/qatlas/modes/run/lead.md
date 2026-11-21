@@ -92,8 +92,8 @@ Die Antwort lautet `integrated <sha>` oder `rework <Grund>`. Nur ein `rework` oh
 Befehl mit unverändertem Bericht erneut auf. So holst du sie auch ab, wenn der Integrator Branch und Worktree
 schon entfernt hat. Fass Task, Branches und Worktree bis zur Antwort nicht an. Nach `rework blocked:` frage den
 Supervisor, ob der Task auf `review` oder `waiting` geht, und mach mit dem nächsten Task weiter. Arbeite nach
-jedem anderen `rework` am Grund und übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe
-nicht die letzte war.
+jedem anderen `rework` im Rahmen des [Korrekturbudgets](playbook-acceptance.md#korrekturbudget) am Grund und
+übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe nicht die letzte war.
 
 Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn von der neuen `<basis>`.
 Solange du nur wartest, auf die Antwort einer Übergabe, auf einen Worker oder auf eine lange eigene Prüfung,
