@@ -58,12 +58,12 @@ oder Library-`policy` an eine Entscheidung des Nutzers. Der Agent hält eine eig
 ## Bearbeitungsrechte
 
 `edit` legt die zulässige Pflege unabhängig vom `type` fest. `edit: locked` schützt Policies und wirklich
-normative oder anweisende Inhalte. Ändere sie nur mit Freigabe und an Ort und Stelle. `edit: shared` lässt
-Agent und Nutzer die Datei im autorisierten Ablauf pflegen, ändert aber nie die Absicht des Projekts ohne
-passende Entscheidung des Nutzers. Folge dem Standard aus der Tabelle und weiche nur mit benanntem Grund ab.
-Entferne ein bestehendes `locked` nie pauschal. Ordne Inhalte nach ihrem Inhalt ein und hole die nötige
-Freigabe ein. Weder Umbenennen, Verschieben, `type`, Ordner noch bloßes Lesen ändern Bearbeitungsrechte,
-Geltungsbereich oder Rang einer Aussage.
+normative oder anweisende Inhalte. Ändere sie nur mit Freigabe des Nutzers oder eines ausdrücklich gestarteten
+Qatlas-Verfahrens und an Ort und Stelle. `edit: shared` lässt Agent und Nutzer die Datei im autorisierten
+Ablauf pflegen, ändert aber nie die Absicht des Projekts ohne passende Entscheidung des Nutzers. Folge dem
+Standard aus der Tabelle und weiche nur mit benanntem Grund ab. Entferne ein bestehendes `locked` nie
+pauschal. Ordne Inhalte nach ihrem Inhalt ein und hole die nötige Freigabe ein. Weder Umbenennen, Verschieben,
+`type`, Ordner noch bloßes Lesen ändern Bearbeitungsrechte, Geltungsbereich oder Rang einer Aussage.
 
 ## Felder
 

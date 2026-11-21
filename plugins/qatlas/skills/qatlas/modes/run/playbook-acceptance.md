@@ -89,10 +89,12 @@ weiterlaufen.
 ## Dokumentationswirkung
 
 Entscheide als Lead über die Dokumentationswirkung jedes Tasks und nimm nötige Änderungen vor der Übergabe in
-den Task-Branch auf. Prüfe sie als Integrator in der Abnahme. Der Aufruf von `run` gibt dafür nur
-Projektdokumentation mit `edit: shared` frei. Ändere keine Datei mit `edit: locked`, sondern lege eine nötige
-Änderung daran als Entscheidung vor: Hängt die Abnahme des Tasks an ihr, übergib ihn an `review`, sonst
-protokolliere sie als `entscheiden`, damit sie im Abschlussblock unter `Entscheiden` steht. Dabei gilt:
+den Task-Branch auf. Prüfe sie als Integrator in der Abnahme. Der Aufruf von `run` gibt dafür das
+Nachziehen von Projektdokumentation frei, unabhängig von `edit`: Bring eine Aussage mit der kleinsten nötigen
+Änderung am bestehenden Ort auf den Stand, den der Task hergestellt hat. Eine Regel, Policy oder Entscheidung
+des Nutzers änderst du damit nicht, dafür gilt der Punkt zum Widerspruch unten. Protokolliere jede Änderung an
+einer Datei mit `edit: locked` mit Datei und neuer Aussage als `annahme`, damit der Nutzer sie im
+Abschlussblock unter `Angenommen` gezielt prüfen kann. Dabei gilt:
 
 - Dokumentiere nur Aussagen, die ein künftiger Maintainer kennen muss, um eine Anforderung zu erfüllen oder
   eine falsche Entscheidung zu vermeiden. Beschreibe keine Details, die Code und Tests ohne relevante
