@@ -959,15 +959,15 @@ try {
     assert.deepStrictEqual([rep.tasks['3'].integrated, rep.tasks['3'].rework, rep.tasks['3'].handovers], [true, 1, 3]);
     assert.ok(rep.tasks['3'].cycle >= 0 && rep.tasks['3'].wait >= 0);
     assert.deepStrictEqual(rep.integrator, { questions: 1, finished: 0 });
-    // Time block: waits for the integrator from the log, checks from the slot runs since the run began.
-    assert.deepStrictEqual(Object.keys(rep.time), ['checks', 'red', 'checking', 'queued', 'integrating']);
-    assert.deepStrictEqual([rep.time.checks, rep.time.red], [0, 0]);
-    assert.ok(rep.time.integrating >= 0);
+    // Summed block: waits for the integrator from the log, checks from the slot runs since the run began.
+    assert.deepStrictEqual(Object.keys(rep.summed), ['checks', 'red', 'checking', 'queued', 'integrating']);
+    assert.deepStrictEqual([rep.summed.checks, rep.summed.red], [0, 0]);
+    assert.ok(rep.summed.integrating >= 0);
     write(path.join(repo, '.qatlas', 'local', 'slots', 'runs.jsonl'), [
       { time: new Date().toISOString(), waited: 2000, duration: 3000, exit: 0 },
       { time: new Date().toISOString(), waited: 0, duration: 1000, exit: 1 },
       { time: '2000-01-01T00:00:00.000Z', waited: 9000, duration: 9000, exit: 1 }].map(x => JSON.stringify(x)).join('\n') + '\n');
-    const timed = ok('report').time;
+    const timed = ok('report').summed;
     assert.deepStrictEqual([timed.checks, timed.red, timed.checking, timed.queued], [2, 1, 4, 2]);
     // The run folder of a repo without an ignore rule stays out of git status.
     assert.strictEqual(git(repo, 'status', '--short'), '');

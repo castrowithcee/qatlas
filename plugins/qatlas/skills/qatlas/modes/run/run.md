@@ -213,12 +213,13 @@ Laufbudget hinaus.
 ## Laufende
 
 Führe `<run> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket mit `done` ohne `rest` geendet hat
-oder gesichert ist und `report` keine offene Übergabe zeigt. Warte dann bei einem Lauf mit Integrator auf sein
-`done` nach seiner Schlussprüfung. Ohne Integrator hat der letzte Lead sie vor seinem `done` ausgeführt. Trage
-danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein (`status` und `erfasst` in
-den `notes` von `report`), führe die Bereinigungsschritte aus, die Projektanweisungen für das Ende eines Laufs
-nennen, und committe die entstandenen Änderungen. Schließe dann mit genau einem Abschlussblock über alle
-Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz unter `Verbesserungen`, Kennzahlen aus
-den Zählungen und dem Block `time` von `report`, mit `--code-repo <code-repo>` für Code außerhalb der
-Steuerwurzel. Halte die Antworten des Nutzers darauf selbst fest, weil die Zuständigkeit der Subagents mit dem
-Lauf endet.
+oder gesichert ist und `report` keine offene Übergabe zeigt. Melde dem Nutzer bei einem Lauf mit Integrator
+dann in genau einer Zeile, dass alle Tasks integriert oder übergeben sind und die Schlussprüfung läuft, und
+warte auf sein `done` nach seiner Schlussprüfung. Ohne Integrator hat der letzte Lead sie vor seinem `done`
+ausgeführt. Trage danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein
+(`status` und `erfasst` in den `notes` von `report`), führe die Bereinigungsschritte aus, die
+Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Schließe dann
+mit genau einem Abschlussblock über alle Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz
+unter `Verbesserungen`, Kennzahlen aus den Zählungen und dem Block `summed` von `report`, mit `--code-repo
+<code-repo>` für Code außerhalb der Steuerwurzel. Halte die Antworten des Nutzers darauf selbst fest, weil die
+Zuständigkeit der Subagents mit dem Lauf endet.
