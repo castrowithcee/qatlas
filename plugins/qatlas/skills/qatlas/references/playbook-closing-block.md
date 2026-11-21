@@ -36,7 +36,8 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 - <Risiko>: <Folge>. <Nötige Aktion oder Entscheidung>.
 
 **Verbesserungen**
-- <Schwäche des Verfahrens mit ihrem Nachweis>: <konkreter Ansatz>.
+- <Schwäche des Verfahrens mit ihrem Nachweis> (#<ID>): <konkreter Ansatz>.
+- <Werkzeug>: <Schwäche mit ihrem Nachweis>: <konkreter Ansatz>.
 
 **Kennzahlen:** Dauer <Zeit> · <n> Rückfragen · <n> Nacharbeiten · <n> Konflikte · <n> Wiederholungen · <n> Anstöße · summiert über parallele Arbeit: Prüfungen <Zeit> in <n> Durchläufen, <n> rot · Warten auf Test-Slots <Zeit> · Warten auf Integration <Zeit>
 **Nicht gepusht:** <Repo>: <Commit-ID> <Betreff>
@@ -55,7 +56,11 @@ Weiter in einer neuen Session: <Modi>
   Code-Stellen gehören in den Task.
 - **Verbesserungen:** Muster dieses Laufs bei Zuschnitt, Taskverträgen, Prüfungen oder Umgebung, abgeleitet
   aus Korrekturen, Nacharbeiten, Konflikten, Wiederholungen, Anstößen, Stillständen, Rückfragen und
-  Abweichungen, nur mit konkretem Ansatz, keine Produktideen.
+  Abweichungen, nur mit konkretem Ansatz, keine Produktideen. Betrifft eine Verbesserung das Verfahren dieses
+  Projekts, etwa Zuschnitt, Taskverträge oder Projektvorgaben, erfasse sie vorher als Entwurf im
+  Planungssystem und nenne seine ID. Betrifft sie ein Werkzeug, das das Projekt nur nutzt, etwa Qatlas selbst,
+  erfasse sie nicht im Projekt, sondern nenne das Werkzeug zuerst, damit der Nutzer sie an dessen Pflege
+  weitergibt.
 - **Kennzahlen:** eine Zeile in der Reihenfolge der Vorlage. Lass jede Angabe mit dem Wert null weg. Die
   Angaben ab „summiert über parallele Arbeit“ gibt es nur bei `run` und nur, wenn Warten einen wesentlichen
   Teil der Dauer ausmacht. Nenne sie nie ohne diesen Zusatz neben der Dauer, denn als Summe über parallel
