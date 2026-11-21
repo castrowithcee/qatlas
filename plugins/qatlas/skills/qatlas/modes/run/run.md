@@ -52,7 +52,8 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
 3. **Wenn Nutzer- oder Projektanweisungen Pull Requests verlangen, vor dem ersten Lead:** [Integration über
    Pull Requests](playbook-git-pr.md), bei einem GitHub-Repo mit `gh` außerdem [Pull Requests auf
    GitHub](playbook-git-pr-github.md).
-4. **Bevor du offene Tasks selbst als Übergabe sicherst:** [der Git-Workflow](playbook-git-workflow.md).
+4. **Bevor du offene Tasks selbst sicherst, als Übergabe oder nach einem Abbruch:** [der
+   Git-Workflow](playbook-git-workflow.md).
 5. **Vor dem Abschlussblock:** [der Abschlussblock](../../references/playbook-closing-block.md) und, falls noch
    nicht gelesen, [Entscheidungen vorlegen](../../references/playbook-decision-card.md).
 
@@ -212,6 +213,37 @@ Beantworte offene Rückfragen und setze `wait` ab dem `cursor` von `report` fort
 Session jedes Paket ohne `done` als „Lead endet ohne `done`“ und starte bei einem Lauf mit Integrator einen
 neuen, weil die Subagents der alten Session nicht mehr laufen. Bilde keine Pakete über das restliche
 Laufbudget hinaus.
+
+## Abbruch
+
+Weist dich der Nutzer in dieser Session ausdrücklich an, den Lauf abzubrechen, beende ihn so, dass ein neuer
+Lauf jeden begonnenen Task ohne Rückfrage fortsetzen kann:
+
+1. **Subagents stoppen:** Stoppe Leads, Integrator und alle Worker, auch die von Leads gestarteten, mit den
+   Mitteln des Hosts. In Claude Code stoppe jeden laufenden Hintergrund-Agenten einzeln mit dem Werkzeug
+   `TaskStop`. Kennst du eine ID nicht, listet ein Aufruf mit unbekannter ID alle laufenden Hintergrund-Agenten,
+   auch die anderer Agenten. In Codex stoppe jeden laufenden Subagent-Thread über deine Steuerung der
+   Subagents. Kannst du nicht feststellen, dass kein Subagent mehr läuft, oder einen nicht stoppen, nenne dem
+   Nutzer das Hindernis und fahre erst fort, wenn er geendet hat.
+2. **Kontroll-Branch:** Steht im Arbeitsbaum eines Kontroll-Branches ein unvollendeter Merge, nimm ihn mit
+   `git merge --abort` zurück, sodass der Arbeitsbaum sauber auf dem letzten vollständigen Stand steht.
+   Lösche oder verwirf dort sonst nichts.
+3. **Tasks sichern:** Gehe jeden Task des Laufs durch, den `report` nicht als integriert führt. Bei einem
+   lokalen Backlog trägst du die Statuswechsel selbst ein.
+   - Ohne eigene Arbeit, also ohne Task-Branch oder mit einem ohne eigene Commits und ohne nicht committete
+     Änderung: Er bleibt oder geht auf `ready`.
+   - Mit eigener Arbeit, die der Kontroll-Branch nicht enthält: Sichere nicht committete Arbeit als
+     Checkpoint nach dem Git-Workflow samt Schutzprüfung. Halte Task-Branch, Worktree-Pfad und Stand im
+     aktuellen Eintrag des Tasks fest, integrationsreif nur für einen unverändert übergebenen oder in
+     Integration befindlichen Stand, sonst Checkpoint. Nenne bei einem vorgebauten Task, dessen Branch die
+     Spitze eines nicht integrierten Vorgänger-Branches enthält, auch den Vorgänger und diese Spitze. Setze
+     ihn auf `ready`.
+   - Der Kontroll-Branch enthält seine Arbeit schon, der Task ist aber nicht abgeschlossen: Übergib ihn mit
+     diesem Befund nach der Backlog-Norm an `review`.
+   - Ging er vor dem Abbruch an `review` oder `waiting`, bleibt er dort.
+4. **Ende:** Führe `<run> end` aus und schließe ohne Schlussprüfung mit dem Abschlussblock nach „Laufende“.
+   Nenne dort unter `Risiken` jede im Lauf übersprungene Prüfung (`report --notes skipped`) mit ihrem Befehl,
+   weil sie nicht nachgeholt wurde.
 
 ## Laufende
 

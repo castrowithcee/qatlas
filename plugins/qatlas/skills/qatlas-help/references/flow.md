@@ -19,7 +19,8 @@ description: >
    einzelnen Task setzt selbst um. Ändern mehrere Pakete Dateien im selben Repo, nimmt ein Integrator jede
    Übergabe ab und committet lokal. Sonst integriert jeder Lead selbst. Der Lauf
    arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder übergibt an `review`, nachdem
-   integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Push und
+   integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Brichst du
+   einen Lauf ab, sichert er jeden begonnenen Task so, dass der nächste Lauf ihn fortsetzt. Push und
    Pull Requests nur, wenn Nutzer- oder Projektanweisungen sie verlangen und erlauben, aber nie
    Veröffentlichung, Deployment oder unumkehrbare Schritte.
 
