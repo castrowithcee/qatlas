@@ -49,10 +49,16 @@ dem Ereignis abläuft. Kennt dein Host keine solchen Hintergrundbefehle, führe 
 `handover` oder `ask` ab.
 
 Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task, der
-Dateien im Repo ändert, einen Worktree an, von `<basis>` oder bei einem vorgebauten Task nach „Übergeben“. Ein
-Task ohne Dateiänderung braucht weder Worktree noch Integration: Schließe ihn nach deiner Abnahme selbst und
-protokolliere ihn mit `<run> log --type integrated --task <id> --text "ohne Dateiänderung"`. Scheitert eine
-Prüfung an der Umgebung, etwa an Platz oder Speicher, frage den Supervisor, bevor du sie als rot wertest.
+Dateien im Repo ändert, einen Worktree an, von `<basis>` oder bei einem vorgebauten Task nach „Übergeben“.
+Nennt der aktuelle Eintrag eines Tasks Task-Branch, Worktree-Pfad und Stand aus einem früheren Lauf, setze
+dort fort, statt neu von `<basis>` zu beginnen. Prüfe vorher wie ein Nachfolger nach „Ende“, dass kein
+laufender oder unbekannter Worker Branch und Worktree nutzt und der Branch den genannten Stand trägt, und
+kläre eine Abweichung mit dem Supervisor. Fehlt nur der Worktree, lege ihn für den vorhandenen Branch neu an.
+Nennt der Eintrag einen Vorgänger mit gemerkter Spitze, behandle den Task als vorgebaut. Bereinige einen
+Checkpoint vor der Übergabe nach der Git-Norm. Ein Task ohne Dateiänderung braucht weder Worktree noch
+Integration: Schließe ihn nach deiner Abnahme selbst und protokolliere ihn mit `<run> log --type integrated
+--task <id> --text "ohne Dateiänderung"`. Scheitert eine Prüfung an der Umgebung, etwa an Platz oder
+Speicher, frage den Supervisor, bevor du sie als rot wertest.
 
 Protokolliere sofort mit `<run> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
 Laufs gehört, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`, `risiko` (nicht öffentlich
