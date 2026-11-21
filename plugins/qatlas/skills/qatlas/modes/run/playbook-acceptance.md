@@ -25,6 +25,13 @@ Fehlschlag ein:
   Ersatzvorgehen. Sichere den Task sofort in `review` oder `waiting`.
 - **Lösungsfehler:** Das Vorgehen wurde ausgeführt, erfüllt aber ein Abnahmekriterium nicht. Leite aus der
   Diagnose oder neuem Nachweis eine konkrete Korrektur ab.
+- **Fehlalarm der Schutzprüfung:** Ein Befund der Schutzprüfung vor dem Commit betrifft einen Wert, den der
+  Task selbst als Testdatum angelegt hat. Baue die Testdaten so um, dass kein echt aussehender Wert im Repo
+  steht, und lass etwa Schlüssel, Token und ähnliche Geheimnisse vom Test zur Laufzeit erzeugen. Prüfe danach
+  erneut. Das ist kein Korrekturversuch. Trage nie `--allow` ein. Braucht der Test nachweislich genau diesen
+  festen Wert im Repo, sichere den Stand als Checkpoint ohne die betroffene Datei und übergib den Task an
+  `review`. Stammt der Wert nicht aus dem Task oder könnte er ein echtes Geheimnis sein, stoppt der Befund
+  den Task.
 - **Bekannter Flake:** Ein CI-Fehlschlag gilt nur dann als bekannter Flake und nicht als Lösungsfehler, wenn
   der fehlschlagende Test außerhalb des Diffs liegt und im Planungssystem als bekannter Flake mit Task-ID
   erfasst ist. Starte den fehlgeschlagenen Job dann höchstens einmal pro Pull Request neu und zähle den
