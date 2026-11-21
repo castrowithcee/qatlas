@@ -77,7 +77,7 @@ function testConfig() {
   assert.deepStrictEqual(state.config.protection, { secrets: 'block', 'personal-data': 'block' });
   assert.deepStrictEqual(state.unknown.map(line => line.replace(/^.*: /, '')).sort(),
     ['unknown key extra.', 'unknown key other.', 'unknown key protection.enabled.', 'unknown key statusline.'],
-    'statusline belongs to the user file; protection.allow to the project file.');
+    'statusline belongs to the user file; protection.allow is valid in the project file.');
   assert.strictEqual(state.problems.length, 0);
   assert.strictEqual(state.statusline.layout, 'wrap', 'A project statusline block is ignored.');
 

@@ -27,7 +27,9 @@ Commit noch jede Commit-Nachricht braucht dann eine zusätzliche Einzelfreigabe:
    `git commit`.
    Bestätigt der Nutzer einen `personal-data`-Befund mit `ask` (Exit `2`) oder `warn` ausdrücklich als
    Fehlalarm, trage ihn mit derselben Prüfung samt `--target <repo-root>` und zusätzlich `--allow <kennung>`
-   ein (die Kennung steht in eckigen Klammern im Befund), stage die Freigabedatei mit und prüfe erneut. Trage
+   ein (die Kennung steht in eckigen Klammern im Befund), stage die Freigabedatei mit und prüfe erneut.
+   Untersagen Projektvorgaben, die Projektkonfiguration `.qatlas/plugins/config.json` zu versionieren, trage
+   stattdessen mit zusätzlich `--local` in die Nutzerdatei ein und stage nichts dafür. Trage
    nur nach dieser ausdrücklichen Bestätigung ein, in einem autonomen Lauf ohne erreichbaren Nutzer nie.
 3. Entwirf die Nachricht ausschließlich aus dem gestagten Diff dieses Commits. Sie beschreibt knapp, was
    sich ändert, und nur das nötige Warum, Risiko oder die Einschränkung. Die vorhandene Repo-Konvention

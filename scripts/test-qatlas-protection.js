@@ -131,7 +131,23 @@ try {
   execFileSync('git', ['-C', allowRepo, 'add', '.qatlas/plugins/config.json']);
   assert.strictEqual(check().status, 0, 'The staged allowlist suppresses the finding.');
 
-  process.stdout.write('✓ Qatlas protection: 17 scenarios passed.\n');
+  // --local records in the user file, which counts without staging and keeps the repo untouched.
+  result = run('allow-local', { home: { format: 1, memory: { enable: false } }, staged: mail });
+  assert.strictEqual(result.status, 2);
+  const localId = result.stdout.match(/\[([0-9a-f]{16})\]/)[1];
+  const localRepo = path.join(root, 'allow-local', 'repo');
+  const localEnv = { ...process.env, HOME: path.join(root, 'allow-local', 'home') };
+  const localRecorded = spawnSync(process.execPath, [script, '--target', localRepo, '--allow', localId, '--local'],
+    { encoding: 'utf8', env: localEnv });
+  assert.strictEqual(localRecorded.status, 0, localRecorded.stdout);
+  const userConfig = JSON.parse(fs.readFileSync(path.join(localEnv.HOME, '.qatlas', 'plugins', 'config.json'), 'utf8'));
+  assert.deepStrictEqual(userConfig.memory, { enable: false }, 'Recording keeps the other keys of the user file.');
+  assert.strictEqual(userConfig.protection.allow[0].hash, localId);
+  assert.ok(!fs.existsSync(path.join(localRepo, '.qatlas')), 'A local allowance writes nothing into the repo.');
+  const localCheck = spawnSync(process.execPath, [script, '--target', localRepo], { encoding: 'utf8', env: localEnv });
+  assert.strictEqual(localCheck.status, 0, 'The user allowlist suppresses the finding.');
+
+  process.stdout.write('✓ Qatlas protection: 18 scenarios passed.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

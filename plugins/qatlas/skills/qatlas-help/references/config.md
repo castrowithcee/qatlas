@@ -32,7 +32,7 @@ ist. Ist die Nutzerdatei kein gültiges JSON oder fehlt ihr `"format": 1`, stopp
 |---|---|---|
 | `protection.secrets` | beide | `block` oder `allow` für Secrets vor dem Commit, Standard `block` |
 | `protection.personal-data` | beide | `block`, `ask`, `warn` oder `allow` für personenbezogene Daten, Standard `ask` |
-| `protection.allow` | Projekt | Freigaben bestätigter Fehlalarme |
+| `protection.allow` | beide | Freigaben bestätigter Fehlalarme |
 | `memory.enable` | beide | `false` schaltet das Repo-Memory unter `.qatlas-brain/memory/` ab, Standard `true` |
 
 `block` verhindert den Schritt, `ask` fragt vorher, `warn` meldet nur, `allow` prüft nicht. Eine bestandene
@@ -40,11 +40,13 @@ Prüfung bleibt stumm. Ob ein Repo öffentlich oder privat ist, leitet Qatlas ni
 drückt diese Absicht aus.
 
 Ein vom Nutzer bestätigter Fehlalarm für `personal-data` kann dauerhaft freigegeben werden, damit spätere
-Commits ihn nicht erneut melden. Die Freigabe gilt erst, wenn die Projektdatei mit ihr gestagt ist, und nur
-für `personal-data` mit `ask` oder `warn`. Secrets und `block` lassen sich nie freigeben, und geänderter Inhalt
-wird erneut gemeldet. Ein Eintrag enthält nur Kennungen, keinen Klartext. Ihn legt
-`node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <kennung>` an. Die
-Kennung nennt der Befund in eckigen Klammern.
+Commits ihn nicht erneut melden. Sie gilt nur für `personal-data` mit `ask` oder `warn`. Secrets und `block`
+lassen sich nie freigeben, und geänderter Inhalt wird erneut gemeldet. Ein Eintrag enthält nur Kennungen,
+keinen Klartext. Ihn legt
+`node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <kennung>` in der
+Projektdatei an. Dort gilt er erst, wenn die Datei mit ihm gestagt ist, und ist so im Commit sichtbar. Mit
+zusätzlich `--local` landet er in der Nutzerdatei, gilt sofort und nur auf diesem Rechner. Das ist der Weg für
+Repos, die keine Qatlas-Dateien aufnehmen. Die Kennung nennt der Befund in eckigen Klammern.
 
 ## `statusline` und `run`
 

@@ -72,7 +72,7 @@ const PROTECTION_LEVELS = {
   secrets: ['block', 'allow'],
   'personal-data': ['block', 'ask', 'warn', 'allow'],
 };
-// statusline and run are user-wide; protection.allow is project-only and checked by the protection check.
+// statusline and run are user-wide; protection.allow is checked by the protection check itself.
 const USER_KEYS = new Set(['format', 'protection', 'memory', 'statusline', 'run']);
 const PROJECT_KEYS = new Set(['format', 'protection', 'memory']);
 
@@ -160,7 +160,7 @@ function configProblems(value, file, project) {
   else if (protection !== undefined) {
     for (const key of Object.keys(protection)) {
       const levels = PROTECTION_LEVELS[key];
-      if (project && key === 'allow') continue;
+      if (key === 'allow') continue;
       if (!levels) unknown.push(file + ': unknown key protection.' + key + '.');
       else if (!levels.includes(protection[key])) {
         invalid.push(file + ': protection.' + key + ' must be one of ' + levels.join(', ') + '.');

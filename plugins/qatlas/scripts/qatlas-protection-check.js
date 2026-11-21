@@ -2,16 +2,17 @@
 'use strict';
 
 // Scans the staged diff for secrets and personal data per the effective protection config.
-// Usage: node qatlas-protection-check.js [--target <repo>] [--print-config] [--allow <id>]
+// Usage: node qatlas-protection-check.js [--target <repo>] [--print-config] [--allow <id> [--local]]
 // Exit: 0 proceed (output only for warn findings), 1 block, 2 ask, 3 check not possible.
 //
-// Allowlist: a confirmed personal-data false positive lives in protection.allow of
-// <repo>/.qatlas/plugins/config.json (list of objects with file, rule, hash); the check reads the staged
-// version of that file. hash = first 16 hex chars of SHA-256 over file NUL rule NUL text of the
-// added line; the line number does not count and the plain text is not stored in the file.
+// Allowlist: a confirmed personal-data false positive lives in protection.allow (list of objects with file,
+// rule, hash) of <repo>/.qatlas/plugins/config.json, read in its staged version, or of the user file
+// ~/.qatlas/plugins/config.json, read from disk. hash = first 16 hex chars of SHA-256 over file NUL rule NUL
+// text of the added line; the line number does not count and the plain text is not stored in the file.
 // Every personal-data finding prints its id (hash) in square brackets. Only personal-data with ask or warn
 // can be allowed; secrets and personal-data with block never can. --allow <id> records the staged finding
-// with that id (exit 2 if not allowable) and stages nothing. An invalid allowlist file yields exit 3.
+// with that id in the project file, with --local in the user file (exit 2 if not allowable), and stages
+// nothing. An invalid allowlist file yields exit 3.
 
 const fs = require('fs');
 const os = require('os');
@@ -75,7 +76,8 @@ function scan(lines, rules) {
   return found;
 }
 
-// Staged copy only, so an unstaged edit cannot suppress a finding; --allow reads the working tree.
+// The project file counts only in its staged copy, so an unstaged edit in the repo cannot suppress a
+// finding. The user file and --allow read from disk.
 function readAllow(file, staged) {
   let source;
   if (staged) {
@@ -151,17 +153,22 @@ try {
   process.exit(3);
 }
 
-const allowFile = locations(root).projectConfigFile;
-const allow = readAllow(allowFile, !argv.includes('--allow'));
-if (allow.problems.length) {
+const recording = argv.includes('--allow');
+const projectFile = locations(root).projectConfigFile;
+const userFile = locations().configFile;
+const allowFile = argv.includes('--local') ? userFile : projectFile;
+const sources = recording ? [readAllow(allowFile, false)] : [readAllow(projectFile, true), readAllow(userFile, false)];
+const problems = sources.flatMap(source => source.problems);
+if (problems.length) {
   process.stdout.write('protection: check not possible, invalid allowlist file.\n'
-    + allow.problems.map(line => '- ' + line).join('\n') + '\n');
+    + problems.map(line => '- ' + line).join('\n') + '\n');
   process.exit(3);
 }
+const allow = { entries: sources.flatMap(source => source.entries), value: sources[0].value };
 const allowable = ['ask', 'warn'].includes(protection['personal-data']);
 
 const allowHash = flag('--allow');
-if (argv.includes('--allow')) {
+if (recording) {
   const hit = allowHash && allowable
     ? scan(lines, PERSONAL_RULES).find(entry => entry.hash === allowHash) : null;
   if (!hit) {
