@@ -1,7 +1,7 @@
 ---
 description: >
-  Taskergebnisse im Lauf selbst abnehmen, Fehlschläge einordnen, höchstens zwei Korrekturen zulassen, die
-  Dokumentationswirkung klären und das Ergebnis integrieren.
+  Taskergebnisse im Lauf selbst abnehmen, Fehlschläge einordnen, Korrekturen begrenzen und weitere nur nach
+  Freigabe zulassen, die Dokumentationswirkung klären und das Ergebnis integrieren.
 ---
 
 # Abnehmen und integrieren
@@ -74,7 +74,7 @@ diese:
    und wie viele Test-Slots darf das Projekt nutzen (`slot --slots <count>`, höchstens die Zahl des Nutzers
    für den Host)? Slots gelten für den ganzen Host, exklusive Ressourcen je Repo.
 
-## Höchstens zwei Korrekturen
+## Korrekturbudget
 
 Der erste Umsetzungsversuch zählt nicht als Korrektur, ebenso wenig seine geplante Fortsetzung nach einem
 geprüften und gesicherten Meilenstein. Lass danach insgesamt höchstens zwei gezielte Korrekturversuche pro
@@ -82,14 +82,23 @@ Task zu, auch wenn mehrere Abnahmekriterien betroffen sind. Jede Korrektur brauc
 daraus abgeleitete Änderung. Bloßes Umformulieren, ein anderer Subagent oder eine neue Session setzt den
 Zähler nicht zurück.
 
-Ist das Kriterium nach der zweiten Korrektur weiterhin nicht erfüllt:
+Ist das Kriterium nach der zweiten oder einer freigegebenen Korrektur weiterhin nicht erfüllt, frage als Lead
+den Supervisor nach einer weiteren Korrektur. Nenne darin belegte Ursache, neuen Nachweis und die konkrete
+Korrektur so, dass er ohne Diff und Log entscheiden kann. Der Supervisor gibt genau eine weitere Korrektur
+frei, wenn alle drei Bedingungen gelten, gleich ob sie das Produkt oder den Prüfaufbau betrifft:
+
+1. Die Ursache ist mit neuem Nachweis belegt.
+2. Die Korrektur ist konkret benannt.
+3. Sie ändert weder Ziel, Scope noch Abnahme.
+
+Jede weitere Freigabe braucht eine neue Anfrage mit neuem Nachweis. Gibt der Supervisor keine Korrektur frei:
 
 1. Beende jede weitere Umsetzung dieses Tasks.
-2. Sichere den aktuellen Diff, die belegte Ursache, die zwei geprüften Korrekturen und die weiterhin
-   verletzte Abnahme kompakt im Task.
+2. Sichere den aktuellen Diff, die belegte Ursache, die geprüften Korrekturen und die weiterhin verletzte
+   Abnahme kompakt im Task.
 3. Setze den Task auf `review` und formuliere die konkrete Nutzerentscheidung zu Voraussetzung,
    Vorgehenswechsel, Scope oder Verschiebung.
-4. Starte keinen Prüfer und keinen Ersatz-Subagent als verdeckte dritte Korrekturrunde.
+4. Starte keinen Prüfer und keinen Ersatz-Subagent als verdeckte weitere Korrekturrunde.
 
 Beginne keinen übrigen Task, der von diesem Ergebnis abhängt. Lass nur nachweislich unabhängige Tasks
 weiterlaufen.
