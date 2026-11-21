@@ -77,10 +77,11 @@ ungelöste Risiken, die verwendeten Worker-Profile mit Modell und Effort, Branch
 Übergabe die letzte des Tasks ist und ob danach eine Prüfung des Nutzers offen bleibt. Lass Rohlogs draußen.
 
 Beginne jeden Bericht mit YAML-Frontmatter (`---` in der ersten Zeile) mit `checks`: ein Eintrag pro
-vollständiger Prüfung der Übergabe, jeweils mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der
-übergebenen Branch-Spitze, z. B. aus `git rev-parse <branch>^{tree}` oder `slot results --tree`). `handover`
-weist jeden anderen `tree` zurück. Ein Eintrag darf von einem anderen Nachweisweg stammen, den das Projekt
-nennt, immer mit seinem `tree`. Ergänze ohne Integration über Pull Requests `branch`, bei Integration über Pull
+vollständiger Prüfung der Übergabe über `slot` oder einen anderen Nachweisweg, den das Projekt nennt, jeweils
+mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der übergebenen Branch-Spitze, z. B. aus `git
+rev-parse <branch>^{tree}` oder `slot results --tree`). `handover` weist jeden anderen `tree` zurück. Schnelle
+Prüfungen ohne `slot` brauchen keinen Eintrag, weil der Integrator sie selbst erneut ausführt. Hat die
+Übergabe sonst keine Prüfung, trage sie trotzdem ein, denn `handover` verlangt mindestens einen. Ergänze ohne Integration über Pull Requests `branch`, bei Integration über Pull
 Requests die Felder `pr-title` (eine nicht leere Zeile), `pr-body` (nicht leer, meist ein `|`-Blockskalar),
 `branch`, `base`, `last` (`true` oder `false`), `pr` (Nummer des offenen Pull Requests), `head` (SHA der
 Spitze des übergebenen Pull Requests) und `pushed` (SHA beim ersten Push), die SHAs in Anführungszeichen, und
