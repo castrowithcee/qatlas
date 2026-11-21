@@ -100,8 +100,8 @@ Jede weitere Freigabe braucht eine neue Anfrage mit neuem Nachweis. Gibt der Sup
    Vorgehenswechsel, Scope oder Verschiebung.
 4. Starte keinen Prüfer und keinen Ersatz-Subagent als verdeckte weitere Korrekturrunde.
 
-Beginne keinen übrigen Task, der von diesem Ergebnis abhängt. Lass nur nachweislich unabhängige Tasks
-weiterlaufen.
+Beginne keinen übrigen Task, der von diesem Ergebnis abhängt, denn seine Abnahme ist offen. Lass nur
+nachweislich unabhängige Tasks weiterlaufen.
 
 ## Dokumentationswirkung
 

@@ -53,7 +53,8 @@ Sicherheitsisolation, nenne einen separaten Clone oder eine Sandbox als Vorausse
   geprüften Meilenstein als Commit, bevor die Arbeit weitergeht.
 - Als Lead: Sichere vor `review`, `waiting` oder deinem Ende jeden nicht integrierten Stand als markierten
   Checkpoint auf dem Task-Branch und halte Task-Branch, Worktree-Pfad und Stand (integrationsreif oder
-  Checkpoint) nach „Planungssystem“ fest. Ein Checkpoint ist nicht integrationsreif.
+  Checkpoint) nach „Planungssystem“ fest, bei einem vorgebauten Task auch den Vorgänger und dessen gemerkte
+  Spitze. Ein Checkpoint ist nicht integrationsreif.
 - Lege auch einen Checkpoint nach dem Commit-Verfahren der Git-Norm an, einschließlich ihrer Schutzprüfung.
   Wende vor jeder Übergabe an den Integrator auf jeden Checkpoint die Bereinigung der Git-Norm an. Stashe nie
   automatisch.
