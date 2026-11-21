@@ -10,5 +10,5 @@
 /.qatlas-brain/zone-export/*
 !/.qatlas-brain/zone-export/.gitkeep
 
-# Local Qatlas runtime state belongs to this checkout only.
+# Project id and working files of agents belong to this checkout only.
 /.qatlas/local/

@@ -43,15 +43,15 @@
 //     this user on the host. No JSON output; the command exit code is passed through (signal: 128 plus
 //     signal number). Each executed command adds one line to runs.jsonl in the slot store of the repo:
 //     {time,waited,duration,exit,command,cwd,resource}, times in milliseconds. The store lies in
-//     <primary working tree>/.qatlas/local/slots; a repo that does not ignore .qatlas/local/ gets the
-//     folder entered in .git/info/exclude.
+//     <state folder of the project>/slots in ~/.qatlas/projects; a repo that does not ignore .qatlas/local/
+//     (where the project id lives) gets the folder entered in .git/info/exclude.
 //   qatlas-run-tools.js slot [--slots <count>] [--repo <path>] status
 //     Read-only view of the test slots of the host and the resources of the repo; "status" without "--"
 //     (after "--" it is a command to run).
 //     Output: {"slots","busy":[{slot,pid,started,cwd,command,orphaned}],
 //     "waiting":[{priority,arrival,pid,cwd,command,orphaned}],
 //     "resources":[{"resource","busy":[{pid,started,cwd,command,orphaned}],"waiting":[...]}]} (resources with
-//     a holder or waiter only); unknown fields are null. Exit: 0, 3 no git repo.
+//     a holder or waiter only); unknown fields are null. Exit: 0, 3 no project folder.
 //   qatlas-run-tools.js slot [--priority] [--repo <path>] --resource <name> -- <command> [args...]
 //     Like slot, but runs the command under a named exclusive resource (capacity 1) instead of a test
 //     slot, e.g. one e2e suite at a time. Each resource has its own queue and belongs to the repo; it does
@@ -86,7 +86,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync, spawn, spawnSync } = require('child_process');
 const { parseFrontmatter } = require('./handover-frontmatter.js');
-const { localDir, excludeLocal } = require('./local-store.js');
+const { projectDir, readState, ensureState, excludeLocal } = require('../../../../../scripts/runtime/project-store.js');
 
 const argv = process.argv.slice(2);
 const command = argv[0];
@@ -357,8 +357,13 @@ const readDetail = text => {
     return { cwd: typeof cwd === 'string' ? cwd : null, command: Array.isArray(command) ? command : null };
   } catch { return { cwd: null, command: null }; }
 };
-// Results, resources and the run log belong to the repo; all its worktrees share them.
-const slotDir = () => path.join(localDir(repo) || fail('Not a git repo: ' + repo, 3), 'slots');
+// Results, resources and the run log belong to the project; all its worktrees share them. Read access gives
+// null while the project has no state folder; write access creates it.
+const slotDir = (write = false) => {
+  if (!projectDir(repo)) fail('No project folder: ' + repo, 3);
+  const state = (write ? ensureState : readState)(repo);
+  return state && path.join(state, 'slots');
+};
 // Locks and queue of the numbered slots are shared by every repo of this user on the host.
 const hostSlotDir = () => path.join(os.homedir(), '.qatlas', 'state', 'slots');
 const ownerFile = lock => path.join(lock, 'owner');
@@ -413,7 +418,7 @@ function slotStatus() {
     const { pid, started, ...detailFields } = holder(path.join(host, entry));
     return { slot: Number(entry), pid, started, ...detailFields };
   });
-  const resources = listDir(path.join(dir, 'resources')).sort().flatMap(name => {
+  const resources = listDir(dir && path.join(dir, 'resources')).sort().flatMap(name => {
     const paths = resourcePaths(dir, name);
     const held = fs.existsSync(paths.lock) ? [holder(paths.lock)] : [];
     const waiting = waiters(paths.queue);
@@ -428,21 +433,14 @@ const maxAgeMs = () => number('--max-age', 24) * HOUR_MS;
 const resultsDir = dir => path.join(dir, 'results');
 
 // State of the worktree holding the working directory; null if it cannot be read (no repo, no commit).
-// The slot store itself does not count as dirt: in the primary working tree it lies inside the worktree.
-function worktreeState(store, inputs = []) {
+function worktreeState(inputs = []) {
   try {
     const cwd = fs.realpathSync(process.cwd());
     const g = args => execFileSync('git', ['-C', cwd, ...args],
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 1 << 28 }).trim();
     const top = fs.realpathSync(g(['rev-parse', '--show-toplevel']));
-    let existing = store;
-    const tail = [];
-    while (!fs.existsSync(existing)) { tail.unshift(path.basename(existing)); existing = path.dirname(existing); }
-    const inside = path.relative(top, path.join(fs.realpathSync(existing), ...tail));
-    const exclude = inside && !inside.startsWith('..') && !path.isAbsolute(inside)
-      ? [`:(exclude,top)${inside.split(path.sep).join('/')}`] : [];
     return {
-      clean: g(['status', '--porcelain', '--untracked-files=all', '--', ':/', ...exclude,
+      clean: g(['status', '--porcelain', '--untracked-files=all', '--', ':/',
         ...inputs.map(input => `:(exclude,top,literal)${input.rel}`)]) === '',
       head: g(['rev-parse', 'HEAD']),
       tree: g(['rev-parse', 'HEAD^{tree}']),
@@ -545,12 +543,12 @@ function cleanResults(dir, maxAge) {
 function slotResults() {
   const dir = slotDir();
   if (opts.includes('--clear')) {
-    fs.rmSync(resultsDir(dir), { recursive: true, force: true });
+    if (dir) fs.rmSync(resultsDir(dir), { recursive: true, force: true });
     return;
   }
   const tree = opts.includes('--tree') ? flag('--tree') : null;
   if (tree !== null && !/^[0-9a-f]{7,64}$/i.test(tree || '')) fail('Invalid: --tree needs a tree SHA of at least 7 hex characters', 2);
-  const results = readResults(dir, maxAgeMs()).filter(record => tree === null || record.tree.startsWith(tree.toLowerCase()))
+  const results = (dir ? readResults(dir, maxAgeMs()) : []).filter(record => tree === null || record.tree.startsWith(tree.toLowerCase()))
     .map(record => ({ ...record, inputs: record.inputs || [] })).sort((a, b) => a.time.localeCompare(b.time));
   out({ results });
 }
@@ -567,10 +565,10 @@ function slot() {
   const maxAge = maxAgeMs();
   const top = opts.includes('--input') ? worktreeTop() : null;
   const inputs = top ? resolveInputs(top) : [];
-  const dir = slotDir();
+  const dir = slotDir(true);
   const paths = resource === null ? null : resourcePaths(dir, resource);
 
-  const pre = worktreeState(dir, inputs);
+  const pre = worktreeState(inputs);
   if (pre && pre.clean && !opts.includes('--no-cache')) {
     const hit = readRecord(resultFile(dir, resultKey(pre, resource)), maxAge);
     if (hit) {
@@ -625,7 +623,7 @@ function slot() {
 
   let released = false;
   const release = () => { if (!released) { released = true; fs.rmSync(lock, { recursive: true, force: true }); } };
-  const before = worktreeState(dir, inputs);
+  const before = worktreeState(inputs);
   const startedAt = Date.now();
   const child = spawn(rest[0], rest.slice(1), { stdio: 'inherit' });
   let signalled = null;
@@ -634,7 +632,7 @@ function slot() {
   }
   child.on('error', error => { release(); fail('Command could not be started: ' + error.message, 127); });
   const record = () => {
-    const after = worktreeState(dir, inputs);
+    const after = worktreeState(inputs);
     if (!before || !before.clean || !after || after.head !== before.head || resultKey(after, resource) !== resultKey(before, resource)) return;
     const target = resultFile(dir, resultKey(before, resource));
     const temp = `${target}.${process.pid}.tmp`;

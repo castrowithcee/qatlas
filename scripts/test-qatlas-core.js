@@ -583,6 +583,103 @@ function testStatuslineCodex() {
   assert.strictEqual(fs.readFileSync(config, 'utf8'), 'model = "x"\n');
 }
 
+function testProjectStore() {
+  const f = fixture('store');
+  const root = fs.realpathSync(f.root);
+  const home = fs.realpathSync(f.home);
+  const projects = path.join(home, '.qatlas', 'projects');
+  const loader = require.resolve('../plugins/qatlas/scripts/runtime/project-store.js');
+  const previous = process.env.HOME;
+  process.env.HOME = home;
+  try {
+    const store = require(loader);
+    const git = (cwd, ...args) => spawnSync('git', ['-C', cwd, '-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { encoding: 'utf8' });
+    const repo = path.join(root, 'My Repo');
+    fs.mkdirSync(repo);
+    git(repo, 'init', '-q', '-b', 'main');
+    git(repo, 'commit', '-q', '--allow-empty', '-m', 'x');
+    const folders = () => fs.existsSync(projects) ? fs.readdirSync(projects) : [];
+
+    // Read access creates nothing and finds nothing.
+    assert.strictEqual(store.readState(repo), null);
+    assert.strictEqual(fs.existsSync(path.join(home, '.qatlas')), false);
+    assert.strictEqual(fs.existsSync(path.join(repo, '.qatlas')), false);
+
+    const state = store.ensureState(repo);
+    assert.match(path.basename(state), /^my-repo-uid[0-9a-f]{8}$/);
+    assert.strictEqual(path.dirname(state), projects);
+    assert.strictEqual(fs.readFileSync(path.join(state, 'path'), 'utf8').trim(), repo);
+    const id = fs.readFileSync(path.join(repo, '.qatlas', 'local', 'uid'), 'utf8').trim();
+    assert.match(id, /^[0-9a-f]{8}$/);
+    assert.strictEqual(git(repo, 'status', '--short').stdout, '', 'The id file stays out of git status.');
+    assert.strictEqual(store.readState(repo), state);
+    assert.strictEqual(store.ensureState(repo), state);
+
+    // A linked worktree and a subfolder share the state of the primary working tree.
+    const tree = path.join(root, 'tree');
+    assert.strictEqual(git(repo, 'worktree', 'add', '-q', '-b', 'side', tree).status, 0);
+    assert.strictEqual(store.ensureState(tree), state);
+    assert.strictEqual(store.readState(tree), state);
+    assert.strictEqual(fs.existsSync(path.join(tree, '.qatlas')), false);
+    fs.mkdirSync(path.join(repo, 'sub'));
+    assert.strictEqual(store.readState(path.join(repo, 'sub')), state);
+    git(repo, 'worktree', 'remove', '--force', tree);
+
+    // A clone gets its own id.
+    const clone = path.join(root, 'clone');
+    assert.strictEqual(spawnSync('git', ['clone', '-q', repo, clone]).status, 0);
+    const cloneState = store.ensureState(clone);
+    assert.notStrictEqual(cloneState, state);
+    assert.strictEqual(folders().length, 2);
+
+    // Moving the project and renaming the state folder keep the assignment, the path follows the move.
+    const moved = path.join(root, 'moved');
+    fs.renameSync(repo, moved);
+    assert.strictEqual(store.readState(moved), state);
+    assert.strictEqual(store.ensureState(moved), state);
+    assert.strictEqual(fs.readFileSync(path.join(state, 'path'), 'utf8').trim(), moved);
+    const renamed = path.join(projects, 'chosen-name-uid' + id);
+    fs.renameSync(state, renamed);
+    assert.strictEqual(store.readState(moved), renamed);
+    assert.strictEqual(store.ensureState(moved), renamed);
+    assert.strictEqual(folders().length, 2);
+
+    // Without the id file the write access takes over the id of the folder whose path points here.
+    fs.rmSync(path.join(moved, '.qatlas'), { recursive: true });
+    assert.strictEqual(store.readState(moved), null);
+    assert.strictEqual(store.ensureState(moved), renamed);
+    assert.strictEqual(fs.readFileSync(path.join(moved, '.qatlas', 'local', 'uid'), 'utf8').trim(), id);
+    assert.strictEqual(git(moved, 'status', '--short').stdout, '');
+
+    // The same id in two folders is an error naming both, and no folder is chosen.
+    const twin = path.join(projects, 'twin-uid' + id);
+    fs.mkdirSync(twin);
+    for (const call of [store.readState, store.ensureState]) {
+      assert.throws(() => call(moved), error => error.message.includes(renamed) && error.message.includes(twin));
+    }
+    fs.rmdirSync(twin);
+
+    // Outside git: the nearest folder upwards with .qatlas, else the start folder. Home is never a project.
+    const plain = path.join(root, 'plain');
+    fs.mkdirSync(path.join(plain, '.qatlas'), { recursive: true });
+    fs.mkdirSync(path.join(plain, 'a', 'b'), { recursive: true });
+    assert.strictEqual(store.projectDir(path.join(plain, 'a', 'b')), plain);
+    const plainState = store.ensureState(path.join(plain, 'a', 'b'));
+    assert.ok(fs.existsSync(path.join(plain, '.qatlas', 'local', 'uid')));
+    assert.strictEqual(store.readState(plain), plainState);
+    const lone = path.join(root, 'lone');
+    fs.mkdirSync(lone);
+    assert.strictEqual(store.projectDir(lone), lone);
+    fs.mkdirSync(path.join(home, 'work'));
+    assert.strictEqual(store.projectDir(home), null);
+    assert.strictEqual(store.ensureState(home), null);
+    assert.strictEqual(store.projectDir(path.join(home, 'work')), path.join(home, 'work'));
+    assert.strictEqual(fs.existsSync(path.join(home, '.qatlas', 'local')), false);
+  } finally {
+    process.env.HOME = previous;
+  }
+}
+
 try {
   testConfig();
   testDoctorRunBlock();
@@ -593,7 +690,8 @@ try {
   testLibraryAndSubagent();
   testStatuslineRefresh();
   testStatuslineCodex();
-  process.stdout.write('✓ Qatlas init, doctor and context: 9 scenarios passed.\n');
+  testProjectStore();
+  process.stdout.write('✓ Qatlas init, doctor and context: 10 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

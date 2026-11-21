@@ -11,7 +11,16 @@ const skill = path.resolve(__dirname, '..', 'plugins', 'qatlas', 'skills', 'qatl
 const tools = path.join(skill, 'modes', 'run', 'scripts', 'qatlas-run-tools.js');
 const runner = path.join(skill, 'modes', 'run', 'scripts', 'qatlas-run.js');
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-run-tools-'));
+const store = require(path.join(skill, '..', '..', 'scripts', 'runtime', 'project-store.js'));
 const gitDir = path.dirname(execFileSync('which', ['git'], { encoding: 'utf8' }).trim());
+// Every spawned script and the store module work in a temporary home, never in the real one.
+process.env.HOME = path.join(root, 'home');
+fs.mkdirSync(process.env.HOME);
+const stateOf = (repo, home = process.env.HOME) => {
+  const previous = process.env.HOME;
+  process.env.HOME = home;
+  try { return store.readState(repo); } finally { process.env.HOME = previous; }
+};
 
 // gh stub, steered by files in $STUB_DIR: view.json, checks.json, merge-mode (same|different),
 // merge-fail-first, (no checks.json: gh reports "no checks reported") merge-fail-after (merges, then reports failure), merge-calls (log), merge-oid. `pr merge` writes the squash commit to the bare remote.
@@ -178,6 +187,13 @@ function testSlotResults() {
   const sub = (...args) => spawnSync(process.execPath, [tools, 'slot', '--repo', repo, ...args], { encoding: 'utf8', env, cwd: repo });
   const results = (...args) => { const r = sub('results', ...args); assert.strictEqual(r.status, 0, r.stderr); return JSON.parse(r.stdout).results; };
 
+  // Reading creates nothing: no project id, no state folder.
+  assert.strictEqual(sub('status').status, 0);
+  assert.deepStrictEqual(results(), []);
+  assert.strictEqual(sub('results', '--clear').status, 0);
+  assert.strictEqual(fs.existsSync(path.join(repo, '.qatlas')), false);
+  assert.strictEqual(fs.existsSync(path.join(home, '.qatlas', 'projects')), false);
+
   // Green run writes a record; the same key is not run again and names its origin.
   let r = slot([], mark(0));
   assert.strictEqual(r.status, 0, r.stderr);
@@ -198,7 +214,7 @@ function testSlotResults() {
 
   // Every executed command is logged with its times and exit code; a reused result is not.
   assert.strictEqual(slot([], ['node', '-e', 'process.exit(3)']).status, 3);
-  const logged = fs.readFileSync(path.join(repo, '.qatlas', 'local', 'slots', 'runs.jsonl'), 'utf8').trim().split('\n')
+  const logged = fs.readFileSync(path.join(stateOf(repo, home), 'slots', 'runs.jsonl'), 'utf8').trim().split('\n')
     .map(line => JSON.parse(line));
   assert.deepStrictEqual(logged.map(x => x.exit), [0, 3]);
   assert.deepStrictEqual(Object.keys(logged[0]).sort(), ['command', 'cwd', 'duration', 'exit', 'resource', 'time', 'waited']);
@@ -222,9 +238,11 @@ function testSlotResults() {
   assert.strictEqual(count(), 5);
   assert.strictEqual(results().length, 4);
 
-  // The slot store is kept out of git status through .git/info/exclude, entered once; an untracked file
+  // The project id is kept out of git status through .git/info/exclude, entered once; an untracked file
   // elsewhere still makes the worktree dirty.
-  assert.strictEqual(git('status', '--short'), '', 'store shows up in git status');
+  assert.strictEqual(git('status', '--short'), '', 'id file shows up in git status');
+  assert.ok(fs.existsSync(path.join(repo, '.qatlas', 'local', 'uid')));
+  assert.strictEqual(fs.existsSync(path.join(repo, '.qatlas', 'local', 'slots')), false);
   const excludes = fs.readFileSync(path.join(repo, '.git', 'info', 'exclude'), 'utf8').split('\n');
   assert.strictEqual(excludes.filter(line => line === '/.qatlas/local/').length, 1);
 
@@ -266,7 +284,7 @@ function testSlotResults() {
   assert.strictEqual(results().length, 5);
 
   // A record older than 24 hours is ignored on read and does not stop the run.
-  const dir = path.join(repo, '.qatlas', 'local', 'slots', 'results');
+  const dir = path.join(stateOf(repo, home), 'slots', 'results');
   for (const file of fs.readdirSync(dir)) {
     const full = path.join(dir, file);
     const record = JSON.parse(fs.readFileSync(full, 'utf8'));
@@ -338,7 +356,7 @@ function testSlotResults() {
   fs.rmSync(path.join(repo, 'extra-input.txt'));
 
   // Validity: --max-age shortens it, the default stays 24 hours; invalid values exit 2.
-  const dir2 = path.join(repo, '.qatlas', 'local', 'slots', 'results');
+  const dir2 = path.join(stateOf(repo, home), 'slots', 'results');
   const age = hours => {
     for (const file of fs.readdirSync(dir2)) {
       const full = path.join(dir2, file);
@@ -963,20 +981,22 @@ try {
     assert.deepStrictEqual(Object.keys(rep.time), ['checks', 'red', 'checking', 'queued', 'integrating']);
     assert.deepStrictEqual([rep.time.checks, rep.time.red], [0, 0]);
     assert.ok(rep.time.integrating >= 0);
-    write(path.join(repo, '.qatlas', 'local', 'slots', 'runs.jsonl'), [
+    write(path.join(stateOf(repo), 'slots', 'runs.jsonl'), [
       { time: new Date().toISOString(), waited: 2000, duration: 3000, exit: 0 },
       { time: new Date().toISOString(), waited: 0, duration: 1000, exit: 1 },
       { time: '2000-01-01T00:00:00.000Z', waited: 9000, duration: 9000, exit: 1 }].map(x => JSON.stringify(x)).join('\n') + '\n');
     const timed = ok('report').time;
     assert.deepStrictEqual([timed.checks, timed.red, timed.checking, timed.queued], [2, 1, 4, 2]);
-    // The run folder of a repo without an ignore rule stays out of git status.
+    // Besides the id, a run writes only run/tmp into the project, and git status stays empty.
     assert.strictEqual(git(repo, 'status', '--short'), '');
+    assert.deepStrictEqual(fs.readdirSync(path.join(repo, '.qatlas', 'local')).sort(), ['uid']);
+    assert.ok(fs.existsSync(path.join(stateOf(repo), 'run', 'events.jsonl')));
     assert.deepStrictEqual(rep.notes, { erfasst: [{ package: 'a', task: '7', text: 'Bug: x - y' }], regel: [{ text: 'Flaky test: rerun once' }] });
     assert.deepStrictEqual(ok('report', '--notes', 'regel'), { notes: { regel: [{ text: 'Flaky test: rerun once' }] } });
     assert.deepStrictEqual(ok('report', '--notes', 'skipped'), { notes: { skipped: [] } });
 
     // An unfinished run is resumed: nothing is archived, the events stay and resume is no note.
-    const archives = () => fs.readdirSync(path.join(repo, '.qatlas', 'local', 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length;
+    const archives = () => fs.readdirSync(path.join(stateOf(repo), 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length;
     assert.strictEqual(archives(), 0);
     const tmpFile = path.join(repo, '.qatlas', 'local', 'run', 'tmp', 'a', 'x.txt');
     fs.mkdirSync(path.dirname(tmpFile), { recursive: true });
@@ -996,7 +1016,7 @@ try {
     ok('begin');
     assert.ok(!fs.existsSync(path.dirname(path.dirname(tmpFile))), 'new run clears run/tmp');
     refused(/past the end of the log/, 'wait', '--since', String(last.cursor), '--timeout', '0.1');
-    assert.strictEqual(fs.readdirSync(path.join(repo, '.qatlas', 'local', 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
+    assert.strictEqual(fs.readdirSync(path.join(stateOf(repo), 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
     ok('plan', '--budget', '1', '--package', 'z', '--tasks', '1');
     assert.strictEqual(ok('begin').resumed, true);
     assert.deepStrictEqual(Object.keys(ok('report').packages), ['z']);
@@ -1010,7 +1030,7 @@ try {
 
     // Stop hook: blocks only for the session of the active run without running background work.
     {
-      const logFile = path.join(repo, '.qatlas', 'local', 'run', 'events.jsonl');
+      const logFile = path.join(stateOf(repo), 'run', 'events.jsonl');
       const lines = () => fs.readFileSync(logFile, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
       const hook = (input, cwd = repo) => spawnSync(process.execPath, [runner, 'stop-hook'], { encoding: 'utf8', cwd: root, env: cleanEnv,
         input: typeof input === 'string' ? input : JSON.stringify({ session_id: 's1', cwd, stop_hook_active: false, background_tasks: [], ...input }) });
@@ -1038,9 +1058,15 @@ try {
       const other = fs.realpathSync(fs.mkdtempSync(path.join(root, 'no-run-')));
       execFileSync('git', ['init', '-q', other]);
       allowed({}, other);
-      fs.mkdirSync(path.join(other, '.qatlas', 'local', 'run'), { recursive: true });
-      fs.writeFileSync(path.join(other, '.qatlas', 'local', 'run', 'events.jsonl'), JSON.stringify({ type: 'resume', session: 's1' }) + '\n');
+      assert.strictEqual(fs.existsSync(path.join(other, '.qatlas')), false, 'a hook creates no project id');
+      const otherRun = path.join(store.ensureState(other), 'run');
+      fs.mkdirSync(otherRun, { recursive: true });
+      fs.writeFileSync(path.join(otherRun, 'events.jsonl'), JSON.stringify({ type: 'resume', session: 's1' }) + '\n');
       allowed({}, other);
+      // Two roots with different state folders: the run of the project folder counts, not the first root's.
+      const mixed = spawnSync(process.execPath, [runner, 'stop-hook'], { encoding: 'utf8', cwd: root, env: { ...cleanEnv, CLAUDE_PROJECT_DIR: repo },
+        input: JSON.stringify({ session_id: 's1', cwd: other, stop_hook_active: false, background_tasks: [] }) });
+      assert.strictEqual(JSON.parse(mixed.stdout).decision, 'block', mixed.stderr);
       allowed({ cwd: undefined });
       // Resume records the new session; the old one no longer blocks.
       withSession('s2', 'begin');
@@ -1063,7 +1089,7 @@ try {
 
     // Spawn hook: while the run of the session is active, a subagent start needs a combination of the config.
     {
-      const home = fs.mkdtempSync(path.join(root, 'home-'));
+      const home = process.env.HOME;
       const config = path.join(home, '.qatlas', 'plugins', 'config.json');
       const host = {
         integrator: { model: null, effort: null }, lead: { model: 'opus', effort: 'high' },
