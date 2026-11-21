@@ -34,7 +34,9 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
   `--since 0` und gib danach jeweils den `cursor` der letzten Ausgabe von `wait` mit. `wait` blockiert,
   solange keine neue Übergabe und kein Laufende eintrifft. Unter `queue` nennt jede Ausgabe alle offenen,
   unbeantworteten Übergaben, die älteste zuerst, auch nach einem Wechsel des Integrators. Nimm als nächste
-  Übergabe immer die älteste aus `queue`, die du noch nicht integrierst.
+  Übergabe immer die älteste aus `queue`, die du noch nicht integrierst. Startest du nachträglich in einem
+  laufenden Lauf, haben Leads frühere Tasks selbst integriert. Solange ein Lead eine eigene Integration offen
+  hat, liefert `wait` keine Übergabe, du schreibst den Kontroll-Branch also nie gleichzeitig mit ihm.
 - **Antworten an Leads:** Antworte mit `<run> answer --package <package> --answer "integrated <sha>"` oder
   mit einem `rework` in der Form aus „Integration“.
 - **Fragen:** Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes regel`. Deckt

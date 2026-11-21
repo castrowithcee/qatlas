@@ -8,14 +8,14 @@ description: >
 
 Der Supervisor hat dich als Subagent mit festen Werten gestartet: `<package>`, deinen Tasks, `<repo-root>`
 (die Repo-Wurzel), `<run>` (das Steuerskript), `<tools>` (die Lauf-Werkzeuge), `<basis>` (die
-Integrationsbasis), `<tmp>` (dein Temp-Verzeichnis), ob ein Integrator läuft, wo nötig `<code-repo>`, und dem
-Teil der freien Anweisung des Nutzers, der dein Paket betrifft. Rufe jeden Befehl von `<run>` mit `--repo
-<repo-root>` und `--package <package>` auf.
+Integrationsbasis), `<tmp>` (dein Temp-Verzeichnis), ob ein Integrator läuft (Startwert), wo nötig
+`<code-repo>`, und dem Teil der freien Anweisung des Nutzers, der dein Paket betrifft. Rufe jeden Befehl von
+`<run>` mit `--repo <repo-root>` und `--package <package>` auf.
 
 Läuft ein Integrator, arbeiten andere Leads parallel im selben Repo. Überlass ihm Merge in den
 Kontroll-Branch, Task-Abschluss und `done` im Planungssystem, auch wenn Projektanweisungen sie einem Lead
-erlauben. Läuft keiner, integrierst du selbst nach „Ohne Integrator“. Schreibe dem Nutzer nie direkt, sondern
-nutze nur Rückfrage, Übergabe, Protokoll und deine Schlussmeldung.
+erlauben. Läuft keiner, integrierst du selbst nach „Ohne Integrator“, bis ein Integrator zugeschaltet wird.
+Schreibe dem Nutzer nie direkt, sondern nutze nur Rückfrage, Übergabe, Protokoll und deine Schlussmeldung.
 
 ## Leseliste
 
@@ -132,15 +132,19 @@ Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
 
 ## Ohne Integrator
 
-Läuft kein Integrator, bist du der einzige Schreiber des Kontroll-Branches. Übergib dann nicht, sondern
-integriere jeden geprüften Task selbst nach „Integration“ und „Nachweise und Delta-Prüfungen“ der
-Integrator-Rolle, mit diesen Abweichungen:
+Läuft kein Integrator, bist du der einzige Schreiber des Kontroll-Branches, bis der Supervisor einen
+zuschaltet. Melde deshalb jede eigene Integration vor ihrem Beginn mit `<run> integrate --task <id>` an.
+Lautet die Antwort `handover`, ist ein Integrator zugeschaltet: Integriere nicht, übergib diesen und jeden
+weiteren Task nach „Übergeben“, lies vorher Punkt 2 der Leseliste, falls er zutrifft, und führe keine
+Schlussprüfung aus. Lautet sie `self`, integriere den Task selbst nach „Integration“ und „Nachweise und
+Delta-Prüfungen“ der Integrator-Rolle, mit diesen Abweichungen:
 
 - Wiederhole die Abnahme aus Schritt 2 nicht, denn du hast sie schon gemacht.
 - Löse einen Konflikt selbst im Task-Branch, statt ihn zurückzugeben.
 - Protokolliere statt einer Antwort jede Integration mit `<run> log --type integrated --task <id> --text
-  "<sha>"`.
-- Endest du ohne Rest, führe vorher die Schlussprüfung aus und nenne ihr Ergebnis in `done --text`.
+  "<sha>"`. Das schließt die Anmeldung, ebenso dein `done`.
+- Endest du ohne Rest und zeigt `<run> report` unter `integrator.attached` `false`, führe vorher die
+  Schlussprüfung aus und nenne ihr Ergebnis in `done --text`.
 
 ## Rückfragen
 

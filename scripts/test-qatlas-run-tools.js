@@ -976,7 +976,7 @@ try {
       b: { tasks: ['3'], questions: 0, finished: 0 } });
     assert.deepStrictEqual([rep.tasks['3'].integrated, rep.tasks['3'].rework, rep.tasks['3'].handovers], [true, 1, 3]);
     assert.ok(rep.tasks['3'].cycle >= 0 && rep.tasks['3'].wait >= 0);
-    assert.deepStrictEqual(rep.integrator, { questions: 1, finished: 0 });
+    assert.deepStrictEqual(rep.integrator, { questions: 1, finished: 0, attached: false });
     // Summed block: waits for the integrator from the log, checks from the slot runs since the run began.
     assert.deepStrictEqual(Object.keys(rep.summed), ['checks', 'red', 'checking', 'queued', 'integrating']);
     assert.deepStrictEqual([rep.summed.checks, rep.summed.red], [0, 0]);
@@ -1209,6 +1209,103 @@ try {
     assert.strictEqual(low(), 1);
     supervise(0);
     assert.strictEqual(low(), 2);
+  }
+
+  // Late integrator: lead announcements, held handovers and the budget across attach, plan and resume.
+  {
+    const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'attach-')));
+    git(repo, 'init', '-q', '-b', 'main');
+    commit(repo, 'a.txt', 'a\n');
+    const fm = `---\nbranch: main\nchecks:\n  - command: node test\n    exit: 0\n    tree: "${git(repo, 'rev-parse', 'main^{tree}')}"\n---\n`;
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.CLAUDE_CODE_SESSION_ID;
+    delete cleanEnv.CLAUDE_PROJECT_DIR;
+    const run = (...args) => spawnSync(process.execPath, [runner, args[0], '--repo', repo, ...args.slice(1)], { encoding: 'utf8', env: cleanEnv });
+    const ok = (...args) => { const res = run(...args); assert.strictEqual(res.status, 0, res.stderr); return JSON.parse(res.stdout); };
+    const refused = (pattern, ...args) => { const res = run(...args); assert.strictEqual(res.status, 2, res.stdout); assert.match(res.stderr, pattern); };
+    const integrate = since => ok('wait', '--role', 'integrator', '--since', String(since), '--timeout', '0.1');
+    const announce = (pkg, task) => ok('integrate', '--package', pkg, '--task', task).integrate;
+    const report = path.join(root, 'attach-report.md');
+    write(report, fm + 'Report\n');
+    const hand = (pkg, task) => ok('handover', '--package', pkg, '--task', task, '--report', report, '--timeout', '0.1');
+
+    refused(/start one with begin/, 'attach');
+    refused(/start one with begin/, 'integrate', '--package', 'a', '--task', '1');
+    ok('begin');
+    ok('plan', '--budget', '2', '--package', 'a', '--tasks', '1,2');
+    ok('plan', '--budget', '2', '--package', 'b', '--tasks', '3');
+    assert.strictEqual(ok('report').integrator.attached, false);
+    refused(/Reserved package name/, 'integrate', '--package', 'integrator', '--task', '1');
+    refused(/Reserved event type/, 'log', '--type', 'attach');
+    refused(/Reserved event type/, 'log', '--type', 'integrate');
+
+    // Without attach the lead integrates itself; repeating the announcement records nothing new.
+    assert.strictEqual(announce('a', '1'), 'self');
+    assert.strictEqual(announce('a', '1'), 'self');
+    assert.strictEqual(ok('report').cursor, 4);
+    // A handover waits while any announcement is open, also one of another package.
+    hand('b', '3');
+    let held = integrate(0);
+    assert.deepStrictEqual([held.events, held.queue], [[], []]);
+    // Closing by integrated of the same package and task releases it; another package or task does not.
+    ok('log', '--type', 'integrated', '--package', 'b', '--task', '1');
+    ok('log', '--type', 'integrated', '--package', 'a', '--task', '2');
+    assert.deepStrictEqual(integrate(0).events, []);
+    ok('log', '--type', 'integrated', '--package', 'a', '--task', '1');
+    let free = integrate(0);
+    assert.deepStrictEqual([free.events.map(e => e.type), free.queue.map(q => q.task)], [['handover'], ['3']]);
+    // A wait that timed out behind the held handover still gets it once the announcement closes.
+    assert.strictEqual(announce('a', '2'), 'self');
+    const before = integrate(0);
+    assert.deepStrictEqual([before.events, before.queue], [[], []]);
+    ok('log', '--type', 'integrated', '--package', 'a', '--task', '2');
+    free = integrate(before.cursor);
+    assert.deepStrictEqual([free.events.map(e => e.type), free.queue.map(q => q.task)], [['handover'], ['3']]);
+    // Without a registration since the cursor, an old handover wakes nothing, as before.
+    assert.deepStrictEqual(integrate(free.cursor).events, []);
+
+    // done of the package closes its open announcement; end still wakes the integrator.
+    assert.strictEqual(announce('a', '1'), 'self');
+    assert.deepStrictEqual(integrate(0).queue, []);
+    ok('done', '--package', 'a');
+    assert.deepStrictEqual(integrate(0).queue.map(q => q.task), ['3']);
+    assert.strictEqual(announce('a', '2'), 'self');
+    const cursor = integrate(0).cursor;
+    ok('end');
+    assert.deepStrictEqual(integrate(cursor).events.map(e => e.type), ['end']);
+    ok('begin', '--discard');
+
+    // Attach: idempotent, answers handover for every lead, also one that integrated itself before.
+    ok('plan', '--budget', '2', '--package', 'a', '--tasks', '1');
+    assert.strictEqual(announce('a', '1'), 'self');
+    ok('log', '--type', 'integrated', '--package', 'a', '--task', '1');
+    assert.deepStrictEqual(ok('attach'), { attached: true });
+    const cursorAttached = ok('report').cursor;
+    assert.deepStrictEqual(ok('attach'), { attached: true });
+    assert.strictEqual(ok('report').cursor, cursorAttached);
+    assert.strictEqual(announce('a', '2'), 'handover');
+    assert.strictEqual(announce('c', '5'), 'handover');
+    assert.strictEqual(ok('report').cursor, cursorAttached);
+    // An announcement left open by a lead that attach caught mid-integration still holds the handover.
+    ok('begin', '--discard');
+    ok('plan', '--budget', '2', '--package', 'a', '--tasks', '1');
+    ok('plan', '--budget', '2', '--package', 'b', '--tasks', '3');
+    assert.strictEqual(announce('a', '1'), 'self');
+    ok('attach');
+    hand('b', '3');
+    assert.deepStrictEqual(integrate(0).queue, []);
+    ok('done', '--package', 'a');
+    assert.deepStrictEqual(integrate(0).queue.map(q => q.task), ['3']);
+
+    // Report: attachment and the budget of the latest plan, also after begin resumes the run.
+    let rep = ok('report');
+    assert.deepStrictEqual([rep.integrator.attached, rep.budget], [true, 2]);
+    ok('plan', '--budget', '5', '--package', 'd', '--tasks', '8,9,10');
+    assert.strictEqual(ok('report').budget, 5);
+    assert.strictEqual(ok('begin').resumed, true);
+    rep = ok('report');
+    assert.deepStrictEqual([rep.integrator.attached, rep.budget], [true, 5]);
+    assert.deepStrictEqual(rep.notes, {});
   }
 
   process.stdout.write('✓ Qatlas-Run-Tools: land, Run-Ablage und Handover-Prüfung erfolgreich.\n');
