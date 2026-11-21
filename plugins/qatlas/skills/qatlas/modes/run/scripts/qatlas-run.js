@@ -3,10 +3,10 @@
 
 // File mailbox of a Qatlas run whose supervisor, leads and, for parallel packages, integrator run as subagents
 // of one host session.
-// They talk only through the JSON-lines log <repo>/.qatlas/local/run/events.jsonl; `seq` is the line index,
-// derived on read. A sender is a lead (--package) or the integrator (--role integrator) and has at most one
-// open signal (question or handover) until it picks up the answer by repeating the same call or logs done after
-// the answer arrived.
+// They talk only through the JSON-lines log run/events.jsonl in the project state folder under
+// ~/.qatlas/projects; `seq` is the line index, derived on read. A sender is a lead (--package) or the
+// integrator (--role integrator) and has at most one open signal (question or handover) until it picks up the
+// answer by repeating the same call or logs done after the answer arrived.
 // wait wakes the supervisor on question, done and disk, the integrator on open handovers and end, and a lead
 // on the answer to its open signal. The integrator's wait also lists every open unanswered handover as "queue",
 // so a handover it skipped or forgot is offered again.
@@ -45,7 +45,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { parseFrontmatter } = require('./handover-frontmatter.js');
-const { localDir, excludeLocal } = require('./local-store.js');
+const { readState, ensureState, excludeLocal } = require('../../../../../scripts/runtime/project-store.js');
 
 const INTEGRATOR = 'integrator';
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
@@ -72,20 +72,35 @@ const positive = (name, fallback) => {
   return value > 0 && Number.isFinite(value) ? value : fail(name + ' must be positive', 2);
 };
 const repoKey = () => fs.realpathSync(path.resolve(need('--repo')[0]));
-const runDir = repo => path.join(repo, '.qatlas', 'local', 'run');
-const eventsFile = repo => path.join(runDir(repo), 'events.jsonl');
+// Read access never creates the state folder and gives null if there is none; write access creates it.
+// A found folder is remembered per repo, as wait loops would otherwise start git on every poll. A folder
+// found by reading still gets one write access that refreshes its stored path.
+const known = new Map();
+const runDir = (repo, write = false) => {
+  const entry = known.get(repo) || { dir: null, ensured: false };
+  if (write ? !entry.ensured : !entry.dir) {
+    const found = (write ? ensureState : readState)(repo);
+    if (write && !found) fail('No project folder for ' + repo, 3);
+    if (found) known.set(repo, { dir: found, ensured: entry.ensured || write });
+  }
+  const dir = (known.get(repo) || entry).dir;
+  return dir && path.join(dir, 'run');
+};
+const eventsFile = (repo, write = false) => { const dir = runDir(repo, write); return dir && path.join(dir, 'events.jsonl'); };
 
 // O_APPEND keeps single-line appends atomic with several writers.
 function record(repo, type, fields = {}) {
-  fs.mkdirSync(runDir(repo), { recursive: true });
+  const file = eventsFile(repo, true);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
   const entry = { at: new Date().toISOString(), type };
   for (const key of ['sender', 'package', 'task', 'budget', 'tasks', 'rest', 'text', 'report', 'session']) if (fields[key]) entry[key] = fields[key];
-  fs.appendFileSync(eventsFile(repo), JSON.stringify(entry) + '\n');
+  fs.appendFileSync(file, JSON.stringify(entry) + '\n');
 }
 
 function events(repo) {
+  const file = eventsFile(repo);
   let raw;
-  try { raw = fs.readFileSync(eventsFile(repo), 'utf8'); } catch { return []; }
+  try { raw = fs.readFileSync(file, 'utf8'); } catch { return []; }
   return raw.split('\n').filter(Boolean).map((line, seq) => {
     try { return { ...JSON.parse(line), seq }; } catch { return { seq, type: 'unreadable' }; }
   });
@@ -134,10 +149,10 @@ function begin() {
       record(repo, 'resume', { session: process.env.CLAUDE_CODE_SESSION_ID });
       return out({ resumed: true, cursor: all.length + 1 });
     }
-    fs.renameSync(eventsFile(repo), path.join(runDir(repo), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
+    fs.renameSync(eventsFile(repo), path.join(runDir(repo, true), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
   }
-  fs.rmSync(path.join(runDir(repo), 'disk-low'), { force: true });
-  fs.rmSync(path.join(runDir(repo), 'tmp'), { recursive: true, force: true });
+  fs.rmSync(path.join(runDir(repo, true), 'disk-low'), { force: true });
+  fs.rmSync(path.join(repo, '.qatlas', 'local', 'run', 'tmp'), { recursive: true, force: true });
   excludeLocal(repo);
   record(repo, 'begin', { session: process.env.CLAUDE_CODE_SESSION_ID });
   out({ begun: true, cursor: 1 });
@@ -169,7 +184,7 @@ const readFile = file => { try { return fs.readFileSync(file, 'utf8'); } catch {
 
 // Never overwrites an existing report.
 function storeReport(repo, name, task, text) {
-  const dir = path.join(runDir(repo), 'reports');
+  const dir = path.join(runDir(repo, true), 'reports');
   const base = [name, task].map(v => String(v).replace(/[^A-Za-z0-9._-]/g, '_')).join('-');
   fs.mkdirSync(dir, { recursive: true });
   for (let n = 1; ; n++) {
@@ -238,10 +253,13 @@ function answer() {
 function checkDisk(repo, minFree) {
   const { bavail, bsize } = fs.statfsSync(repo);
   const free = bavail * bsize / 1e9;
-  const marker = path.join(runDir(repo), 'disk-low');
-  if (free >= minFree) return fs.rmSync(marker, { force: true });
+  if (free >= minFree) {
+    const dir = runDir(repo);
+    return dir && fs.rmSync(path.join(dir, 'disk-low'), { force: true });
+  }
+  const marker = path.join(runDir(repo, true), 'disk-low');
   try {
-    fs.mkdirSync(runDir(repo), { recursive: true });
+    fs.mkdirSync(path.dirname(marker), { recursive: true });
     fs.writeFileSync(marker, '', { flag: 'wx' });
   } catch { return; }
   record(repo, 'disk', { text: `Free space ${free.toFixed(1)} GB, below ${minFree} GB.` });
@@ -316,7 +334,7 @@ function end() {
 // first handover. Wait time: last handover to the answer integrated.
 // Commands run through slot since the run began, from the run log of the slot store.
 function slotRuns(repo, since) {
-  const dir = localDir(repo);
+  const dir = readState(repo);
   const lines = (dir && readFile(path.join(dir, 'slots', 'runs.jsonl')) || '').split('\n').filter(Boolean);
   return lines.flatMap(line => { try { return [JSON.parse(line)]; } catch { return []; } })
     .filter(run => Date.parse(run.time) >= since);
