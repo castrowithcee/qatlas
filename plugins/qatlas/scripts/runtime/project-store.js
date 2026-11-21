@@ -122,4 +122,8 @@ function ensureState(start) {
   return dir;
 }
 
-module.exports = { projectDir, excludeLocal, readState, ensureState };
+// Read access for diagnosis: all state folders with a valid id suffix, and the id stored in a project.
+const stateFolders = folders;
+const readId = project => readText(idFile(project));
+
+module.exports = { projectDir, excludeLocal, readState, ensureState, stateFolders, readId };

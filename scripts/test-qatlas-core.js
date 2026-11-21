@@ -680,6 +680,73 @@ function testProjectStore() {
   }
 }
 
+function listFiles(dir) {
+  const out = [];
+  const walk = d => {
+    for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
+      const file = path.join(d, entry.name);
+      out.push(path.relative(dir, file) + (entry.isDirectory() ? '/' : ':' + fs.readFileSync(file, 'utf8').length));
+      if (entry.isDirectory()) walk(file);
+    }
+  };
+  walk(dir);
+  return out.sort();
+}
+
+function testDoctorProjectState() {
+  const f = fixture('doctor-state');
+  const projects = path.join(f.home, '.qatlas', 'projects');
+  const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
+  const run = () => runNode(doctor, ['--target', f.project], { cwd: f.project, home: f.home });
+  const folder = (name, projectPath) => {
+    write(path.join(projects, name, 'path'), projectPath === undefined ? '' : projectPath + '\n');
+    if (projectPath === undefined) fs.rmSync(path.join(projects, name, 'path'));
+  };
+  const own = fs.realpathSync(f.project);
+  const withId = (dir, id) => write(path.join(dir, '.qatlas', 'local', 'uid'), id + '\n');
+
+  // No state anywhere: nothing about project state, and nothing is created.
+  fs.rmSync(f.home, { recursive: true });
+  fs.mkdirSync(f.home);
+  assert.ok(!/project state|state folder/.test(run().stdout));
+  assert.strictEqual(fs.existsSync(path.join(f.home, '.qatlas')), false);
+
+  withId(f.project, 'aaaaaaaa');
+  folder('mine-uidaaaaaaaa', own);
+  const other = path.join(f.root, 'other');
+  withId(other, 'cccccccc');
+  folder('valid-uidcccccccc', other);
+  folder('nosuffix', path.join(f.root, 'gone'));
+  folder('nopath-uid11111111');
+  folder('gone-uid22222222', path.join(f.root, 'gone'));
+  const foreign = path.join(f.root, 'foreign');
+  withId(foreign, 'ffffffff');
+  folder('foreign-uid33333333', foreign);
+  // A project that lost its id file is taken over again on the next write, so it is no finding.
+  const lost = path.join(f.root, 'lost');
+  fs.mkdirSync(lost);
+  folder('lost-uid44444444', lost);
+
+  const before = [listFiles(f.home), listFiles(f.project)];
+  const out = run().stdout;
+  assert.ok(!out.includes('project state:'), out);
+  const notes = out.slice(out.indexOf('NOTES'));
+  assert.strictEqual(notes.split('\n').filter(line => line.startsWith('- ')).length, 3, out);
+  assert.ok(notes.includes(path.join(projects, 'nopath-uid11111111') + ' has no path file'));
+  assert.ok(notes.includes(path.join(projects, 'gone-uid22222222')) && notes.includes(path.join(f.root, 'gone')));
+  assert.ok(notes.includes(path.join(projects, 'foreign-uid33333333')) && notes.includes(foreign));
+  assert.ok(!notes.includes('mine-uid') && !notes.includes('valid-uid') && !notes.includes('nosuffix') && !notes.includes('lost-uid'));
+
+  // The same id in two folders is reported with both paths.
+  folder('twin-uidaaaaaaaa', own);
+  const twin = run().stdout;
+  assert.ok(twin.split('NOTES')[0].includes('project state: '), twin);
+  assert.ok(twin.includes(path.join(projects, 'mine-uidaaaaaaaa')) && twin.includes(path.join(projects, 'twin-uidaaaaaaaa')));
+  fs.rmSync(path.join(projects, 'twin-uidaaaaaaaa'), { recursive: true });
+
+  assert.deepStrictEqual([listFiles(f.home), listFiles(f.project)], before, 'Doctor changes neither home nor project.');
+}
+
 try {
   testConfig();
   testDoctorRunBlock();
@@ -691,6 +758,7 @@ try {
   testStatuslineRefresh();
   testStatuslineCodex();
   testProjectStore();
+  testDoctorProjectState();
   process.stdout.write('✓ Qatlas init, doctor and context: 10 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });

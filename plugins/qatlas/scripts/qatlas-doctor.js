@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
 const { readConfig } = require('./runtime/config-loader.js');
+const { readState, stateFolders, readId } = require('./runtime/project-store.js');
 
 const target = projectRoot(process.argv);
 
@@ -32,6 +33,26 @@ for (const problem of configState.problems) missing.push('config: ' + problem);
 for (const unknown of configState.unknown) notes.push('config: ' + unknown + ' Qatlas does not read it.');
 
 for (const item of plan(target)) missing.push(item.shown + ' is missing; qatlas-core init adds it.');
+
+// readState throws if the project id belongs to several state folders; the message names all of them.
+try { readState(target); } catch (error) { missing.push('project state: ' + error.message); }
+
+// A state folder that no project owns any more. A project without an id file is no finding: the next write
+// access takes the id over again.
+for (const folder of stateFolders()) {
+  let recorded = null;
+  try { recorded = fs.readFileSync(path.join(folder.dir, 'path'), 'utf8').trim(); } catch { /* no path file */ }
+  const seen = ' (last seen project path: ' + recorded + ').';
+  const exists = Boolean(recorded && fs.statSync(recorded, { throwIfNoEntry: false })?.isDirectory());
+  const id = exists ? readId(recorded) : null;
+  if (!recorded) {
+    notes.push('state folder ' + folder.dir + ' has no path file.');
+  } else if (!exists) {
+    notes.push('state folder ' + folder.dir + ' points to a missing folder' + seen);
+  } else if (id !== null && id !== folder.id) {
+    notes.push('state folder ' + folder.dir + ' belongs to a project with another id' + seen);
+  }
+}
 
 // Reserved root files stay lean; beyond the limit their details move into the folder of the same name.
 for (const name of ['CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md']) {
