@@ -60,7 +60,9 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
 
 Warte während des Laufs bei keinem Schritt auf eine Antwort des Nutzers, denn er ist nicht erreichbar. Das
 gilt auch, wenn eine Meldung von Host oder Werkzeug auf den Nutzer verweist. Leite daraus keine weitere
-Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unverändert.
+Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unverändert. Ausgenommen ist nur
+die Freigabe einer weiteren Korrektur nach „Korrekturbudget“ in [Abnehmen und
+integrieren](playbook-acceptance.md).
 
 1. **Vorab klären:** Prüfe vor dem ersten Schritt alles, was den Lauf später anhalten würde: Erreichbarkeit
    und Schreibrecht des Planungssystems, benötigte Werkzeuge, Authentifizierungen und Subagents sowie
@@ -174,7 +176,9 @@ alle) und `werkzeug` (Defekt des Steuerskripts oder der Lauf-Werkzeuge, mit Nach
 - **`question`:** Antworte mit `<run> answer` an den Absender des Ereignisses (`--package <package>` oder
   `--role integrator`) und `--answer "<Antwort>"`: aus dem Projektwissen mit Quelle, sonst nach
   „Ohne Nutzer“. Kann die Lage wiederkehren, etwa ein instabiler Test, protokolliere die Antwort einmal als
-  `regel` mit `--text "<Lage>: <Entscheidung>"`.
+  `regel` mit `--text "<Lage>: <Entscheidung>"`. Fragt ein Lead nach einer weiteren Korrektur, antworte nach
+  „Korrekturbudget“ in [Abnehmen und integrieren](playbook-acceptance.md) und protokolliere jede Freigabe mit
+  `log --type annahme`.
 - **`disk`:** Führe den Bereinigungsschritt aus, den das Projekt dafür nennt. Ohne einen handle nach
   „Ohne Nutzer“. Fragt ein Lead danach zu einer Prüfung, die an der Umgebung scheiterte, lass sie ihn einmal
   wiederholen, nicht gleichzeitig mit einer anderen langen Prüfung dieses Laufs.
