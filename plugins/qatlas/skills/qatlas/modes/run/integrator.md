@@ -85,7 +85,7 @@ jeden Wiederholungslauf eines CI-Jobs ebenso mit `--type rerun`. Beide zählen i
    Requests nach „Integration über Pull Requests“, indem du den vom Lead geöffneten Pull Request landest.
    Welche lokalen Prüfungen bleiben, entscheiden die [Nachweise und
    Delta-Prüfungen](#nachweise-und-delta-prüfungen). Ohne Deklaration dort prüfe lokal nur die betroffenen
-   Bereiche über `slot --priority` und überlass die volle Breite der CI. Ohne CI teste den gemergten Stand
+   Bereiche, Tests über `slot --priority`, und überlass die volle Breite der CI. Ohne CI teste den gemergten Stand
    selbst mit den Projekttests über `slot` oder übernimm vor der Landung einen gültigen Nachweis nach
    demselben Abschnitt. Führe jeden Befehl, den die Projektanweisungen einer exklusiven Ressource zuordnen,
    über `slot --resource <name> -- <command>` aus. Schlägt die CI beim Landen fehl, ordne den Fehlschlag
@@ -115,7 +115,8 @@ Schritt 3 aus und überspringe keine.
   --tree <tree>` einen passenden Eintrag (oder besteht der vom Projekt genannte Pfad des Eintrags die
   Tree-Prüfung des Projekts), übernimm den Nachweis ohne neuen Lauf. Ohne CI darfst du dann landen. Bei
   grüner CI auf demselben Head lass die lokale `slot --priority`-Prüfung weg.
-- **Anderer Tree:** Führe die schnellen gemeinsamen Prüfungen vollständig über `slot` aus. Führe eine teure
+- **Anderer Tree:** Führe die schnellen gemeinsamen Prüfungen vollständig aus, über `slot` nach der Regel in
+  [Einen Task ausführen](playbook-task-execution.md). Führe eine teure
   Prüfung nur aus, wenn `git diff --name-only <Merge-Base von Task-Branch und Basis> <aktuelle Basis>` einen
   ihrer Pfadbereiche berührt. Nimm nach einem selbst gelösten Konflikt die Merge-Base von vor deinem Merge.
   Protokolliere jede übersprungene Prüfung mit `<run> log --type skipped --task <id> --text "<Prüfung und

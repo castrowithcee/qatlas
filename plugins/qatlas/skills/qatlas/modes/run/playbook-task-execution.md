@@ -71,7 +71,11 @@ nichts verändern. Achte darauf, dass sich die Aufträge nachweislich ergänzen,
 bauen und zusammen im Korrekturbudget dieses einen Tasks bleiben.
 
 Führe lokale Nachweise über `<tools> slot -- <test command>` aus: `slot` begrenzt gleichzeitige Testläufe
-auf dem ganzen Host und verwendet einen grünen Nachweis desselben Trees wieder. Entnimm Projektwerte für Gültigkeit,
+auf dem ganzen Host und verwendet einen grünen Nachweis desselben Trees wieder. Das gilt für alles, was Tests
+ausführt, baut oder eine geteilte Ressource braucht, auch für einen Befehl, der schnelle Prüfungen mit Tests
+verkettet. Führe Prüfungen, die den Host kaum belasten und in der Regel unter einer Minute enden, etwa
+Formatierung, statische Analyse oder Syntaxprüfung, direkt ohne `slot` aus: Ihre Wiederholung kostet nichts,
+deshalb brauchen sie keinen gespeicherten Nachweis. Entnimm Projektwerte für Gültigkeit,
 unversionierte Eingaben, Slot-Anzahl und exklusive Ressourcen der Teststrategie des Projekts in „Abnehmen und
 integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl, den die Projektvorgaben einer
 exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. Führe vollständige Tests immer

@@ -51,7 +51,8 @@ Anweisungen. Halte in jedem Projekt diesen Vertrag ein:
   zählt, weil der Commit den Tree festlegt.
 - Melde Rot nie als Grün und wiederhole keinen gültigen grünen Nachweis.
 - Belege eine geteilte Ressource nie gleichzeitig mit anderen.
-- Nutze `slot` als Standardweg für lokalen Nachweis.
+- Nutze `slot` als Standardweg für lokalen Nachweis, außer für schnelle Prüfungen nach [Einen Task
+  ausführen](playbook-task-execution.md).
 
 Die Strategie beantwortet die Kernfragen zu `TESTING.md` aus [Reservierte Datei
 füllen](../../../qatlas-core-filing/references/playbook-reserved-files.md) und für einen Lauf zusätzlich
