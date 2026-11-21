@@ -54,7 +54,8 @@ Worker über viele Umsetzungs- und Prüfschritte bindet, sind Signale zum Teilen
 Mehr als etwa drei bis vier neue Operationen oder erwartete 500 bis 800 neue Zeilen dienen als Prüfwert. Die Zahlen sind keine starre
 Grenze. Halte eng gekoppelte Schritte zusammen, wenn getrennte Abnahme künstlich wäre.
 Jedes Paket braucht eine eigene beobachtbare Fertigstellung und einen konkreten Prüfweg und hinterlässt einen konsistenten Zustand.
-Plane die Integration und die inhaltliche Reihenfolge zwischen abhängigen Paketen.
+Prüfe jede Abhängigkeit gegen die Regel der Backlog-Norm und drücke eine bloße Reihenfolge nur über die Reihenfolge des Planungssystems aus.
+Plane die Integration zwischen abhängigen Paketen.
 Das Paket, das das Ziel erreicht, gehört zum selben Zuschnitt. Lege es mit den anderen an, als `draft`, wenn eine Frage offen bleibt.
 Wenn du einen bestehenden Task teilst, erhalte das bestätigte Ziel und die Abnahme der
 ursprünglichen Arbeit vollständig, übernimm die geltenden Entscheidungen und Sicherheitsgrenzen konkret in

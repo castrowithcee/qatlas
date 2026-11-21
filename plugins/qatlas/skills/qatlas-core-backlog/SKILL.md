@@ -55,6 +55,15 @@ Zulässige Wege:
 - Ein Arbeitspaket ohne erkennbaren Status hat keinen. Behandle es nicht als `draft`, wähle es nicht aus und
   setze ihm ohne Auftrag keinen Status. Nenne die Anzahl, wo sie für Auswahl oder Übersicht zählt.
 
+## Abhängigkeiten
+
+- Task B hängt nur dann von Task A ab, wenn B ohne ein Ergebnis von A nicht ausgeführt oder nicht abgenommen
+  werden kann, etwa weil B ein Modul, eine Schnittstelle, eine Migration oder eine Entscheidung nutzt, die erst
+  A herstellt. Nenne dieses Ergebnis in der Abhängigkeit konkret.
+- Fachliche Priorität, sinnvolle Reihenfolge, frühe Risikoklärung, gemeinsame Dateien oder der Wunsch,
+  Konflikte zu vermeiden, sind nie eine Abhängigkeit. Reihenfolge steht allein in der Reihenfolge des
+  Planungssystems.
+
 ## Ausführungsreife
 
 `ready` bezeichnet belegte Ausführungsreife. Der Task beschreibt Ziel, Scope-in, Scope-out, Vorgehen und

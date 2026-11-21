@@ -47,7 +47,8 @@ Arbeitskarte, keine starre Allowlist. Scope-in und Scope-out bleiben die Autorit
   `Ungeklärt: <fehlende Information>`. Mit `Ungeklärt` bleibt der Task draft.>
 
 ## Abhängigkeiten
-<!-- Voraussetzungen, Reihenfolge und betroffene Integrationsgrenzen. `- Keine.` eintragen, wenn unabhängig. -->
+<!-- Echte Voraussetzungen nach der Backlog-Norm, je mit dem benötigten Ergebnis, und betroffene
+Integrationsgrenzen. `- Keine.` eintragen, wenn unabhängig. -->
 
 ## Entscheidungsspielraum
 <!-- Was darf der ausführende Agent selbst entscheiden? Welche Entscheidung bleibt ausdrücklich beim Nutzer? -->
