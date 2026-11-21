@@ -77,20 +77,23 @@ ungelöste Risiken, die verwendeten Worker-Profile mit Modell und Effort, Branch
 Übergabe die letzte des Tasks ist und ob danach eine Prüfung des Nutzers offen bleibt. Lass Rohlogs draußen.
 
 Beginne jeden Bericht mit YAML-Frontmatter (`---` in der ersten Zeile) mit `checks`: ein Eintrag pro
-vollständiger Prüfung der Übergabe, jeweils mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der
-übergebenen Branch-Spitze, z. B. aus `git rev-parse <branch>^{tree}` oder `slot results --tree`). `handover`
-weist jeden anderen `tree` zurück. Ein Eintrag darf von einem anderen Nachweisweg stammen, den das Projekt
-nennt, immer mit seinem `tree`. Ergänze ohne Integration über Pull Requests `branch`, bei Integration über Pull
+vollständiger Prüfung der Übergabe über `slot` oder einen anderen Nachweisweg, den das Projekt nennt, jeweils
+mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der übergebenen Branch-Spitze, z. B. aus `git
+rev-parse <branch>^{tree}` oder `slot results --tree`). `handover` weist jeden anderen `tree` zurück. Schnelle
+Prüfungen ohne `slot` brauchen keinen Eintrag, weil der Integrator sie selbst erneut ausführt. Hat die
+Übergabe sonst keine Prüfung, trage sie trotzdem ein, denn `handover` verlangt mindestens einen. Ergänze ohne Integration über Pull Requests `branch`, bei Integration über Pull
 Requests die Felder `pr-title` (eine nicht leere Zeile), `pr-body` (nicht leer, meist ein `|`-Blockskalar),
 `branch`, `base`, `last` (`true` oder `false`), `pr` (Nummer des offenen Pull Requests), `head` (SHA der
 Spitze des übergebenen Pull Requests) und `pushed` (SHA beim ersten Push), die SHAs in Anführungszeichen, und
 bei einer Ausnahme von der Zuschnittsregel `cut-exception: <Grund>`.
 
-Die Antwort lautet `integrated <sha>` oder `rework <Grund>`. Nur ein `rework` ohne `conflict:` oder `cut:`
-zählt als Korrekturversuch. Kommt keine, warte nach der Regel aus „Umsetzen“ und rufe denselben Befehl mit
-unverändertem Bericht erneut auf. So holst du sie auch ab, wenn der Integrator Branch und Worktree schon
-entfernt hat. Fass Task, Branches und Worktree bis zur Antwort nicht an. Arbeite nach `rework` am Grund und
-übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe nicht die letzte war.
+Die Antwort lautet `integrated <sha>` oder `rework <Grund>`. Nur ein `rework` ohne `conflict:`, `cut:` oder
+`blocked:` zählt als Korrekturversuch. Kommt keine, warte nach der Regel aus „Umsetzen“ und rufe denselben
+Befehl mit unverändertem Bericht erneut auf. So holst du sie auch ab, wenn der Integrator Branch und Worktree
+schon entfernt hat. Fass Task, Branches und Worktree bis zur Antwort nicht an. Nach `rework blocked:` frage den
+Supervisor, ob der Task auf `review` oder `waiting` geht, und mach mit dem nächsten Task weiter. Arbeite nach
+jedem anderen `rework` am Grund und übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe
+nicht die letzte war.
 
 Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn von der neuen `<basis>`.
 Solange du nur wartest, auf die Antwort einer Übergabe, auf einen Worker oder auf eine lange eigene Prüfung,
@@ -145,4 +148,6 @@ oder unbekannter Worker sie nutzt und die Branches den in Task oder Protokoll ge
 deines Vorgängers allein belegt das nicht. Kläre eine Abweichung vor jeder Änderung mit dem Supervisor. Nenne
 übernommene Branches und Worktrees, die inzwischen integriert sind, in deiner Schlussmeldung zur Bereinigung
 über `qatlas-work tree`. Zeigt `report` unter `open` eine offene Rückfrage oder Übergabe deines Pakets, rufe
-denselben Befehl mit derselben Frage oder dem dort genannten Bericht erneut auf, um die Antwort abzuholen.
+denselben Befehl mit derselben Frage oder dem dort genannten Bericht erneut auf, um die Antwort abzuholen. Die
+letzte Antwort auf die Übergabe eines Tasks, auch eine nie abgeholte, steht in `report` beim Task unter
+`answer`.

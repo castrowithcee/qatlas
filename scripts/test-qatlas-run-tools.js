@@ -977,15 +977,15 @@ try {
     assert.deepStrictEqual([rep.tasks['3'].integrated, rep.tasks['3'].rework, rep.tasks['3'].handovers], [true, 1, 3]);
     assert.ok(rep.tasks['3'].cycle >= 0 && rep.tasks['3'].wait >= 0);
     assert.deepStrictEqual(rep.integrator, { questions: 1, finished: 0 });
-    // Time block: waits for the integrator from the log, checks from the slot runs since the run began.
-    assert.deepStrictEqual(Object.keys(rep.time), ['checks', 'red', 'checking', 'queued', 'integrating']);
-    assert.deepStrictEqual([rep.time.checks, rep.time.red], [0, 0]);
-    assert.ok(rep.time.integrating >= 0);
+    // Summed block: waits for the integrator from the log, checks from the slot runs since the run began.
+    assert.deepStrictEqual(Object.keys(rep.summed), ['checks', 'red', 'checking', 'queued', 'integrating']);
+    assert.deepStrictEqual([rep.summed.checks, rep.summed.red], [0, 0]);
+    assert.ok(rep.summed.integrating >= 0);
     write(path.join(stateOf(repo), 'slots', 'runs.jsonl'), [
       { time: new Date().toISOString(), waited: 2000, duration: 3000, exit: 0 },
       { time: new Date().toISOString(), waited: 0, duration: 1000, exit: 1 },
       { time: '2000-01-01T00:00:00.000Z', waited: 9000, duration: 9000, exit: 1 }].map(x => JSON.stringify(x)).join('\n') + '\n');
-    const timed = ok('report').time;
+    const timed = ok('report').summed;
     assert.deepStrictEqual([timed.checks, timed.red, timed.checking, timed.queued], [2, 1, 4, 2]);
     // Besides the id, a run writes only run/tmp into the project, and git status stays empty.
     assert.strictEqual(git(repo, 'status', '--short'), '');
@@ -1027,6 +1027,29 @@ try {
     assert.ok(!fs.existsSync(path.dirname(path.dirname(tmpFile))), 'discard clears run/tmp');
     assert.strictEqual(archives(), 2);
     assert.deepStrictEqual(ok('report').packages, {});
+
+    // A blocked landing is no correction; an answered signal of a sender that logged done is no longer open, and
+    // its answer stays readable in the task for a successor.
+    ok('plan', '--budget', '1', '--package', 'p', '--tasks', '5,6,7');
+    ok('handover', '--package', 'p', '--task', '5', '--report', report, '--timeout', '0.1');
+    ok('answer', '--package', 'p', '--answer', 'rework blocked: CI size limit');
+    ok('done', '--package', 'p', '--rest', '5,6,7');
+    let after = ok('report');
+    assert.deepStrictEqual([after.open, after.tasks['5'].rework, after.tasks['5'].integrated, after.tasks['5'].answer],
+      [[], 0, false, 'rework blocked: CI size limit']);
+    // The successor of the package hands over without collecting the old answer; plain rework still counts.
+    ok('handover', '--package', 'p', '--task', '6', '--report', report, '--timeout', '0.1');
+    ok('answer', '--package', 'p', '--answer', 'rework fix the test');
+    assert.strictEqual(ok('handover', '--package', 'p', '--task', '6', '--report', report, '--timeout', '0.1').answer, 'rework fix the test');
+    assert.strictEqual(ok('report').tasks['6'].rework, 1);
+    // done before the answer: the handover stays open and queued until answered, then it closes.
+    ok('handover', '--package', 'p', '--task', '7', '--report', report, '--timeout', '0.1');
+    ok('done', '--package', 'p', '--rest', '7');
+    assert.deepStrictEqual(ok('report').open.map(o => [o.sender, o.task, o.answered]), [['p', '7', false]]);
+    assert.deepStrictEqual(integrate(0).queue.map(q => q.task), ['7']);
+    ok('answer', '--package', 'p', '--answer', 'integrated fed789');
+    after = ok('report');
+    assert.deepStrictEqual([after.open, after.tasks['7'].integrated, after.tasks['7'].answer], [[], true, 'integrated fed789']);
 
     // Stop hook: blocks only for the session of the active run without running background work.
     {

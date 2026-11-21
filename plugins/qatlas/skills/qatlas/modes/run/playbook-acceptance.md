@@ -25,6 +25,13 @@ Fehlschlag ein:
   Ersatzvorgehen. Sichere den Task sofort in `review` oder `waiting`.
 - **Lösungsfehler:** Das Vorgehen wurde ausgeführt, erfüllt aber ein Abnahmekriterium nicht. Leite aus der
   Diagnose oder neuem Nachweis eine konkrete Korrektur ab.
+- **Fehlalarm der Schutzprüfung:** Ein Befund der Schutzprüfung vor dem Commit betrifft einen Wert, den der
+  Task selbst als Testdatum angelegt hat. Baue die Testdaten so um, dass kein echt aussehender Wert im Repo
+  steht, und lass etwa Schlüssel, Token und ähnliche Geheimnisse vom Test zur Laufzeit erzeugen. Prüfe danach
+  erneut. Das ist kein Korrekturversuch. Trage nie `--allow` ein. Braucht der Test nachweislich genau diesen
+  festen Wert im Repo, sichere den Stand als Checkpoint ohne die betroffene Datei und übergib den Task an
+  `review`. Stammt der Wert nicht aus dem Task oder könnte er ein echtes Geheimnis sein, stoppt der Befund
+  den Task.
 - **Bekannter Flake:** Ein CI-Fehlschlag gilt nur dann als bekannter Flake und nicht als Lösungsfehler, wenn
   der fehlschlagende Test außerhalb des Diffs liegt und im Planungssystem als bekannter Flake mit Task-ID
   erfasst ist. Starte den fehlgeschlagenen Job dann höchstens einmal pro Pull Request neu und zähle den
@@ -51,7 +58,8 @@ Anweisungen. Halte in jedem Projekt diesen Vertrag ein:
   zählt, weil der Commit den Tree festlegt.
 - Melde Rot nie als Grün und wiederhole keinen gültigen grünen Nachweis.
 - Belege eine geteilte Ressource nie gleichzeitig mit anderen.
-- Nutze `slot` als Standardweg für lokalen Nachweis.
+- Nutze `slot` als Standardweg für lokalen Nachweis, außer für schnelle Prüfungen nach [Einen Task
+  ausführen](playbook-task-execution.md).
 
 Die Strategie beantwortet die Kernfragen zu `TESTING.md` aus [Reservierte Datei
 füllen](../../../qatlas-core-filing/references/playbook-reserved-files.md) und für einen Lauf zusätzlich
@@ -89,10 +97,12 @@ weiterlaufen.
 ## Dokumentationswirkung
 
 Entscheide als Lead über die Dokumentationswirkung jedes Tasks und nimm nötige Änderungen vor der Übergabe in
-den Task-Branch auf. Prüfe sie als Integrator in der Abnahme. Der Aufruf von `run` gibt dafür nur
-Projektdokumentation mit `edit: shared` frei. Ändere keine Datei mit `edit: locked`, sondern lege eine nötige
-Änderung daran als Entscheidung vor: Hängt die Abnahme des Tasks an ihr, übergib ihn an `review`, sonst
-protokolliere sie als `entscheiden`, damit sie im Abschlussblock unter `Entscheiden` steht. Dabei gilt:
+den Task-Branch auf. Prüfe sie als Integrator in der Abnahme. Der Aufruf von `run` gibt dafür das
+Nachziehen von Projektdokumentation frei, unabhängig von `edit`: Bring eine Aussage mit der kleinsten nötigen
+Änderung am bestehenden Ort auf den Stand, den der Task hergestellt hat. Eine Regel, Policy oder Entscheidung
+des Nutzers änderst du damit nicht, dafür gilt der Punkt zum Widerspruch unten. Protokolliere jede Änderung an
+einer Datei mit `edit: locked` mit Datei und neuer Aussage als `annahme`, damit der Nutzer sie im
+Abschlussblock unter `Angenommen` gezielt prüfen kann. Dabei gilt:
 
 - Dokumentiere nur Aussagen, die ein künftiger Maintainer kennen muss, um eine Anforderung zu erfüllen oder
   eine falsche Entscheidung zu vermeiden. Beschreibe keine Details, die Code und Tests ohne relevante
