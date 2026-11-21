@@ -57,6 +57,7 @@ bei beiden Plattformschritten, gleich mit welchen Mitteln, diesen Vertrag ein:
 - **Abschluss:** Das Landen des Pull Requests ersetzt die lokale Integration. Setze einen Task erst auf
   `done`, wenn alle seine Pull Requests gemergt sind und die Abnahme auf dem neuen `origin/<control-branch>`
   belegt ist.
-- **Abhängige Arbeit:** Beginne einen abhängigen Task oder Pull Request nur vom integrierten
-  `origin/<control-branch>`, nie auf einem Vorgänger-Branch, der nicht integriert ist. Ein Squash-Merge
-  schließt gestapelte Branches aus.
+- **Abhängige Arbeit:** Pushe einen vorgebauten Task erst, wenn du ihn nach der
+  [Lead-Rolle](lead.md#übergeben) auf das integrierte `origin/<control-branch>` umgesetzt hast. Öffne nie
+  einen Pull Request auf einem nicht integrierten Vorgänger-Branch, denn ein Squash-Merge schließt gestapelte
+  Pull Requests aus.

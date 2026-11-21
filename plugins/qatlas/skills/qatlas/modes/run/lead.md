@@ -49,10 +49,10 @@ dem Ereignis abläuft. Kennt dein Host keine solchen Hintergrundbefehle, führe 
 `handover` oder `ask` ab.
 
 Ist `<basis>` eine `origin/…`-Ref, hole sie vor jeder Verwendung frisch mit `git fetch`. Lege pro Task, der
-Dateien im Repo ändert, einen Worktree von `<basis>` an. Ein Task ohne Dateiänderung braucht weder Worktree
-noch Integration: Schließe ihn nach deiner Abnahme selbst und protokolliere ihn mit `<run> log --type
-integrated --task <id> --text "ohne Dateiänderung"`. Scheitert eine Prüfung an der Umgebung, etwa an Platz
-oder Speicher, frage den Supervisor, bevor du sie als rot wertest.
+Dateien im Repo ändert, einen Worktree an, von `<basis>` oder bei einem vorgebauten Task nach „Übergeben“. Ein
+Task ohne Dateiänderung braucht weder Worktree noch Integration: Schließe ihn nach deiner Abnahme selbst und
+protokolliere ihn mit `<run> log --type integrated --task <id> --text "ohne Dateiänderung"`. Scheitert eine
+Prüfung an der Umgebung, etwa an Platz oder Speicher, frage den Supervisor, bevor du sie als rot wertest.
 
 Protokolliere sofort mit `<run> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
 Laufs gehört, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`, `risiko` (nicht öffentlich
@@ -95,14 +95,29 @@ Supervisor, ob der Task auf `review` oder `waiting` geht, und mach mit dem näch
 jedem anderen `rework` im Rahmen des [Korrekturbudgets](playbook-acceptance.md#korrekturbudget) am Grund und
 übergib erneut. Setze den Task nach `integrated` fort, wenn die Übergabe nicht die letzte war.
 
-Hängt der nächste Task vom übergebenen ab, warte auf `integrated` und starte ihn von der neuen `<basis>`.
+Hängt der nächste Task von einem ab, dessen Ergebnis du abgenommen und übergeben oder ohne Integrator zur
+Integration gebracht hast, baue ihn darauf vor, auch wenn der Vorgänger noch auf die Integration wartet, an
+einer äußeren Schranke hängt (`rework blocked:`, `waiting`) oder nur noch die Prüfung des Nutzers fehlt. Baue
+nie auf einem Vorgänger vor, dessen Abnahme offen ist oder über den der Nutzer inhaltlich entscheiden muss.
+
+1. **Start:** Lege Worktree und Task-Branch des abhängigen Tasks von der Spitze des übergebenen
+   Vorgänger-Branches an, nicht von `<basis>`, und merke dir diese Spitze. Den Vorgänger-Branch selbst änderst
+   du nicht.
+2. **Nacharbeit am Vorgänger:** Ändert sich der Vorgänger, etwa nach einem `rework`, hole seine neue Spitze
+   per Merge in den abhängigen Branch, bevor du dort weiterarbeitest, und merke sie dir statt der alten.
+3. **Übergabe:** Übergib oder integriere den abhängigen Task erst, wenn der Vorgänger integriert ist. Bring
+   ihn davor auf die neue `<basis>`: per Merge wie oben, wenn die gemerkte Spitze in `<basis>` enthalten ist
+   (`git merge-base --is-ancestor <Spitze> <basis>`), sonst, etwa nach einem Squash-Merge, nur mit den eigenen
+   Commits über `git rebase --onto <basis> <Spitze> <task-branch>`. Das ist zulässig, weil ein vorgebauter
+   Branch vor seiner Übergabe nie gepusht ist. Danach läuft die Übergabeprüfung wie oben einmal grün.
+
 Solange du nur wartest, auf die Antwort einer Übergabe, auf einen Worker oder auf eine lange eigene Prüfung,
-darfst du von der aktuellen `<basis>` aus einen nachweislich unabhängigen Task dieses Pakets beginnen, etwa
-den zweiten Zweig einer Kette, deren gemeinsamer Vorgänger integriert ist. Ein übergebener Task gilt dann als
-sicher übergeben. Rufe bei offener Übergabe an jedem Zwischenstand, mindestens nach jeder Rückkehr eines
-Workers, `handover` erneut mit `--timeout 10` auf, bis die Antwort da ist, und übergib den nächsten Task erst
-danach. Gib einem `rework` Vorrang: Sichere den laufenden Task am nächsten geprüften Meilenstein als
-Checkpoint, arbeite am Grund, übergib erneut und mach danach weiter.
+darfst du einen nachweislich unabhängigen Task dieses Pakets von der aktuellen `<basis>` aus beginnen oder
+einen abhängigen vorbauen. Ein übergebener Task gilt dann als sicher übergeben. Rufe bei offener Übergabe an
+jedem Zwischenstand, mindestens nach jeder Rückkehr eines Workers, `handover` erneut mit `--timeout 10` auf,
+bis die Antwort da ist, und übergib den nächsten Task erst danach. Gib einem `rework` Vorrang: Sichere den
+laufenden Task am nächsten geprüften Meilenstein als Checkpoint, arbeite am Grund, übergib erneut und mach
+danach weiter.
 
 Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
 `<run> cut --branch <task-branch> --base <basis>`, mit `--code-repo` für Code außerhalb der Steuerwurzel.
@@ -137,12 +152,17 @@ frühere Nachrichten durch eine Zusammenfassung ersetzt hat und dir der Wortlaut
 einzelner Hinweis des Hosts belegt das nicht. Warte auch dann auf die Antworten offener Übergaben. Sichere
 ein `rework`, das danach eintrifft, als Checkpoint am bestehenden Ort und nimm seinen Task in den Rest.
 
-Beende deine Arbeit, wenn jeder Task integriert, an `review` übergeben oder durch einen gescheiterten Task
-blockiert ist, oder wenn du nach einer Verdichtung keinen neuen Task beginnst. Protokolliere dein Ende mit
-`<run> done`, bei einer Verdichtung mit `--text "Kontext verdichtet"`, mit `--rest <id,id,...>` für die
-Tasks, die du weder abgeschlossen noch übergeben hast. Halte deine Schlussmeldung bei wenigen Zeilen: je Task
-integriert, an `review` übergeben oder Rest, für jeden Rest-Task Branch und Worktree. Alles andere steht im
-Protokoll.
+Landet der Vorgänger eines vorgebauten Tasks in diesem Lauf nicht, etwa weil er an `review` oder `waiting`
+geht, bring den vorgebauten Task bis zu einem geprüften Stand, sichere ihn als Checkpoint nach „Commits und
+Checkpoints“ im Git-Workflow und setze ihn auf `ready`. Ein folgender Lauf setzt dort fort. Nimm ihn nicht in
+`--rest`, denn auch ein Nachfolger könnte ihn in diesem Lauf nicht übergeben.
+
+Beende deine Arbeit, wenn jeder Task integriert, an `review` übergeben, als vorgebauter Task gesichert oder
+durch einen gescheiterten Task blockiert ist, oder wenn du nach einer Verdichtung keinen neuen Task beginnst.
+Protokolliere dein Ende mit `<run> done`, bei einer Verdichtung mit `--text "Kontext verdichtet"`, mit `--rest
+<id,id,...>` für die Tasks, die du weder abgeschlossen noch übergeben hast. Halte deine Schlussmeldung bei
+wenigen Zeilen: je Task integriert, an `review` übergeben, vorgebaut gesichert oder Rest, für jeden
+vorgebauten und jeden Rest-Task Branch und Worktree. Alles andere steht im Protokoll.
 
 **Nachfolger:** Übernimmst du ein Paket, übernimm Branches und Worktrees eines Tasks erst, wenn kein laufender
 oder unbekannter Worker sie nutzt und die Branches den in Task oder Protokoll genannten Stand tragen. Das Ende
