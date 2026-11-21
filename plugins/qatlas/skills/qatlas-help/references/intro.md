@@ -41,3 +41,8 @@ sparsam und sicher bleibt.
 
 `AGENTS.md` im Repo bleibt die native Projektanweisung: Zweck, Projektregeln und die Lesebedingungen, die in
 `.qatlas-brain/` verweisen.
+
+## Fehler melden
+
+Einen Fehler in einem Qatlas-Plugin meldest du unter https://github.com/castrowithcee/qatlas/issues mit der
+Vorlage für Fehlermeldungen. Trage dort keine privaten Projektdaten ein.

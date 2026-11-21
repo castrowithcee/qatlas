@@ -1,0 +1,50 @@
+name: Fehler melden
+description: Ein Qatlas-Plugin verhält sich anders, als es selbst beschreibt, oder zwei seiner Regeln widersprechen sich.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Trage keine privaten Projektdaten ein: keine Projektnamen, Pfade, Task-IDs, Zugangsdaten oder Inhalte aus deinem Projekt.
+  - type: input
+    id: plugin
+    attributes:
+      label: Plugin
+      placeholder: qatlas
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: 3.3.0
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: Host
+      description: Coding-Agent und seine Version
+      placeholder: Claude Code 2.x, Codex 0.x
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: Beobachtung
+      description: Was ist passiert?
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: Erwartung
+      description: Was hätte nach der Beschreibung des Plugins passieren sollen, mit der Stelle, die das festlegt?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Nachweis
+      description: Aufruf, Ausgabe oder Fehlermeldung, die den Fehler belegt, ohne private Projektdaten.
+    validations:
+      required: true
