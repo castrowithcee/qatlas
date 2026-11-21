@@ -44,9 +44,10 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 - **Log:** Protokolliere sofort mit `<run> log --type <type> --package <package> --task <id> --text
   "<text>"`, was in den Abschluss gehört (`annahme`, `abweichung`, `risiko`, `erfasst`, `entscheiden`,
   `werkzeug`), so formuliert, wie es im Abschlussblock stehen wird.
-- **Kontext verdichtet:** Schätze deinen Kontext nicht. Hat der Host ihn verdichtet, schließe die laufende
-  Integration ab, nimm keine neue Übergabe an, protokolliere dein Ende mit `<run> done --role integrator
-  --text "Kontext verdichtet"` und ende mit einer Zeile.
+- **Kontext verdichtet:** Schätze deinen Kontext nicht. Hat der Host ihn nach dem Merkmal aus [der
+  Lead-Rolle](lead.md#ende) verdichtet, schließe die laufende Integration ab, nimm keine neue Übergabe an,
+  protokolliere dein Ende mit `<run> done --role integrator --text "Kontext verdichtet"` und ende mit einer
+  Zeile.
 - **Nachfolger:** Rekonstruiere den Stand aus `report` und dem Planungssystem. Übersprungene Prüfungen findest
   du mit `report --notes skipped`. Starte `wait --role integrator --since 0` und nimm Übergaben
   nur aus `wait`.

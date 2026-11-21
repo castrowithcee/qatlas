@@ -132,9 +132,10 @@ denselben Befehl erneut auf. Frage nicht, solange eine Übergabe offen ist. Wart
 ## Ende
 
 Schätze deinen Kontext nicht: Ohne Messwert des Hosts lässt sich seine Füllung nicht beurteilen. Beginne nur
-dann keinen neuen Task, wenn der Host deinen Kontext schon verdichtet hat. Warte auch dann auf die Antworten
-offener Übergaben. Sichere ein `rework`, das danach eintrifft, als Checkpoint am bestehenden Ort und nimm
-seinen Task in den Rest.
+dann keinen neuen Task, wenn der Host deinen Kontext schon verdichtet hat. Verdichtet ist er, wenn der Host
+frühere Nachrichten durch eine Zusammenfassung ersetzt hat und dir der Wortlaut früherer Schritte fehlt. Ein
+einzelner Hinweis des Hosts belegt das nicht. Warte auch dann auf die Antworten offener Übergaben. Sichere
+ein `rework`, das danach eintrifft, als Checkpoint am bestehenden Ort und nimm seinen Task in den Rest.
 
 Beende deine Arbeit, wenn jeder Task integriert, an `review` übergeben oder durch einen gescheiterten Task
 blockiert ist, oder wenn du nach einer Verdichtung keinen neuen Task beginnst. Protokolliere dein Ende mit
