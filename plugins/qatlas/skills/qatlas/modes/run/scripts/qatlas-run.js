@@ -9,7 +9,7 @@
 // answer by repeating the same call or logs done after the answer arrived.
 // wait wakes the supervisor on question, done and disk, the integrator on open handovers and end, and a lead
 // on the answer to its open signal. The integrator's wait also lists every open unanswered handover as "queue",
-// so a handover it skipped or forgot is offered again.
+// so a handover it skipped or forgot is offered again, unless a lead's own integration is still open.
 // Usage:
 //   qatlas-run.js begin --repo <root> [--discard]
 //     Resumes an unfinished run; --discard archives it and starts anew.
@@ -26,6 +26,13 @@
 //   qatlas-run.js done --repo <root> (--package <package> [--rest <id,id,...>] | --role integrator) [--text <text>]
 //   qatlas-run.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
 //     Type integrated: a lead without integrator records a task it finished itself; report counts it as integrated.
+//   qatlas-run.js attach --repo <root>
+//     Supervisor: attaches the integrator to a running run, idempotent, never detached. Output: {"attached":true}.
+//   qatlas-run.js integrate --repo <root> --package <package> --task <id>
+//     Lead without integrator, before each own integration. Output {"integrate":"handover"} once the integrator
+//     is attached (hand over with handover), else {"integrate":"self"} and the registration stays open until
+//     log --type integrated for the same package and task or done of the package. While one is open, the
+//     integrator's wait lists no handover (not as event, not in queue); it is delivered after the last closes.
 //   qatlas-run.js report --repo <root> [--code-repo <path>] [--notes <type>]
 //     "summed" adds up over all agents working in parallel, so its times can exceed "duration". It counts, in
 //     seconds since begin, the commands run through slot in the repo of the code ("checks", of them "red",
@@ -53,7 +60,7 @@ const SUPERVISOR_WAKES = new Set(['question', 'done', 'disk']);
 // Rework for a conflict, a cut or a blocked landing is no correction attempt and stays out of the per-task
 // rework count.
 const CORRECTION = /^rework (?!(?:conflict|cut|blocked):)/;
-const RESERVED = new Set([...SIGNAL, 'begin', 'resume', 'plan', 'done', 'disk', 'end']);
+const RESERVED = new Set([...SIGNAL, 'begin', 'resume', 'plan', 'attach', 'integrate', 'done', 'disk', 'end']);
 const TASK_ID = /^[A-Za-z0-9#_][A-Za-z0-9#_-]*$/;
 
 const opts = process.argv.slice(3);
@@ -140,6 +147,23 @@ function idList(name) {
 }
 
 const ended = all => all.some(e => e.type === 'end');
+const attached = all => all.some(e => e.type === 'attach');
+
+// Own integrations a lead announced and has not closed yet. closedAt is the seq of the latest closing event: a
+// handover held back meanwhile counts as new from there, so a wait whose cursor already passed it still wakes.
+function registrations(all) {
+  const open = new Map();
+  let closedAt = -1;
+  for (const e of all) {
+    const key = e.package + '\0' + e.task;
+    if (e.type === 'integrate') open.set(key, e);
+    else if (e.type === 'integrated' && open.delete(key)) closedAt = e.seq;
+    else if (e.type === 'done') {
+      for (const [k, r] of open) if (r.package === e.sender) { open.delete(k); closedAt = e.seq; }
+    }
+  }
+  return { open, closedAt };
+}
 
 function begin() {
   const repo = repoKey();
@@ -170,6 +194,26 @@ function plan() {
   if (all.some(e => e.type === 'plan' && e.package === name)) fail('Package already planned: ' + name, 2);
   record(repo, 'plan', { package: name, budget, tasks });
   out({ planned: name, budget, tasks });
+}
+
+function attach() {
+  const repo = repoKey();
+  const all = events(repo);
+  if (!all.some(e => e.type === 'begin') || ended(all)) fail('No running run: start one with begin', 2);
+  if (!attached(all)) record(repo, 'attach');
+  out({ attached: true });
+}
+
+function integrate() {
+  const repo = repoKey();
+  const [name, task] = need('--package', '--task');
+  if (name === INTEGRATOR) fail('Reserved package name: integrator', 2);
+  if (!TASK_ID.test(task)) fail('--task must match [A-Za-z0-9#_-]', 2);
+  const all = events(repo);
+  if (!all.some(e => e.type === 'begin') || ended(all)) fail('No running run: start one with begin', 2);
+  if (attached(all)) return out({ integrate: 'handover' });
+  if (!registrations(all).open.has(name + '\0' + task)) record(repo, 'integrate', { package: name, task });
+  out({ integrate: 'self' });
 }
 
 function reportText() {
@@ -294,9 +338,10 @@ async function wait() {
     // A new run starts a new log, so an old cursor would match nothing and wait would hang silently.
     if (since > all.length) fail(`--since ${since} is past the end of the log (${all.length} events); a new run started, pass --since 0`, 2);
     const open = role === INTEGRATOR ? openSignals(all) : null;
-    const queued = e => e.type === 'handover' && open.get(e.sender)?.seq === e.seq && open.get(e.sender).answer === null;
-    const wakes = e => (open ? e.type === 'end' || queued(e) : SUPERVISOR_WAKES.has(e.type));
-    const hits = all.filter(e => e.seq >= since && wakes(e));
+    const held = role === INTEGRATOR ? registrations(all) : null;
+    const queued = e => e.type === 'handover' && !held.open.size && open.get(e.sender)?.seq === e.seq && open.get(e.sender).answer === null;
+    const wakes = e => (open ? (e.type === 'end' && e.seq >= since) || (queued(e) && Math.max(e.seq, held.closedAt) >= since) : e.seq >= since && SUPERVISOR_WAKES.has(e.type));
+    const hits = all.filter(wakes);
     if (hits.length || Date.now() >= end) {
       const queue = open ? { queue: all.filter(queued).map(({ seq, at, sender, task, report }) => ({ seq, at, sender, task, report })) } : {};
       return out({ events: hits, ...queue, cursor: all.length, timeout: !hits.length });
@@ -347,7 +392,7 @@ function report() {
   const secs = ms => Math.round(ms) / 1000;
   const packages = {};
   const tasks = {};
-  const integrator = { questions: 0, finished: 0 };
+  const integrator = { questions: 0, finished: 0, attached: attached(all) };
   const counts = { rerun: 0, conflict: 0, integrated: 0 };
   const notes = {};
   const since = {};
@@ -577,7 +622,7 @@ function spawnHook() {
 }
 
 const commands = {
-  begin, 'stop-hook': stopHook, 'spawn-hook': spawnHook, plan, answer, done, log: logEvent, report, end, wait,
+  begin, 'stop-hook': stopHook, 'spawn-hook': spawnHook, plan, attach, integrate, answer, done, log: logEvent, report, end, wait,
   ask: () => raise('question', need('--question')[0]),
   handover: () => raise('handover', reportText(), need('--task')[0]),
   cut: () => cut(codeRepo(repoKey())),
