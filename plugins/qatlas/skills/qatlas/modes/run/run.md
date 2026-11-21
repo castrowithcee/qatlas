@@ -169,7 +169,8 @@ fülle nach Lage Pakete nach, starte Nachfolger oder führe `<run> end` aus.
 Protokolliere, was du selbst zum Abschlussblock beiträgst, sofort mit `<run> log --type <type> --package
 <package> --task <id> --text "<text>"`, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`,
 `risiko` (nicht öffentlich erfasst), `erfasst` (neuer Task), `entscheiden`, `regel` (geltende Entscheidung für
-alle) und `werkzeug` (Defekt des Steuerskripts oder der Lauf-Werkzeuge, mit Nachweis).
+alle) und `werkzeug` (Defekt des Steuerskripts, der Lauf-Werkzeuge oder dieser Anweisungen im Sinn von
+„Verbesserungen“ im Abschlussblock, mit Nachweis).
 
 - **`question`:** Antworte mit `<run> answer` an den Absender des Ereignisses (`--package <package>` oder
   `--role integrator`) und `--answer "<Antwort>"`: aus dem Projektwissen mit Quelle, sonst nach
@@ -225,7 +226,7 @@ solcher Schritt etwas, das andere Projekte auf dem Host mitnutzen, etwa einen Bu
 Temp-Verzeichnis, prüfe vorher mit `<tools> slot status`, ob ein Slot belegt ist oder ein Aufruf wartet. Ist
 das so, lass den Schritt in diesem Lauf aus, ohne zu warten, und nenne ihn im Abschlussblock unter `Risiken`
 mit dem Befehl, den der Nutzer später ausführen kann. Schließe dann mit genau einem Abschlussblock über alle
-Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz unter `Verbesserungen`, Kennzahlen aus
+Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz nach „Verbesserungen“, Kennzahlen aus
 den Zählungen und dem Block `summed` von `report`, mit `--code-repo <code-repo>` für Code außerhalb der
 Steuerwurzel. Halte die Antworten des Nutzers darauf selbst fest, weil die Zuständigkeit der Subagents mit dem
 Lauf endet.
