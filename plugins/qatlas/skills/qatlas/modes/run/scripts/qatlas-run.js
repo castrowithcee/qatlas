@@ -27,9 +27,9 @@
 //   qatlas-run.js log --repo <root> --type <type> [--package <package>] [--task <id>] [--text <text>]
 //     Type integrated: a lead without integrator records a task it finished itself; report counts it as integrated.
 //   qatlas-run.js report --repo <root> [--code-repo <path>] [--notes <type>]
-//     "time" sums, in seconds since begin: the commands run through slot in the repo of the code ("checks",
-//     of them "red", "checking", and "queued" for a free slot) and the waits from a handover to its answer
-//     ("integrating"). Each task carries the text of its last answer ("answer"), also one never picked up.
+//     "summed" adds up over all agents working in parallel, so its times can exceed "duration". It counts, in
+//     seconds since begin, the commands run through slot in the repo of the code ("checks", of them "red",
+//     "checking", and "queued" for a free slot) and the waits from a handover to its answer ("integrating"). Each task carries the text of its last answer ("answer"), also one never picked up.
 //   qatlas-run.js end --repo <root>
 //   qatlas-run.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
 //   qatlas-run.js stop-hook
@@ -378,7 +378,7 @@ function report() {
   const sum = key => secs(runs.reduce((total, run) => total + (Number(run[key]) || 0), 0));
   out({ ended: ended(all), cursor: all.length, duration: all.length ? secs(time(all[all.length - 1]) - time(all[0])) : null,
     budget, packages, open, tasks, integrator, log: counts,
-    time: { checks: runs.length, red: runs.filter(run => run.exit !== 0).length, checking: sum('duration'), queued: sum('waited'), integrating: secs(integrating) },
+    summed: { checks: runs.length, red: runs.filter(run => run.exit !== 0).length, checking: sum('duration'), queued: sum('waited'), integrating: secs(integrating) },
     notes });
 }
 

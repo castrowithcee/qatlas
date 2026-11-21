@@ -38,7 +38,7 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 **Verbesserungen**
 - <Schwäche des Verfahrens mit ihrem Nachweis>: <konkreter Ansatz>.
 
-**Kennzahlen:** <eine Zeile>
+**Kennzahlen:** Dauer <Zeit> · <n> Rückfragen · <n> Nacharbeiten · <n> Konflikte · <n> Wiederholungen · <n> Anstöße · summiert über parallele Arbeit: Prüfungen <Zeit> in <n> Durchläufen, <n> rot · Warten auf Test-Slots <Zeit> · Warten auf Integration <Zeit>
 **Nicht gepusht:** <Repo>: <Commit-ID> <Betreff>
 
 Weiter in einer neuen Session: <Modi>
@@ -56,10 +56,10 @@ Weiter in einer neuen Session: <Modi>
 - **Verbesserungen:** Muster dieses Laufs bei Zuschnitt, Taskverträgen, Prüfungen oder Umgebung, abgeleitet
   aus Korrekturen, Nacharbeiten, Konflikten, Wiederholungen, Anstößen, Stillständen, Rückfragen und
   Abweichungen, nur mit konkretem Ansatz, keine Produktideen.
-- **Kennzahlen:** Dauer und die von null verschiedenen Zahlen an Rückfragen, Nacharbeiten, Konflikten,
-  Wiederholungen und Anstößen. Macht Warten einen wesentlichen Teil der Dauer aus, nenne dahinter die Zeit in
-  Prüfungen mit der Zahl der Durchläufe und der roten davon, die Wartezeit auf Test-Slots und die Wartezeit
-  auf die Integration.
+- **Kennzahlen:** eine Zeile in der Reihenfolge der Vorlage. Lass jede Angabe mit dem Wert null weg. Die
+  Angaben ab „summiert über parallele Arbeit“ gibt es nur bei `run` und nur, wenn Warten einen wesentlichen
+  Teil der Dauer ausmacht. Nenne sie nie ohne diesen Zusatz neben der Dauer, denn als Summe über parallel
+  arbeitende Agenten können sie die Dauer übersteigen.
 - **Letzte Zeile:** nur Modi mit echter Arbeit: `review` für Tasks in `review`, `shape <eindeutiger Task>`
   für einen Entwurf oder `shape backlog` für mehrere, `run <Scope>` für den ersten ausführbaren Scope nach
   `shape`. Eine neue Idee geht an `goal`. Starte keinen Modus selbst. Ist nichts offen, sagt das die

@@ -100,9 +100,6 @@ jeden Wiederholungslauf eines CI-Jobs ebenso mit `--type rerun`. Beide zählen i
    setze ihn stattdessen nach „An den Nutzer übergeben“ auf `review`. Antworte mit `integrated <sha>`, wobei
    `<sha>` der Integrationscommit auf dem Kontroll-Branch ist.
 
-Musst du über Pull Requests vor dem Merge die Basis nachziehen, bleibt die Integration seriell an die
-CI-Dauer gebunden. Nenne das mit `log --type risiko` als Engpass.
-
 ## Nachweise und Delta-Prüfungen
 
 Die nativen Anweisungen des Projekts können Stufen deklarieren, etwa die schnellen gemeinsamen Prüfungen und
