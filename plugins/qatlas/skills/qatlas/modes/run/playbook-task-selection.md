@@ -14,7 +14,8 @@ Commit- noch als Subagent-Zahl und passe es nicht an die Zahl der `ready`-Tasks 
    Abhängigkeiten und Zuständigkeitssignale. Nennt der Aufruf Tasks ausdrücklich, bestimme das nur für sie.
 2. Nimm ausführbare `ready`-Tasks in der Reihenfolge des Planungssystems. Legt es unter ihnen keine
    Reihenfolge fest, wähle nach erfüllbaren Abhängigkeiten, fachlichem Wert, früher Risikoklärung und
-   sinnvoller Integration.
+   sinnvoller Integration. Einen `deferred`-Task nimmst du nach der Backlog-Norm nur auf, wenn der Aufruf ihn
+   ausdrücklich nennt.
 3. Lies die gewählten Tasks nicht selbst. Ein einzelner Task bildet ohne Lesen ein Paket. Gib mehrere einem
    lesenden Worker mit dem Profil `standard`, der jeden gewählten Task und seine echten Blocker vollständig
    liest, keine weiteren Kandidaten, und je Task in einer Zeile zurückgibt: Abhängigkeiten, Kopplung mit

@@ -35,6 +35,9 @@ die Bindung.
 - `waiting`: Eine externe Voraussetzung, Ressource oder ein externes Ereignis verhindert das Weiterarbeiten.
   Grund und Wiederaufnahmesignal sind konkret benannt. Eine unfertige interne Task-Abhängigkeit allein genügt
   nicht.
+- `deferred`: Der Nutzer hat die Arbeit bewusst auf später verschoben. Weder ein Blocker noch eine offene
+  Frage ist Voraussetzung. Anders als bei `waiting` blockiert nichts Externes, der Nutzer hat entschieden,
+  dass die Arbeit jetzt nicht dran ist.
 - `done`: Abnahmekriterien erfüllt, vereinbarte Prüfungen verifiziert, Dokumentationswirkung erledigt und
   keine offene Frage. Verworfen und Duplikat sind Abschlussarten.
 
@@ -45,12 +48,20 @@ Zulässige Wege:
 - `in-progress -> ready | draft | review | waiting | done`
 - `review -> ready | draft | waiting | done`
 - `waiting -> draft | ready`
+- `draft | ready | waiting -> deferred`
+- `deferred -> draft | ready`
 
 - Setze einen Task unmittelbar vor der ersten schreibenden Ausführung auf `in-progress`. Eine bloße Sichtung
   beansprucht ihn nicht.
 - `ready` autorisiert keine Ausführung und sagt nichts über die Reihenfolge. Welcher Task zuerst drankommt,
-  bestimmt die Reihenfolge des Planungssystems. Ordne sie nicht stillschweigend um. Zurückgestellte, weiter
-  ausführbare Arbeit bleibt `ready` und rückt in dieser Reihenfolge nach hinten.
+  bestimmt die Reihenfolge des Planungssystems. Ordne sie nicht stillschweigend um. Ausführbare Arbeit, die
+  nur nach hinten rückt, bleibt `ready`.
+- Du darfst das Zurückstellen oder Zurückholen eines Tasks vorschlagen. Setze oder entferne `deferred` erst,
+  wenn der Nutzer es im Gespräch ausdrücklich genehmigt hat, nie aus eigener Einschätzung und nie im
+  autonomen Teil von `run`, weil dort kein Nutzer erreichbar ist. Nennt der Nutzer einen `deferred`-Task im
+  Aufruf eines Modus ausdrücklich, gilt das als Genehmigung zum Zurückholen.
+- Wähle einen `deferred`-Task nie aus, auch nicht im Scope des ganzen Backlogs, außer der Aufruf nennt ihn
+  ausdrücklich. Wo du Status zählst oder aufzählst, nenne die Zahl der `deferred`-Tasks einmal getrennt.
 - Technische Schwierigkeit allein macht einen Task weder zu `draft`, `review` noch `waiting`.
 - Ein Arbeitspaket ohne erkennbaren Status hat keinen. Behandle es nicht als `draft`, wähle es nicht aus und
   setze ihm ohne Auftrag keinen Status. Nenne die Anzahl, wo sie für Auswahl oder Übersicht zählt.

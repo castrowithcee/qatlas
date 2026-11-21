@@ -17,7 +17,7 @@ edit: shared
 - **Arbeitspakete:** <objekttyp und container, ein objekt pro task>
 - **Entwürfe:** <wo unausgereifte arbeit und ideen leben>
 - **Status:** `draft` = <merkmal>, `ready` = <merkmal>, `in-progress` = <merkmal>, `review` = <merkmal>,
-  `waiting` = <merkmal>. <wie ein wechsel das bisherige merkmal ersetzt>
+  `waiting` = <merkmal>, `deferred` = <merkmal>. <wie ein wechsel das bisherige merkmal ersetzt>
 - **Abschluss:** `done` = <merkmal und schreibschritt>, verworfen = <merkmal>, Duplikat = <merkmal>
 - **Reihenfolge:** <woran erkennbar ist, welcher `ready`-task zuerst drankommt, und wo abhängigkeiten stehen>
 - **Anspruch:** <woran erkennbar ist, wer einen task bearbeitet>

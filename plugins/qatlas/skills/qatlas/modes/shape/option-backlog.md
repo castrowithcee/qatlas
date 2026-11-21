@@ -7,7 +7,8 @@ description: >
 # Bestehende Arbeit zuschneiden
 
 Diese Variante bearbeitet nur die bestehenden `draft`-Tasks des Scopes, jeweils an ihrem bestehenden Platz.
-Tasks in anderen Status bleiben unberührt.
+Tasks in anderen Status bleiben unberührt. Einen `deferred`-Task nimmst du nach der Backlog-Norm nur auf, wenn
+der Aufruf ihn ausdrücklich nennt.
 
 ## Bestand aufnehmen
 
@@ -27,6 +28,6 @@ der Task `draft` mit der genauen fehlenden Information.
 ## Abschluss
 
 Beende erst, wenn jeder anfangs gewählte Entwurf `ready` ist, mit seiner konkreten, aktuell unbeantwortbaren
-Frage `draft` bleibt oder vom Nutzer ausdrücklich zurückgestellt wurde. Das Ergebnis des Abschlussblocks
-nennt, wie viele dieser Entwürfe nun `ready` und `draft` sind.
+Frage `draft` bleibt oder nach der Backlog-Norm `deferred` ist. Das Ergebnis des Abschlussblocks nennt, wie
+viele dieser Entwürfe nun `ready`, `draft` und `deferred` sind.
 Seine letzte Zeile nennt den ersten ausführbaren Scope.

@@ -62,10 +62,11 @@ der Nutzer erst beschreibt, gehört zu `goal`, nicht auf eine Karte.
   Abnahme.
 - Setze den nächsten Status nach dem maßgeblichen Vertrag: `ready`, wenn ein Entwurf Ausführungsreife
   erreicht oder ein neuer ausdrücklicher Lauf den Task fortsetzen oder integrieren muss, `review`,
-  solange eine Nutzeraktion offen bleibt, `waiting` bei einer externen Voraussetzung, `draft`, solange eine
-  Vertragsfrage offen bleibt oder die Antwort einen neuen Zuschnitt verlangt, `done`, wenn nach der Antwort
-  nichts mehr zu tun ist und das Ergebnis integriert ist, im selben Schritt nach dem Planungssystem
-  geschlossen. Einen Status, den der Modus nicht setzen darf, überlässt du `review`.
+  solange eine Nutzeraktion offen bleibt, `waiting` bei einer externen Voraussetzung, `deferred` nach der
+  Backlog-Norm, `draft`, solange eine Vertragsfrage offen bleibt oder die Antwort einen neuen Zuschnitt
+  verlangt, `done`, wenn nach der Antwort nichts mehr zu tun ist und das Ergebnis integriert ist, im selben
+  Schritt nach dem Planungssystem geschlossen. Einen Status, den der Modus nicht setzen darf, überlässt du
+  `review`.
 - Pflege nach jedem erledigten Task den Roster des maßgeblichen Planungssystems mit.
 - Ändert die Entscheidung eine maßgebliche Grundlage, pflege sie an ihrem Platz.
 - Eine Antwort autorisiert keine Ausführung.

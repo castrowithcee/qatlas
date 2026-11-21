@@ -34,6 +34,7 @@ bleibt in einem vollständigen Lesen eigenständig ausführbar:
   Nach einer Klärung bleibt nur ein noch nötiger aktueller Stand oder `- Keine.`. Er enthält:
   - bei `review` nur die aktuelle Übergabe an den Nutzer nach der Backlog-Norm,
   - bei `waiting` Grund, Wiederaufnahmesignal, verifizierten Stand und nächsten Schritt,
+  - bei `deferred` nur die Entscheidung des Nutzers,
   - bei `done` `- Keine.` oder nur wichtige Entscheidungen, Auffälligkeiten, Risiken, Warnungen und
     Abweichungen sowie die Orte, an denen dauerhafte Projektwahrheiten oder falsch gewordene Dokumentation
     aktualisiert wurden. Nenne jeden dieser Punkte auch im abschließenden Chat.
@@ -71,7 +72,7 @@ lebt, nicht dass ein Worker daran arbeitet.
 
 `BACKLOG.md` ist die einzige Übersicht. Sie enthält eine Zeile pro unfertigem Root-Task und Projekt: Link,
 Status und Kurzstand. Projektzeilen verweisen auf ihre `README.md`. Innerhalb einer für den Gegenstand
-zulässigen Reihenfolge stehen Tasks als `review`, `in-progress`, `waiting`, `ready`, `draft`.
+zulässigen Reihenfolge stehen Tasks als `review`, `in-progress`, `waiting`, `ready`, `draft`, `deferred`.
 Projektzeilen folgen ihrer Gegenstandsreihenfolge. Fertige Root-Tasks entfallen. Projekte dürfen ihren
 Aufbauverlauf behalten.
 

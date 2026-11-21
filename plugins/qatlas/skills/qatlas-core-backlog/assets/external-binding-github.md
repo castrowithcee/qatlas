@@ -17,8 +17,8 @@ edit: shared
   anderer MCP-Server, mit der nötigen Anmeldung, keine secrets>
 - **Arbeitspakete:** ein Issue pro Task
 - **Entwürfe:** offenes Issue mit Label `draft`
-- **Status:** offenes Issue mit genau einem der Labels `draft`, `ready`, `in-progress`, `review`, `waiting`.
-  Ein Wechsel ersetzt das bisherige Status-Label. Offen ohne Status-Label hat keinen Status.
+- **Status:** offenes Issue mit genau einem der Labels `draft`, `ready`, `in-progress`, `review`, `waiting`,
+  `deferred`. Ein Wechsel ersetzt das bisherige Status-Label. Offen ohne Status-Label hat keinen Status.
 - **Abschluss:** `done` = geschlossen mit Grund `completed`, verworfen = `not planned`, Duplikat =
   `duplicate`. Geschlossen gilt vor jedem Label. Ein wieder geöffnetes Issue bekommt `draft`.
 - **Reihenfolge:** niedrigere Issue-Nummer zuerst, Abhängigkeiten als Beziehung „blocked by“ am Issue
