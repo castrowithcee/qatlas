@@ -1008,6 +1008,29 @@ try {
     assert.strictEqual(archives(), 2);
     assert.deepStrictEqual(ok('report').packages, {});
 
+    // A blocked landing is no correction; an answered signal of a sender that logged done is no longer open, and
+    // its answer stays readable in the task for a successor.
+    ok('plan', '--budget', '1', '--package', 'p', '--tasks', '5,6,7');
+    ok('handover', '--package', 'p', '--task', '5', '--report', report, '--timeout', '0.1');
+    ok('answer', '--package', 'p', '--answer', 'rework blocked: CI size limit');
+    ok('done', '--package', 'p', '--rest', '5,6,7');
+    let after = ok('report');
+    assert.deepStrictEqual([after.open, after.tasks['5'].rework, after.tasks['5'].integrated, after.tasks['5'].answer],
+      [[], 0, false, 'rework blocked: CI size limit']);
+    // The successor of the package hands over without collecting the old answer; plain rework still counts.
+    ok('handover', '--package', 'p', '--task', '6', '--report', report, '--timeout', '0.1');
+    ok('answer', '--package', 'p', '--answer', 'rework fix the test');
+    assert.strictEqual(ok('handover', '--package', 'p', '--task', '6', '--report', report, '--timeout', '0.1').answer, 'rework fix the test');
+    assert.strictEqual(ok('report').tasks['6'].rework, 1);
+    // done before the answer: the handover stays open and queued until answered, then it closes.
+    ok('handover', '--package', 'p', '--task', '7', '--report', report, '--timeout', '0.1');
+    ok('done', '--package', 'p', '--rest', '7');
+    assert.deepStrictEqual(ok('report').open.map(o => [o.sender, o.task, o.answered]), [['p', '7', false]]);
+    assert.deepStrictEqual(integrate(0).queue.map(q => q.task), ['7']);
+    ok('answer', '--package', 'p', '--answer', 'integrated fed789');
+    after = ok('report');
+    assert.deepStrictEqual([after.open, after.tasks['7'].integrated, after.tasks['7'].answer], [[], true, 'integrated fed789']);
+
     // Stop hook: blocks only for the session of the active run without running background work.
     {
       const logFile = path.join(repo, '.qatlas', 'local', 'run', 'events.jsonl');

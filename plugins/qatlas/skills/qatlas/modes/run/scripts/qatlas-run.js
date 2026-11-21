@@ -5,7 +5,8 @@
 // of one host session.
 // They talk only through the JSON-lines log <repo>/.qatlas/local/run/events.jsonl; `seq` is the line index,
 // derived on read. A sender is a lead (--package) or the integrator (--role integrator) and has at most one
-// open signal (question or handover) until it picks up the answer by repeating the same call.
+// open signal (question or handover) until it picks up the answer by repeating the same call or logs done after
+// the answer arrived.
 // wait wakes the supervisor on question, done and disk, the integrator on open handovers and end, and a lead
 // on the answer to its open signal. The integrator's wait also lists every open unanswered handover as "queue",
 // so a handover it skipped or forgot is offered again.
@@ -28,7 +29,7 @@
 //   qatlas-run.js report --repo <root> [--code-repo <path>] [--notes <type>]
 //     "time" sums, in seconds since begin: the commands run through slot in the repo of the code ("checks",
 //     of them "red", "checking", and "queued" for a free slot) and the waits from a handover to its answer
-//     ("integrating").
+//     ("integrating"). Each task carries the text of its last answer ("answer"), also one never picked up.
 //   qatlas-run.js end --repo <root>
 //   qatlas-run.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
 //   qatlas-run.js stop-hook
@@ -49,8 +50,9 @@ const { localDir, excludeLocal } = require('./local-store.js');
 const INTEGRATOR = 'integrator';
 const SIGNAL = new Set(['question', 'handover', 'answer', 'picked']);
 const SUPERVISOR_WAKES = new Set(['question', 'done', 'disk']);
-// Rework for a conflict or a cut is no correction attempt and stays out of the per-task rework count.
-const CORRECTION = /^rework (?!(?:conflict|cut):)/;
+// Rework for a conflict, a cut or a blocked landing is no correction attempt and stays out of the per-task
+// rework count.
+const CORRECTION = /^rework (?!(?:conflict|cut|blocked):)/;
 const RESERVED = new Set([...SIGNAL, 'begin', 'resume', 'plan', 'done', 'disk', 'end']);
 const TASK_ID = /^[A-Za-z0-9#_][A-Za-z0-9#_-]*$/;
 
@@ -89,20 +91,22 @@ function events(repo) {
   });
 }
 
-// Last signal per sender: its latest question or handover, with the answer once one arrived and whether it
-// was picked up. A signal stays open until it is picked.
+// Last signal per sender: its latest question or handover, with the answer once one arrived, whether it was
+// picked up and whether its sender logged done since. A signal stays open until it is picked, or until it is
+// answered and its sender has ended: nobody would pick it up, and an ended run must not wait for it.
 function lastSignals(all) {
   const last = new Map();
   for (const e of all) {
-    if (!e.sender || !SIGNAL.has(e.type)) continue;
-    if (e.type === 'question' || e.type === 'handover') last.set(e.sender, { ...e, answer: null, picked: false });
+    if (!e.sender || !(SIGNAL.has(e.type) || e.type === 'done')) continue;
+    if (e.type === 'question' || e.type === 'handover') last.set(e.sender, { ...e, answer: null, picked: false, done: false });
     else if (e.type === 'answer' && last.has(e.sender)) last.get(e.sender).answer = e.text;
     else if (e.type === 'picked' && last.has(e.sender)) last.get(e.sender).picked = true;
+    else if (e.type === 'done' && last.has(e.sender)) last.get(e.sender).done = true;
   }
   return last;
 }
 
-const openSignals = all => new Map([...lastSignals(all)].filter(([, signal]) => !signal.picked));
+const openSignals = all => new Map([...lastSignals(all)].filter(([, signal]) => !signal.picked && !(signal.done && signal.answer !== null)));
 
 function sender() {
   const role = flag('--role');
@@ -355,6 +359,7 @@ function report() {
       if (!t.handovers++ && since[e.sender] !== undefined) t.cycle = secs(time(e) - since[e.sender]);
       t.lastHandover = time(e);
     }
+    if (e.type === 'answer') t.answer = e.text;
     if (e.type === 'answer' && t.lastHandover !== undefined) integrating += time(e) - t.lastHandover;
     if (e.type === 'answer' && /^integrated\b/.test(e.text || '')) {
       if (t.lastHandover !== undefined) t.wait = secs(time(e) - t.lastHandover);
