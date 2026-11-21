@@ -104,31 +104,29 @@ integrieren](playbook-acceptance.md).
 ## Pakete bilden
 
 Verteile die ausgewählten Tasks des Scopes, ohne Scope des Backlogs, auf Pakete: höchstens vier, mit `--limit
-<n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Bilde ein weiteres Paket erst, wenn die bestehenden
-nach der Größenregel gefüllt sind oder eine der folgenden Regeln es verlangt, und nur aus Tasks, die von ihnen
-unabhängig sind. Ein Paket ist die Zuständigkeit eines Leads für unveränderte Tasks. Am Zuschnitt der Tasks
-änderst du nichts. Nimm Abhängigkeiten, Kopplung, gemeinsame Dateien, geänderte Repos und Umfang aus den
-Angaben des lesenden Workers.
+<n>` höchstens `n`, mit `--limit 0` ohne feste Grenze. Ein Paket ist die Zuständigkeit eines Leads für
+unveränderte Tasks. Am Zuschnitt der Tasks änderst du nichts. Nimm Abhängigkeiten, Kopplung, gemeinsame
+Dateien, geänderte Repos und Umfang aus den Angaben des lesenden Workers.
 
 - **Kopplung:** Halte Abhängigkeiten und echte Kopplung über gemeinsame Invarianten, Migrationen oder
   Laufzeitressourcen innerhalb eines Pakets. Lässt sich Kopplung nicht ausschließen, lege die Tasks in dasselbe
   Paket.
-- **Gemeinsame Dateien:** Lege Tasks, die dieselbe zentrale Datei umbauen, etwa eine gemeinsame Testdatei
-  oder dieselbe Dokumentation, in ein Paket, weil jede Integration dort für die anderen Pakete als Konflikt
-  zurückkommt. Lass Pakete nur Dateien gemeinsam nutzen, die jeder Task bloß um Einträge ergänzt, etwa ein
-  Register, oder die generiert sind, und nur, wo es sich nicht vermeiden lässt. Solche Konflikte löst der
-  Integrator.
-- **Serielle Integration:** Ergänze ein Paket aus einer reinen Abhängigkeitskette um unabhängige Tasks, damit
-  sein Lead weiterarbeitet, während er auf eine Integration wartet. Gib einem übergreifenden Task, der viele
-  Bereiche berührt, etwa einer Import- oder Pfadumstellung, ein eigenes Paket und starte es zuerst.
-- **Größe:** etwa fünf Tasks, genau so viele, wie ein Lead nach Umfang, Kopplung und absehbarem Kontextbedarf
-  in einem Lauf tragen kann, ohne seinen Kontext zu überlasten: mehr bei sehr kleinen, weniger bei großen
-  Tasks. Fülle jedes Paket bis zu dieser Größe, soweit die ausgewählten Tasks reichen. Nimm weniger Tasks nur
-  bei einer ausdrücklichen Mengenvorgabe, nie aus der Deutung von Wörtern wie „Pilot“ oder „Test“. Lass, was
-  in kein Paket passt, in seiner Reihenfolge für Nachfüllen und spätere Läufe.
+- **Gemeinsame Dateien:** Lege Tasks, die dieselbe Datei an denselben Stellen umbauen, in ein Paket, weil jede
+  Integration dort für die anderen Pakete als Konflikt zurückkommt. Ändern Tasks verschiedene Stellen einer
+  Datei, ergänzen sie nur Einträge, etwa in einem Register, oder ist die Datei generiert, hält sie das nicht in
+  einem Paket. Konflikte aus ergänzten Einträgen und generierten Dateien löst der Integrator.
+- **Serielle Integration:** Gib einem übergreifenden Task, der viele Bereiche berührt, etwa einer Import- oder
+  Pfadumstellung, ein eigenes Paket und starte es zuerst.
+- **Größe:** Werte den Umfang jedes Tasks in Punkten: `klein` 1, `mittel` 2, `groß` 5. Ein Paket fasst zehn
+  Punkte, also etwa fünf mittlere, zwei große oder zehn kleine Tasks. Tasks, die nach den Regeln oben in ein
+  Paket gehören, etwa eine Abhängigkeitskette, bilden eine Gruppe, die zusammenbleibt. Ordne Tasks und Gruppen
+  in ihrer Reihenfolge jeweils dem ersten Paket zu, in dem sie zehn Punkte nicht überschreiten, sonst einem
+  neuen Paket. Eine Gruppe über zehn Punkte bildet allein ein Paket. Nimm weniger Tasks nur bei einer
+  ausdrücklichen Mengenvorgabe, nie aus der Deutung von Wörtern wie „Pilot“ oder „Test“. Lass, was wegen der
+  Paketgrenze in kein Paket passt, in seiner Reihenfolge für Nachfüllen und spätere Läufe.
 
-Das Laufbudget ist die Summe der Paketgrößen zu Beginn. Jeder abgeschlossene oder gesichert an `review`
-übergebene Task verbraucht einen Slot. Protokolliere jedes Paket mit `<run> plan --budget <n> --package
+Das Laufbudget ist die Zahl der Tasks in den Paketen zu Beginn. Jeder abgeschlossene oder gesichert an
+`review` übergebene Task verbraucht einen Slot. Protokolliere jedes Paket mit `<run> plan --budget <n> --package
 <package> --tasks <id,id,...>` und gib jedem späteren `plan` dasselbe Laufbudget mit. Sag dem Nutzer in einer
 Zeile, wie viele Tasks und Leads starten und wie hoch das Laufbudget ist, und starte direkt.
 
@@ -201,9 +199,9 @@ Backlog trage jeden Entwurf nach „Laufende“ ein.
   Leads, erfasse dafür einen Entwurf.
 
 **Nachfüllen:** Endet ein Paket und ist das Laufbudget nicht aufgebraucht, bilde aus den verbleibenden Tasks
-ein neues, von allen laufenden unabhängiges Paket nach der Größenregel, höchstens so groß wie das Restbudget,
-mit neuem Namen, protokolliere es mit `plan` und starte seinen Lead. Lass nie mehr Leads gleichzeitig laufen, als
-„Pakete bilden“ zulässt.
+ein neues, von allen laufenden unabhängiges Paket nach der Größenregel mit höchstens so vielen Tasks wie das
+Restbudget, mit neuem Namen, protokolliere es mit `plan` und starte seinen Lead. Lass nie mehr Leads
+gleichzeitig laufen, als „Pakete bilden“ zulässt.
 
 ## Fortsetzen
 
