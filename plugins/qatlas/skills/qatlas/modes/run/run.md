@@ -218,8 +218,12 @@ dann in genau einer Zeile, dass alle Tasks integriert oder übergeben sind und d
 warte auf sein `done` nach seiner Schlussprüfung. Ohne Integrator hat der letzte Lead sie vor seinem `done`
 ausgeführt. Trage danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein
 (`status` und `erfasst` in den `notes` von `report`), führe die Bereinigungsschritte aus, die
-Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Schließe dann
-mit genau einem Abschlussblock über alle Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz
-unter `Verbesserungen`, Kennzahlen aus den Zählungen und dem Block `summed` von `report`, mit `--code-repo
-<code-repo>` für Code außerhalb der Steuerwurzel. Halte die Antworten des Nutzers darauf selbst fest, weil die
-Zuständigkeit der Subagents mit dem Lauf endet.
+Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Leert ein
+solcher Schritt etwas, das andere Projekte auf dem Host mitnutzen, etwa einen Build-Cache oder ein gemeinsames
+Temp-Verzeichnis, prüfe vorher mit `<tools> slot status`, ob ein Slot belegt ist oder ein Aufruf wartet. Ist
+das so, lass den Schritt in diesem Lauf aus, ohne zu warten, und nenne ihn im Abschlussblock unter `Risiken`
+mit dem Befehl, den der Nutzer später ausführen kann. Schließe dann mit genau einem Abschlussblock über alle
+Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz unter `Verbesserungen`, Kennzahlen aus
+den Zählungen und dem Block `summed` von `report`, mit `--code-repo <code-repo>` für Code außerhalb der
+Steuerwurzel. Halte die Antworten des Nutzers darauf selbst fest, weil die Zuständigkeit der Subagents mit dem
+Lauf endet.
