@@ -7,7 +7,8 @@ description: >
 # Worktree-Vertrag
 
 Git registriert alle Worktrees eines Repos gemeinsam. Dieses Register ist die maßgebliche Quelle. Der Ordner
-unter `~/.qatlas/state/worktrees/` ist nur der gemeinsame Speicherort für alle Agents desselben Nutzers.
+`worktrees/` im Zustandsordner des Projekts unter `~/.qatlas/projects/` ist nur der gemeinsame Speicherort für
+alle Agents desselben Nutzers.
 
 ## Anlegen
 
@@ -61,8 +62,8 @@ danach und räumt auf. Der übergebende Lead rührt die übergebenen Branches un
    keiner der beiden Nachweise erbracht, entferne nichts und zeige den konkreten Stand. Beanspruchte Arbeit
    eines laufenden oder unbekannten Workers bleibt.
 3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <path>` ohne
-   `--force`. Entferne danach mit `rmdir` die leer gewordenen Zwischenordner einschließlich des Repo-Ordners.
-   Der Ordner `~/.qatlas/state/worktrees/` selbst bleibt.
+   `--force`. Entferne danach mit `rmdir` die leer gewordenen Zwischenordner unterhalb von `worktrees/`.
+   `worktrees/` und der Zustandsordner selbst bleiben.
 4. Lösche den lokalen Branch nach der Zielprüfung nur mit `git branch -d`. Schlägt der Befehl fehl, erzwinge
    das Löschen nicht. Die einzige Ausnahme ist ein Branch mit erbrachtem Squash-Nachweis, den `git branch -D`
    entfernen darf. Remote-Branches werden nur auf ausdrücklichen Wunsch oder nach einer Regel des laufenden

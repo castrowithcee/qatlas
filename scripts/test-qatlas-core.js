@@ -377,7 +377,7 @@ function testLibraryAndSubagent() {
   const worktree = runNode(path.join(pluginRoot, 'scripts', 'qatlas-worktree-path.js'),
     ['task/0001-test', '--target', f.project], { cwd: f.project, home: f.home });
   assert.match(worktree.stdout.trim(),
-    /\/\.qatlas\/state\/worktrees\/project-[0-9a-f]{8}\/task\/0001-test$/);
+    /\/\.qatlas\/projects\/project-uid[0-9a-f]{8}\/worktrees\/task\/0001-test$/);
 
   const script = path.join(pluginRoot, 'hooks', 'qatlas-context.js');
   const subagent = runNode(script, ['subagent'], { cwd: f.project, home: f.home });
@@ -680,6 +680,35 @@ function testProjectStore() {
   }
 }
 
+function testWorktreePath() {
+  const f = fixture('worktree');
+  initProject(f);
+  spawnSync('git', ['-C', f.project, 'commit', '-q', '--allow-empty', '-m', 'x']);
+  const script = path.join(pluginRoot, 'scripts', 'qatlas-worktree-path.js');
+  const where = (target, branch = 'task/0001-test') => {
+    const result = runNode(script, [branch, '--target', target], { cwd: f.root, home: f.home });
+    assert.strictEqual(result.status, 0, result.stderr);
+    return result.stdout.trim();
+  };
+  const first = where(f.project);
+
+  // A linked worktree resolves to the same state folder.
+  const linked = path.join(f.root, 'linked');
+  assert.strictEqual(spawnSync('git', ['-C', f.project, 'worktree', 'add', '-q', '-b', 'side', linked]).status, 0);
+  assert.strictEqual(where(linked), first);
+  assert.strictEqual(spawnSync('git', ['-C', f.project, 'worktree', 'remove', linked]).status, 0);
+
+  // The path depends on the project id, not on where the repo lies.
+  const moved = path.join(f.root, 'moved');
+  fs.renameSync(f.project, moved);
+  assert.strictEqual(where(moved), first);
+
+  const plain = path.join(f.root, 'plain');
+  fs.mkdirSync(plain);
+  assert.strictEqual(runNode(script, ['task/x', '--target', plain], { cwd: f.root, home: f.home }).status, 1);
+  assert.strictEqual(fs.existsSync(path.join(plain, '.qatlas')), false, 'No project id outside a repo.');
+}
+
 try {
   testConfig();
   testDoctorRunBlock();
@@ -691,7 +720,8 @@ try {
   testStatuslineRefresh();
   testStatuslineCodex();
   testProjectStore();
-  process.stdout.write('✓ Qatlas init, doctor and context: 10 scenarios passed.\n');
+  testWorktreePath();
+  process.stdout.write('✓ Qatlas init, doctor and context: 11 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }
