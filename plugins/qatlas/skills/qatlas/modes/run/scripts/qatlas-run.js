@@ -39,7 +39,7 @@
 //     "checking", and "queued" for a free slot) and the waits from a handover to its answer ("integrating"). Each task carries the text of its last answer ("answer"), also one never picked up.
 //   qatlas-run.js end --repo <root>
 //   qatlas-run.js close --repo <root> [--text <text>]
-//     Supervisor: last call of an ended run. If ~/.qatlas/hooks/run-end.js exists, runs it once with node and
+//     Supervisor: last call of an ended run. If ~/.qatlas/plugins/hooks/run-end.js exists, runs it once with node and
 //     one JSON line on stdin: {"event":"run-end","project","repo","text","duration","tasks","integrated",
 //     "decisions","risks","drafts"}. The file is the switch; a failing or slow hook never fails close.
 //     Output: {"closed":true,"hook":"none"|"ok"|"failed"|"skipped"[,"detail"]}; "skipped" on a repeated close.
@@ -461,7 +461,7 @@ function close() {
   if (!ended(all)) fail('Run not ended: run end first', 2);
   if (closed(all)) return out({ closed: true, hook: 'skipped' });
   record(repo, 'close', { text: flag('--text') });
-  const hook = path.join(os.homedir(), '.qatlas', 'hooks', 'run-end.js');
+  const hook = path.join(os.homedir(), '.qatlas', 'plugins', 'hooks', 'run-end.js');
   if (!fs.existsSync(hook)) return out({ closed: true, hook: 'none' });
   const data = reportData(repo);
   const count = type => (data.notes[type] || []).length;

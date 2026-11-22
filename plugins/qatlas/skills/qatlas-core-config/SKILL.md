@@ -2,7 +2,7 @@
 name: qatlas-core-config
 description: >
   Qatlas-Einstellungen und Nutzermodule ansehen, erklären, ändern oder einrichten: die beiden Dateien
-  config.json mit den Blöcken protection, memory, statusline und run sowie die Module unter ~/.qatlas/hooks/,
+  config.json mit den Blöcken protection, memory, statusline und run sowie die Module unter ~/.qatlas/plugins/hooks/,
   etwa die Benachrichtigung am Ende eines Laufs. Verwenden, sobald der Nutzer eine Einstellung von Qatlas
   ändern, ein Verhalten ein- oder ausschalten oder über ein Laufende benachrichtigt werden will, und bei
   qatlas-core-config. Nicht für die Frage, wie Qatlas intern arbeitet.

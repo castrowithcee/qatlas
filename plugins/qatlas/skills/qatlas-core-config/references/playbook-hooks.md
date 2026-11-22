@@ -1,18 +1,18 @@
 ---
 description: >
-  Module des Nutzers unter ~/.qatlas/hooks/: Vertrag des Moduls run-end.js, das Qatlas am Ende eines Laufs
+  Module des Nutzers unter ~/.qatlas/plugins/hooks/: Vertrag des Moduls run-end.js, das Qatlas am Ende eines Laufs
   startet, und der Weg, es mit dem Nutzer einzurichten, zu prüfen und abzuschalten.
 ---
 
 # Nutzermodule
 
-Ein Nutzermodul ist eine Node-Datei des Nutzers unter `~/.qatlas/hooks/`. Qatlas startet sie zu einem festen
+Ein Nutzermodul ist eine Node-Datei des Nutzers unter `~/.qatlas/plugins/hooks/`. Qatlas startet sie zu einem festen
 Ereignis und liefert keine mit. Die Datei ist der Schalter: Vorhanden heißt eingeschaltet, fehlt sie,
 geschieht nichts. Einen Schlüssel in einer `config.json` gibt es dafür nicht.
 
 ## `run-end.js`
 
-`qatlas run` startet `~/.qatlas/hooks/run-end.js` einmal, wenn der Supervisor einen Lauf abschließt. Das Modul
+`qatlas run` startet `~/.qatlas/plugins/hooks/run-end.js` einmal, wenn der Supervisor einen Lauf abschließt. Das Modul
 erhält auf der Standardeingabe eine Zeile JSON:
 
 | Feld | Inhalt |
@@ -35,7 +35,7 @@ Sekunden. Endet es mit einem Fehler oder zu spät, läuft der Abschluss trotzdem
    eine Shell. Zugangsdaten stehen nicht im Modul, sondern dort, wo das gewählte Werkzeug sie verwaltet. Soll
    ein Projekt nichts melden, prüft das Modul `project` selbst.
 3. Prüfe es mit einer Beispielzeile, ohne einen Lauf zu starten:
-   `echo '{"event":"run-end","project":"test","repo":"/tmp/test","text":"Test","duration":1,"tasks":1,"integrated":1,"decisions":0,"risks":0,"drafts":0}' | node ~/.qatlas/hooks/run-end.js`
+   `echo '{"event":"run-end","project":"test","repo":"/tmp/test","text":"Test","duration":1,"tasks":1,"integrated":1,"decisions":0,"risks":0,"drafts":0}' | node ~/.qatlas/plugins/hooks/run-end.js`
    und lass den Nutzer bestätigen, dass die Meldung ankam.
 
 Zum Abschalten benenne die Datei um oder lösche sie nach Zustimmung des Nutzers.

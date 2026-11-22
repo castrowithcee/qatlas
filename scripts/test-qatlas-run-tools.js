@@ -1110,7 +1110,7 @@ try {
       ok('log', '--type', 'entscheiden', '--text', 'x');
       ok('end');
       assert.strictEqual(JSON.parse(hook({}).stdout).decision, 'block');
-      const hookFile = path.join(process.env.HOME, '.qatlas', 'hooks', 'run-end.js');
+      const hookFile = path.join(process.env.HOME, '.qatlas', 'plugins', 'hooks', 'run-end.js');
       const got = path.join(root, 'run-end.json');
       fs.mkdirSync(path.dirname(hookFile), { recursive: true });
       fs.writeFileSync(hookFile, `require('fs').writeFileSync(${JSON.stringify(got)}, require('fs').readFileSync(0, 'utf8'));`);
