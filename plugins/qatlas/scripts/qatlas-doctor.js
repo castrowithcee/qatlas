@@ -54,17 +54,32 @@ for (const folder of stateFolders()) {
   }
 }
 
-// Reserved root files stay lean; beyond the limit their details move into the folder of the same name.
-for (const name of ['CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md']) {
-  const file = path.join(target, '.qatlas-brain', name);
-  if (!fs.existsSync(file)) continue;
-  let lines;
-  try { lines = fs.readFileSync(file, 'utf8').split(/\r?\n/); }
+// Files of the knowledge space stay lean. A reserved root file moves details into the folder of the same
+// name, any other file is split by subject. Zones and the user's own templates are not Qatlas content.
+const reserved = ['CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md'];
+const brain = path.join(target, '.qatlas-brain');
+function markdownFiles(dir, top) {
+  let entries = [];
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return []; }
+  const found = [];
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    if (top && ['zone-import', 'zone-export', 'templates'].includes(entry.name)) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...markdownFiles(full, false));
+    else if (entry.isFile() && entry.name.endsWith('.md')) found.push(full);
+  }
+  return found;
+}
+for (const file of markdownFiles(brain, true)) {
+  const name = path.relative(brain, file).split(path.sep).join('/');
+  let words;
+  try { words = fs.readFileSync(file, 'utf8').split(/\s+/).filter(Boolean).length; }
   catch (error) { missing.push('.qatlas-brain/' + name + ' is not readable: ' + error.message); continue; }
-  if (lines.at(-1) === '') lines.pop();
-  if (lines.length > 300) {
-    notes.push('.qatlas-brain/' + name + ' has ' + lines.length + ' lines, limit 300. Move details into '
-      + name.replace('.md', '').toLowerCase() + '/ and keep the file as the entry.');
+  if (words > 3500) {
+    notes.push('.qatlas-brain/' + name + ' has ' + words + ' words, limit 3500. '
+      + (reserved.includes(name)
+        ? 'Move details into ' + name.replace('.md', '').toLowerCase() + '/ and keep the file as the entry.'
+        : 'Split it by subject into several files of the same folder.'));
   }
 }
 

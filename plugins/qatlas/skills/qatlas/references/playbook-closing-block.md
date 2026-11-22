@@ -1,7 +1,8 @@
 ---
 description: >
   Gemeinsamer Abschluss von run und shape im Chat: Ergebnis, nummerierte, im Chat beantwortbare
-  Nutzerpunkte, neue Tasks, offene Risiken, Prozessverbesserungen, Kennzahlen und ungepushte Commits.
+  Nutzerpunkte, neue Tasks, offene Risiken, überlange Dateien und Tasks, Prozessverbesserungen, Kennzahlen
+  und ungepushte Commits.
 ---
 
 # Abschlussblock
@@ -35,6 +36,9 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 **Risiken**
 - <Risiko>: <Folge>. <Nötige Aktion oder Entscheidung>.
 
+**Umfang**
+- <Datei oder Task (#<ID>)>: <n> Wörter, weil <Grund>.
+
 **Verbesserungen**
 - <Schwäche mit ihrem Nachweis aus diesem Lauf> (#<Entwurf-ID>): <Datei>: „<Textvorschlag>“.
 - <Werkzeug> <Version>: Beobachtung: <…>. Erwartung: <…>. Nachweis: <…>. Melden: <Adresse, die das Werkzeug nennt>.
@@ -54,6 +58,8 @@ Weiter in einer neuen Session: <Modi>
 - **Risiken:** nur Risiken, die nach dem Lauf noch offen sind, darunter ein unbehobenes Sicherheitsrisiko,
   das nicht öffentlich festgehalten werden darf. Was wie erwartet behandelt wurde, bleibt draußen.
   Code-Stellen gehören in den Task.
+- **Umfang:** jede in diesem Lauf angelegte oder gewachsene Datei über der Umfangsgrenze des Wissensraums und
+  jeder angelegte oder geänderte Task über dem Prüfwert der Backlog-Norm, mit Umfang und Grund.
 - **Verbesserungen:** Ein Eintrag braucht einen Nachweis aus diesem Lauf: eine Rückfrage, eine Nacharbeit,
   eine Übergabe an den Nutzer, ein belegtes Fehlverhalten eines Werkzeugs oder eine protokollierte Annahme
   oder Abweichung, weil zwei Vorgaben sich widersprechen. Ohne Nachweis entsteht kein Eintrag, auch nicht für

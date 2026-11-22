@@ -11,7 +11,8 @@ description: >
    des Nutzers ist noch keine Entscheidung. Sie bleibt in ihrem Plan oder Task.
 3. **Ort:** Im Wissensraum wählt die Aufgabe die reservierte Datei, sonst wählt der Typ den festen Ordner.
    Prüfe vor dem Anlegen, ob eine bestehende Datei derselben Aufgabe oder desselben Typs stattdessen wachsen
-   sollte. Eine reservierte Datei sammelt jede Aussage ihrer Aufgabe bis zu ihrer Zeilengrenze.
+   sollte. Eine reservierte Datei sammelt jede Aussage ihrer Aufgabe bis zur Umfangsgrenze. Ein Ergebnis für
+   mehrere Tasks schneide schon beim Anlegen nach Gegenstand, damit jeder Task nur seinen Abschnitt braucht.
 4. **Vorlage:** Prüfe vor einer wiederkehrenden Nutzerstruktur `.qatlas-brain/templates/`. Verlangt die
    Aufgabe eine Vorlage von Qatlas, nimm die, die der zuständige Skill in seinen `assets/` mitliefert.
 5. **Name:** Nenne sie `<type>-<slug>.md`, einen Task `task-<id>-<slug>.md`.

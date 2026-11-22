@@ -46,6 +46,9 @@ aktuellen Eintrag wörtlich mit. Ergänze nur, was der Vertrag nicht enthält, u
 
 - **Arbeitsort:** Worktree und Branch sowie ein eigenes Unterverzeichnis von `<tmp>` für temporäre Dateien des
   Workers.
+- **Lektüre:** zu jeder Quelle, auf die der Task verweist, die Datei und den Abschnitt, den dieser Worker
+  braucht. Trage ihm nie auf, eine Quelle ganz zu lesen, um seinen Teil zu finden. Lässt sich der Teil nicht
+  als Abschnitt benennen, gib ihm den Ausschnitt wörtlich mit.
 - **Meilenstein:** bei einem geteilten Task der Teil dieses Workers mit seinen Abnahmekriterien und Prüfungen
   und dem, was späteren Aufträgen bleibt.
 - **Abweichungen:** wo der geprüfte Stand des Repos von der Ausführungsgrundlage des Tasks abweicht, und jede

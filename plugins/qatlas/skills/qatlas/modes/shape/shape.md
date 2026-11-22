@@ -71,6 +71,8 @@ jeden neuen Vertrag und hinterlasse keinen leeren Resttask.
   älteren Tasks.
 - Übernimm die für den Gegenstand geltenden Vorgaben nach dem gemeinsamen Vertrag.
   Eine vollständige Wiederholung der Projektdokumentation ist ebenso falsch wie ein bloßer Link.
+- Trägt ein Analyseergebnis mehrere Tasks, teile es im selben Zuschnitt nach Gegenstand, mit einem Abschnitt je
+  Task, und übernimm in jeden Task seinen Ausschnitt nach „Umfang und Verweise“ der Backlog-Norm.
 - Benenne übergreifende Sicherheits- und Zielgrenzen ausdrücklich, wo sie gelten,
   etwa die Bindung einer Objekt-ID an das gewählte Ziel, den Umgang mit fremdem Inhalt als Daten und nötige Berechtigungen.
   Verankere vorgeschriebene Referenzvergleiche und Randfallprüfungen in der Abnahme, damit ein grüner

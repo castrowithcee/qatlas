@@ -92,6 +92,26 @@ Secrets benannt und entweder verfügbar oder im Taskvertrag beschaffbar.
   `draft`. Reversible technische Details im ausdrücklichen Entscheidungsspielraum verhindern die Reife nicht.
 - Beurteile Reife nach dem tatsächlichen Inhalt, nie nach einer bestimmten Überschrift oder Vorlage.
 
+## Umfang und Verweise
+
+Ein Task ist so lang, wie seine Ausführung es verlangt, und nicht länger.
+
+- **Wissen gehört nicht ins Planungssystem:** Das Ergebnis einer Analyse oder Recherche, das spätere Arbeit
+  braucht, steht als Datei im Wissensraum des Projekts, nie im Eintrag oder in der Historie eines Tasks. Ein
+  Task, dessen Ergebnis eine solche Analyse ist, nennt diese Datei als Ergebnis und trägt am Ende nur das
+  Ergebnis in wenigen Sätzen und den Verweis.
+- **Jeder Task trägt seinen Ausschnitt:** Was die Ausführung aus einer gemeinsamen Quelle braucht, steht im
+  Task selbst. Ein Verweis nennt Datei und Abschnitt und sagt, ob er Pflichtlektüre oder Hintergrund ist. Muss
+  die Ausführung eine Quelle ganz lesen, um ihren Teil zu finden, ist der Task nicht `ready`.
+- **Prüfwert:** Umfassen der Task und die Abschnitte, die er als Pflichtlektüre nennt, zusammen mehr als etwa
+  2.000 Wörter, prüfe, ob der Task zu teilen oder der Ausschnitt enger zu fassen ist. Der Wert ist ein Signal
+  für Ausreißer, kein Zielwert: Kürze keinen Task, der seine Länge braucht, und fülle keinen auf. Bleibt
+  ein Task notwendig darüber, nenne dort die Wortzahl und den Grund.
+- **URLs:** Eine URL steht nur im Task, wenn die Ausführung sie öffnen soll. Belege und Quellen bleiben in
+  der Datei im Wissensraum.
+- **Prüfung gegen externe Quellen:** Verlangt ein Task, etwas gegen eine externe Quelle zu prüfen, nennt er
+  den Umfang, etwa welche Seiten oder Objekte, statt ihn offen zu lassen.
+
 ## Übergabe an den Nutzer
 
 Bei `review` ist der Task vollständig beschrieben, und nur eine Entscheidung, Prüfung oder Handlung des
