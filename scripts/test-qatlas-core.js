@@ -439,6 +439,20 @@ function testInit() {
   assert.strictEqual(fs.readFileSync(path.join(f.project, 'AGENTS.md'), 'utf8'), '# Own\n');
   assert.strictEqual(fs.readFileSync(path.join(f.project, '.gitignore'), 'utf8'), ignore, 'Rules are added once.');
 
+  const long = 'word '.repeat(3501);
+  write(path.join(f.project, '.qatlas-brain', 'TESTING.md'), long);
+  write(path.join(f.project, '.qatlas-brain', 'knowledge', 'knowledge-long.md'), long);
+  write(path.join(f.project, '.qatlas-brain', 'knowledge', 'knowledge-short.md'), 'word\n'.repeat(3500));
+  write(path.join(f.project, '.qatlas-brain', 'zone-import', 'raw.md'), long);
+  write(path.join(f.project, '.qatlas-brain', 'templates', 'template.md'), long);
+  const limits = run(doctor).stdout;
+  assert.ok(limits.includes('.qatlas-brain/TESTING.md has 3501 words, limit 3500. Move details into testing/'), limits);
+  assert.ok(limits.includes('.qatlas-brain/knowledge/knowledge-long.md has 3501 words, limit 3500. Split it'), limits);
+  assert.ok(!/knowledge-short|raw\.md|template\.md/.test(limits), 'Files at the limit, zones and templates stay unreported.');
+  for (const part of ['TESTING.md', 'knowledge', 'templates', path.join('zone-import', 'raw.md')]) {
+    fs.rmSync(path.join(f.project, '.qatlas-brain', part), { recursive: true });
+  }
+
   const memoryDir = path.join(f.project, '.qatlas-brain', 'memory');
   fs.rmSync(memoryDir, { recursive: true });
   assert.ok(run(doctor).stdout.includes('.qatlas-brain/memory/MEMORY.md is missing'));
