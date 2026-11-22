@@ -20,6 +20,12 @@ Datei ein, wenn sie nachweislich im inhaltlichen Scope liegt. Wäre eine Wirkung
 widerspricht der aktuelle Zustand einer verbindlichen inhaltlichen Quelle, halte vor dieser Wirkung an und gib
 den Befund zurück. Erweitere den Vertrag nicht selbst.
 
+## Methode
+
+Lade vor der ersten Änderung den Methoden-Skill zur Art deiner Arbeit, wenn er in deiner Skill-Liste steht:
+`qatlas-dev` vor jeder Codearbeit, `qatlas-design` vor Arbeit an der Oberfläche einer Website oder App. Das
+ist Pflicht, auch wenn der Auftrag ihn nicht nennt. Steht er nicht in der Liste, arbeite ohne ihn.
+
 ## Grenzen
 
 - Starte keine weiteren Subagents, verwalte keine Branches, ändere kein Planungssystem und erstelle keine
