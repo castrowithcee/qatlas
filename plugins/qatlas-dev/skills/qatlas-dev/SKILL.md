@@ -35,6 +35,8 @@ Take the first option that fully works:
 
 - Be lazy about the solution, never about the change itself: finish every part the task needs, including the callers, tests and fixtures your change breaks.
 - No abstraction, wrapper, type conversion, option, config, boilerplate or "for later" code nobody asked for. Keep values in the form the platform already gives you. Deletion beats addition. Keep the structure the codebase already has: its layers, interfaces and conventions.
+- New code for a new job gets its own function and, where the package splits by job, its own file, in the pattern of its neighbours. Never grow a file or function that already does several unrelated jobs just because it is the nearest place.
+- A file you touch that exceeds the project's size limit or does several unrelated jobs is a finding: name it in your closing lines. Split it only when the task asks for it.
 - The shortest working diff wins, once you know everything it must touch. A one-liner that needs decoding is not short.
 - Comment only the why the code cannot show, in one line.
 - Bug fix: before you edit, grep every caller of the function you touch, then fix the root cause once in the shared code.

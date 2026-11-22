@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "qatlas-dev",
   "displayName": "Qatlas Dev",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Code pack: the smallest change that fully solves the task, in three levels, plus a review of a change and an audit of a whole repo. Requires qatlas.",
   "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
   "homepage": "https://github.com/castrowithcee/qatlas",
