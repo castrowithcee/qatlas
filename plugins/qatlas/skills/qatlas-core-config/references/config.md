@@ -48,9 +48,4 @@ Projektdatei an. Dort gilt er erst, wenn die Datei mit ihm gestagt ist, und ist 
 zusätzlich `--local` landet er in der Nutzerdatei, gilt sofort und nur auf diesem Rechner. Das ist der Weg für
 Repos, die keine Qatlas-Dateien aufnehmen. Die Kennung nennt der Befund in eckigen Klammern.
 
-## `statusline` und `run`
-
-Den Block `statusline` beschreibt [Statusline konfigurieren](../../qatlas-core/references/playbook-statusline.md),
-den Block `run` die [Lauf-Konfiguration](../../qatlas/modes/run/playbook-run-config.md).
-
 Zugangsdaten gehören nie in eine `config.json`.

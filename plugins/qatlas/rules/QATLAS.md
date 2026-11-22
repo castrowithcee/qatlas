@@ -24,6 +24,8 @@ Lade den passenden Skill, sobald sein Anlass eintritt, und arbeite nicht aus dem
   Taskarbeit nur dort und nach dessen Regeln geschieht.
 - **`qatlas-core-git`:** prüft vor jedem Eingriff den Repo-Zustand und hält Commits, Push und Historie
   sicher.
+- **`qatlas-core-config`:** kennt jede Einstellung und jedes Modul, mit dem der Nutzer Qatlas anpasst, und
+  ändert sie nur mit seiner Zustimmung.
 
 Fragt der Nutzer, was Qatlas ist oder wie es funktioniert, lies `<plugin-root>/skills/qatlas-help/SKILL.md`
 und führe ihn von dort aus.

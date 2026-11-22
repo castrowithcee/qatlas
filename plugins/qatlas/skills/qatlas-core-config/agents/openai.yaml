@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Core Config"
+  short_description: "Qatlas-Einstellungen und Nutzermodule ansehen und ändern"
+  default_prompt: "Nutze $qatlas-core-config, um die gewünschte Qatlas-Einstellung oder das Nutzermodul anzusehen oder zu ändern."

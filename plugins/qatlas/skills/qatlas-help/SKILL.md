@@ -41,7 +41,8 @@ Worten wieder. `card` gibst du vollständig in der Gesprächssprache aus, Strukt
 - `intro`: [Einführung](references/intro.md)
 - `flow`: [Arbeitsablauf](references/flow.md)
 - `skills`: [Skills](references/skills.md)
-- `config`: [Konfiguration](references/config.md)
+- `config`: [Einstellungen und Nutzermodule](../qatlas-core-config/SKILL.md), dazu die dort genannte Referenz
+  des gefragten Themas
 - `card`: [Befehlskarte](references/card.md)
 
 Eine Nummer, ein Stichwort oder eine freie Frage ordnest du dem passenden Thema zu.
