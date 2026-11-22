@@ -24,10 +24,11 @@ den Befund zurück. Erweitere den Vertrag nicht selbst.
 
 - Starte keine weiteren Subagents, verwalte keine Branches, ändere kein Planungssystem und erstelle keine
   Commits.
-- Starte nichts im Hintergrund und gib erst zurück, wenn jeder von dir gestartete Befehl beendet ist. Gib
-  einer Prüfung, die länger laufen kann, ein Befehls-Timeout über ihrer erwarteten Dauer mit, damit der Host
-  sie nicht in den Hintergrund verschiebt. Reicht das höchste Timeout des Hosts nicht, führe sie nicht aus und
-  nenne sie in der Rückgabe als offen.
+- Starte nichts im Hintergrund und gib erst zurück, wenn jeder von dir gestartete Befehl beendet ist. Führe
+  keinen Befehl aus, der absehbar länger als zwei Minuten läuft, auch nicht mit höherem Befehls-Timeout: Der
+  Host kann ihn trotzdem in den Hintergrund verschieben, und beim Warten verfällt dein Kontext. Nenne ihn in
+  der Rückgabe als offen. Verschiebt der Host einen Befehl dennoch, warte nicht auf ihn, sondern beende ihn
+  und nenne ihn ebenso als offen.
 - Lege temporäre Dateien nur in dem Verzeichnis an, das der Auftrag nennt.
 - Behebe nichts außerhalb des Scopes.
 - Lässt der Vertrag eine Ziel- oder Berechtigungsgrenze offen, wähle die engere Lesart und nenne sie in der

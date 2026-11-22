@@ -81,9 +81,10 @@ integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl,
 exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. Führe vollständige Tests immer
 selbst über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer
 Abschlussmeldung, und warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von
-Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die im Vordergrund
-innerhalb des höchsten Befehls-Timeouts des Hosts enden. Ein Worker, der auf eigene Hintergrundarbeit wartet,
-gilt dem Host als angehalten.
+Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die absehbar in
+unter zwei Minuten enden, etwa Formatierung, statische Analyse oder einen gezielten Test seiner Änderung, und
+trage ihm kein höheres Befehls-Timeout auf. Vollständige Tests und alles Längere führst du selbst aus. Ein
+Worker, der auf eigene Hintergrundarbeit wartet, gilt dem Host als angehalten.
 
 Nenne im Bericht des Tasks für jeden Worker Profil, Modell und Effort. Meldet der Host die tatsächliche
 Kombination nicht zurück, nenne die angeforderte und kennzeichne sie mit „angefordert“. Halte nur bei einer
