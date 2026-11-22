@@ -1101,11 +1101,35 @@ try {
       withSession(null, 'begin');
       assert.strictEqual('session' in lines().pop(), false);
       allowed({ session_id: 's2' });
-      // An ended run allows the stop.
+      // Only a closed run allows the stop; close needs an ended run, runs the user's hook once and never fails.
       withSession('s1', 'begin', '--discard');
       assert.strictEqual(JSON.parse(hook({}).stdout).decision, 'block');
+      refused(/run end first/, 'close');
+      ok('plan', '--budget', '2', '--package', 'c', '--tasks', '1,2');
+      ok('log', '--type', 'integrated', '--package', 'c', '--task', '1', '--text', 'abc');
+      ok('log', '--type', 'entscheiden', '--text', 'x');
       ok('end');
+      assert.strictEqual(JSON.parse(hook({}).stdout).decision, 'block');
+      const hookFile = path.join(process.env.HOME, '.qatlas', 'hooks', 'run-end.js');
+      const got = path.join(root, 'run-end.json');
+      fs.mkdirSync(path.dirname(hookFile), { recursive: true });
+      fs.writeFileSync(hookFile, `require('fs').writeFileSync(${JSON.stringify(got)}, require('fs').readFileSync(0, 'utf8'));`);
+      assert.deepStrictEqual(ok('close', '--text', 'done'), { closed: true, hook: 'ok' });
+      const message = JSON.parse(fs.readFileSync(got, 'utf8'));
+      assert.deepStrictEqual([message.event, message.project, message.repo, message.text, message.tasks, message.integrated, message.decisions, message.risks, message.drafts],
+        ['run-end', path.basename(repo), repo, 'done', 2, 1, 1, 0, 0]);
+      fs.rmSync(got);
+      assert.deepStrictEqual(ok('close'), { closed: true, hook: 'skipped' });
+      assert.ok(!fs.existsSync(got), 'a repeated close runs no hook');
       allowed({});
+      ok('begin');
+      ok('end');
+      fs.writeFileSync(hookFile, 'process.stderr.write("boom\\n"); process.exit(3);');
+      assert.deepStrictEqual(ok('close'), { closed: true, hook: 'failed', detail: 'boom' });
+      ok('begin');
+      ok('end');
+      fs.rmSync(hookFile);
+      assert.deepStrictEqual(ok('close'), { closed: true, hook: 'none' });
       ok('begin', '--discard');
       assert.strictEqual('session' in lines().pop(), false);
     }

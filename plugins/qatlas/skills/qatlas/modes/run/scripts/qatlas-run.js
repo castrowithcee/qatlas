@@ -38,10 +38,15 @@
 //     seconds since begin, the commands run through slot in the repo of the code ("checks", of them "red",
 //     "checking", and "queued" for a free slot) and the waits from a handover to its answer ("integrating"). Each task carries the text of its last answer ("answer"), also one never picked up.
 //   qatlas-run.js end --repo <root>
+//   qatlas-run.js close --repo <root> [--text <text>]
+//     Supervisor: last call of an ended run. If ~/.qatlas/hooks/run-end.js exists, runs it once with node and
+//     one JSON line on stdin: {"event":"run-end","project","repo","text","duration","tasks","integrated",
+//     "decisions","risks","drafts"}. The file is the switch; a failing or slow hook never fails close.
+//     Output: {"closed":true,"hook":"none"|"ok"|"failed"|"skipped"[,"detail"]}; "skipped" on a repeated close.
 //   qatlas-run.js cut --repo <root> [--code-repo <path>] --branch <branch> --base <ref>
 //   qatlas-run.js stop-hook
 //     Stop hook of the host, input on stdin (no --repo). Blocks a stop once while the run of this session is
-//     active and no background work runs; allows it silently (exit 0) in every other case and on any error.
+//     not closed and no background work runs; allows it silently (exit 0) in every other case and on any error.
 //   qatlas-run.js spawn-hook
 //     PreToolUse hook of Claude Code for the Agent tool, input on stdin (no --repo). While the run of this
 //     session is active and run.hosts.claude-code of the user config is valid, denies a subagent start whose
@@ -49,8 +54,9 @@
 //     on any error.
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawnSync } = require('child_process');
 const { parseFrontmatter } = require('./handover-frontmatter.js');
 const { readState, ensureState, excludeLocal } = require('../../../../../scripts/runtime/project-store.js');
 
@@ -60,7 +66,7 @@ const SUPERVISOR_WAKES = new Set(['question', 'done', 'disk']);
 // Rework for a conflict, a cut or a blocked landing is no correction attempt and stays out of the per-task
 // rework count.
 const CORRECTION = /^rework (?!(?:conflict|cut|blocked):)/;
-const RESERVED = new Set([...SIGNAL, 'begin', 'resume', 'plan', 'attach', 'integrate', 'done', 'disk', 'end']);
+const RESERVED = new Set([...SIGNAL, 'begin', 'resume', 'plan', 'attach', 'integrate', 'done', 'disk', 'end', 'close']);
 const TASK_ID = /^[A-Za-z0-9#_][A-Za-z0-9#_-]*$/;
 
 const opts = process.argv.slice(3);
@@ -147,6 +153,7 @@ function idList(name) {
 }
 
 const ended = all => all.some(e => e.type === 'end');
+const closed = all => all.some(e => e.type === 'close');
 const attached = all => all.some(e => e.type === 'attach');
 
 // Own integrations a lead announced and has not closed yet. closedAt is the seq of the latest closing event: a
@@ -385,8 +392,7 @@ function slotRuns(repo, since) {
     .filter(run => Date.parse(run.time) >= since);
 }
 
-function report() {
-  const repo = repoKey();
+function reportData(repo) {
   const all = events(repo);
   const time = e => Date.parse(e.at);
   const secs = ms => Math.round(ms) / 1000;
@@ -433,16 +439,40 @@ function report() {
   for (const t of Object.values(tasks)) delete t.lastHandover;
   const open = [...openSignals(all).values()].map(o => ({ sender: o.sender, type: o.type, ...(o.task ? { task: o.task } : {}),
     ...(o.type === 'handover' ? { report: o.report } : { question: o.text }), answered: o.answer !== null }));
-  if (opts.includes('--notes')) {
-    const [type] = need('--notes');
-    return out({ notes: { [type]: notes[type] || [] } });
-  }
   const runs = all.length ? slotRuns(codeRepo(repo), time(all[0])) : [];
   const sum = key => secs(runs.reduce((total, run) => total + (Number(run[key]) || 0), 0));
-  out({ ended: ended(all), cursor: all.length, duration: all.length ? secs(time(all[all.length - 1]) - time(all[0])) : null,
+  return { ended: ended(all), cursor: all.length, duration: all.length ? secs(time(all[all.length - 1]) - time(all[0])) : null,
     budget, packages, open, tasks, integrator, log: counts,
     summed: { checks: runs.length, red: runs.filter(run => run.exit !== 0).length, checking: sum('duration'), queued: sum('waited'), integrating: secs(integrating) },
-    notes });
+    notes };
+}
+
+function report() {
+  const data = reportData(repoKey());
+  if (!opts.includes('--notes')) return out(data);
+  const [type] = need('--notes');
+  out({ notes: { [type]: data.notes[type] || [] } });
+}
+
+// The user's hook is optional and foreign code: it gets data on stdin only, and nothing it does fails the run.
+function close() {
+  const repo = repoKey();
+  const all = events(repo);
+  if (!ended(all)) fail('Run not ended: run end first', 2);
+  if (closed(all)) return out({ closed: true, hook: 'skipped' });
+  record(repo, 'close', { text: flag('--text') });
+  const hook = path.join(os.homedir(), '.qatlas', 'hooks', 'run-end.js');
+  if (!fs.existsSync(hook)) return out({ closed: true, hook: 'none' });
+  const data = reportData(repo);
+  const count = type => (data.notes[type] || []).length;
+  const planned = new Set(Object.values(data.packages).flatMap(p => p.tasks));
+  const message = { event: 'run-end', project: path.basename(repo), repo, text: flag('--text') || '', duration: data.duration,
+    tasks: planned.size, integrated: Object.values(data.tasks).filter(t => t.integrated).length,
+    decisions: count('entscheiden'), risks: count('risiko'), drafts: count('erfasst') };
+  const res = spawnSync(process.execPath, [hook], { input: JSON.stringify(message) + '\n', encoding: 'utf8', timeout: 60000 });
+  if (!res.error && res.status === 0) return out({ closed: true, hook: 'ok' });
+  const detail = res.error ? res.error.message : (res.stderr || '').trim().split('\n').pop() || 'exit ' + res.status;
+  out({ closed: true, hook: 'failed', detail: detail.slice(0, 300) });
 }
 
 function codeRepo(repo) {
@@ -561,7 +591,7 @@ function validateHandover(text, repo) {
 
 // Whether the session of a hook input has an active run. A subagent may sit in a task worktree, so the folder
 // of the call and the project folder count, each as its own worktree and as the main one.
-function sessionRuns(input) {
+function sessionRuns(input, over = ended) {
   const roots = new Set();
   for (const dir of [input.cwd, process.env.CLAUDE_PROJECT_DIR]) {
     if (!dir) continue;
@@ -575,7 +605,7 @@ function sessionRuns(input) {
   }
   return [...roots].some(root => {
     const all = events(root);
-    if (!all.some(e => e.type === 'begin') || ended(all)) return false;
+    if (!all.some(e => e.type === 'begin') || over(all)) return false;
     const started = all.filter(e => e.type === 'begin' || e.type === 'resume').pop();
     return Boolean(started.session) && started.session === input.session_id;
   });
@@ -587,8 +617,8 @@ function stopHook() {
     const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     if (!Array.isArray(input.background_tasks) || input.stop_hook_active === true) return;
     if (input.background_tasks.some(task => task && task.status === 'running')) return;
-    if (!sessionRuns(input)) return;
-    out({ decision: 'block', reason: 'The run is still active and no background work is running: refill packages, start successors, or run end.' });
+    if (!sessionRuns(input, closed)) return;
+    out({ decision: 'block', reason: 'The run is not closed and no background work is running: refill packages, start successors, or run end; after end finish the closing work and run close.' });
   } catch { /* allow the stop */ }
 }
 
@@ -622,7 +652,7 @@ function spawnHook() {
 }
 
 const commands = {
-  begin, 'stop-hook': stopHook, 'spawn-hook': spawnHook, plan, attach, integrate, answer, done, log: logEvent, report, end, wait,
+  begin, 'stop-hook': stopHook, 'spawn-hook': spawnHook, plan, attach, integrate, answer, done, log: logEvent, report, end, close, wait,
   ask: () => raise('question', need('--question')[0]),
   handover: () => raise('handover', reportText(), need('--task')[0]),
   cut: () => cut(codeRepo(repoKey())),

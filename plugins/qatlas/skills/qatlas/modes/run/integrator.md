@@ -98,7 +98,9 @@ jeden Wiederholungslauf eines CI-Jobs ebenso mit `--type rerun`. Beide zählen i
    außerhalb der Arbeit des Leads, etwa einer Grenze der CI oder einer fehlenden Voraussetzung, antworte
    `rework blocked: <Grund>`. Das zählt nicht als Korrekturversuch.
 4. Erlauben Nutzer- oder Projektanweisungen, den Kontroll-Branch zu pushen, pushe ihn direkt nach der
-   Landung, nie erzwungen. Sonst lass ihn lokal, bis der Lauf endet. Ist es die letzte Übergabe des Tasks,
+   Landung, nie erzwungen. Sonst lass ihn lokal, bis der Lauf endet. Verlangt das Projekt eine Prüfung für
+   das Ende eines Laufs und integrierst du lokal, pushe erst nach der grünen Schlussprüfung, damit der Remote
+   nur einen Stand mit diesem Nachweis erhält. Ist es die letzte Übergabe des Tasks,
    schließe ihn danach im Planungssystem und setze ihn auf `done`. Fehlt nur noch die Prüfung des Nutzers,
    setze ihn stattdessen nach „An den Nutzer übergeben“ auf `review`. Antworte mit `integrated <sha>`, wobei
    `<sha>` der Integrationscommit auf dem Kontroll-Branch ist.
@@ -124,9 +126,10 @@ Schritt 3 aus und überspringe keine.
 - **Schlussprüfung:** Führe nach `end` einmal über `slot` auf dem Endstand jede teure Prüfung aus, die in
   diesem Lauf mindestens einmal übersprungen wurde, und jede Prüfung, die das Projekt für das Ende eines Laufs
   verlangt. Suche diese von den nativen Anweisungen des Projekts aus dort, wo es seine Prüfungen beschreibt.
-  Ein bestimmter Dateiname ist nicht vorausgesetzt. Ist eine rot, protokolliere sie mit `log --type risiko`
-  und nenne sie im Abschluss unter `Entscheiden`. Den Entwurf dafür erfasst der Supervisor. Lass bereits
-  integrierte Tasks, wie sie sind.
+  Ein bestimmter Dateiname ist nicht vorausgesetzt. Sind alle grün, hole einen Push nach, den Schritt 4 der
+  Integration bis hierher aufschiebt. Ist eine rot, protokolliere jede rote mit `<run> log --type final
+  --text "<Befehl>: <Befund in einem Satz>"`, pushe nicht und korrigiere nichts. Die Korrektur veranlasst der
+  Supervisor. Lass bereits integrierte Tasks, wie sie sind.
 
 Räume lokale Worktrees und Branches nach dem Worktree-Vertrag auf, mit dem Squash-Beleg der Landung als
 Nachweis. Ist eine Merge-Queue aktiv, lösche den Remote-Branch nach dem Worktree-Vertrag, nachdem die Queue

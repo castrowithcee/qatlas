@@ -183,7 +183,8 @@ Hintergrundbefehle, führe es im Vordergrund aus, mit `--timeout` knapp unter de
 Hosts. Überwache sonst nur über die Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore,
 Crons oder Warteschleifen.
 Blockiert ein Stop-Hook des Hosts dein Stoppen, weil der Lauf aktiv ist und keine Hintergrundarbeit läuft,
-fülle nach Lage Pakete nach, starte Nachfolger oder führe `<run> end` aus.
+fülle nach Lage Pakete nach, starte Nachfolger oder führe `<run> end` aus. Nach `end` bring den Lauf nach
+„Laufende“ bis zu `<run> close`.
 
 Protokolliere, was du selbst zum Abschlussblock beiträgst, sofort mit `<run> log --type <type> --package
 <package> --task <id> --text "<text>"`, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`,
@@ -203,9 +204,27 @@ alle) und `werkzeug` (Defekt des Steuerskripts, der Lauf-Werkzeuge oder dieser A
 
 ## Neue Entwürfe
 
-Lass jeden Entwurf dieses Laufs `draft`, bis der Nutzer `shape` dafür startet. Lege einen Entwurf, den du
-selbst erfasst, bei einem externen Planungssystem sofort nach dessen Bindung als Entwurf an. Beim lokalen
-Backlog trage jeden Entwurf nach „Laufende“ ein.
+Lege einen Entwurf, den du selbst erfasst, bei einem externen Planungssystem sofort nach dessen Bindung als
+Entwurf an. Beim lokalen Backlog trage jeden Entwurf nach „Laufende“ ein.
+
+Kläre die Reife aller Entwürfe dieses Laufs nach `<run> end` und vor dem Abschlussblock, sobald jeder im
+Planungssystem steht, ohne sie selbst zu lesen oder zu recherchieren. Gib sie gemeinsam einem lesenden Worker
+mit dem Profil `standard` und diesem Auftrag:
+
+> Prüfe jeden dieser Entwürfe gegen „Ausführungsreife“ in
+> `<plugin-root>/skills/qatlas-core-backlog/SKILL.md`: <IDs oder Pfade>. Lies den Entwurf und genau die
+> Quellen, die er nennt. Suche einen fehlenden Fakt gezielt, im Wissensraum über Dateiname und `description`,
+> im Code über den konkreten Bezeichner, und folge einem Verweis nur, wenn er die offene Frage beantwortet.
+> Lies keine Ordner und nichts auf Vorrat, und höre auf, sobald jeder Punkt der Ausführungsreife belegt oder
+> als offen benannt ist. Ändere nichts außer Dateien unter `<tmp>`. Schreibe je Entwurf den vollständigen
+> Taskvertrag nach `<tmp>/<ID>.md` und gib je Entwurf genau eine Zeile zurück: `reif` mit der Quelle jedes
+> ergänzten Fakts oder `offen` mit der einen konkreten Vertragsfrage oder Nutzerentscheidung. Melde `offen`
+> nie für eine technische Schwierigkeit oder einen Fakt, den du nachlesen kannst.
+
+Setze `<tmp>` auf `<repo-root>/.qatlas/local/run/tmp/drafts/`. Übernimm bei `reif` den Vertrag unverändert aus
+der Datei ins Planungssystem und setze den Task auf `ready`. Bei `offen` bleibt er `draft`, bis der Nutzer
+`shape` dafür startet. Nenne unter `Neu` im Abschlussblock jeden Entwurf mit seinem Status, bei `draft` mit
+der offenen Frage. Ein reif gewordener Task startet in diesem Lauf nicht und ändert das Laufbudget nicht.
 
 ## Ende eines Subagents
 
@@ -216,7 +235,7 @@ Backlog trage jeden Entwurf nach „Laufende“ ein.
   Endet auch er ohne `done`, sichere die offenen Tasks nach dem Git-Workflow als Übergabe an `review`.
 - **Integrator `done` oder Ende ohne `done` vor `end`:** Starte einen neuen.
 - **Rote Schlussprüfung:** Meldet sie das `done` des Integrators nach `end` oder, ohne Integrator, das eines
-  Leads, erfasse dafür einen Entwurf.
+  Leads, handle nach `<run> end` nach „Rote Schlussprüfung“.
 
 **Nachfüllen:** Endet ein Paket und ist das Laufbudget nicht aufgebraucht, bilde aus den verbleibenden Tasks
 ein neues, von allen laufenden unabhängiges Paket nach der Größenregel mit höchstens so vielen Tasks wie das
@@ -269,7 +288,7 @@ Führe `<run> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket m
 oder gesichert ist und `report` keine offene Übergabe zeigt. Melde dem Nutzer bei zugeschaltetem Integrator
 dann in genau einer Zeile, dass alle Tasks integriert oder übergeben sind und die Schlussprüfung läuft, und
 warte auf sein `done` nach seiner Schlussprüfung. Ohne Integrator hat der letzte Lead sie vor seinem `done`
-ausgeführt. Trage danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein
+ausgeführt. War sie rot, handle zuerst nach „Rote Schlussprüfung“. Trage danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein
 (`status` und `erfasst` in den `notes` von `report`), führe die Bereinigungsschritte aus, die
 Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Leert ein
 solcher Schritt etwas, das andere Projekte auf dem Host mitnutzen, etwa einen Build-Cache oder ein gemeinsames
@@ -280,3 +299,21 @@ Pakete: Einträge aus den `notes` von `report`, jede `werkzeug`-Notiz nach „Ve
 den Zählungen und dem Block `summed` von `report`, mit `--code-repo <code-repo>` für Code außerhalb der
 Steuerwurzel. Halte die Antworten des Nutzers darauf selbst fest, weil die Zuständigkeit der Subagents mit dem
 Lauf endet.
+
+Führe unmittelbar vor dem Abschlussblock, wenn sonst nichts mehr aussteht, `<run> close --text "<Ankerzeile
+des Abschlussblocks>"` aus, auch nach einem Abbruch. Das meldet das Laufende an ein Modul des Nutzers, falls
+er eines eingerichtet hat. Lautet die Ausgabe `hook: failed`, nenne das mit `detail` unter `Risiken`.
+
+## Rote Schlussprüfung
+
+Lass eine rote Schlussprüfung noch in diesem Lauf korrigieren, statt sie dem Nutzer zu überlassen. Starte
+dafür nach `<run> end` genau einmal einen Subagent wie einen Lead mit diesem Auftrag und warte auf sein Ende:
+
+> Du korrigierst die rote Schlussprüfung eines beendeten Laufs. Lies
+> `<plugin-root>/skills/qatlas/modes/run/lead.md` vollständig und arbeite nach „Rote Schlussprüfung
+> korrigieren“. Steuerskript: `<run>`, Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`,
+> Integrationsbasis: `<basis>`, Temp-Verzeichnis: `<repo-root>/.qatlas/local/run/tmp/final/`.
+
+Er zählt weder gegen die Paketzahl noch gegen das Laufbudget. Meldet er Grün, nenne die Korrektur im Ergebnis
+des Abschlussblocks. Bleibt die Prüfung rot oder endet er ohne Ergebnis, starte keinen zweiten: Erfasse dafür
+einen Entwurf und lege ihn unter `Entscheiden` vor.

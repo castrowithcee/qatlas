@@ -111,9 +111,10 @@ Laufs das Anlegen weiterer Arbeit nicht einschließt:
 - nachweislich falsche Dokumentation.
 
 Nenne im Entwurf den Befund, den Ort, den Nachweis und den Task, bei dem er gefunden wurde. Unterstützt das
-Planungssystem Labels, gib ihm `run-fund`. Überlass Ausarbeitung, Zuschnitt und Reife `shape`. Deckt ein
-bestehender Task den Befund bereits ab, lege nichts an und nenne diesen Task. Fasse dasselbe Muster an
-mehreren Stellen in einem Entwurf zusammen. Halte Verbesserungsideen, Refactoring, Stilfragen und mögliche
+Planungssystem Labels, gib ihm `run-fund`. Arbeite ihn nicht weiter aus: Die Reife klärt der Supervisor am
+Laufende, den Rest `shape`. Deckt ein bestehender Task den Befund bereits ab, lege nichts an und nenne diesen
+Task. Fasse dasselbe Muster an mehreren Stellen in einem Entwurf zusammen.
+Halte Verbesserungsideen, Refactoring, Stilfragen und mögliche
 Erweiterungen nicht fest, denn sie sind keine Nebenbefunde.
 
 Lass ein unbehobenes Sicherheitsrisiko nie an einen öffentlich einsehbaren Ort gelangen, weder in

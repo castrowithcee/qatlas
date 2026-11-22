@@ -146,6 +146,29 @@ Delta-Prüfungen“ der Integrator-Rolle, mit diesen Abweichungen:
 - Endest du ohne Rest und zeigt `<run> report` unter `integrator.attached` `false`, führe vorher die
   Schlussprüfung aus und nenne ihr Ergebnis in `done --text`.
 
+## Rote Schlussprüfung korrigieren
+
+Nennt dein Auftrag statt eines Pakets die rote Schlussprüfung eines beendeten Laufs, bist du der einzige
+Schreiber des Kontroll-Branches. Übergabe, Rückfrage und `done` entfallen, weil der Lauf beendet ist. Es
+gelten Punkt 1 und 3 der Leseliste.
+
+1. **Befund:** Lies die roten Prüfungen mit `<run> report --notes final` und stelle die Ursache auf dem
+   Endstand des Kontroll-Branches fest, ohne die Prüfung dafür vollständig zu wiederholen.
+2. **Korrektur:** Behebe nur diese Ursache mit der kleinsten Änderung in einem eigenen Worktree von `<basis>`
+   nach „Einen Task ausführen“. Ziel, Scope und Abnahme der integrierten Tasks änderst du nicht, und du nimmst
+   keinen Task zurück.
+3. **Nachweis:** Führe auf dem korrigierten Stand die schnellen gemeinsamen Prüfungen und die gesamte
+   Schlussprüfung über `slot` aus. Ist sie wieder rot, bleibt dir genau eine weitere Korrektur aus neuem
+   Nachweis.
+4. **Integration:** Integriere den grünen Stand selbst nach „Integration“ der Integrator-Rolle samt dem dort
+   aufgeschobenen Push und nenne im Commit die behobene Prüfung.
+5. **Ohne Erfolg:** Bleibt die Schlussprüfung rot oder braucht die Korrektur eine Entscheidung, die du im Lauf
+   den Supervisor fragen würdest, integriere und pushe nichts, lass den Worktree als Checkpoint stehen und
+   protokolliere mit `<run> log --type risiko --text "<Prüfung>: <belegte Ursache, geprüfte Korrekturen,
+   Branch>"`.
+
+Ende mit wenigen Zeilen: je Prüfung grün mit Integrationscommit oder weiter rot mit Ursache und Branch.
+
 ## Rückfragen
 
 Dein Nutzer ist der Supervisor. Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes
