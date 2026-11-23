@@ -14,7 +14,9 @@
 //                 [--direction <id>]           deal the full sheet for the chosen direction
 //   node draw.mjs --show                       reprint the saved direction sheet
 //   node draw.mjs --redraw hero|type|palette|photos|section:<role>|direction   re-deal one slot
+//   node draw.mjs --alternatives <role>        list the other blueprints for one role of the saved sheet
 //   node draw.mjs --list sectors|directions|roles|tones
+//   node draw.mjs --photos list|<set>|"words"  print a photograph set, or search the descriptions
 //   node draw.mjs --site <id>                  print one studied reference site in full
 //   node draw.mjs --app --kind <kind> ...      deal a style for an app screen instead (see lib/app-draw.mjs)
 //
@@ -106,9 +108,9 @@ const shuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0;
 // prefer items not used recently, without ever emptying the pool
 const fresh = (pool, recent) => { const f = pool.filter((x) => !recent.includes(x.id)); return f.length ? f : pool; };
 
-// ---------- history (project + user level) ----------
+// ---------- history (user level) ----------
 const userHist = process.env.QATLAS_DESIGN_HISTORY || join(homedir(), '.qatlas', 'state', 'qatlas-design', 'history.json');
-const readHist = () => { for (const p of [userHist]) { try { return JSON.parse(readFileSync(p, 'utf8')); } catch {} } return []; };
+const readHist = () => { try { return JSON.parse(readFileSync(userHist, 'utf8')); } catch { return []; } };
 const writeHist = (entry) => { try { mkdirSync(dirname(userHist), { recursive: true }); const h = readHist(); h.unshift(entry); writeFileSync(userHist, JSON.stringify(h.slice(0, 24), null, 1)); } catch {} };
 
 // ---------- show / redraw ----------

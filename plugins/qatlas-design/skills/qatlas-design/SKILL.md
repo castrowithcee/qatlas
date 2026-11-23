@@ -24,9 +24,17 @@ section its full content. Do not trade substance for restraint; blind jurors pre
 tells over an empty page without them.
 
 In the commands below `<skill>` is this skill's folder. Run them from the project's root, so the
-working files land in `.qatlas/local/qatlas-design/` there. The scripts need Node 22+ and an installed
-Chrome, Edge or Chromium (set `CHROME_PATH` to its executable if they do not find it), and install
-nothing. `assets.mjs` also needs network access; it uses no API keys.
+working files land in `.qatlas/local/qatlas-design/` there. In a git repository that folder must be
+ignored: if `git check-ignore .qatlas/local/x` prints nothing, add `/.qatlas/local/` to `.gitignore`
+first. The scripts need Node 22+ and an installed Chrome, Edge or Chromium (set `CHROME_PATH` to its
+executable if they do not find it), and install nothing. `draw.mjs` also keeps a history in
+`~/.qatlas/state/qatlas-design/history.json`: the time, the sector or kind and the ids dealt in the
+last 24 draws, so consecutive projects do not look alike. Set `QATLAS_DESIGN_HISTORY` to another path
+to move it; where the file cannot be written, the draw works without it.
+
+`assets.mjs` needs network access; it uses no API keys. `inspect.mjs` and `scenes.mjs` need it for
+everything the page loads from elsewhere: the dealt fonts (Google Fonts, Fontshare), the dealt
+photographs (picsum.photos) and any CDN script.
 
 ## Page or app screen
 
@@ -353,9 +361,15 @@ launch. Never fake a payment form.
 
 **No Chrome or Node 22.** Run `draw.mjs`, `lint.mjs` and `assets.mjs` (Node 18+), take screenshots with
 whatever browser tool you have, and critique those. Say in the report that the inspector could not run.
+As root or in a container Chrome exits at once ("Chrome exited early"): set
+`QATLAS_DESIGN_CHROME_ARGS=--no-sandbox` for the run, and inspect only pages you trust that way.
 
 **No network.** If `assets.mjs` reaches no source, draw the pictures and say in the report that the
-open collections could not be searched.
+open collections could not be searched. If the browser reaches no network either, the inspector
+reports what did not load (`broken-image` for remote pictures, `font-fallback` and `font-not-dealt`
+for remote fonts) and its screenshots show fallback type and empty picture boxes. Do not rebuild the
+page to silence these: fix every other `FAIL`, and say in the report which findings come from the
+missing network and that type and pictures could not be judged.
 
 ## Files
 

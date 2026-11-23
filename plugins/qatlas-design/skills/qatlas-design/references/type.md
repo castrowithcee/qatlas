@@ -139,6 +139,8 @@ The sheet gives a `<link>` tag. Use it exactly; do not swap in a face you prefer
 - In a framework, use its font loader with the same family and weights (`next/font/google`, or a
   self-hosted `@font-face` with `font-display: swap`). Fontshare faces load from the
   `api.fontshare.com` stylesheet on the sheet.
+- The faces come from Google Fonts and Fontshare. Check each face's licence for the project's use,
+  above all before you self-host its files.
 - After building, `inspect.mjs` reports the families that actually rendered. If it warns that a face
   did not load, the screenshots show a fallback and nothing you judge from them is real. Fix the link
   first.

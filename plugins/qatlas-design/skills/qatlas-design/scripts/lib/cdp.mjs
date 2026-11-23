@@ -99,6 +99,7 @@ export class Browser {
     };
     process.once('exit', drop);
     for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.once(sig, () => { drop(); process.exit(130); });
+    // QATLAS_DESIGN_CHROME_ARGS adds flags, such as --no-sandbox where Chrome runs as root or in a container.
     const args = [
       '--headless=new', '--remote-debugging-port=0', `--user-data-dir=${dir}`,
       '--disk-cache-size=16777216', '--media-cache-size=16777216',
@@ -106,7 +107,8 @@ export class Browser {
       '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
       '--disable-backgrounding-occluded-windows', '--disable-features=Translate,MediaRouter',
       '--force-color-profile=srgb', '--autoplay-policy=no-user-gesture-required',
-      '--enable-unsafe-swiftshader', `--window-size=${width},${height}`, ...extraArgs, 'about:blank',
+      '--enable-unsafe-swiftshader', `--window-size=${width},${height}`, ...extraArgs,
+      ...(process.env.QATLAS_DESIGN_CHROME_ARGS || '').split(/\s+/).filter(Boolean), 'about:blank',
     ];
     const proc = spawn(exe, args, { stdio: ['ignore', 'ignore', 'pipe'] });
     pid = proc.pid;
