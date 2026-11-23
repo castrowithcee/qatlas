@@ -21,7 +21,8 @@ Entscheidungen eines Tasks laufen als `Entscheidung 1/2`, `Entscheidung 2/2` vor
 Task 2/5: <Thema in einfachen Worten> (#<Nummer>)
 
 Kontext:
-<Ein oder zwei Sätze zum belegten Stand und dazu, warum die Entscheidung nötig ist.>
+<Der belegte Stand und warum die Entscheidung nötig ist, mit dem Inhalt jedes beteiligten Tasks, den die
+Antwort braucht.>
 
 Zu entscheiden:
 <Die konkrete Frage.>
@@ -33,10 +34,15 @@ Optionen:
 Empfehlung:
 1, weil <Begründung aus Ziel, Risiko und Folgen.>
 
-Antwort: 1, 2 oder eine eigene Richtung.
+Antwort: 1, 2, eine eigene Richtung oder eine Rückfrage.
 ```
 
-- Verwende den exakten Bezeichner aus dem Planungssystem oder die eindeutige Task-ID. Erfinde keine Nummer.
+- Die ID steht nur in der Kopfzeile, als exakter Bezeichner aus dem Planungssystem. Erfinde keine Nummer.
+- Halte den Kontext so kurz, wie es geht, und so lang, dass der Nutzer die Frage beantworten kann, ohne einen
+  Task zu öffnen. Sind mehrere Tasks beteiligt, sage zu jedem, was er verlangt, und unterscheide sie danach
+  über ihr Thema oder als erste und zweite Aufgabe.
+- Fragt der Nutzer zurück, erkläre genau diese Karte ausführlicher im Klartext und lege dieselbe Frage erneut
+  vor.
 - Prüfe eine im Task bereits vorbereitete Entscheidung gegen den aktuellen Stand und lege sie von dort aus
   vor.
 - Biete eine bis vier wirklich einander ausschließende Optionen an. Verstecke die Empfehlung weder in ihrer
