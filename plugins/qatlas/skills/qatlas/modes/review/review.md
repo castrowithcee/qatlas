@@ -7,16 +7,16 @@ description: >
 
 # Übergaben abschließen
 
-Lege dem Nutzer vor, was nur er entscheiden, prüfen oder tun kann, und halte seine Antwort fest. Er sucht und
-liest dafür keinen Task: Die Karte trägt alles, was er für die Antwort braucht.
+Lege dem Nutzer vor, was nur er entscheiden, prüfen oder tun kann, und halte seine Antwort fest. Schreibe
+jede Karte so, dass er dafür keinen Task suchen oder lesen muss.
 
 ## Aufruf
 
-`review [Scope]` nimmt einen Task, ein Projekt oder ohne Scope alle offenen Übergaben des maßgeblichen
-Planungssystems. `review` kennt keine Flags und erhält keine Freigabe für gesperrte Projektdokumentation. Es
-umfasst das Lesen des aktuellen Stands, Änderungen an Status und Entscheidungen im maßgeblichen
-Planungssystem und einen lokalen Sammelcommit am vollständigen Ende. Umsetzung, Worker, technische Tests,
-Integration, externe Wirkungen und Pushes bleiben außen vor.
+Nimm bei `review [Scope]` einen Task, ein Projekt oder ohne Scope alle offenen Übergaben des maßgeblichen
+Planungssystems. `review` kennt keine Flags und erhält keine Freigabe für gesperrte Projektdokumentation.
+Lies den aktuellen Stand, ändere Status und Entscheidungen im maßgeblichen Planungssystem und lege am
+vollständigen Ende einen lokalen Sammelcommit an. Setze nichts um, starte keine Worker und keine technischen
+Tests, integriere nichts, löse keine externe Wirkung aus und pushe nichts.
 
 ## Leseliste
 
@@ -73,9 +73,10 @@ Antwort: ok, die Abweichung beschreiben oder überspringen.
 
 ## Abschluss
 
-Halte jede Antwort und jedes Prüfergebnis so fest, wie es das Vorlegen von Entscheidungen beschreibt. Lege
-keinen Zwischencommit an und prüfe nach jeder Antwort, dass der Steuerungs-Branch nicht von jemand anderem
-geändert wurde. Erst wenn jede Übergabe der Ausgangs-Queue abgeschlossen oder übersprungen ist, lies den
-vollständigen Diff und lege nach der Git-Norm genau einen lokalen Sammelcommit pro betroffenem Repo an. Der
-ausdrückliche Aufruf ersetzt die vorherige Freigabe seiner Nachricht. Zeige danach Nachricht und ID. Bei
-offenem Rest oder vorzeitigem Ende wird nichts committet. Pushe nichts.
+Halte jede Antwort und jedes Prüfergebnis so fest, wie es das Vorlegen von Entscheidungen beschreibt. Was du
+im Planungssystem festhältst, gilt sofort. Für geänderte Dateien des Repos legst du keinen Zwischencommit an
+und prüfst nach jeder Antwort, dass der Steuerungs-Branch nicht von jemand anderem geändert wurde. Erst wenn
+jede Übergabe der Ausgangs-Queue abgeschlossen oder übersprungen ist, lies den vollständigen Diff und lege
+nach der Git-Norm genau einen lokalen Sammelcommit pro betroffenem Repo an. Der ausdrückliche Aufruf ersetzt
+die vorherige Freigabe seiner Nachricht. Zeige danach Nachricht und ID. Bei offenem Rest oder vorzeitigem
+Ende committest du diese Dateien nicht. Pushe nichts.

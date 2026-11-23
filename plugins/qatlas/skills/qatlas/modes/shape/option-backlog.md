@@ -6,9 +6,9 @@ description: >
 
 # Bestehende Arbeit zuschneiden
 
-Diese Variante bearbeitet nur die bestehenden `draft`-Tasks des Scopes, jeweils an ihrem bestehenden Platz.
-Tasks in anderen Status bleiben unberührt. Einen `deferred`-Task nimmst du nach der Backlog-Norm nur auf, wenn
-der Aufruf ihn ausdrücklich nennt.
+Bearbeite nur die bestehenden `draft`-Tasks des Scopes, jeweils an ihrem bestehenden Platz, und lass Tasks in
+anderen Status unberührt. Einen `deferred`-Task nimmst du nach der Backlog-Norm nur auf, wenn der Aufruf ihn
+ausdrücklich nennt.
 
 ## Bestand aufnehmen
 

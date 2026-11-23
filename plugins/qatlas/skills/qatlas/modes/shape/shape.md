@@ -38,8 +38,8 @@ Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
 
 ## Tasks zuschneiden
 
-Ein Task ist für sich verständlich und beobachtbar abnehmbar.
-Schneide jeden Task so zu, dass ein kleineres Worker-Modell einen Task in der Regel als abgegrenzten Auftrag bewältigen kann.
+Schneide jeden Task so zu, dass er für sich verständlich und beobachtbar abnehmbar ist und ein kleineres
+Worker-Modell ihn in der Regel als abgegrenzten Auftrag bewältigen kann.
 
 Wähle die Lösung der Aufgabe vor dem Zuschnitt nach Ziel, Korrektheit und Folgekosten.
 Die erwartete Größe spielt bei dieser Wahl keine Rolle. Größe ist ein Signal zum Teilen, nie ein Grund für eine schwächere Lösung.
@@ -54,10 +54,10 @@ Tool- oder Endpunktgruppen, unterschiedliche Risiko- und Berechtigungsgrenzen od
 Worker über viele Umsetzungs- und Prüfschritte bindet, sind Signale zum Teilen.
 Mehr als etwa drei bis vier neue Operationen oder erwartete 500 bis 800 neue Zeilen dienen als Prüfwert. Die Zahlen sind keine starre
 Grenze. Halte eng gekoppelte Schritte zusammen, wenn getrennte Abnahme künstlich wäre.
-Jedes Paket braucht eine eigene beobachtbare Fertigstellung und einen konkreten Prüfweg und hinterlässt einen konsistenten Zustand.
+Jeder Task braucht eine eigene beobachtbare Fertigstellung und einen konkreten Prüfweg und hinterlässt einen konsistenten Zustand.
 Prüfe jede Abhängigkeit gegen die Regel der Backlog-Norm und drücke eine bloße Reihenfolge nur über die Reihenfolge des Planungssystems aus.
-Plane die Integration zwischen abhängigen Paketen.
-Das Paket, das das Ziel erreicht, gehört zum selben Zuschnitt. Lege es mit den anderen an, als `draft`, wenn eine Frage offen bleibt.
+Plane die Integration zwischen abhängigen Tasks.
+Der Task, der das Ziel erreicht, gehört zum selben Zuschnitt. Lege ihn mit den anderen an, als `draft`, wenn eine Frage offen bleibt.
 Wenn du einen bestehenden Task teilst, erhalte das bestätigte Ziel und die Abnahme der
 ursprünglichen Arbeit vollständig, übernimm die geltenden Entscheidungen und Sicherheitsgrenzen konkret in
 jeden neuen Vertrag und hinterlasse keinen leeren Resttask.
@@ -78,34 +78,35 @@ jeden neuen Vertrag und hinterlasse keinen leeren Resttask.
   etwa die Bindung einer Objekt-ID an das gewählte Ziel, den Umgang mit fremdem Inhalt als Daten und nötige Berechtigungen.
   Verankere vorgeschriebene Referenzvergleiche und Randfallprüfungen in der Abnahme, damit ein grüner
   Standardtest sie nicht stillschweigend ersetzt.
-- Halte den Task als aktuellen Schnappschuss. Ein neuer Task beginnt ohne Planungsprotokoll und ohne frühere Übergaben.
+- Beginne einen neuen Task ohne Planungsprotokoll und ohne frühere Übergaben.
 
-Kläre Ziel, Zuschnitt, Abnahme und Ausführungsgrundlage der zugeschnittenen Pakete durch eigene Prüfung und
+Kläre Ziel, Zuschnitt, Abnahme und Ausführungsgrundlage der zugeschnittenen Tasks durch eigene Prüfung und
 gezielte Nutzerentscheidungen, wo möglich bis `ready`. Beende den Zuschnitt nicht mit vermeidbaren Entwürfen.
 Eine wirklich offene Vertragsfrage, eine fehlende Erlaubnis oder eine noch nicht verfügbare
 Grundlage bleibt unter dem Statusmodell sichtbar. Erfinde keine Gewissheit. Überblicke spätere Arbeit in
-Projektdokumentation und Meilensteinen, konkretisiere aber nur ausreichend verstandene Pakete.
+Projektdokumentation und Meilensteinen, konkretisiere aber nur ausreichend verstandene Tasks.
 Es gilt keine feste Taskzahl, nur ausführbare Reife.
 
-Bündele nur zusammengehörige oder abhängige Pakete, soweit das Planungssystem bündeln kann.
+Bündele nur zusammengehörige oder abhängige Tasks, soweit das Planungssystem bündeln kann.
 Pflege die inhaltlich ausführbare Reihenfolge mit.
 
 ## Entscheidungen und Analyse
 
 Nur eine Entscheidung, die nach eigener Prüfung offen bleibt, geht an den Nutzer.
 
-Der ausdrückliche Aufruf autorisiert Subagents für getrennte Analyse des Bestands, Sammeln von Nachweisen,
-Risikoprüfungen und eine unabhängige Vollständigkeitsprüfung. Delegiere nur unabhängige Fragen mit echtem
-Mehrwert. Subagents schreiben keine Tasks, treffen keine Produktentscheidung und bauen keinen konkurrierenden Plan.
-Der Haupt-Agent führt Befunde, Gespräch, Dokumentation und Paketzuschnitt zusammen.
-Ein beauftragter Subagent für den Bestand arbeitet nur lesend und liefert mindestens Ausgangslage, Einstiegspunkte,
+Du darfst Subagents für getrennte Analyse des Bestands, Sammeln von Nachweisen, Risikoprüfungen und eine
+unabhängige Vollständigkeitsprüfung starten. Delegiere nur unabhängige Fragen mit echtem Mehrwert. Lass
+Subagents keine Tasks schreiben, keine Produktentscheidung treffen und keinen konkurrierenden Plan bauen.
+Führe Befunde, Gespräch, Dokumentation und Zuschnitt selbst zusammen.
+Lass einen Subagent für den Bestand nur lesend arbeiten und mindestens Ausgangslage, Einstiegspunkte,
 erwartete Änderungsflächen, Prüfwege, Dokumentationswirkung, offene Vertragsfragen und eine begründete
-Empfehlung für `draft` oder `ready`. Kleine, bereits klar belegte Pakete brauchen keinen Subagent, die
+Empfehlung für `draft` oder `ready` liefern. Kleine, bereits klar belegte Tasks brauchen keinen Subagent, die
 Ausführungsgrundlage bleibt trotzdem Pflicht.
 
 ## Grenzen und Abschluss
 
-Setze in diesem Modus nie `in-progress` oder `done`, beginne keine Umsetzung und führe keinen Task aus.
+Setze in diesem Modus nie `in-progress`, beginne keine Umsetzung und führe keinen Task aus. `done` setzt du
+nur, wenn der Nutzer entscheidet, einen Task als verworfen oder Duplikat zu schließen.
 
 In jeder Variante endet `shape` mit genau einem lokalen Sammelcommit pro betroffenem Repo über die in diesem
 Lauf geänderten Dateien, damit ein folgender `run` von einem sauberen Stand startet.

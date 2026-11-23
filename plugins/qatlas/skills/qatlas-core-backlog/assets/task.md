@@ -1,6 +1,6 @@
 ---
 description: >
-  Rumpf eines Tasks im lokalen Backlog mit allen Abschnitten des Taskvertrags, vom Warum bis zum
+  Rumpf eines Tasks für jedes Planungssystem mit allen Abschnitten des Taskvertrags, vom Warum bis zum
   Abschlussbericht.
 ---
 
@@ -23,8 +23,7 @@ Ausführung nötigen Inhalt zusammenfassen, nicht umfangreich duplizieren. -->
 
 ## Ausführungsgrundlage
 <!-- Belegter Ist-Stand für Arbeit an einem vorhandenen System. Bei einer Aufgabe ohne vorhandenen Bestand
-den nicht anwendbaren Punkt mit Begründung kennzeichnen. Erwartete Änderungsflächen sind eine begründete
-Arbeitskarte, keine starre Allowlist. Scope-in und Scope-out bleiben die Autorität. -->
+den nicht anwendbaren Punkt mit Begründung kennzeichnen. -->
 
 - **Ausgangszustand:** <Wie verhält sich der relevante Bestand heute?>
 - **Bestehende Einstiegspunkte:** <Welche Komponenten, Pfade oder Schnittstellen tragen das Verhalten?>
@@ -36,7 +35,7 @@ Arbeitskarte, keine starre Allowlist. Scope-in und Scope-out bleiben die Autorit
   fehlt? Keine Secrets festhalten.>
 - **Dokumentationswirkung:** <Genau eine Form: `Ändern: <Quellen und erwartete Aussage>`,
   `Prüfen: <Quellen und zu bestätigende Aussage>`, `Keine: <Begründung>` oder
-  `Ungeklärt: <fehlende Information>`. Mit `Ungeklärt` bleibt der Task draft.>
+  `Ungeklärt: <fehlende Information>`.>
 
 ## Abhängigkeiten
 <!-- Echte Voraussetzungen nach der Backlog-Norm, je mit dem benötigten Ergebnis, und betroffene

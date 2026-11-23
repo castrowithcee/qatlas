@@ -9,12 +9,12 @@ description: >
 
 # qatlas-core-backlog
 
-`.qatlas-brain/backlog/BACKLOG.md` nennt immer das einzige maßgebliche Planungssystem und seine Bindung.
+Arbeite nur im Planungssystem, das `.qatlas-brain/backlog/BACKLOG.md` nennt, und nach seiner Bindung.
 Nutzer- oder Projektvorgaben haben Vorrang.
 
-- Die Bindung führt Planungs-, Orchestrierungs- und Taskarbeit zum richtigen Objekt, Zugang und
-  Statusmerkmal. Folge ausschließlich ihr. Der lokale Backlog ist eine Bindung wie jede andere und wird neben
-  einem anderen System nicht als Spiegel gepflegt. Ideen gehen an das Entwurfsobjekt, das die Bindung nennt.
+- Nimm Objekt, Zugang und Statusmerkmal für Planungs-, Orchestrierungs- und Taskarbeit ausschließlich aus der
+  Bindung. Der lokale Backlog ist eine Bindung wie jede andere. Pflege ihn neben einem anderen System nicht
+  als Spiegel. Lege Ideen am Entwurfsobjekt ab, das die Bindung nennt.
 - Die Einheit eines Planungssystems ist ein Issue. Das System behält seine eigenen Namen, Statuswerte, Typen
   und Felder. Ein Issue, dessen Merkmal nach der Bindung für einen Status dieser Norm steht, ist ein Task.
   Ein Issue ohne solches Merkmal, etwa eine Idee, ist keiner.
@@ -26,7 +26,7 @@ Nutzer- oder Projektvorgaben haben Vorrang.
 Jeder Task trägt in jedem Planungssystem genau einen dieser Status. Woran das System ihn zeigt, sagt die
 Bindung.
 
-- `draft`: Das Arbeitspaket selbst hat eine offene Frage zu Ergebnis, Scope-in, Scope-out, Ansatz, Abnahme
+- `draft`: Der Task selbst hat eine offene Frage zu Ergebnis, Scope-in, Scope-out, Ansatz, Abnahme
   oder einen ungeprüften Ist-Stand, der diese Punkte wesentlich ändern könnte.
 - `ready`: Ausführungsreif nach „Ausführungsreife“.
 - `in-progress`: Eine Ausführung hat den Task beansprucht. Das Signal bleibt auch nach einem Abbruch
@@ -49,8 +49,10 @@ Zulässige Wege:
 - `in-progress -> ready | draft | review | waiting | done`
 - `review -> ready | draft | waiting | done`
 - `waiting -> draft | ready`
-- `draft | ready | waiting -> deferred`
+- `draft | ready | review | waiting -> deferred`
 - `deferred -> draft | ready`
+- `draft | ready | waiting | deferred -> done`, nur mit der Abschlussart verworfen oder Duplikat und nur auf
+  Entscheidung des Nutzers
 
 - Setze einen Task unmittelbar vor der ersten schreibenden Ausführung auf `in-progress`. Eine bloße Sichtung
   beansprucht ihn nicht.
@@ -64,7 +66,7 @@ Zulässige Wege:
 - Wähle einen `deferred`-Task nie aus, auch nicht im Scope des ganzen Backlogs, außer der Aufruf nennt ihn
   ausdrücklich. Wo du Status zählst oder aufzählst, nenne die Zahl der `deferred`-Tasks einmal getrennt.
 - Technische Schwierigkeit allein macht einen Task weder zu `draft`, `review` noch `waiting`.
-- Ein Arbeitspaket ohne erkennbaren Status hat keinen. Behandle es nicht als `draft`, wähle es nicht aus und
+- Ein Issue ohne erkennbaren Status hat keinen. Behandle es nicht als `draft`, wähle es nicht aus und
   setze ihm ohne Auftrag keinen Status. Nenne die Anzahl, wo sie für Auswahl oder Übersicht zählt.
 
 ## Abhängigkeiten
@@ -95,7 +97,9 @@ Secrets benannt und entweder verfügbar oder im Taskvertrag beschaffbar.
 
 ## Umfang und Verweise
 
-Ein Task ist so lang, wie seine Ausführung es verlangt, und nicht länger.
+Lies vor dem Schreiben eines Tasks oder dem Ändern seines Stands, in jedem Planungssystem, vollständig
+[Inhalt eines Tasks](references/task-content.md). Halte einen Task so lang, wie seine Ausführung es verlangt,
+und nicht länger.
 
 - **Wissen gehört nicht ins Planungssystem:** Das Ergebnis einer Analyse oder Recherche, das spätere Arbeit
   braucht, steht als Datei im Wissensraum des Projekts, nie im Eintrag oder in der Historie eines Tasks. Ein
@@ -134,12 +138,22 @@ Eintrag, so vollständig, dass der Nutzer ohne Task, Diff und Verlauf antworten 
 - Ohne Vorgabe des Nutzers oder des Projekts gilt der lokale Backlog. Seine Bindung ist
   `<plugin-root>/scaffold/.qatlas-brain/backlog/BACKLOG.md`, mit `<plugin-root>` als im Sessionkontext
   genanntem `QATLAS PLUGIN ROOT`. Übernimm sie unverändert, wenn ein Projekt zum lokalen Backlog wechselt.
-- Lies vor dem Anlegen, Ändern oder Prüfen einer Bindung an ein anderes System vollständig [die
-  Bindungsvorlage](assets/external-binding.md). Bei normaler Taskarbeit liest du nur `BACKLOG.md`.
+- Lege die Bindung an ein anderes System aus [der Bindungsvorlage](assets/external-binding.md) an und prüfe
+  eine bestehende gegen deren Zeilen. Bei normaler Taskarbeit liest du nur `BACKLOG.md`.
 - Beantworte die Zeilen der Vorlage in dieser Reihenfolge: aus Vorgaben des Nutzers oder des Projekts zum
   Planungssystem, aus einer lesenden Probe des Systems, zuletzt durch eine gebündelte Rückfrage. Unterstelle
   keinen Anbieter aus einem vorhandenen Git-Remote. Lege die fertige Bindung vor und schreibe sie nach
   Zustimmung.
+- Schreibe je Zeile eine Antwort, ohne Begründung, Anleitung oder Anbieterwissen, denn `BACKLOG.md` wird in
+  jeder Session geladen.
+- Nenne als Merkmal, was das System am Issue selbst zeigt: Feld, Label, Typ, offen oder geschlossen. Jeder
+  Status muss eindeutig erkennbar sein. Tragen zwei dasselbe Merkmal, nenne das ausdrücklich und welcher von
+  beiden beim Lesen gilt.
+- Hat das System unter ausführbaren Tasks keine Reihenfolge, schreibe „keine“. Der aktuelle Datensatz muss
+  ohne Historie ausführbar bleiben.
+- Lege Nachschlagedaten, die nur beim Schreiben nötig sind, etwa Feld- oder Options-IDs, Raten- und
+  Batchgrenzen, in eine eigene Datei am Ort der Wahl des Nutzers und verweise aus der betroffenen Zeile mit
+  Lesebedingung darauf.
 - Wählt der Nutzer GitHub-Issues ohne eigene Vorgabe, lege [die Startvorlage für
   GitHub-Issues](assets/external-binding-github.md) als Ausgangspunkt vor, nicht als Standard.
 - Prüfe `BACKLOG.md` bei Taskarbeit nicht auf Vollständigkeit. Fehlt die Antwort für den anstehenden

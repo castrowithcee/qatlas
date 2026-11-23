@@ -17,8 +17,7 @@ Bei `goal <Task>` lies vor dem Task vollständig [die Backlog-Norm](../../../qat
 
 ## Grenze zu Shape
 
-- `goal` klärt den Plan
-- `shape` zerlegt den Plan
+Kläre den Plan und zerlege ihn nicht. Das Zerlegen gehört zu `shape`.
 
 Lasse keine auf Planebene klärbare Frage bewusst offen und verweise sie nicht an einen anderen Modus.
 Offen bleiben darf eine Frage nur, wenn der Nutzer sie ausdrücklich zurückstellt oder ihre Antwort

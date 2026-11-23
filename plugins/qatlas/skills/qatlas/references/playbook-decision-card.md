@@ -6,8 +6,8 @@ description: >
 
 # Entscheidungen vorlegen
 
-Das gilt, wann immer ein Modus eine echte Nutzerentscheidung braucht. Der Modus behält Auswahl, inhaltliche
-Prüfung und seinen Abschluss. Diese Datei regelt die Karte und das Festhalten der Antwort.
+Lege jede echte Nutzerentscheidung eines Modus als Karte vor und halte die Antwort fest, wie es hier steht.
+Auswahl, inhaltliche Prüfung und Abschluss bleiben beim Modus.
 
 ## Queue
 
@@ -43,7 +43,7 @@ Antwort: 1, 2 oder eine eigene Richtung.
   Reihenfolge noch in günstigerer Formulierung.
 - Erreichen die Optionen das Ziel unterschiedlich weit, nenne, was eine Teil-Option weglässt. Eine kleinere
   Task-Größe ist kein Vorteil. Ist die bessere Option größer, empfiehl sie und nenne ihren Zuschnitt in
-  Pakete.
+  Tasks.
 - Nummeriere freien Text nie als Option. Erlaube ihn nur in der Antwortzeile. Gib die Karte im normalen
   Gespräch aus, nicht über ein Auswahlwerkzeug, das eine solche Option ergänzt oder Kontext und Frage
   trennt.
@@ -64,8 +64,8 @@ der Nutzer erst beschreibt, gehört zu `goal`, nicht auf eine Karte.
   erreicht oder ein neuer ausdrücklicher Lauf den Task fortsetzen oder integrieren muss, `review`,
   solange eine Nutzeraktion offen bleibt, `waiting` bei einer externen Voraussetzung, `deferred` nach der
   Backlog-Norm, `draft`, solange eine Vertragsfrage offen bleibt oder die Antwort einen neuen Zuschnitt
-  verlangt, `done`, wenn nach der Antwort nichts mehr zu tun ist und das Ergebnis integriert ist, im selben
-  Schritt nach dem Planungssystem geschlossen. Einen Status, den der Modus nicht setzen darf, überlässt du
-  `review`.
+  verlangt, `done`, wenn nach der Antwort nichts mehr zu tun ist und das Ergebnis integriert ist oder der
+  Nutzer den Task als verworfen oder Duplikat schließt, im selben Schritt nach dem Planungssystem geschlossen.
+  Einen Status, den der Modus nicht setzen darf, überlässt du `review`.
 - Ändert die Entscheidung eine maßgebliche Grundlage, pflege sie an ihrem Platz.
 - Eine Antwort autorisiert keine Ausführung.

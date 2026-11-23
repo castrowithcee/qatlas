@@ -4,20 +4,19 @@
 // The local backlog: issues as text files on the branch qatlas-backlog of the project repo, checked out once
 // under .qatlas/local/backlog/ of the primary working tree, where agents may edit files. The branch shares no
 // history with the code, so every working tree of the repo sees one live state and the backlog travels with
-// the remote of the repo.
+// the remote of the repo. The script passes the text of an issue through and prescribes none.
 // Usage: node qatlas-backlog.js <command> [--target <dir>]
 //   fields                                    the selection of every field, also before the first issue
 //   fields add <field> [<value>] [--means <qatlas status>] [--no-work]
 //   fields remove <field> <value>
-//   list [--status s] [--type t] [--label l] [--parent id] [--where key=value] [--all]
+//   list [--status <s>] [--type <t>] [--label <l>] [--parent <id>] [--where <key>=<value>] [--all]
 //   show <id>
-//   add --title <text> [--type t] [--status s] [--parent id] [--depends id,id] [--labels a,b]
-//       [--set key=value] [--body-file <file>] [--id <id>]
-//   set <id> [--title] [--type] [--status] [--parent id | --no-parent] [--depends id,id] [--labels a,b]
-//       [--set key=value] [--force]
+//   add --title <text> [--body-file <file>] [--type <t>] [--status <s>] [--parent <id>] [--depends <id,id>]
+//       [--labels <a,b>] [--set <key>=<value>] [--id <id>]
+//   set <id> [--title <text>] [--body-file <file>] [--type <t>] [--status <s>] [--parent <id> | --no-parent]
+//       [--depends <id,id>] [--labels <a,b>] [--set <key>=<value>] [--force]
 //   move <id> --before <id> | --after <id> | --first | --last
-//   save [--message <text>]                   commits edits made directly in issue files
-//   check                                     lists invalid issues, exit 1 if there are any
+//   save                                      commits edits made directly in issue files
 //   sync [--resolved]                         fetches, merges and pushes the backlog branch
 // Output is JSON on stdout. Exit 1 is a refused command, exit 2 a sync conflict.
 
@@ -30,15 +29,26 @@ const BRANCH = 'qatlas-backlog';
 const REF = 'refs/heads/' + BRANCH;
 const QATLAS_STATUS = ['draft', 'ready', 'in-progress', 'review', 'waiting', 'deferred', 'done'];
 const WAYS = {
-  draft: ['ready', 'waiting', 'deferred'],
-  ready: ['in-progress', 'draft', 'waiting', 'deferred'],
+  draft: ['ready', 'waiting', 'deferred', 'done'],
+  ready: ['in-progress', 'draft', 'waiting', 'deferred', 'done'],
   'in-progress': ['ready', 'draft', 'review', 'waiting', 'done'],
-  review: ['ready', 'draft', 'waiting', 'done'],
-  waiting: ['draft', 'ready', 'deferred'],
-  deferred: ['draft', 'ready'],
+  review: ['ready', 'draft', 'waiting', 'deferred', 'done'],
+  waiting: ['draft', 'ready', 'deferred', 'done'],
+  deferred: ['draft', 'ready', 'done'],
   done: [],
 };
 const CORE = ['title', 'type', 'status', 'rank', 'parent', 'depends', 'labels'];
+const SELECTIONS = ['status', 'type', 'labels', 'custom'];
+const OPTIONS = {
+  fields: ['means', 'no-work'],
+  list: ['status', 'type', 'label', 'parent', 'where', 'all'],
+  show: [],
+  add: ['title', 'body-file', 'type', 'status', 'parent', 'depends', 'labels', 'set', 'id'],
+  set: ['title', 'body-file', 'type', 'status', 'parent', 'no-parent', 'depends', 'labels', 'set', 'force'],
+  move: ['before', 'after', 'first', 'last'],
+  save: [],
+  sync: ['resolved'],
+};
 
 class Refusal extends Error {}
 // Ends the command with its own output and exit code, after locks are released.
@@ -95,16 +105,28 @@ function fieldProblems(fields) {
 }
 
 // A new backlog starts from the shipped selection; the user's block backlog replaces whole fields of it.
-function startFields(project) {
+function fieldsFrom(block) {
   const fields = defaultFields();
-  let own = null;
-  try { own = require('./runtime/config-loader.js').readConfig(project).backlog; } catch { /* shipped selection */ }
-  if (!isObject(own)) return fields;
-  const merged = { ...fields };
-  for (const key of ['status', 'type', 'labels', 'custom']) if (key in own) merged[key] = own[key];
-  const problems = fieldProblems(merged);
-  if (problems.length) refuse('The block backlog of the user config is invalid: ' + problems.join(' '));
-  return merged;
+  for (const key of SELECTIONS) if (isObject(block) && key in block) fields[key] = block[key];
+  return fields;
+}
+
+// What is wrong with the block backlog of the user config, also for the doctor.
+function configProblems(block) {
+  if (block === null || block === undefined) return [];
+  if (!isObject(block)) return ['The block must be an object.'];
+  return [...Object.keys(block).filter(key => !SELECTIONS.includes(key)).map(key => key + ' is no known key.'),
+    ...fieldProblems(fieldsFrom(block))];
+}
+
+// The block is read once and never again, so a mistake in it stops the start instead of being skipped.
+function startFields(project) {
+  const state = require('./runtime/config-loader.js').readConfig(project);
+  const problems = state.userError ? [state.userError]
+    : [...state.problems.filter(problem => problem.startsWith(state.configFile + ': backlog')),
+      ...configProblems(state.backlog)];
+  if (problems.length) refuse('No backlog starts until ' + state.configFile + ' is repaired: ' + problems.join(' '));
+  return fieldsFrom(state.backlog);
 }
 
 const meansOf = (fields, name) => (fields.status.find(entry => entry.name === name) || {}).means || null;
@@ -193,97 +215,114 @@ function gitDir(project) {
   } catch { return null; }
 }
 
-function locate(start, write) {
+// Where the backlog of a project lives and how git reaches it. Creates nothing.
+function locate(start) {
   const project = projectDir(start);
   const common = project && gitDir(project);
   if (!common) refuse('The local backlog needs a git repo. qatlas-core init sets one up.');
   const state = path.join(project, '.qatlas', 'local');
   const dir = path.join(state, 'backlog');
-  if (write && !fs.existsSync(dir)) { excludeLocal(project); fs.mkdirSync(dir, { recursive: true }); }
-  // Reading creates nothing, so the checkout may not exist yet.
   const git = (args, options = {}) => {
-    const checkedOut = fs.existsSync(dir);
+    // A relative path of a remote counts from the project, so network commands run there, without the checkout.
+    const checkedOut = !options.network && fs.existsSync(dir);
     const env = { ...process.env, GIT_DIR: common, GIT_INDEX_FILE: path.join(state, 'backlog.index') };
     if (checkedOut) env.GIT_WORK_TREE = dir;
     try {
       return execFileSync('git', args, { cwd: checkedOut ? dir : project, env, encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+        stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 28 }).trim();
     } catch (error) {
       if (options.allowFail) return null;
+      // git merge-tree exits 1 on a conflict and still names the merged tree.
+      if (options.conflict && error.status === 1) return String(error.stdout).trim();
       throw new Refusal('git ' + args[0] + ' failed: ' + String(error.stderr || error.message).trim());
     }
   };
   return { project, state, dir, git };
 }
 
-// Brings the checkout in line with the branch; a branch that only the remote has is taken over. With write
-// a missing backlog is started. Returns null when there is no backlog and none was asked for.
-function open(start, write = false) {
-  const at = locate(start, write);
-  // A clone or a cleaned working tree has the branch but no checkout yet; reading takes it over.
-  if (!write && !fs.existsSync(at.dir) && findTip(at.project)) return open(start, true);
-  let tip = at.git(['rev-parse', '-q', '--verify', REF], { allowFail: true });
-  if (!tip) {
-    const remote = at.git(['for-each-ref', '--format=%(objectname)', 'refs/remotes/*/' + BRANCH]).split('\n').filter(Boolean);
-    if (remote.length === 1) { at.git(['update-ref', REF, remote[0]]); tip = remote[0]; }
-  }
-  if (tip && !fs.existsSync(path.join(at.dir, 'fields.json'))) {
+const tipOf = (at, ref) => at.git(['rev-parse', '-q', '--verify', ref], { allowFail: true });
+const tracking = remote => 'refs/remotes/' + remote + '/' + BRANCH;
+
+// The one remote the backlog travels with: origin, else the first. Other remotes never count.
+function remoteOf(at) {
+  const remotes = at.git(['remote']).split('\n').filter(Boolean);
+  return remotes.includes('origin') ? 'origin' : remotes[0] || null;
+}
+
+function remoteTip(at) {
+  const remote = remoteOf(at);
+  return remote ? tipOf(at, tracking(remote)) : null;
+}
+
+// The store as the checkout holds it. Without a backlog it shows the fields a new one starts with and
+// creates nothing. A checkout that is missing, as after a clone or git clean, is built again from the
+// branch, and a branch that only the remote has is taken over, both under the lock.
+function open(start, held = false) {
+  const at = locate(start);
+  let tip = tipOf(at, REF);
+  const taken = tip ? null : remoteTip(at);
+  if (!tip && !taken) return { ...at, fields: startFields(at.project), issues: [], created: false };
+  const file = path.join(at.dir, 'fields.json');
+  if (taken || !fs.existsSync(file)) {
+    if (!held) return locked(start, store => store);
+    if (taken) at.git(['update-ref', REF, tip = taken, '']);
     fs.mkdirSync(at.dir, { recursive: true });
     at.git(['read-tree', tip]);
     at.git(['checkout-index', '-a', '-f']);
   }
-  if (!tip && !write) return { ...at, fields: startFields(at.project), issues: [], created: false };
-  if (!tip) {
-    fs.mkdirSync(path.join(at.dir, 'issues'), { recursive: true });
-    fs.writeFileSync(path.join(at.dir, 'fields.json'), JSON.stringify(startFields(at.project), null, 2) + '\n');
-  }
   let fields;
-  try { fields = JSON.parse(fs.readFileSync(path.join(at.dir, 'fields.json'), 'utf8')); }
+  try { fields = JSON.parse(fs.readFileSync(file, 'utf8')); }
   catch (error) { refuse('fields.json of the backlog is not readable: ' + error.message); }
-  const store = { ...at, fields, issues: readIssues(at.dir), created: true };
-  if (!tip) commit(store, 'Start the backlog');
-  return store;
+  return { ...at, fields, issues: readIssues(at.dir), created: true };
 }
 
-function findTip(project) {
-  try {
-    return execFileSync('git', ['-C', project, 'for-each-ref', '--format=%(objectname)', 'refs/remotes/*/' + BRANCH,
-      REF], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-  } catch { return ''; }
-}
-
-// Commits whatever the checkout holds. The ref moves only from the tip this commit was built on.
-function commit(store, message, parents = null) {
+// Commits whatever the checkout holds. The ref moves only from the tip this commit was built on, and only
+// if the commit adds no secret: checked like staged code, so that none ever enters the history and travels.
+function commit(store, message) {
   store.git(['add', '-A']);
   const tree = store.git(['write-tree']);
-  const tip = store.git(['rev-parse', '-q', '--verify', REF], { allowFail: true });
-  if (!parents && tip && store.git(['rev-parse', tip + '^{tree}']) === tree) return tip;
-  const list = parents || (tip ? [tip] : []);
-  const made = store.git(['commit-tree', tree, ...list.flatMap(parent => ['-p', parent]), '-m', message]);
-  store.git(tip ? ['update-ref', REF, made, tip] : ['update-ref', REF, made]);
-  return made;
+  const tip = tipOf(store, REF);
+  if (tip && store.git(['rev-parse', tip + '^{tree}']) === tree) return;
+  const made = store.git(['commit-tree', tree, ...(tip ? ['-p', tip] : []), '-m', message]);
+  if (require('./runtime/config-loader.js').readConfig(store.project).config.protection.secrets !== 'allow') {
+    const patch = store.git(['show', '--format=', '-p', '--unified=0', '--no-color', '--no-ext-diff', made]);
+    const secrets = require('./qatlas-protection-check.js').scanSecrets(patch).map(hit => hit.item);
+    if (secrets.length) {
+      refuse('Nothing is committed: possible secrets in ' + secrets.join(', ')
+        + '. Remove them from the text and repeat the command.');
+    }
+  }
+  store.git(['update-ref', REF, made, tip || '']);
 }
 
-// One writer at a time for all working trees and agents of the project on this host.
-function locked(start, action) {
-  const at = locate(start, true);
+// The lock names its holder, so only a dead process loses it, however long a sync takes. A lock without
+// a readable holder counts as left behind after a minute.
+function abandoned(lock) {
+  let holder = 0;
+  try { holder = Number(fs.readFileSync(lock, 'utf8')); } catch { /* no holder to ask */ }
+  if (holder > 0) {
+    try { process.kill(holder, 0); return false; } catch (error) { return error.code === 'ESRCH'; }
+  }
+  try { return Date.now() - fs.statSync(lock).mtimeMs > 60000; } catch { return false; }
+}
+
+// One writer at a time for all working trees and agents of the project on this host. Only a command that
+// starts may meet a project without a backlog; every other one is refused before anything is created.
+function locked(start, action, starts = false) {
+  const at = locate(start);
+  if (!starts && !tipOf(at, REF) && !remoteTip(at)) refuse('This project has no local backlog yet. add starts one.');
+  excludeLocal(at.project);
+  fs.mkdirSync(at.state, { recursive: true });
   const lock = path.join(at.state, 'backlog.lock');
   for (let attempt = 0; ; attempt++) {
-    try { fs.mkdirSync(lock); break; } catch (error) {
+    try { fs.writeFileSync(lock, String(process.pid), { flag: 'wx' }); break; } catch (error) {
       if (error.code !== 'EEXIST') throw error;
-      let age = 0;
-      try { age = Date.now() - fs.statSync(lock).mtimeMs; } catch { continue; }
-      if (age > 60000) { fs.rmSync(lock, { recursive: true, force: true }); continue; }
+      if (abandoned(lock)) { fs.rmSync(lock, { recursive: true, force: true }); continue; }
       if (attempt > 600) refuse('The backlog stays locked: ' + lock);
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50);
     }
   }
-  try { return action(open(start, true)); } finally { fs.rmSync(lock, { recursive: true, force: true }); }
-}
-
-function writeIssue(store, issue) {
-  fs.mkdirSync(path.join(store.dir, 'issues'), { recursive: true });
-  fs.writeFileSync(issue.file, formatIssue(issue.meta, issue.body));
+  try { return action(open(start, true)); } finally { fs.rmSync(lock, { force: true }); }
 }
 
 function find(store, id) {
@@ -291,14 +330,56 @@ function find(store, id) {
   return store.issues.find(issue => issue.id === wanted) || refuse('There is no issue ' + id + '.');
 }
 
-// Checks the whole store as it would be, then writes what the command changed and commits. A refused
-// command leaves the files as they were.
+function readBody(file) {
+  try { return fs.readFileSync(path.resolve(file), 'utf8'); }
+  catch (error) { return refuse('The file for --body-file is not readable: ' + error.message); }
+}
+
+// The status ways hold against the committed state, so an edit in a file cannot go around them.
+function wayProblems(store, changed) {
+  if (!store.created) return [];
+  const edited = store.git(['diff', '--name-only', REF, '--', 'issues']).split('\n').filter(Boolean)
+    .map(name => path.basename(name, '.md'));
+  const problems = [];
+  for (const id of new Set([...edited, ...(changed.issues || []).map(issue => issue.id)])) {
+    const issue = store.issues.find(entry => entry.id === id);
+    const old = parseIssue(store.git(['show', REF + ':issues/' + id + '.md'], { allowFail: true }) || '');
+    const before = old && meansOf(store.fields, old.meta.status);
+    const after = issue && issue.meta && meansOf(store.fields, issue.meta.status);
+    if (id !== changed.force && before && after && before !== after && !WAYS[before].includes(after)) {
+      problems.push(id + ': the backlog norm has no way from ' + before + ' to ' + after + '. From ' + before + ': '
+        + (WAYS[before].join(', ') || 'none') + '. set --force only on the user\'s explicit word.');
+    }
+  }
+  return problems;
+}
+
+// Checks the whole store as it would be, then writes what the command changed and commits; the first
+// commit starts the backlog. A refused command leaves the checkout as it was, also when the commit is
+// refused after the files are written. A text edited in a file stays, so that it can be corrected.
 function saved(store, message, changed = {}) {
   const problems = storeProblems(store);
+  if (!problems.length) problems.push(...wayProblems(store, changed));
   if (problems.length) refuse('Nothing is committed until this is fixed: ' + problems.join(' '));
-  for (const issue of changed.issues || []) writeIssue(store, issue);
-  if (changed.fields) fs.writeFileSync(path.join(store.dir, 'fields.json'), JSON.stringify(store.fields, null, 2) + '\n');
-  commit(store, message);
+  const files = (changed.issues || []).map(issue => [issue.file, formatIssue(issue.meta, issue.body)]);
+  if (changed.fields || !store.created) {
+    files.push([path.join(store.dir, 'fields.json'), JSON.stringify(store.fields, null, 2) + '\n']);
+  }
+  const fresh = !fs.existsSync(store.dir);
+  const before = files.map(([file]) => { try { return fs.readFileSync(file); } catch { return null; } });
+  try {
+    fs.mkdirSync(path.join(store.dir, 'issues'), { recursive: true });
+    for (const [file, text] of files) fs.writeFileSync(file, text);
+    commit(store, message);
+  } catch (error) {
+    if (fresh) {
+      for (const name of ['backlog', 'backlog.index']) fs.rmSync(path.join(store.state, name), { recursive: true, force: true });
+    } else {
+      files.forEach(([file], at) => (before[at] === null ? fs.rmSync(file, { force: true }) : fs.writeFileSync(file, before[at])));
+    }
+    throw error;
+  }
+  store.created = true;
 }
 
 // ---------- views
@@ -328,7 +409,8 @@ function counts(store) {
   return out;
 }
 
-// One line for the session start; reads files only and creates nothing.
+// One line for the session start. Reads the checkout as it lies, asks git only where the primary working
+// tree is, and creates nothing.
 function summary(start) {
   try {
     const project = projectDir(start);
@@ -355,13 +437,17 @@ function check(start) {
 
 // ---------- commands
 
-function parse(argv) {
+function parse(command, argv) {
   const flags = new Set(['--all', '--force', '--first', '--last', '--no-parent', '--resolved', '--no-work']);
   const options = {};
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (!arg.startsWith('--')) { rest.push(arg); continue; }
+    // An option the command does not know would otherwise pass as done without any effect.
+    if (!OPTIONS[command].includes(arg.slice(2))) {
+      refuse(command + ' has no option ' + arg + '. It takes: ' + (OPTIONS[command].map(name => '--' + name).join(', ') || 'none') + '.');
+    }
     if (flags.has(arg)) { options[arg.slice(2)] = true; continue; }
     if (i + 1 >= argv.length) refuse(arg + ' needs a value.');
     (options[arg.slice(2)] = options[arg.slice(2)] || []).push(argv[++i]);
@@ -372,26 +458,20 @@ function parse(argv) {
 }
 
 const padded = ids => ids.map(id => (/^\d+$/.test(id) ? id.padStart(4, '0') : id));
+const known = (what, value, values) => values.includes(value)
+  || refuse('Unknown ' + what + ' ' + value + '. Known: ' + (values.join(', ') || 'none') + '.');
 
-function applyOptions(store, issue, args, isNew) {
+function applyOptions(store, issue, args) {
   const { options, one, list } = args;
   const meta = issue.meta;
-  const before = meansOf(store.fields, meta.status);
   if (one('title') !== undefined) meta.title = one('title');
   if (one('type') !== undefined) meta.type = one('type');
-  if (!store.fields.type.some(entry => entry.name === meta.type)) {
-    refuse('Unknown type ' + meta.type + '. Known: ' + store.fields.type.map(entry => entry.name).join(', ') + '.');
-  }
+  known('type', meta.type, store.fields.type.map(entry => entry.name));
   if (isWork(store.fields, meta.type)) {
     if (one('status') !== undefined) meta.status = resolveStatus(store.fields, one('status'));
     else if (!('status' in meta)) meta.status = resolveStatus(store.fields, 'draft');
     if (typeof meta.rank !== 'number') {
       meta.rank = Math.max(0, ...store.issues.map(entry => (entry.meta && typeof entry.meta.rank === 'number' ? entry.meta.rank : 0))) + 1;
-    }
-    const after = meansOf(store.fields, meta.status);
-    if (!isNew && before && after && before !== after && !WAYS[before].includes(after) && !options.force) {
-      refuse('The backlog norm has no way from ' + before + ' to ' + after + '. From ' + before + ': '
-        + (WAYS[before].join(', ') || 'none') + '. --force only on the user\'s explicit word.');
     }
   } else {
     if (one('status') !== undefined) refuse('The type ' + meta.type + ' carries no status.');
@@ -410,13 +490,7 @@ function applyOptions(store, issue, args, isNew) {
     if (pair.slice(cut + 1) === '') delete meta[key]; else meta[key] = pair.slice(cut + 1);
   }
   for (const key of ['depends', 'labels']) if (Array.isArray(meta[key]) && !meta[key].length) delete meta[key];
-}
-
-function templateBody() {
-  try {
-    const text = fs.readFileSync(path.join(__dirname, '..', 'skills', 'qatlas-core-backlog', 'assets', 'task.md'), 'utf8');
-    return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '').replace(/^\s+/, '');
-  } catch { return ''; }
+  if (one('body-file') !== undefined) issue.body = readBody(one('body-file'));
 }
 
 const commands = {
@@ -429,8 +503,7 @@ const commands = {
       const used = test => store.issues.some(issue => issue.meta && test(issue.meta));
       if (action === 'add' && field === 'status') {
         if (!value) refuse('fields add status needs a name.');
-        const means = args.one('means');
-        all.status.push({ name: value, means: means === undefined || means === 'none' ? null : means });
+        all.status.push({ name: value, means: args.one('means') === undefined ? null : args.one('means') });
       } else if (action === 'add' && field === 'type') {
         if (!value) refuse('fields add type needs a name.');
         all.type.push(args.options['no-work'] ? { name: value, work: false } : { name: value });
@@ -458,7 +531,7 @@ const commands = {
       } else refuse('There is no selection ' + field + '.');
       saved(store, 'Change the fields', { fields: true });
       return { created: true, ...all };
-    });
+    }, action === 'add');
   },
 
   list(start, args) {
@@ -466,25 +539,35 @@ const commands = {
     const { options, one } = args;
     let issues = store.issues.filter(issue => issue.meta);
     const typed = one('type');
+    const wanted = one('status');
     if (!options.all) {
       issues = issues.filter(issue => (typed ? true : isWork(store.fields, issue.meta.type))
-        && (one('status') ? true : meansOf(store.fields, issue.meta.status) !== 'done'));
+        && (wanted ? true : meansOf(store.fields, issue.meta.status) !== 'done'));
     }
-    if (typed) issues = issues.filter(issue => issue.meta.type === typed);
-    if (one('status')) {
-      const wanted = one('status');
+    if (typed) {
+      known('type', typed, store.fields.type.map(entry => entry.name));
+      issues = issues.filter(issue => issue.meta.type === typed);
+    }
+    if (wanted) {
+      known('status', wanted, [...store.fields.status.map(entry => entry.name), ...QATLAS_STATUS]);
       issues = issues.filter(issue => issue.meta.status === wanted || meansOf(store.fields, issue.meta.status) === wanted);
     }
-    if (one('label')) issues = issues.filter(issue => (issue.meta.labels || []).includes(one('label')));
+    if (one('label')) {
+      known('label', one('label'), store.fields.labels);
+      issues = issues.filter(issue => (issue.meta.labels || []).includes(one('label')));
+    }
     if (one('parent')) issues = issues.filter(issue => issue.meta.parent === padded([one('parent')])[0]);
     for (const pair of options.where || []) {
-      const [key, value] = [pair.slice(0, pair.indexOf('=')), pair.slice(pair.indexOf('=') + 1)];
-      issues = issues.filter(issue => String(issue.meta[key]) === value);
+      const cut = pair.indexOf('=');
+      if (cut < 1) refuse('--where needs key=value.');
+      known('field', pair.slice(0, cut), [...CORE, ...Object.keys(store.fields.custom)]);
+      issues = issues.filter(issue => String(issue.meta[pair.slice(0, cut)]) === pair.slice(cut + 1));
     }
     return { issues: ordered(store, issues).map(issue => view(store, issue)), counts: counts(store) };
   },
 
   show(start, args) {
+    if (!args.rest[0]) refuse('show needs an id.');
     const store = open(start);
     const issue = find(store, args.rest[0]);
     return { ...view(store, issue), path: issue.file, body: issue.body };
@@ -500,24 +583,19 @@ const commands = {
       if (store.issues.some(issue => issue.id === id)) refuse('The issue ' + id + ' exists.');
       const meta = { title: '', type: args.one('type') || store.fields.type.find(entry => entry.work !== false).name };
       const issue = { id, file: path.join(store.dir, 'issues', id + '.md'), meta, body: '' };
-      applyOptions(store, issue, args, true);
-      const bodyFile = args.one('body-file');
-      issue.body = bodyFile ? fs.readFileSync(path.resolve(bodyFile), 'utf8') : (isWork(store.fields, meta.type) ? templateBody() : '');
+      applyOptions(store, issue, args);
       store.issues.push(issue);
       saved(store, 'Add ' + id + ': ' + meta.title, { issues: [issue] });
       return { id, path: issue.file, ...meta };
-    });
+    }, true);
   },
 
   set(start, args) {
     return locked(start, store => {
       const issue = find(store, args.rest[0]);
       if (!issue.meta) refuse(issue.id + ' has no frontmatter. Repair the file first.');
-      applyOptions(store, issue, args, false);
-      const bodyFile = args.one('body-file');
-      if (bodyFile) issue.body = fs.readFileSync(path.resolve(bodyFile), 'utf8');
-      else if (isWork(store.fields, issue.meta.type) && !issue.body.trim()) issue.body = templateBody();
-      saved(store, 'Change ' + issue.id + ': ' + issue.meta.title, { issues: [issue] });
+      applyOptions(store, issue, args);
+      saved(store, 'Change ' + issue.id + ': ' + issue.meta.title, { issues: [issue], force: args.options.force && issue.id });
       return view(store, issue);
     });
   },
@@ -525,9 +603,9 @@ const commands = {
   move(start, args) {
     return locked(start, store => {
       const issue = find(store, args.rest[0]);
-      const ranked = ordered(store, store.issues.filter(entry => entry.meta && typeof entry.meta.rank === 'number' && entry.id !== issue.id))
-        .sort((a, b) => a.meta.rank - b.meta.rank);
       if (!issue.meta || typeof issue.meta.rank !== 'number') refuse('Only an issue that is work has a place in the order.');
+      const ranked = store.issues.filter(entry => entry.meta && typeof entry.meta.rank === 'number' && entry.id !== issue.id)
+        .sort((a, b) => a.meta.rank - b.meta.rank || a.id.localeCompare(b.id));
       const anchor = args.one('before') || args.one('after');
       let index;
       if (args.options.first) index = 0;
@@ -545,70 +623,94 @@ const commands = {
     });
   },
 
-  save(start, args) {
+  save(start) {
     return locked(start, store => {
-      saved(store, args.one('message') || 'Save edited issues');
+      saved(store, 'Save edited issues');
       return { saved: true };
     });
   },
 
-  check(start) {
-    const problems = check(start);
-    if (problems.length) throw new Outcome(1, { problems });
-    return { problems };
-  },
-
   sync(start, args) {
+    const at = locate(start);
+    // The merge runs without a working tree through git merge-tree --write-tree, which git has from 2.38.
+    const version = at.git(['version']);
+    const [major, minor] = (/(\d+)\.(\d+)/.exec(version) || []).slice(1).map(Number);
+    if (!(major > 2 || (major === 2 && minor >= 38))) refuse('sync needs git 2.38 or newer. This is ' + version + '.');
+    const remote = remoteOf(at);
+    // Fetching moves only the tracking ref, so the network stays out of the lock until the push.
+    let theirs = null;
+    if (remote && at.git(['ls-remote', '--heads', remote, BRANCH], { network: true })) {
+      at.git(['fetch', '-q', remote, '+' + REF + ':' + tracking(remote)], { network: true });
+      theirs = tipOf(at, tracking(remote));
+    }
     return locked(start, store => {
-      saved(store, 'Save edited issues');
-      const remotes = store.git(['remote']).split('\n').filter(Boolean);
-      const remote = remotes.includes('origin') ? 'origin' : remotes[0];
+      const copies = path.join(store.state, 'backlog-remote');
+      let reported = {};
+      try { reported = JSON.parse(fs.readFileSync(path.join(copies, 'conflict.json'), 'utf8')); } catch { /* none */ }
+      saved(store, store.created ? 'Save edited issues' : 'Start the backlog');
+      fs.rmSync(copies, { recursive: true, force: true });
       if (!remote) return { synced: false, reason: 'The repo has no remote.' };
-      const tracking = 'refs/remotes/' + remote + '/' + BRANCH;
-      const push = () => { store.git(['push', '-q', remote, REF + ':' + REF]); store.git(['update-ref', tracking, store.git(['rev-parse', REF])]); };
-      const has = store.git(['ls-remote', '--heads', remote, BRANCH]);
-      const mine = store.git(['rev-parse', REF]);
-      if (!has) { push(); return { synced: true, pushed: true }; }
-      store.git(['fetch', '-q', remote, '+' + REF + ':' + tracking]);
-      const theirs = store.git(['rev-parse', tracking]);
-      const within = (a, b) => store.git(['merge-base', '--is-ancestor', a, b], { allowFail: true }) !== null;
+      const mine = tipOf(store, REF);
+      const push = () => {
+        store.git(['push', '-q', remote, REF + ':' + REF], { network: true });
+        store.git(['update-ref', tracking(remote), tipOf(store, REF)]);
+        return { synced: true, pushed: true };
+      };
+      if (!theirs) return push();
       if (mine === theirs) return { synced: true, pushed: false };
-      if (within(theirs, mine)) { push(); return { synced: true, pushed: true }; }
+      const within = (a, b) => store.git(['merge-base', '--is-ancestor', a, b], { allowFail: true }) !== null;
+      if (within(theirs, mine)) return push();
       const refresh = () => store.git(['read-tree', '--reset', '-u', REF]);
       if (within(mine, theirs)) {
         store.git(['update-ref', REF, theirs, mine]);
         refresh();
         return { synced: true, pushed: false, updated: true };
       }
-      if (args.options.resolved) {
-        commit(store, 'Merge the backlog of ' + remote, [mine, theirs]);
-        push();
-        return { synced: true, pushed: true, merged: true };
+      const [tree, ...rows] = store.git(['merge-tree', '--write-tree', '--no-messages', '--allow-unrelated-histories',
+        mine, theirs], { conflict: true }).split('\n');
+      // Each conflicted file is listed once per side that holds it: 1 the common base, 2 mine, 3 theirs.
+      const sides = {};
+      for (const row of rows) {
+        const [, side, name] = /^\d+ [0-9a-f]+ ([123])\t(.+)$/.exec(row) || [];
+        if (name) sides[name] = (sides[name] || '') + side;
       }
-      const merged = store.git(['merge-tree', '--write-tree', '--name-only', mine, theirs], { allowFail: true });
-      if (merged && /^[0-9a-f]{40,}$/.test(merged.split('\n')[0])) {
-        const made = store.git(['commit-tree', merged.split('\n')[0], '-p', mine, '-p', theirs, '-m', 'Merge the backlog of ' + remote]);
-        store.git(['update-ref', REF, made, mine]);
-        refresh();
-        push();
-        return { synced: true, pushed: true, merged: true };
+      const files = Object.keys(sides);
+      // --resolved settles the conflict that was reported and nothing the user has not seen: the same
+      // state of the remote and no further file.
+      const settled = args.options.resolved && reported.theirs === theirs
+        && files.every(name => (reported.files || []).includes(name));
+      if (files.length && !settled) {
+        // The remote versions are laid beside the checkout for comparison.
+        fs.mkdirSync(copies, { recursive: true });
+        fs.writeFileSync(path.join(copies, 'conflict.json'), JSON.stringify({ theirs, files }) + '\n');
+        for (const name of files) {
+          const text = store.git(['show', theirs + ':' + name], { allowFail: true });
+          if (text === null) continue;
+          fs.mkdirSync(path.dirname(path.join(copies, name)), { recursive: true });
+          fs.writeFileSync(path.join(copies, name), text + '\n');
+        }
+        const numbers = [...store.issues.map(issue => issue.id), ...store.git(['ls-tree', '--name-only', theirs, 'issues/'])
+          .split('\n').map(name => path.basename(name, '.md'))].map(Number).filter(Number.isInteger);
+        throw new Outcome(2, { synced: false, conflict: true, files, collisions: files.filter(name => sides[name] === '23'),
+          free: String(Math.max(0, ...numbers) + 1).padStart(4, '0'), local: store.dir, remote: copies,
+          next: 'Bring each file under local to the state that shall hold, then run sync --resolved. A file under '
+            + 'collisions holds two different issues with one number: first add the local one again with --id, from '
+            + 'the number under free on.' });
       }
-      // Both sides changed the same file. The remote versions are laid beside the checkout for comparison.
-      const copies = path.join(store.state, 'backlog-remote');
-      fs.rmSync(copies, { recursive: true, force: true });
-      const changed = store.git(['diff', '--name-only', mine, theirs]).split('\n').filter(Boolean);
-      const base = store.git(['merge-base', mine, theirs], { allowFail: true });
-      const files = changed.filter(name => !base || (store.git(['diff', '--name-only', base, mine, '--', name])
-        && store.git(['diff', '--name-only', base, theirs, '--', name])));
-      for (const name of files) {
-        const text = store.git(['show', theirs + ':' + name], { allowFail: true });
-        if (text === null) continue;
-        fs.mkdirSync(path.dirname(path.join(copies, name)), { recursive: true });
-        fs.writeFileSync(path.join(copies, name), text + '\n');
+      let merged = tree;
+      if (files.length) {
+        // The checkout decides the conflicted files; everything else comes from the merge, so that no
+        // change of the remote is lost. The index then returns to the checkout for the refresh below.
+        store.git(['read-tree', tree]);
+        store.git(['update-index', '--add', '--remove', '--', ...files]);
+        merged = store.git(['write-tree']);
+        store.git(['read-tree', mine]);
       }
-      throw new Outcome(2, { synced: false, conflict: true, files, local: store.dir, remote: copies,
-        next: 'Bring each file under local to the state that shall hold, then run sync --resolved.' });
-    });
+      const made = store.git(['commit-tree', merged, '-p', mine, '-p', theirs, '-m', 'Merge the backlog of ' + remote]);
+      store.git(['update-ref', REF, made, mine]);
+      refresh();
+      return { ...push(), merged: true };
+    }, true);
   },
 };
 
@@ -618,11 +720,11 @@ function main() {
   const start = targetAt >= 0 ? path.resolve(argv.splice(targetAt, 2)[1]) : process.cwd();
   const command = argv.shift();
   if (!commands[command]) {
-    process.stderr.write('usage: qatlas-backlog.js fields|list|show|add|set|move|save|check|sync [--target <dir>]\n');
+    process.stderr.write('usage: qatlas-backlog.js ' + Object.keys(commands).join('|') + ' [--target <dir>]\n');
     process.exit(1);
   }
   try {
-    process.stdout.write(JSON.stringify(commands[command](start, parse(argv)), null, 2) + '\n');
+    process.stdout.write(JSON.stringify(commands[command](start, parse(command, argv)), null, 2) + '\n');
   } catch (error) {
     if (error instanceof Outcome) {
       process.stdout.write(JSON.stringify(error.output, null, 2) + '\n');
@@ -636,4 +738,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { check, summary, BRANCH };
+module.exports = { check, summary, configProblems };

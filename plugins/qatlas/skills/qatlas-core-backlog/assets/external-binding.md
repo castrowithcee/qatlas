@@ -27,13 +27,4 @@ edit: shared
 - **Lokaler Spiegel:** keiner
 
 <!-- Nach .qatlas-brain/backlog/BACKLOG.md kopieren, alle Platzhalter ersetzen und diesen Kommentar
-     entfernen. Die Datei wird in jeder Session geladen: eine Zeile je Antwort, ohne Begründung, Anleitung
-     oder Anbieterwissen.
-     - Ein Merkmal ist, was das System am Arbeitspaket selbst zeigt: Feld, Label, Typ, offen oder geschlossen.
-     - Jeder Status ist eindeutig erkennbar. Tragen zwei dasselbe Merkmal, nenne das ausdrücklich und welcher
-       von beiden beim Lesen gilt.
-     - Hat das System unter ausführbaren Tasks keine Reihenfolge, schreibe „keine“.
-     - Der aktuelle Datensatz bleibt ohne Historie ausführbar.
-     - Nachschlagedaten, die nur beim Schreiben nötig sind, etwa Feld- oder Options-IDs, Raten- und
-       Batchgrenzen, stehen in einer eigenen Datei am Ort der Wahl des Nutzers. Die betroffene Zeile verweist
-       darauf mit Lesebedingung. -->
+     entfernen. -->

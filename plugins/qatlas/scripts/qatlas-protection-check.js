@@ -49,8 +49,7 @@ function git(args) {
   return execFileSync('git', ['-C', target, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 1 << 28 });
 }
 
-function stagedLines() {
-  const diff = git(['diff', '--cached', '--no-color', '--no-ext-diff', '--unified=0']);
+function addedLines(diff) {
   const lines = [];
   let file = null;
   let line = 0;
@@ -62,6 +61,8 @@ function stagedLines() {
   }
   return lines;
 }
+
+const stagedLines = () => addedLines(git(['diff', '--cached', '--no-color', '--no-ext-diff', '--unified=0']));
 
 function scan(lines, rules) {
   const found = [];
@@ -130,80 +131,90 @@ function gitleaks() {
 }
 
 let root = null;
-try { root = git(['rev-parse', '--show-toplevel']).trim(); } catch { /* not a git repo */ }
 
-const state = readConfig(root || target);
-if (!state.protectionValid) {
-  process.stdout.write('protection: check not possible, invalid configuration.\n'
-    + state.problems.map(line => '- ' + line).join('\n') + '\n');
-  process.exit(3);
-}
-const protection = state.config.protection;
-if (argv.includes('--print-config')) {
-  process.stdout.write(JSON.stringify(protection) + '\n');
-  process.exit(0);
-}
-if (!root) process.exit(0);
+function main() {
+  try { root = git(['rev-parse', '--show-toplevel']).trim(); } catch { /* not a git repo */ }
 
-let lines;
-try {
-  lines = stagedLines();
-} catch {
-  process.stdout.write('protection: check not possible, staged diff not readable.\n');
-  process.exit(3);
-}
-
-const recording = argv.includes('--allow');
-const projectFile = locations(root).projectConfigFile;
-const userFile = locations().configFile;
-const allowFile = argv.includes('--local') ? userFile : projectFile;
-const sources = recording ? [readAllow(allowFile, false)] : [readAllow(projectFile, true), readAllow(userFile, false)];
-const problems = sources.flatMap(source => source.problems);
-if (problems.length) {
-  process.stdout.write('protection: check not possible, invalid allowlist file.\n'
-    + problems.map(line => '- ' + line).join('\n') + '\n');
-  process.exit(3);
-}
-const allow = { entries: sources.flatMap(source => source.entries), value: sources[0].value };
-const allowable = ['ask', 'warn'].includes(protection['personal-data']);
-
-const allowHash = flag('--allow');
-if (recording) {
-  const hit = allowHash && allowable
-    ? scan(lines, PERSONAL_RULES).find(entry => entry.hash === allowHash) : null;
-  if (!hit) {
-    process.stdout.write('protection: id ' + (allowHash || '(missing)') + ' is no allowable personal-data '
-      + 'finding in the staged diff (only ask or warn); nothing recorded.\n');
-    process.exit(2);
+  const state = readConfig(root || target);
+  if (!state.protectionValid) {
+    process.stdout.write('protection: check not possible, invalid configuration.\n'
+      + state.problems.map(line => '- ' + line).join('\n') + '\n');
+    process.exit(3);
   }
-  const known = allow.entries.some(e => e.file === hit.file && e.rule === hit.rule && e.hash === hit.hash);
-  if (!known) {
-    const value = allow.value || { format: 1 };
-    value.protection = { ...value.protection, allow: allow.entries.concat([{ file: hit.file, rule: hit.rule, hash: hit.hash }]) };
-    fs.mkdirSync(path.dirname(allowFile), { recursive: true });
-    fs.writeFileSync(allowFile, JSON.stringify(value, null, 2) + '\n');
+  const protection = state.config.protection;
+  if (argv.includes('--print-config')) {
+    process.stdout.write(JSON.stringify(protection) + '\n');
+    process.exit(0);
   }
-  process.stdout.write(allowFile + '\n');
-  process.exit(0);
+  if (!root) process.exit(0);
+
+  let lines;
+  try {
+    lines = stagedLines();
+  } catch {
+    process.stdout.write('protection: check not possible, staged diff not readable.\n');
+    process.exit(3);
+  }
+
+  const recording = argv.includes('--allow');
+  const projectFile = locations(root).projectConfigFile;
+  const userFile = locations().configFile;
+  const allowFile = argv.includes('--local') ? userFile : projectFile;
+  const sources = recording ? [readAllow(allowFile, false)] : [readAllow(projectFile, true), readAllow(userFile, false)];
+  const problems = sources.flatMap(source => source.problems);
+  if (problems.length) {
+    process.stdout.write('protection: check not possible, invalid allowlist file.\n'
+      + problems.map(line => '- ' + line).join('\n') + '\n');
+    process.exit(3);
+  }
+  const allow = { entries: sources.flatMap(source => source.entries), value: sources[0].value };
+  const allowable = ['ask', 'warn'].includes(protection['personal-data']);
+
+  const allowHash = flag('--allow');
+  if (recording) {
+    const hit = allowHash && allowable
+      ? scan(lines, PERSONAL_RULES).find(entry => entry.hash === allowHash) : null;
+    if (!hit) {
+      process.stdout.write('protection: id ' + (allowHash || '(missing)') + ' is no allowable personal-data '
+        + 'finding in the staged diff (only ask or warn); nothing recorded.\n');
+      process.exit(2);
+    }
+    const known = allow.entries.some(e => e.file === hit.file && e.rule === hit.rule && e.hash === hit.hash);
+    if (!known) {
+      const value = allow.value || { format: 1 };
+      value.protection = { ...value.protection, allow: allow.entries.concat([{ file: hit.file, rule: hit.rule, hash: hit.hash }]) };
+      fs.mkdirSync(path.dirname(allowFile), { recursive: true });
+      fs.writeFileSync(allowFile, JSON.stringify(value, null, 2) + '\n');
+    }
+    process.stdout.write(allowFile + '\n');
+    process.exit(0);
+  }
+
+  const results = [];
+  if (protection.secrets !== 'allow') {
+    results.push(['secrets', protection.secrets, gitleaks() || scan(lines, SECRET_RULES)]);
+  }
+  if (protection['personal-data'] !== 'allow') {
+    const found = scan(lines, PERSONAL_RULES)
+      .filter(hit => !(allowable
+        && allow.entries.some(e => e.file === hit.file && e.rule === hit.rule && e.hash === hit.hash)))
+      .map(hit => ({ item: hit.item + ' [' + hit.hash + ']' }));
+    results.push(['personal-data', protection['personal-data'], found]);
+  }
+
+  const hits = results.filter(([, , found]) => found.length);
+  if (!hits.length) process.exit(0);
+
+  for (const [category, level, found] of hits) {
+    process.stdout.write(category + ' (' + level + '):\n' + found.map(hit => '- ' + hit.item).join('\n') + '\n');
+  }
+  const levels = hits.map(([, level]) => level);
+  process.exit(levels.includes('block') ? 1 : levels.includes('ask') ? 2 : 0);
 }
 
-const results = [];
-if (protection.secrets !== 'allow') {
-  results.push(['secrets', protection.secrets, gitleaks() || scan(lines, SECRET_RULES)]);
-}
-if (protection['personal-data'] !== 'allow') {
-  const found = scan(lines, PERSONAL_RULES)
-    .filter(hit => !(allowable
-      && allow.entries.some(e => e.file === hit.file && e.rule === hit.rule && e.hash === hit.hash)))
-    .map(hit => ({ item: hit.item + ' [' + hit.hash + ']' }));
-  results.push(['personal-data', protection['personal-data'], found]);
-}
+// For other scripts: the secret findings among the added lines of a unified diff.
+const scanSecrets = diff => scan(addedLines(diff), SECRET_RULES).map(hit => ({ item: hit.item }));
 
-const hits = results.filter(([, , found]) => found.length);
-if (!hits.length) process.exit(0);
+if (require.main === module) main();
 
-for (const [category, level, found] of hits) {
-  process.stdout.write(category + ' (' + level + '):\n' + found.map(hit => '- ' + hit.item).join('\n') + '\n');
-}
-const levels = hits.map(([, level]) => level);
-process.exit(levels.includes('block') ? 1 : levels.includes('ask') ? 2 : 0);
+module.exports = { scanSecrets };

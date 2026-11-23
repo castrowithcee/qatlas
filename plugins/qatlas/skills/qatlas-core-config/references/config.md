@@ -30,7 +30,7 @@ ist. Ist die Nutzerdatei kein gültiges JSON oder fehlt ihr `"format": 1`, stopp
 
 | Schlüssel | Datei | Wirkung |
 |---|---|---|
-| `protection.secrets` | beide | `block` oder `allow` für Secrets vor dem Commit, Standard `block` |
+| `protection.secrets` | beide | `block` oder `allow` für Secrets vor dem Commit, auch im lokalen Backlog, Standard `block` |
 | `protection.personal-data` | beide | `block`, `ask`, `warn` oder `allow` für personenbezogene Daten, Standard `ask` |
 | `protection.allow` | beide | Freigaben bestätigter Fehlalarme |
 | `memory.enable` | beide | `false` schaltet das Repo-Memory unter `.qatlas-brain/memory/` ab, Standard `true` |
@@ -53,6 +53,8 @@ Repos, die keine Qatlas-Dateien aufnehmen. Die Kennung nennt der Befund in eckig
 Der Block gilt nur nutzerweit und ist die eigene Vorgabe für jeden neuen lokalen Backlog. Jeder der vier
 Schlüssel `status`, `type`, `labels` und `custom` ersetzt die ausgelieferte Auswahl dieses Felds, ein
 fehlender behält sie. Ein begonnener Backlog trägt seine Auswahl selbst und liest den Block nicht mehr.
+Solange die Nutzerdatei ungültig ist oder der Block einen Fehler oder einen unbekannten Schlüssel enthält,
+beginnt deshalb kein lokaler Backlog. Doctor meldet beides.
 
 ```json
 {
