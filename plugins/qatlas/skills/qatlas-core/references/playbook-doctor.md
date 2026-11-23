@@ -20,12 +20,12 @@ aktuellen Host verfügbar sind, prüft erst `qatlas run`.
 ## Planungssystem
 
 Prüfe `.qatlas-brain/backlog/BACKLOG.md` lesend gegen [die
-Backlog-Norm](../../qatlas-core-backlog/SKILL.md), eine externe Bindung zusätzlich gegen deren
-Bindungsvorlage. Melde als Hinweis:
+Backlog-Norm](../../qatlas-core-backlog/SKILL.md), die Bindung an ein anderes System als den lokalen Backlog
+zusätzlich gegen deren Bindungsvorlage. Melde als Hinweis:
 
 - jede fehlende Antwort, jeden Status außerhalb der Norm und jeden nicht eindeutig erkennbaren Status,
-- gewachsenen Inhalt: bei einer Bindung alles über eine Zeile je Antwort hinaus, etwa Begründung, Anleitung,
-  Anbieterwissen oder Verlauf, bei einem Roster erledigte Tasks und mehr als eine Zeile je Eintrag.
+- gewachsenen Inhalt: alles über eine Zeile je Antwort hinaus, etwa Begründung, Anleitung, Anbieterwissen,
+  Verlauf oder einzelne Tasks.
 
 ## Bericht
 

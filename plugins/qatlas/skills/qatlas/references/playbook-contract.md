@@ -22,7 +22,7 @@ Sie erweitert weder Scope noch Autorisierung und hebt kein Limit des Modus auf.
 Reichen der beim Sessionstart geladene Einstieg und der Taskvertrag nicht aus, öffne weiteres Projektwissen
 über [die Navigation](../../qatlas-core-navigation/SKILL.md).
 
-Lies im Planungssystem zuerst nur Roster oder externe Metadaten des Scopes und danach nur die Tasks
+Lies im Planungssystem zuerst nur die Übersicht des Scopes und danach nur die Tasks
 vollständig, mit denen du arbeitest. Öffne Kommentare oder Historie nur bei einem Widerspruch, bei fehlender,
 für die Entscheidung relevanter Begründung oder bei einem ausdrücklichen Verweis im aktuellen Eintrag.
 

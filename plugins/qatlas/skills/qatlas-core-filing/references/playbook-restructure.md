@@ -8,7 +8,7 @@ description: >
 
 1. **Bestandsaufnahme:** Bestimme Ziel, Bearbeitungsrechte, betroffene Verweise und mögliche Namenskollisionen,
    bevor du etwas änderst. `edit: locked` braucht ausdrückliche Freigabe.
-2. **Umbenennen und verschieben:** Typpräfix und Task-ID bleiben stabil. Suche nach Verweisen auf den alten
+2. **Umbenennen und verschieben:** Das Typpräfix bleibt stabil. Suche nach Verweisen auf den alten
    Pfad und ändere nur die tatsächlich gebrochenen.
 3. **Zusammenführen:** Übernimm alle verbindlichen Aussagen in die Zieldatei am maßgeblichen Ort. Entferne
    dann die Quelle und lenke ihre Verweise auf das Ziel um.

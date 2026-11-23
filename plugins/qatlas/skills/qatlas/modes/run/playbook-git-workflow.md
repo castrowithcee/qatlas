@@ -34,16 +34,10 @@ Sicherheitsisolation, nenne einen separaten Clone oder eine Sandbox als Vorausse
 
 ## Planungssystem
 
-- **Extern:** Als Lead: Beanspruche jeden Task unmittelbar vor der ersten schreibenden Ausführung, setze
-  `review`, `waiting` oder `draft` selbst und lege Entwürfe selbst an. Ist ein Task inzwischen fremd
-  beansprucht oder sein Anspruch unklar, ändere nichts daran und frage den Supervisor. `done` setzt, wer
-  integriert, nach Integration und Nachweis auf dem Kontroll-Branch, einen Task ohne Dateiänderung der Lead
-  nach seiner Abnahme.
-- **Lokales Backlog im Repo:** Während Leads oder Integrator laufen, schreibt es nur der Integrator, auf dem
-  Kontroll-Branch. Das Paket im Steuerskript ist der Anspruch des Leads. Als Lead, auch ohne Integrator, oder
-  Supervisor: Was du sonst ins Backlog schreiben würdest, protokolliere mit `log` (`status` für Statuswechsel
-  samt Inhalt, `erfasst` für Entwürfe), mit Task-Branch, Worktree-Pfad und Stand. Der Supervisor trägt es nach
-  dem Ende des letzten Subagents ein.
+Als Lead: Beanspruche jeden Task unmittelbar vor der ersten schreibenden Ausführung, setze `review`,
+`waiting` oder `draft` selbst und lege Entwürfe selbst an. Ist ein Task inzwischen fremd beansprucht oder sein
+Anspruch unklar, ändere nichts daran und frage den Supervisor. `done` setzt, wer integriert, nach Integration
+und Nachweis auf dem Kontroll-Branch, einen Task ohne Dateiänderung der Lead nach seiner Abnahme.
 
 ## Commits und Checkpoints
 

@@ -152,6 +152,12 @@ if (specification.project) {
 
 lines.push('', body);
 
+if (block === 'project-backlog') {
+  let state = null;
+  try { state = require('../scripts/qatlas-backlog.js').summary(root); } catch { /* the index alone is enough */ }
+  if (state) lines.push('', 'LOCAL BACKLOG: ' + state);
+}
+
 if (block === 'qatlas') {
   lines.push('', scaffold
     ? 'QATLAS SCAFFOLD: yes (.qatlas-brain/ exists; AGENTS.md is the entry; backlog is injected separately; '

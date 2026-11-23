@@ -40,8 +40,7 @@ nie wegen des Umfangs allein. Du musst dafür nicht erst einen kleinen Worker sc
 `standard` und `demanding` vor dem Start kurz. Setze das Korrekturbudget bei einem Modellwechsel nicht zurück.
 
 Der Taskvertrag ist der Auftrag. Verfasse ihn nicht neu. Nenne dem Worker Task-ID und Titel und den Leseweg
-zum aktuellen Eintrag: beim lokalen Backlog den Pfad der Task-Datei, bei einem externen Planungssystem den
-Leseaufruf, mit dem du den Task selbst gelesen hast. Kann ein Worker den Task so nicht lesen, gib ihm den
+zum aktuellen Eintrag: den Leseaufruf, mit dem du den Task selbst gelesen hast. Kann ein Worker den Task so nicht lesen, gib ihm den
 aktuellen Eintrag wörtlich mit. Ergänze nur, was der Vertrag nicht enthält, und gib keine Geheimnisse weiter:
 
 - **Arbeitsort:** Worktree und Branch sowie ein eigenes Unterverzeichnis von `<tmp>` für temporäre Dateien des

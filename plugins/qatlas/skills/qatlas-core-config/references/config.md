@@ -10,7 +10,7 @@ Standardwerten abweicht, und Init legt keine an. Eine fehlende Datei ist der Nor
 
 | Datei | Blöcke | Zweck |
 |---|---|---|
-| `~/.qatlas/plugins/config.json` | `protection`, `memory`, `statusline`, `run` | Nutzerweite Einstellungen für alle Projekte |
+| `~/.qatlas/plugins/config.json` | `protection`, `memory`, `statusline`, `run`, `backlog` | Nutzerweite Einstellungen für alle Projekte |
 | `<repo>/.qatlas/plugins/config.json` | `protection`, `memory` | Versionierte Projektwerte: Ein gesetzter Wert überschreibt den nutzerweiten, ein fehlender erbt |
 
 Jede Datei trägt `"format": 1`. Ohne diese Angabe ist sie ungültig. Ein Block in der falschen Datei und ein
@@ -47,5 +47,27 @@ keinen Klartext. Ihn legt
 Projektdatei an. Dort gilt er erst, wenn die Datei mit ihm gestagt ist, und ist so im Commit sichtbar. Mit
 zusätzlich `--local` landet er in der Nutzerdatei, gilt sofort und nur auf diesem Rechner. Das ist der Weg für
 Repos, die keine Qatlas-Dateien aufnehmen. Die Kennung nennt der Befund in eckigen Klammern.
+
+## `backlog`
+
+Der Block gilt nur nutzerweit und ist die eigene Vorgabe für jeden neuen lokalen Backlog. Jeder der vier
+Schlüssel `status`, `type`, `labels` und `custom` ersetzt die ausgelieferte Auswahl dieses Felds, ein
+fehlender behält sie. Ein begonnener Backlog trägt seine Auswahl selbst und liest den Block nicht mehr.
+
+```json
+{
+  "format": 1,
+  "backlog": {
+    "type": [{ "name": "task" }, { "name": "bug" }, { "name": "idea", "work": false }],
+    "labels": ["frontend", "backend"],
+    "custom": { "priority": ["high", "normal", "low"], "kunde": null }
+  }
+}
+```
+
+- `status` ist eine Liste aus `name` und `means`, einem Status der Backlog-Norm oder `null`. Jeder Status der
+  Norm braucht mindestens einen Wert. Stehen mehrere dafür, schreibt Qatlas den ersten.
+- `type` ist eine Liste aus `name` und optional `"work": false` für einen Typ ohne Status, etwa eine Idee.
+- `custom` nennt eigene Felder: mit einer Liste als Auswahl, mit `null` für freien Text.
 
 Zugangsdaten gehören nie in eine `config.json`.

@@ -88,8 +88,8 @@ for (const file of markdownFiles(brain, true)) {
 // lead to a file. Everything here is a note, as the user may have asked for an exception.
 const folders = ['backlog', 'memory', 'knowledge', 'playbooks', 'templates', 'zone-import', 'zone-export',
   ...reserved.map(name => name.replace('.md', '').toLowerCase())];
-const types = ['task', 'meta', 'policy', 'playbook', 'fact', 'memory', 'knowledge'];
-const fixedNames = ['BACKLOG.md', 'IDEAS.md', 'MEMORY.md', 'README.md'];
+const types = ['meta', 'policy', 'playbook', 'fact', 'memory', 'knowledge'];
+const fixedNames = ['BACKLOG.md', 'MEMORY.md'];
 const text = file => { try { return fs.readFileSync(file, 'utf8'); } catch { return null; } };
 let rootEntries = [];
 try { rootEntries = fs.readdirSync(brain, { withFileTypes: true }); } catch { /* no knowledge space */ }
@@ -104,8 +104,20 @@ for (const entry of rootEntries.sort((a, b) => a.name.localeCompare(b.name))) {
     notes.push('.qatlas-brain/' + entry.name + ' is none of the reserved files.');
   }
 }
+// The folder backlog/ holds the binding alone; issues of the local backlog live on their own branch.
+let backlogEntries = [];
+try { backlogEntries = fs.readdirSync(path.join(brain, 'backlog')).filter(name => name !== 'BACKLOG.md'); } catch { /* none */ }
+if (backlogEntries.length) {
+  notes.push('.qatlas-brain/backlog/ holds more than BACKLOG.md. Tasks, projects and ideas of the local backlog '
+    + 'live as issues on the branch qatlas-backlog; move them with the user by switching the planning system.');
+}
+try {
+  for (const problem of require('./qatlas-backlog.js').check(target)) notes.push('local backlog: ' + problem);
+} catch (error) { notes.push('local backlog: ' + error.message); }
+
 for (const file of markdownFiles(brain, true)) {
   const name = path.relative(brain, file).split(path.sep).join('/');
+  if (name.startsWith('backlog/') && name !== 'backlog/BACKLOG.md') continue;
   const base = path.basename(file);
   const head = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---/.exec(text(file) || '');
   const type = head && (/^type:[ \t]*(\S+)/m.exec(head[1]) || [])[1];

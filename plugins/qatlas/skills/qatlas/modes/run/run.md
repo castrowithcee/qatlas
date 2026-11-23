@@ -22,9 +22,7 @@ Committe im gewählten Scope lokal und lass lokal integrieren, ohne nachzufragen
 und merge sie nur, wenn Nutzer- oder Projektanweisungen es verlangen und erlauben. Protokolliere dann vor dem
 ersten Lead einmal als `regel`, welche Vorgabe Push, Pull Request und Merge erlaubt, mit ihrem Ort, und mit
 welchen Mitteln das Projekt sie ausführt. Gleiche eine Warnung des Hosts zu einem Merge damit ab. Löse keine
-andere externe oder unumkehrbare Wirkung aus. Schreibe bei einem lokalen Backlog nur vor dem ersten Lead und
-nach dem Ende des letzten Subagents hinein. Was du dazwischen schriebst, etwa einen Statuswechsel oder eine
-festgehaltene Antwort, protokolliere mit `log --type status`.
+andere externe oder unumkehrbare Wirkung aus.
 
 `<run>` ist das Steuerskript `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run.js`, `<tools>`
 sind die Lauf-Werkzeuge `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run-tools.js` und
@@ -204,8 +202,7 @@ alle) und `werkzeug` (Defekt des Steuerskripts, der Lauf-Werkzeuge oder dieser A
 
 ## Neue Entwürfe
 
-Lege einen Entwurf, den du selbst erfasst, bei einem externen Planungssystem sofort nach dessen Bindung als
-Entwurf an. Beim lokalen Backlog trage jeden Entwurf nach „Laufende“ ein.
+Lege einen Entwurf, den du selbst erfasst, sofort nach der Bindung des Planungssystems als Entwurf an.
 
 Kläre die Reife aller Entwürfe dieses Laufs nach `<run> end` und vor dem Abschlussblock, sobald jeder im
 Planungssystem steht, ohne sie selbst zu lesen oder zu recherchieren. Gib sie gemeinsam einem lesenden Worker
@@ -265,8 +262,7 @@ Lauf jeden begonnenen Task ohne Rückfrage fortsetzen kann:
 2. **Kontroll-Branch:** Steht im Arbeitsbaum eines Kontroll-Branches ein unvollendeter Merge, nimm ihn mit
    `git merge --abort` zurück, sodass der Arbeitsbaum sauber auf dem letzten vollständigen Stand steht.
    Lösche oder verwirf dort sonst nichts.
-3. **Tasks sichern:** Gehe jeden Task des Laufs durch, den `report` nicht als integriert führt. Bei einem
-   lokalen Backlog trägst du die Statuswechsel selbst ein.
+3. **Tasks sichern:** Gehe jeden Task des Laufs durch, den `report` nicht als integriert führt.
    - Ohne eigene Arbeit, also ohne Task-Branch oder mit einem ohne eigene Commits und ohne nicht committete
      Änderung: Er bleibt oder geht auf `ready`.
    - Mit eigener Arbeit, die der Kontroll-Branch nicht enthält: Sichere nicht committete Arbeit als
@@ -288,8 +284,7 @@ Führe `<run> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket m
 oder gesichert ist und `report` keine offene Übergabe zeigt. Melde dem Nutzer bei zugeschaltetem Integrator
 dann in genau einer Zeile, dass alle Tasks integriert oder übergeben sind und die Schlussprüfung läuft, und
 warte auf sein `done` nach seiner Schlussprüfung. Ohne Integrator hat der letzte Lead sie vor seinem `done`
-ausgeführt. War sie rot, handle zuerst nach „Rote Schlussprüfung“. Trage danach bei einem lokalen Backlog die protokollierten Statuswechsel und Entwürfe ein
-(`status` und `erfasst` in den `notes` von `report`), führe die Bereinigungsschritte aus, die
+ausgeführt. War sie rot, handle zuerst nach „Rote Schlussprüfung“. Führe danach die Bereinigungsschritte aus, die
 Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Leert ein
 solcher Schritt etwas, das andere Projekte auf dem Host mitnutzen, etwa einen Build-Cache oder ein gemeinsames
 Temp-Verzeichnis, prüfe vorher mit `<tools> slot status`, ob ein Slot belegt ist oder ein Aufruf wartet. Ist

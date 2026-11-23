@@ -10,7 +10,7 @@ Nimm in einen Lauf höchstens so viele Tasks auf, wie sein Laufbudget erlaubt. W
 Commit- noch als Subagent-Zahl und passe es nicht an die Zahl der `ready`-Tasks an. Lass weitere
 `ready`-Tasks in ihrer bestehenden Reihenfolge für spätere Läufe.
 
-1. Bestimme aus dem Roster oder den externen Metadaten des gewählten Scopes Status, Kurzstand, Reihenfolge,
+1. Bestimme aus der Übersicht des Planungssystems für den gewählten Scope Status, Kurzstand, Reihenfolge,
    Abhängigkeiten und Zuständigkeitssignale. Nennt der Aufruf Tasks ausdrücklich, bestimme das nur für sie.
 2. Nimm ausführbare `ready`-Tasks in der Reihenfolge des Planungssystems. Legt es unter ihnen keine
    Reihenfolge fest, wähle nach erfüllbaren Abhängigkeiten, fachlichem Wert, früher Risikoklärung und

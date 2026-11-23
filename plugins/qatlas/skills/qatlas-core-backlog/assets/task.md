@@ -1,16 +1,8 @@
 ---
 description: >
-  <Worum geht es bei dieser Aufgabe? Ein Satz.>
-type: task
-edit: shared
-status: draft         # draft | ready | in-progress | review | waiting | deferred | done
+  Rumpf eines Tasks im lokalen Backlog mit allen Abschnitten des Taskvertrags, vom Warum bis zum
+  Abschlussbericht.
 ---
-
-# Aufgabe: <Titel>
-
-<!-- Nach .qatlas-brain/backlog/task-<id>-<slug>.md oder
-.qatlas-brain/backlog/<project>/task-<id>-<slug>.md kopieren und vor dem Schreiben alle Platzhalter
-ersetzen. -->
 
 ## Warum
 <!-- Entscheidungsrelevanter Kontext, keine Wiederholung des Titels. -->

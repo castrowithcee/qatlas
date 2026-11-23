@@ -15,7 +15,7 @@ description: >
    mehrere Tasks schneide schon beim Anlegen nach Gegenstand, damit jeder Task nur seinen Abschnitt braucht.
 4. **Vorlage:** Prüfe vor einer wiederkehrenden Nutzerstruktur `.qatlas-brain/templates/`. Verlangt die
    Aufgabe eine Vorlage von Qatlas, nimm die, die der zuständige Skill in seinen `assets/` mitliefert.
-5. **Name:** Nenne sie `<type>-<slug>.md`, einen Task `task-<id>-<slug>.md`.
+5. **Name:** Nenne sie `<type>-<slug>.md`.
 6. **Frontmatter:** Setze es für Markdown nach dem Frontmatter-Schema.
 7. **Navigation:** Muss der neue Inhalt für bestimmte Arbeit gelesen werden, ergänze eine eindeutige
    Lesebedingung: bei einer reservierten Datei unter `Projektwissen` in `AGENTS.md`, sonst in der README des

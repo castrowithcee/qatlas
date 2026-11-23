@@ -22,10 +22,10 @@ festen Ordner, und jede nimmt nur ihre Aufgabe oder ihre Typen auf.
 - Für gewöhnliche Datei- und Ordnernamen gelten Kebab-Case, reines ASCII und keine Leerzeichen. Müller wird
   zu `mueller`.
 - Reservierte Funktions- und Agentendateien behalten ihre feste Schreibweise: `README.md`, `AGENTS.md`,
-  `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `PROJECT.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`,
+  `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `PROJECT.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`,
   `TESTING.md`, `CONTRIBUTING.md`, `FRAMEWORK.md` und `INDEX.md`. Bestehende Funktionsdateien behalten ihren Zweck und
   ihren lokalen Geltungsbereich.
-- Inhaltsdateien im Wissensraum beginnen mit dem Frontmatter-`type`. Nur Tasks tragen zusätzlich eine ID.
+- Inhaltsdateien im Wissensraum beginnen mit dem Frontmatter-`type`.
 - Daten werden als `YYYY-MM-DD` geschrieben. Chronologische Dateien dürfen mit diesem Datum beginnen.
 - ä, ö, ü und ß werden in deutschen Dateien direkt geschrieben.
 
@@ -52,8 +52,8 @@ Eintrag an und nie einen Ordner über die festen hinaus, außer der Nutzer verla
 ## Vorgang wählen
 
 Folgt das Anlegen, Ändern oder Verschieben einer Datei einer kanonischen Vorlage oder einem Fachvertrag,
-etwa ein Task samt Abschluss nach `done/` unter dem Vertrag des lokalen Backlogs, genügen Vorlage und
-Vertrag. Lies die folgenden Referenzen nur für das, was beide offenlassen. Andernfalls lies die Referenz des
+etwa die Bindung eines Planungssystems nach der Backlog-Norm, genügen Vorlage und Vertrag. Issues des lokalen
+Backlogs sind keine Dateien des Wissensraums und folgen allein der Backlog-Norm. Lies die folgenden Referenzen nur für das, was beide offenlassen. Andernfalls lies die Referenz des
 Vorgangs vollständig vor dem Vorgang:
 
 - Anlegen ohne passende Vorlage: [Datei](references/playbook-create.md)
@@ -62,4 +62,4 @@ Vorgangs vollständig vor dem Vorgang:
   [Umstrukturieren](references/playbook-restructure.md)
 - Import: [Import](references/playbook-import.md)
 - Frontmatter setzen oder ändern: [Frontmatter](references/frontmatter.md)
-- Ordner, Namen oder Task-ID im Wissensraum bestimmen: [Projekt-Wissensraum](references/structure.md)
+- Ordner oder Namen im Wissensraum bestimmen: [Projekt-Wissensraum](references/structure.md)

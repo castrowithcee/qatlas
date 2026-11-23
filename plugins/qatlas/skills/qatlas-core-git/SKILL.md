@@ -28,7 +28,8 @@ bestimmt der jeweilige Ablauf den Scope für lokale Commits und Integrationen. D
 
 - Ermittle für jeden betroffenen Pfad das genaue Repo-Root. Ein eingebettetes Repo mit eigener
   `.git`-Struktur ist ein eigenes Repo und wird separat geprüft, gestagt und committet.
-- Nicht ausdrücklich betroffene Repos, Branches, Worktrees und Remotes bleiben unverändert.
+- Nicht ausdrücklich betroffene Repos, Branches, Worktrees und Remotes bleiben unverändert. Der Branch
+  `qatlas-backlog` gehört dem lokalen Backlog: Nur dessen Skript ändert, pusht oder löscht ihn.
 - Merge, rebase, stash oder ändere bei lokalen Änderungen, Divergenz oder Konflikten nichts eigenmächtig.
   Berichte den Zustand, bevor du darauf aufbaust, und hole die nötige Entscheidung ein.
 - Führe destruktive Git-Befehle wie `reset --hard`, `clean -f`, `checkout --` oder ein überschreibendes

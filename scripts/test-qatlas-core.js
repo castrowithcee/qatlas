@@ -460,7 +460,7 @@ function testInit() {
   write(path.join(brainDir, 'knowledge', 'knowledge-fine.md'), typed('knowledge'));
   write(path.join(brainDir, 'knowledge', 'fact-wrong.md'), typed('knowledge'));
   write(path.join(brainDir, 'knowledge', 'knowledge-bare.md'), '# Bare\n');
-  write(path.join(brainDir, 'backlog', 'web', 'README.md'), typed('meta'));
+  write(path.join(brainDir, 'backlog', 'task-0001-old.md'), '# Old task\n');
   write(path.join(brainDir, 'memory', 'memory-lost.md'), typed('memory'));
   fs.appendFileSync(path.join(brainDir, 'memory', 'MEMORY.md'), '- [Gone](memory-gone.md) - hook.\n');
   write(path.join(f.home, '.qatlas', 'state', 'worktrees', 'x', 'file'), 'x');
@@ -475,13 +475,14 @@ function testInit() {
     '.qatlas-brain/memory/memory-lost.md has no line in MEMORY.md.',
     '.qatlas-brain/memory/MEMORY.md links memory-gone.md, which does not exist.',
     '.qatlas-brain/PROJECT.md has no line with its reading condition in AGENTS.md.',
+    '.qatlas-brain/backlog/ holds more than BACKLOG.md.',
     path.join('.qatlas', 'state', 'worktrees') + ': worktrees from before',
     path.join('.qatlas', 'local', 'team') + ': run state']) {
     assert.ok(structure.includes(note), note + '\n' + structure);
   }
-  assert.ok(!/knowledge-fine|backlog\/web|PROJECT\.md has (no|the)(?! line)/.test(structure), structure);
+  assert.ok(!/knowledge-fine|task-0001-old|PROJECT\.md has (no|the)(?! line)/.test(structure), structure);
   assert.ok(!structure.includes('MISSING'), 'Structure findings are notes.');
-  for (const part of ['PROJECT.md', 'NOTES.md', 'plans', 'docs', 'knowledge', path.join('backlog', 'web')]) {
+  for (const part of ['PROJECT.md', 'NOTES.md', 'plans', 'docs', 'knowledge', path.join('backlog', 'task-0001-old.md')]) {
     fs.rmSync(path.join(brainDir, part), { recursive: true });
   }
   fs.rmSync(path.join(f.home, '.qatlas'), { recursive: true });

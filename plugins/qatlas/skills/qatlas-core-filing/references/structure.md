@@ -2,7 +2,7 @@
 description: >
   Aufbau des Projekt-Wissensraums .qatlas-brain/: AGENTS.md als Einstieg, die reservierten Root-Dateien mit
   ihrer Aufgabe und Lesebedingung, die festen Ordner mit ihren Typen, das Verbot weiterer Ordner, die
-  Umfangsgrenze, Zonen, FRAMEWORK.md außerhalb des Raums, die Library des Nutzers, Dateinamen und Task-IDs.
+  Umfangsgrenze, Zonen, FRAMEWORK.md außerhalb des Raums, die Library des Nutzers und Dateinamen.
 ---
 
 # Projekt-Wissensraum
@@ -71,7 +71,7 @@ der ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau die aufgefü
 
 | Ordner | Inhalt | `type` |
 |---|---|---|
-| `backlog/` | Weiterleitung zum maßgeblichen Planungssystem und, falls lokal, dessen Arbeitspakete | `meta`, `task` |
+| `backlog/` | `BACKLOG.md` mit der Bindung an das maßgebliche Planungssystem | `meta` |
 | `memory/` | dauerhafte Hinweise, die sich anderswo nicht ableiten lassen, mit ihrem Index `MEMORY.md` | `memory`, `meta` |
 | `knowledge/` | Fachwissen, Synthese und Schnappschüsse externer Quellen | `knowledge`, `fact` |
 | `playbooks/` | wiederholbare Abläufe | `playbook` |
@@ -81,8 +81,7 @@ der ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau die aufgefü
 | `zone-export/` | per gitignore ausgeschlossener Puffer nur für ausdrücklich verlangte Lieferergebnisse | keiner |
 
 Lege im Wissensraum nie einen weiteren Ordner oder Unterordner an, außer der Nutzer verlangt es
-ausdrücklich. Ausnahmen sind die Struktur, die der Backlog-Vertrag innerhalb von `backlog/` festlegt, und
-`zone-import/processed/<yyyy-mm>/`. Inhalt, der in keinen Ordner und keine reservierte Datei passt, ist eine
+ausdrücklich. Einzige Ausnahme ist `zone-import/processed/<yyyy-mm>/`. Inhalt, der in keinen Ordner und keine reservierte Datei passt, ist eine
 Frage an den Nutzer, kein Grund für einen neuen Ordner.
 
 - Aktualisiere bestehende Memories, statt sie zu duplizieren. Neue Memories entstehen auch auf ausdrückliche
@@ -94,8 +93,8 @@ Frage an den Nutzer, kein Grund für einen neuen Ordner.
 - Große oder sich ändernde Binärdateien gehören in einen Dateispeicher oder Git LFS, nicht dauerhaft in eine
   Zone.
 - Technische Projektkonfiguration liegt unter `.qatlas/plugins/`, Projektkennung und Arbeitsdateien von
-  Agenten unter `.qatlas/local/`, Laufzeitzustand unter `~/.qatlas/projects/`. Nichts davon gehört zum
-  Wissensraum.
+  Agenten unter `.qatlas/local/`, Laufzeitzustand und die Issues des lokalen Backlogs unter
+  `~/.qatlas/projects/`. Nichts davon gehört zum Wissensraum.
 
 ## FRAMEWORK.md
 
@@ -116,23 +115,9 @@ eine `policy`. Vorhandene Ordner und Namen der Library bleiben, wie sie sind.
 
 ## Dateinamen
 
-Inhaltsdateien heißen `<type>-<slug>.md`: Das Präfix ist immer der Frontmatter-`type`. Nur Tasks tragen eine
-ID: `task-<id>-<slug>.md`. Reservierte Dateien und `meta`-Dateien behalten ihre reservierten Namen ohne
-Präfix. Der Slug ist Kebab-Case und je Typ im ganzen Wissensraum eindeutig. Ihn umzubenennen ist eine
-Umstrukturierung samt allen Verweisen.
-
-Die Task-ID ist eine fortlaufende Dezimalzahl über den ganzen Wissensraum, einschließlich der
-Backlog-Projekte. Alle vorhandenen Task-IDs findest du so:
-
-```sh
-find .qatlas-brain -type f -name 'task-*.md' | grep -E '/task-[0-9]{4,}-[^/]*$'
-```
-
-Wähle den höchsten Wert plus eins und fülle auf mindestens vier Stellen auf. Ohne Treffer beginnt es bei
-`0001`. Prüfe vor dem Schreiben und vor dem Integrieren erneut auf Kollisionen. Bei parallelen neuen
-Einträgen nimmt der noch nicht integrierte Eintrag die nächste freie ID samt angepassten Verweisen. IDs
-werden nie wiederverwendet und nie aus kosmetischen Gründen neu nummeriert. Task-IDs anderer Form zählen
-nicht und bleiben unverändert.
+Inhaltsdateien heißen `<type>-<slug>.md`: Das Präfix ist immer der Frontmatter-`type`. Reservierte Dateien
+und `meta`-Dateien behalten ihre reservierten Namen ohne Präfix. Der Slug ist Kebab-Case und je Typ im ganzen
+Wissensraum eindeutig. Ihn umzubenennen ist eine Umstrukturierung samt allen Verweisen.
 
 Funktionsdateien, technische Formate und rohe Zonenartefakte folgen ihren festen Namen oder eigenen
 Formaten. Nenne den Geltungsbereich, wenn ein Funktionsname mehrdeutig ist.

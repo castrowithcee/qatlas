@@ -2,28 +2,29 @@
 name: qatlas-core-backlog
 description: >
   Taskarbeit im maßgeblichen Planungssystem: Aufgaben anlegen, auswählen, beanspruchen, Status setzen,
-  übergeben oder abschließen, Roster, Projekte und Ideen des lokalen Qatlas-Backlogs pflegen sowie das
+  übergeben oder abschließen, Issues, Felder und Ideen des lokalen Qatlas-Backlogs führen sowie das
   Planungssystem eines Projekts anbinden, prüfen oder wechseln. Verwenden, sobald Planungs- oder Taskarbeit
   über das bloße Anzeigen des geladenen Backlogs hinausgeht.
 ---
 
 # qatlas-core-backlog
 
-`.qatlas-brain/backlog/BACKLOG.md` nennt immer das einzige maßgebliche Planungssystem. Nutzer- oder
-Projektvorgaben haben Vorrang.
+`.qatlas-brain/backlog/BACKLOG.md` nennt immer das einzige maßgebliche Planungssystem und seine Bindung.
+Nutzer- oder Projektvorgaben haben Vorrang.
 
-- Bei lokaler Autorität ist `BACKLOG.md` der Roster des Qatlas-Backlogs.
-- Bei externer Autorität enthält `BACKLOG.md` den prominenten Link und die Bindung, die Planungs-,
-  Orchestrierungs- und Taskarbeit zum richtigen Objekt, Zugang und Statusmerkmal führt. Folge ausschließlich
-  dieser Bindung. Der lokale Backlog wird dann nicht als Spiegel gepflegt, und Ideen gehen an das
-  Entwurfsobjekt, das die Bindung nennt.
+- Die Bindung führt Planungs-, Orchestrierungs- und Taskarbeit zum richtigen Objekt, Zugang und
+  Statusmerkmal. Folge ausschließlich ihr. Der lokale Backlog ist eine Bindung wie jede andere und wird neben
+  einem anderen System nicht als Spiegel gepflegt. Ideen gehen an das Entwurfsobjekt, das die Bindung nennt.
+- Die Einheit eines Planungssystems ist ein Issue. Das System behält seine eigenen Namen, Statuswerte, Typen
+  und Felder. Ein Issue, dessen Merkmal nach der Bindung für einen Status dieser Norm steht, ist ein Task.
+  Ein Issue ohne solches Merkmal, etwa eine Idee, ist keiner.
 - Widersprechen sich native Projektanweisungen und `BACKLOG.md`, ändere nichts und kläre, welche Aussage
   aktualisiert werden muss.
 
 ## Status
 
-Jeder Task trägt in jedem Planungssystem genau einen dieser Status. Woran ein externes System ihn zeigt, sagt
-die Bindung.
+Jeder Task trägt in jedem Planungssystem genau einen dieser Status. Woran das System ihn zeigt, sagt die
+Bindung.
 
 - `draft`: Das Arbeitspaket selbst hat eine offene Frage zu Ergebnis, Scope-in, Scope-out, Ansatz, Abnahme
   oder einen ungeprüften Ist-Stand, der diese Punkte wesentlich ändern könnte.
@@ -128,9 +129,12 @@ Eintrag, so vollständig, dass der Nutzer ohne Task, Diff und Verlauf antworten 
 - **Empfehlung:** bei einer Entscheidung die Optionen mit ihrer Folge und die begründete Empfehlung.
 - **Danach:** was auf die Antwort folgt: der Abschluss oder die Arbeit, die ein neuer Lauf fortsetzt.
 
-## Externe Bindung
+## Bindung
 
-- Lies vor dem Anlegen, Ändern oder Prüfen einer Bindung vollständig [die
+- Ohne Vorgabe des Nutzers oder des Projekts gilt der lokale Backlog. Seine Bindung ist
+  `<plugin-root>/scaffold/.qatlas-brain/backlog/BACKLOG.md`, mit `<plugin-root>` als im Sessionkontext
+  genanntem `QATLAS PLUGIN ROOT`. Übernimm sie unverändert, wenn ein Projekt zum lokalen Backlog wechselt.
+- Lies vor dem Anlegen, Ändern oder Prüfen einer Bindung an ein anderes System vollständig [die
   Bindungsvorlage](assets/external-binding.md). Bei normaler Taskarbeit liest du nur `BACKLOG.md`.
 - Beantworte die Zeilen der Vorlage in dieser Reihenfolge: aus Vorgaben des Nutzers oder des Projekts zum
   Planungssystem, aus einer lesenden Probe des Systems, zuletzt durch eine gebündelte Rückfrage. Unterstelle
@@ -157,5 +161,4 @@ während Taskarbeit.
 
 ## Lokaler Backlog
 
-Lies vor jeder Arbeit im lokalen Backlog vollständig den
-[lokalen Backlog-Vertrag](references/local-backlog.md).
+Lies vor jeder Arbeit im lokalen Backlog vollständig [Lokaler Backlog](references/local-backlog.md).

@@ -3,8 +3,8 @@ name: qatlas-core-navigation
 description: >
   Projektwissen gezielt erschließen, sobald eine Aufgabe Kontext aus dem Repo braucht: Einstieg über
   AGENTS.md und deren Lesebedingungen, die reservierten Dateien PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md,
-  TESTING.md und CONTRIBUTING.md, Scope-READMEs und FRAMEWORK.md, Suche über Frontmatter, Memory lesen, Roster und
-  Ideen des lokalen Backlogs. Nicht zum Anlegen, Ändern oder Verschieben von Dateien.
+  TESTING.md und CONTRIBUTING.md, Scope-READMEs und FRAMEWORK.md, Suche über Frontmatter, Memory und
+  Planungssystem lesen. Nicht zum Anlegen, Ändern oder Verschieben von Dateien.
 ---
 
 # qatlas-core-navigation
@@ -25,7 +25,7 @@ Aufgabe braucht.
    hast. Durchsuche den Baum nicht vorsorglich.
 4. Lies denselben Knoten nicht erneut, solange er sich nicht geändert hat.
 
-Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags`, `type` und `status` des Frontmatters,
+Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags` und `type` des Frontmatters,
 öffne dann nur die Rümpfe passender Treffer und weite erst danach auf die Volltextsuche aus.
 
 ## Geltung des Gelesenen
@@ -46,4 +46,4 @@ Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags`, `type` 
 
 Lies die Referenz des Vorgangs vollständig vor dem Vorgang:
 
-- Memory, Roster, Ideen: [Projektzustand lesen](references/project-state.md)
+- Memory und Planungssystem: [Projektzustand lesen](references/project-state.md)

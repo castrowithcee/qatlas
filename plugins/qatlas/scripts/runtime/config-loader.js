@@ -72,8 +72,8 @@ const PROTECTION_LEVELS = {
   secrets: ['block', 'allow'],
   'personal-data': ['block', 'ask', 'warn', 'allow'],
 };
-// statusline and run are user-wide; protection.allow is checked by the protection check itself.
-const USER_KEYS = new Set(['format', 'protection', 'memory', 'statusline', 'run']);
+// statusline, run and backlog are user-wide; protection.allow is checked by the protection check itself.
+const USER_KEYS = new Set(['format', 'protection', 'memory', 'statusline', 'run', 'backlog']);
 const PROJECT_KEYS = new Set(['format', 'protection', 'memory']);
 
 function locations(projectRoot = null) {
@@ -251,6 +251,11 @@ function readConfig(projectRoot = null) {
     }
   }
 
+  // The fields a new local backlog starts with; the backlog script checks their content.
+  if (value.backlog !== undefined && !isObject(value.backlog)) {
+    problems.push(paths.configFile + ': backlog must be an object.');
+  }
+
   return {
     ...paths,
     config,
@@ -261,6 +266,7 @@ function readConfig(projectRoot = null) {
     statusline: normalizeStatusline(isObject(value.statusline) ? value.statusline : null),
     hasStatusline: isObject(value.statusline),
     run: runBlock,
+    backlog: isObject(value.backlog) ? value.backlog : null,
   };
 }
 

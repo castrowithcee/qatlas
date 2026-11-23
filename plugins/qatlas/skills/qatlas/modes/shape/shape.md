@@ -87,8 +87,8 @@ Grundlage bleibt unter dem Statusmodell sichtbar. Erfinde keine Gewissheit. Übe
 Projektdokumentation und Meilensteinen, konkretisiere aber nur ausreichend verstandene Pakete.
 Es gilt keine feste Taskzahl, nur ausführbare Reife.
 
-Gruppiere nur zusammengehörige oder abhängige Pakete in einem Projekt.
-Pflege den maßgeblichen Roster und die inhaltlich ausführbare Reihenfolge mit.
+Bündele nur zusammengehörige oder abhängige Pakete, soweit das Planungssystem bündeln kann.
+Pflege die inhaltlich ausführbare Reihenfolge mit.
 
 ## Entscheidungen und Analyse
 

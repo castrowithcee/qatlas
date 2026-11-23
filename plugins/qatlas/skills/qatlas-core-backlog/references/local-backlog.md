@@ -1,25 +1,52 @@
 ---
 description: >
-  Vertrag des lokalen Qatlas-Backlogs für Tasks, Projekte, Status, Roster, Übergaben und Ideen.
+  Arbeit im lokalen Qatlas-Backlog über das Backlog-Skript: Issues lesen, anlegen, ändern, ordnen, bündeln
+  und abschließen, Felder und ihre Auswahl pflegen, Ideen führen und den Backlog mit dem Remote abgleichen,
+  dazu der Inhalt eines Tasks.
 ---
 
 # Lokaler Backlog
 
-## Tasks und Projekte
+Arbeite im lokalen Backlog nur über das Skript. Jede Ausgabe ist JSON. Exit `1` heißt abgelehnt, mit dem
+Grund auf stderr.
 
-- Ein Task ist eine eigenständig in einer Session erledigbare Arbeitseinheit in
-  `.qatlas-brain/backlog/task-<id>-<slug>.md`. Die ID folgt den Task-IDs des
-  [Projekt-Wissensraums](../../qatlas-core-filing/references/structure.md).
-- Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `README.md`. Sein Slug ist
-  Kebab-Case, beginnt nicht mit `task-` und ist nicht `done`.
-- Die Ordnerzugehörigkeit bestimmt die Projektzugehörigkeit. Es gibt kein Feld `project:`.
-- Echte Abhängigkeiten und Reihenfolge stehen im Roster, für Tasks eines Projekts in dessen `README.md`. Ein
-  Link ersetzt keinen Kontext, den der Task braucht, um eigenständig ausgeführt zu werden.
+```text
+node <plugin-root>/scripts/qatlas-backlog.js <Befehl>
+```
 
-## Aktueller Taskstand
+`<plugin-root>` ist der im Sessionkontext genannte `QATLAS PLUGIN ROOT`.
 
-Ein offener Task ist der kompakte, materialisierte aktuelle Stand seiner Arbeit, kein laufendes Journal. Er
-bleibt in einem vollständigen Lesen eigenständig ausführbar:
+- Die Issues liegen auf dem Branch `qatlas-backlog` des Projekt-Repos. Fasse ihn nie mit Git an: kein
+  Checkout, Merge, Rebase, Push oder Löschen von Hand.
+- Ändere Titel, Typ, Status und jedes andere Feld nur über `set`. In der Datei eines Issues bearbeitest du
+  allein den Text unter dem Frontmatter.
+- Jeder schreibende Befehl committet im Backlog, auch offene Textänderungen an anderen Issues. Lehnt er ab,
+  bleibt alles, wie es war.
+
+## Lesen
+
+- `list` zeigt die offene Arbeit in ihrer Reihenfolge, je Issue mit eigenem Status, dem Status dieser Norm
+  unter `means` und `executable` für einen `ready`-Task ohne offene Abhängigkeit. Filter: `--status`,
+  `--type`, `--label`, `--parent`, `--where <feld>=<wert>`, mit `--all` auch Erledigtes und Ideen.
+- `show <id>` zeigt ein Issue vollständig samt Pfad seiner Datei.
+
+Lies zuerst `list` und danach nur die gewählten Issues und ihre echten Blocker mit `show`. Ein ausdrücklich
+genanntes Issue darfst du sofort vollständig lesen. Lade nie vorsorglich alle Issues.
+
+## Anlegen
+
+1. `add --title "<Titel>"` legt ein Issue mit dem Rumpf eines Tasks an und nennt ID und Pfad. Optional:
+   `--type`, `--status`, `--parent <id>`, `--depends <id,id>`, `--labels <a,b>`, `--set <feld>=<wert>` und
+   `--body-file <Datei>` für einen fertigen Text.
+2. Fülle in der genannten Datei jeden Abschnitt und ersetze alle Platzhalter.
+3. `save` prüft und committet den Text.
+
+Ohne `--status` ist ein neuer Task `draft`.
+
+## Inhalt eines Tasks
+
+Ein offener Task ist der kompakte aktuelle Stand seiner Arbeit, kein laufendes Journal. Er bleibt in einem
+vollständigen Lesen eigenständig ausführbar:
 
 - Warum, Ergebnis, Scope, geltende Leitplanken, Abhängigkeiten, aktueller Ansatz und Abnahmekriterien
   enthalten nur Aussagen, die noch gelten. Arbeite eine entschiedene Entscheidung an ihrer richtigen Stelle
@@ -35,11 +62,12 @@ bleibt in einem vollständigen Lesen eigenständig ausführbar:
   - bei `waiting` Grund, Wiederaufnahmesignal, verifizierten Stand und nächsten Schritt,
   - bei `deferred` nur die Entscheidung des Nutzers,
   - bei `done` `- Keine.` oder nur wichtige Entscheidungen, Auffälligkeiten, Risiken, Warnungen und
-    Abweichungen sowie die Orte, an denen dauerhafte Projektwahrheiten oder falsch gewordene Dokumentation
-    aktualisiert wurden. Nenne jeden dieser Punkte auch im abschließenden Chat.
+    Abweichungen, die Abschlussart, falls verworfen oder Duplikat, sowie die Orte, an denen dauerhafte
+    Projektwahrheiten oder falsch gewordene Dokumentation aktualisiert wurden. Nenne jeden dieser Punkte auch
+    im abschließenden Chat.
 - Rohe Logs, vollständige Befehlsausgaben, allgemeine Kommunikation, verworfene Versuche und eine Chronologie,
-  die für den nächsten Schritt nicht nötig ist, gehören nicht in den Task. Die Git-Historie ist das Protokoll
-  der Vergangenheit.
+  die für den nächsten Schritt nicht nötig ist, gehören nicht in den Task. Die Git-Historie des Backlogs ist
+  das Protokoll der Vergangenheit.
 - Verweise auf stabile Repo-Quellen dürfen deren Inhalt kurz zusammenfassen, statt ihn vollständig zu
   duplizieren. Alle Grenzen und Entscheidungen, die für die konkrete Ausführung nötig sind, bleiben im Task.
 
@@ -47,38 +75,45 @@ Schneide nie nach einer harten Token-, Zeilen- oder Zeichengrenze. Lässt sich s
 Taskvertrag nicht mehr in einer Session ausführen, schneide die verbleibende Arbeit bewusst neu. Entferne
 keine bindende Entscheidung und keinen nötigen Grund nur für eine kleinere Datei.
 
-Lies vor einem neuen Task [die kanonische Task-Vorlage](../assets/task.md) vollständig, vor einem neuen
-Projektkopf zusätzlich [die kanonische Projektvorlage](../assets/project-readme.md). Vorlagen und dieser
-Vertrag gelten unabhängig davon, wie ein Task entsteht. Nutzervorlagen unter `.qatlas-brain/templates/`
-ersetzen sie nicht.
+## Status, Reihenfolge und Bündelung
 
-## Status
+- `set <id> --status <status>` nimmt einen eigenen Statuswert des Backlogs oder einen Status dieser Norm.
+  Einen Weg, den die Norm nicht kennt, lehnt der Befehl ab. Setze `--force` nur auf ausdrückliches Wort des
+  Nutzers, etwa um ein erledigtes Issue wieder zu öffnen.
+- Schreibe bei einem Übergang zuerst den `Abschlussbericht` in die Datei und setze dann den Status. Der
+  Abschluss ist `--status done`.
+- `move <id> --before <id>`, `--after <id>`, `--first` oder `--last` ändert die Reihenfolge. Ordne sie nicht
+  stillschweigend um.
+- `--parent <id>` bündelt Issues unter einem übergeordneten, das Ziel und Umfang des Vorhabens trägt.
+  `--no-parent` löst die Bindung.
+- `--depends <id,id>` nennt echte Voraussetzungen nach der Backlog-Norm. Das benötigte Ergebnis steht im
+  Abschnitt `Abhängigkeiten` des Tasks. Ein Verweis ersetzt keinen Kontext, den der Task zur Ausführung
+  braucht.
 
-- Der Status steht im Frontmatter-Feld `status` des Tasks. Widersprechen sich Status und Roster, gewinnt der
-  Status.
-- Die Reihenfolge der `ready`-Tasks ist ihre Reihenfolge im Roster, für Tasks eines Projekts in dessen
-  `README.md`.
-- Pflege bei jedem Statuswechsel im selben Schritt den Roster.
-- Der Abschluss ist ein einziger Schritt: `status: done`, abschließender `Abschlussbericht` und Verschieben
-  nach `done/` neben dem Task: ein Root-Task nach `.qatlas-brain/backlog/done/`, ein Task eines Projekts nach
-  `.qatlas-brain/backlog/<project>/done/`. Ein `done`-Task liegt nur dort.
-- Ein Task mit dem früheren Status `next` gilt als `ready`. Setze ihn bei der nächsten Änderung auf `ready`
-  und stelle ihn im Roster vor die übrigen `ready`-Tasks.
+## Felder
 
-Projektköpfe nutzen davon unabhängig `active -> final -> archived`. Ihr `active` heißt, dass das Projekt
-lebt, nicht dass ein Worker daran arbeitet.
+`fields` zeigt die Auswahl jedes Felds: die Statuswerte mit dem Status dieser Norm, für den jeder steht, die
+Typen, die Labels und die eigenen Felder des Nutzers. Ein Wert außerhalb der Auswahl wird abgelehnt.
 
-## Roster
-
-`BACKLOG.md` ist die einzige Übersicht. Sie enthält eine Zeile pro unfertigem Root-Task und Projekt: Link,
-Status und Kurzstand. Projektzeilen verweisen auf ihre `README.md`. Innerhalb einer für den Gegenstand
-zulässigen Reihenfolge stehen Tasks als `review`, `in-progress`, `waiting`, `ready`, `draft`, `deferred`.
-Projektzeilen folgen ihrer Gegenstandsreihenfolge. Fertige Root-Tasks entfallen. Projekte dürfen ihren
-Aufbauverlauf behalten.
+- Lege einen Status, Typ, ein Label oder ein eigenes Feld nur auf Wunsch des Nutzers an:
+  `fields add status <name> --means <status der norm>`, `fields add type <name>`, mit `--no-work` für einen
+  Typ ohne Status, `fields add labels <name>`, `fields add <feld> <wert>` für ein Feld mit Auswahl und
+  `fields add <feld>` für ein Feld mit freiem Text. `fields remove <feld> <wert>` entfernt einen Wert, den
+  kein Issue mehr trägt.
+- Ein eigenes Feld setzt du mit `set <id> --set <feld>=<wert>`. Qatlas wertet nur Status, Reihenfolge,
+  Bündelung und Abhängigkeiten aus. Hat der Backlog ein Feld `priority`, sortiert `list` zuerst danach.
 
 ## Ideen
 
-`.qatlas-brain/backlog/IDEAS.md` ist das getrennte Inventar unverbindlicher Ideen und wird mit der ersten
-Idee angelegt. Sie
-trägt keine Task-IDs, Datumsfelder oder Status. Wird eine Idee bewusst zu Arbeit, lege zuerst den
-vollständigen Task oder das vollständige Projekt an und entferne dann den übernommenen Ideeneintrag.
+Eine Idee ist ein Issue eines Typs ohne Status, ab Werk `idea`: `add --title "<Idee>" --type idea`. Sie
+erscheint nicht in der offenen Arbeit, `list --type idea` zeigt sie. Wird eine Idee bewusst zu Arbeit, gib
+ihr mit `set <id> --type <typ>` einen Typ mit Status und fülle den Rumpf wie bei einem neuen Task.
+
+## Abgleich
+
+`sync` holt den Backlog vom Remote des Repos, führt ihn zusammen und pusht ihn. Führe ihn nur aus, wo du auch
+den Code dieses Repos pushen dürftest, und vor der Arbeit auf einem anderen Gerät.
+
+Meldet `sync` einen Konflikt (Exit `2`), haben beide Seiten dasselbe Issue geändert. Die Ausgabe nennt die
+Dateien, den lokalen Ordner und den Ordner mit den Fassungen des Remotes. Kläre je Datei mit dem Nutzer,
+welcher Stand gilt, bringe die lokale Datei auf diesen Stand und führe `sync --resolved` aus.

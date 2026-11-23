@@ -37,7 +37,7 @@ Eintrag entsteht.
 Hat das Skript `BACKLOG.md` neu angelegt und nennen die globale Arbeitsvereinbarung, eine ihrer
 Lesebedingungen oder die Projektanweisungen eine Vorgabe zum Planungssystem, binde das Projekt nach
 [der Backlog-Norm](../../qatlas-core-backlog/SKILL.md) daran. Nur dieser Schritt braucht die Zustimmung des
-Nutzers. Ohne Vorgabe bleibt der lokale Backlog.
+Nutzers. Ohne Vorgabe bleibt der lokale Backlog, den `BACKLOG.md` schon bindet.
 
 ## Übergabe
 

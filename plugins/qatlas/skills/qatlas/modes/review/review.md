@@ -14,7 +14,7 @@ liest dafür keinen Task: Die Karte trägt alles, was er für die Antwort brauch
 
 `review [Scope]` nimmt einen Task, ein Projekt oder ohne Scope alle offenen Übergaben des maßgeblichen
 Planungssystems. `review` kennt keine Flags und erhält keine Freigabe für gesperrte Projektdokumentation. Es
-umfasst das Lesen des aktuellen Stands, Änderungen an Status, Roster und Entscheidungen im maßgeblichen
+umfasst das Lesen des aktuellen Stands, Änderungen an Status und Entscheidungen im maßgeblichen
 Planungssystem und einen lokalen Sammelcommit am vollständigen Ende. Umsetzung, Worker, technische Tests,
 Integration, externe Wirkungen und Pushes bleiben außen vor.
 

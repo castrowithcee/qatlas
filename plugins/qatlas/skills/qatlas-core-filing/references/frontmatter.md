@@ -1,12 +1,13 @@
 ---
 description: >
-  Frontmatter-Schema für Inhalts-Markdown-Dateien: description, die sieben Inhaltstypen und ihre
+  Frontmatter-Schema für Inhalts-Markdown-Dateien: description, die sechs Inhaltstypen und ihre
   Unterscheidung, Bearbeitungsrechte, Pflichtfelder und Änderungen an Ort und Stelle.
 ---
 
 # Frontmatter-Schema
 
-Jede Inhalts-Markdown-Datei beginnt mit Frontmatter. Die beiden Zonen bleiben davon frei. Dateien, die einem
+Jede Inhalts-Markdown-Datei beginnt mit Frontmatter. Die beiden Zonen bleiben davon frei, ebenso die Issues
+des lokalen Backlogs, deren Felder das Backlog-Skript führt. Dateien, die einem
 offiziellen Agentenstandard folgen, etwa `SKILL.md`, agentennative Befehle und Agentenanweisungsdateien wie
 `AGENTS.md`, folgen diesem Standard und tragen weder `type` noch `edit`. Mitgelieferte Plugin-Dateien tragen
 außer den Feldern ihres Agentenstandards nur `description`.
@@ -30,16 +31,15 @@ Reihenfolge. Der erste Treffer entscheidet:
 
 | Reihenfolge | `type` | Frage | Standard-`edit` |
 |---|---|---|---|
-| 1 | `task` | Ist es ein Arbeitspaket, das erledigt werden soll? | `shared` |
-| 2 | `meta` | Ist es eine Datei, die existiert, weil Qatlas sie ins Projekt bringt: Navigation, Index, Planungseintrag oder Scope-Rahmen? | `shared`, für `FRAMEWORK.md` `locked` |
-| 3 | `policy` | Bindet es alle, die in seinem Geltungsbereich arbeiten, Mensch oder Agent, bis der Nutzer es ändert? | `locked` |
-| 4 | `playbook` | Beschreibt es Schritte, wie etwas zu tun ist, für Mensch oder Agent? | `shared` |
-| 5 | `fact` | Gibt es eine externe Quelle wieder? | `shared` |
-| 6 | `memory` | Ist es ein kurzer Hinweis für spätere Sessions? | `shared` |
-| 7 | `knowledge` | Alles andere: Fachwissen, Synthese, Beschreibung der aktuellen Architektur. | `shared` |
+| 1 | `meta` | Ist es eine Datei, die existiert, weil Qatlas sie ins Projekt bringt: Navigation, Index, Bindung des Planungssystems oder Scope-Rahmen? | `shared`, für `FRAMEWORK.md` `locked` |
+| 2 | `policy` | Bindet es alle, die in seinem Geltungsbereich arbeiten, Mensch oder Agent, bis der Nutzer es ändert? | `locked` |
+| 3 | `playbook` | Beschreibt es Schritte, wie etwas zu tun ist, für Mensch oder Agent? | `shared` |
+| 4 | `fact` | Gibt es eine externe Quelle wieder? | `shared` |
+| 5 | `memory` | Ist es ein kurzer Hinweis für spätere Sessions? | `shared` |
+| 6 | `knowledge` | Alles andere: Fachwissen, Synthese, Beschreibung der aktuellen Architektur. | `shared` |
 
 - **Vorhaben oder Policy:** Ein Vorhaben hat ein Ende („Mountainbike kaufen“). Es ist Arbeit und lebt als
-  Tasks im Planungssystem, nicht als eigene Datei. Eine Policy hat kein Ende. Sie gilt („das Fahrrad ist
+  Tasks im Planungssystem, nicht als Datei im Wissensraum. Eine Policy hat kein Ende. Sie gilt („das Fahrrad ist
   rot“) und bindet jedes spätere Vorhaben, bis der Nutzer sie ändert. Was ein Vorhaben dauerhaft festlegt,
   wird zur Policy.
 - **Was eine Policy enthält:** eine einzelne festgelegte Wahl („die Datenbank ist Postgres“) ebenso wie ein
@@ -70,15 +70,11 @@ pauschal. Ordne Inhalte nach ihrem Inhalt ein und hole die nötige Freigabe ein.
 
 | `type` | Zusätzliche Felder |
 |---|---|
-| `meta` | keine, nur ein Projektkopf im lokalen Backlog ergänzt `status` |
-| `task` | `status` |
 | `policy` | optional `paths` |
-| `playbook`, `knowledge`, `memory` | keine |
+| `meta`, `playbook`, `knowledge`, `memory` | keine |
 | `fact` | optional `source` |
 
-Die Task-Statuswerte legt die Backlog-Norm fest.
-Feste `meta`-Ziele sind `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, ein Projektkopf im lokalen Backlog und eine
-`FRAMEWORK.md` außerhalb des Wissensraums. Die reservierten Root-Dateien tragen ihren Inhaltstyp:
+Feste `meta`-Ziele sind `BACKLOG.md`, `MEMORY.md` und eine `FRAMEWORK.md` außerhalb des Wissensraums. Die reservierten Root-Dateien tragen ihren Inhaltstyp:
 `PROJECT.md`, `CONVENTIONS.md`, `TESTING.md` und `CONTRIBUTING.md` sind `policy`, `ARCHITECTURE.md` ist
 `knowledge`.
 

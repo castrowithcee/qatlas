@@ -62,8 +62,7 @@ Speicher, frage den Supervisor, bevor du sie als rot wertest.
 
 Protokolliere sofort mit `<run> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
 Laufs gehört, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`, `risiko` (nicht öffentlich
-erfasst), `erfasst` (jeder Entwurf, den du anlegst oder beim lokalen Backlog nur protokollierst, als
-`<Thema>: <was>. <Warum>.`), `status` (jeder Statuswechsel beim lokalen Backlog), `entscheiden` und `werkzeug`
+erfasst), `erfasst` (jeder Entwurf, den du anlegst, als `<Thema>: <was>. <Warum>.`), `entscheiden` und `werkzeug`
 (Steuerskript, Lauf-Werkzeuge oder diese Anweisungen verhalten sich anders, als sie selbst beschreiben, oder
 zwei ihrer Regeln widersprechen sich, mit Nachweis).
 
