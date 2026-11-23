@@ -154,19 +154,26 @@ gelten Punkt 1 und 3 der Leseliste.
 1. **Befund:** Lies die roten Prüfungen mit `<run> report --notes final` und stelle die Ursache auf dem
    Endstand des Kontroll-Branches fest, ohne die Prüfung dafür vollständig zu wiederholen.
 2. **Korrektur:** Behebe nur diese Ursache mit der kleinsten Änderung in einem eigenen Worktree von `<basis>`
-   nach „Einen Task ausführen“. Ziel, Scope und Abnahme der integrierten Tasks änderst du nicht, und du nimmst
-   keinen Task zurück.
+   nach „Einen Task ausführen“. Belegt der Nachweis einen Fehler im Produkt, behebe ihn dort, statt die Prüfung
+   anzupassen. Ziel, Scope und Abnahme der integrierten Tasks änderst du nicht, und du nimmst keinen Task
+   zurück.
 3. **Nachweis:** Führe auf dem korrigierten Stand die schnellen gemeinsamen Prüfungen und die gesamte
-   Schlussprüfung über `slot` aus. Ist sie wieder rot, bleibt dir genau eine weitere Korrektur aus neuem
-   Nachweis.
+   Schlussprüfung über `slot` aus. Ist sie wieder rot, entscheidet der neue Nachweis:
+   - **Dieselbe Ursache:** Dir bleibt genau eine weitere Korrektur aus neuem Nachweis. Besteht die Ursache
+     auch nach der zweiten, handle nach Schritt 5.
+   - **Andere Ursache:** Scheitert die Prüfung an einer anderen Stelle mit anderem Nachweis, ist die vorige
+     Ursache behoben. Beginne für die neue im selben Worktree bei Schritt 1, mit wieder zwei Korrekturen.
+   - **Obergrenze:** Korrigiere insgesamt höchstens fünf Ursachen. Zeigt die Prüfung eine sechste, handle nach
+     Schritt 5.
 4. **Integration:** Integriere den grünen Stand selbst nach „Integration“ der Integrator-Rolle samt dem dort
    aufgeschobenen Push und nenne im Commit die behobene Prüfung.
-5. **Ohne Erfolg:** Bleibt die Schlussprüfung rot oder braucht die Korrektur eine Entscheidung, die du im Lauf
-   den Supervisor fragen würdest, integriere und pushe nichts, lass den Worktree als Checkpoint stehen und
-   protokolliere mit `<run> log --type risiko --text "<Prüfung>: <belegte Ursache, geprüfte Korrekturen,
-   Branch>"`.
+5. **Ohne Erfolg:** Ist eine Grenze aus Schritt 3 erreicht oder braucht die Korrektur eine Entscheidung, die du
+   im Lauf den Supervisor fragen würdest, integriere und pushe nichts, lass den Worktree als Checkpoint stehen
+   und protokolliere mit `<run> log --type risiko --text "<Prüfung>: <behobene Ursachen, offene Ursache mit
+   Nachweis, geprüfte Korrekturen, Branch>"`.
 
-Ende mit wenigen Zeilen: je Prüfung grün mit Integrationscommit oder weiter rot mit Ursache und Branch.
+Ende mit wenigen Zeilen: je Prüfung grün mit Integrationscommit und behobenen Ursachen oder weiter rot mit
+offener Ursache und Branch.
 
 ## Rückfragen
 

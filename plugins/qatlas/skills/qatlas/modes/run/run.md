@@ -302,6 +302,6 @@ dafür nach `<run> end` genau einmal einen Subagent wie einen Lead mit diesem Au
 > korrigieren“. Steuerskript: `<run>`, Lauf-Werkzeuge: `<tools>`, Repo-Wurzel: `<repo-root>`,
 > Integrationsbasis: `<basis>`, Temp-Verzeichnis: `<repo-root>/.qatlas/local/run/tmp/final/`.
 
-Er zählt weder gegen die Paketzahl noch gegen das Laufbudget. Meldet er Grün, nenne die Korrektur im Ergebnis
-des Abschlussblocks. Bleibt die Prüfung rot oder endet er ohne Ergebnis, starte keinen zweiten: Erfasse dafür
+Er zählt weder gegen die Paketzahl noch gegen das Laufbudget. Meldet er Grün, nenne jede behobene Ursache im
+Ergebnis des Abschlussblocks. Bleibt die Prüfung rot oder endet er ohne Ergebnis, starte keinen zweiten: Erfasse dafür
 einen Entwurf und lege ihn unter `Entscheiden` vor.
