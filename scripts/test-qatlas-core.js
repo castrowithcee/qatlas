@@ -407,12 +407,10 @@ function testInit() {
     first.stdout);
   assert.ok(fs.existsSync(path.join(f.project, '.git')), 'Init runs git init without asking.');
   assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain')).sort(),
-    ['backlog', 'memory', 'zone-export', 'zone-import']);
+    ['backlog', 'memory', 'zone-import']);
   assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain', 'backlog')), ['BACKLOG.md']);
   assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain', 'memory')), ['MEMORY.md']);
-  for (const zone of ['zone-import', 'zone-export']) {
-    assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain', zone)), ['.gitkeep']);
-  }
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.project, '.qatlas-brain', 'zone-import')), ['.gitkeep']);
   assert.strictEqual(fs.readFileSync(path.join(f.project, 'CLAUDE.md'), 'utf8'), '@AGENTS.md\n');
   assert.ok(fs.readFileSync(path.join(f.project, 'AGENTS.md'), 'utf8').includes('## Projektwissen'));
   assert.strictEqual(fs.readFileSync(path.join(f.project, 'README.md'), 'utf8'), '# project\n',

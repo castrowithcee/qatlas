@@ -1,13 +1,14 @@
 ---
 description: >
-  Einstieg und Suchpfad für die eigene Qatlas-Library des Nutzers mit Konventionen, Policies, Playbooks und Wissen.
+  Einstieg und Suchpfad für die eigene Qatlas-Library des Nutzers mit Policies, Playbooks und Wissen.
 type: meta
 edit: shared
 ---
 
 # Qatlas-Library
 
-Dies ist die eigene Library des Nutzers mit wiederverwendbaren Konventionen, Policies, Playbooks und Wissen.
+Dies ist die eigene Library des Nutzers mit wiederverwendbaren Policies, Playbooks und Wissen. Eine
+projektübergreifende Konvention ist eine Policy.
 Sie ist eine bewusste Auswahl und nicht automatisch ein vollständiges Wiki. Projektspezifische Inhalte bleiben beim Projekt.
 
 Ein Eintrag gilt für einen Task, wenn sein Gegenstand passt und keine ausdrückliche Nutzeranweisung und keine

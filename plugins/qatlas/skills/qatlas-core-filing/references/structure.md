@@ -2,7 +2,7 @@
 description: >
   Aufbau des Projekt-Wissensraums .qatlas-brain/: AGENTS.md als Einstieg, die reservierten Root-Dateien mit
   ihrer Aufgabe und Lesebedingung, die festen Ordner mit ihren Typen, das Verbot weiterer Ordner, die
-  Umfangsgrenze, Zonen, FRAMEWORK.md außerhalb des Raums, Dateinamen und Task-IDs.
+  Umfangsgrenze, Zonen, FRAMEWORK.md außerhalb des Raums, die Library des Nutzers, Dateinamen und Task-IDs.
 ---
 
 # Projekt-Wissensraum
@@ -31,6 +31,7 @@ enthält nur, was Code, Tests, Linter und Hooks nicht ohnehin durchsetzen.
 
 | Datei | Aufgabe | Standard-Lesebedingung | `type` |
 |---|---|---|---|
+| `PROJECT.md` | was das Projekt sein soll: Zweck, Zielgruppe, Zielbild, Nicht-Ziele und bindende Produktentscheidungen mit ihrem Grund | vor dem Klären, Planen oder Zuschneiden von Arbeit | `policy` |
 | `CONVENTIONS.md` | wie gearbeitet wird: Codestil, Benennung, Muster, Ablage, verbotene Praktiken | vor dem Schreiben von Code oder Dateien | `policy` |
 | `ARCHITECTURE.md` | wie das System gebaut ist: Module, Datenflüsse, Abhängigkeiten, Grenzen, mit dem Grund jeder bindenden Entscheidung | vor dem Ändern von Struktur, Modulen oder Schnittstellen | `knowledge` |
 | `TESTING.md` | wie das Projekt geprüft wird: die Teststrategie des Projekts mit Befehlen, Stufen, Nachweis, Ressourcen, Abdeckungserwartungen und was vor einem Commit oder einer Übergabe grün sein muss | vor dem Ausführen von Prüfungen oder dem Ändern von Tests oder CI | `policy` |
@@ -40,6 +41,11 @@ Was in jeder Session gelten muss, etwa Zweck, Grenzen, Sichtbarkeit und die Lese
 `AGENTS.md`. Was über alle Projekte hinweg gilt, bleibt in der Library des Nutzers. Eine Entscheidung wird
 mit ihrem Grund in die reservierte Datei eingearbeitet, die sie betrifft. Es gibt kein Entscheidungsregister,
 und überholter Inhalt wird ersetzt, nicht archiviert.
+
+`PROJECT.md` hält die Absicht fest, nie den Bestand: keine Funktionsliste, keinen Umsetzungsstand und nichts,
+was der Code selbst zeigt. Ändere sie nur, wenn eine Entscheidung des Nutzers Zweck, Zielbild, Nicht-Ziele
+oder eine Produktentscheidung ändert, etwa weil etwas entfällt oder ersetzt wird. Ein erledigter Task ändert
+sie nicht.
 
 ## Umfangsgrenze
 
@@ -57,7 +63,7 @@ nichts.
 
 ## Feste Ordner
 
-Init legt `backlog/BACKLOG.md`, die Zonen `zone-import/` und `zone-export/` mit je einer `.gitkeep` und,
+Init legt `backlog/BACKLOG.md`, die Zone `zone-import/` mit einer `.gitkeep` und,
 sofern die Plugin-Konfiguration das Repo-Memory nicht abschaltet (`memory.enable: false`), `memory/MEMORY.md`
 an. Jeder andere Ordner entsteht zusammen mit seinem ersten Eintrag. Ohne `.qatlas-brain/` ist das Projekt
 bewusst nicht eingerichtet: Lege keine seiner Dateien an, was auch immer die Konfiguration sagt, denn Init ist
@@ -67,11 +73,10 @@ der ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau die aufgefü
 |---|---|---|
 | `backlog/` | Weiterleitung zum maßgeblichen Planungssystem und, falls lokal, dessen Arbeitspakete | `meta`, `task` |
 | `memory/` | dauerhafte Hinweise, die sich anderswo nicht ableiten lassen, mit ihrem Index `MEMORY.md` | `memory`, `meta` |
-| `plans/` | in Tasks geschnittene Vorhaben, als Referenz geführt | `plan` |
 | `knowledge/` | Fachwissen, Synthese und Schnappschüsse externer Quellen | `knowledge`, `fact` |
 | `playbooks/` | wiederholbare Abläufe | `playbook` |
 | `templates/` | die eigenen Vorlagen des Nutzers. Qatlas legt dort nichts an und aktualisiert nichts | wie das Ziel der Vorlage |
-| `conventions/`, `architecture/`, `testing/`, `contributing/` | Details, die aus der gleichnamigen reservierten Datei ausgelagert wurden, die der Einstieg bleibt | wie diese Datei |
+| `project/`, `conventions/`, `architecture/`, `testing/`, `contributing/` | Details, die aus der gleichnamigen reservierten Datei ausgelagert wurden, die der Einstieg bleibt | wie diese Datei |
 | `zone-import/` | per gitignore ausgeschlossener Puffer für nicht vertrauenswürdiges Rohmaterial | keiner |
 | `zone-export/` | per gitignore ausgeschlossener Puffer nur für ausdrücklich verlangte Lieferergebnisse | keiner |
 
@@ -100,6 +105,14 @@ lege sie erst nach seiner Zustimmung an, sobald der Bereich eigene Arbeitsregeln
 Ausnahmen bestätigt hat. Die README dieses Bereichs nennt die Arbeit, vor der sie gelesen werden muss. Sie
 enthält kein allgemeines Fachwissen und wiederholt weder native Projektanweisungen noch einzelne Policies.
 Arbeitsregeln für das Projekt als Ganzes gehören in `CONVENTIONS.md`.
+
+## Library des Nutzers
+
+`~/qatlas/` gehört dem Nutzer, ist optional und hält nur Projektübergreifendes. Sie ersetzt keine reservierte
+Datei eines Projekts: Was ein Projekt bindet, steht in dessen Wissensraum und zieht mit dem Repo. Legst du in
+der Library auf Wunsch des Nutzers eine Datei an, gelten Frontmatter, Typen und Dateinamen des Wissensraums
+und je Typ ein Ordner: `policies/`, `playbooks/` und `knowledge/`. Eine projektübergreifende Konvention ist
+eine `policy`. Vorhandene Ordner und Namen der Library bleiben, wie sie sind.
 
 ## Dateinamen
 

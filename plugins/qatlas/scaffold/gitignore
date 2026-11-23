@@ -5,10 +5,8 @@
 !/.qatlas-brain/zone-import/.gitkeep
 
 # Zone .qatlas-brain/zone-export/: requested deliverables the user takes out of the repo. They often hold
-# real, unredacted data and must never be versioned. The folder may stay via .gitkeep; its content is
-# ignored.
+# real, unredacted data and must never be versioned. The folder arises with the first deliverable.
 /.qatlas-brain/zone-export/*
-!/.qatlas-brain/zone-export/.gitkeep
 
 # Project id and working files of agents belong to this checkout only.
 /.qatlas/local/

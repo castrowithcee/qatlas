@@ -1,6 +1,6 @@
 ---
 description: >
-  Frontmatter-Schema für Inhalts-Markdown-Dateien: description, die acht Inhaltstypen und ihre
+  Frontmatter-Schema für Inhalts-Markdown-Dateien: description, die sieben Inhaltstypen und ihre
   Unterscheidung, Bearbeitungsrechte, Pflichtfelder und Änderungen an Ort und Stelle.
 ---
 
@@ -32,17 +32,16 @@ Reihenfolge. Der erste Treffer entscheidet:
 |---|---|---|---|
 | 1 | `task` | Ist es ein Arbeitspaket, das erledigt werden soll? | `shared` |
 | 2 | `meta` | Ist es eine Datei, die existiert, weil Qatlas sie ins Projekt bringt: Navigation, Index, Planungseintrag oder Scope-Rahmen? | `shared`, für `FRAMEWORK.md` `locked` |
-| 3 | `plan` | Ist es ein Vorhaben, das abgeschlossen werden kann? | `shared` |
-| 4 | `policy` | Bindet es alle, die in seinem Geltungsbereich arbeiten, Mensch oder Agent, bis der Nutzer es ändert? | `locked` |
-| 5 | `playbook` | Beschreibt es Schritte, wie etwas zu tun ist, für Mensch oder Agent? | `shared` |
-| 6 | `fact` | Gibt es eine externe Quelle wieder? | `shared` |
-| 7 | `memory` | Ist es ein kurzer Hinweis für spätere Sessions? | `shared` |
-| 8 | `knowledge` | Alles andere: Fachwissen, Synthese, Beschreibung der aktuellen Architektur. | `shared` |
+| 3 | `policy` | Bindet es alle, die in seinem Geltungsbereich arbeiten, Mensch oder Agent, bis der Nutzer es ändert? | `locked` |
+| 4 | `playbook` | Beschreibt es Schritte, wie etwas zu tun ist, für Mensch oder Agent? | `shared` |
+| 5 | `fact` | Gibt es eine externe Quelle wieder? | `shared` |
+| 6 | `memory` | Ist es ein kurzer Hinweis für spätere Sessions? | `shared` |
+| 7 | `knowledge` | Alles andere: Fachwissen, Synthese, Beschreibung der aktuellen Architektur. | `shared` |
 
-- **Plan oder Policy:** Ein Plan hat ein Ende. Er hält ein Vorhaben („Mountainbike kaufen“) als Referenz
-  fest. Die daraus geschnittenen Tasks bestimmen die konkrete Arbeit. Eine Policy hat kein Ende. Sie gilt
-  („das Fahrrad ist rot“) und bindet jedes spätere Vorhaben, bis der Nutzer sie ändert. Was ein Plan
-  dauerhaft festlegt, wird zur Policy, und der Plan verlinkt sie, statt sie zu wiederholen.
+- **Vorhaben oder Policy:** Ein Vorhaben hat ein Ende („Mountainbike kaufen“). Es ist Arbeit und lebt als
+  Tasks im Planungssystem, nicht als eigene Datei. Eine Policy hat kein Ende. Sie gilt („das Fahrrad ist
+  rot“) und bindet jedes spätere Vorhaben, bis der Nutzer sie ändert. Was ein Vorhaben dauerhaft festlegt,
+  wird zur Policy.
 - **Was eine Policy enthält:** eine einzelne festgelegte Wahl („die Datenbank ist Postgres“) ebenso wie ein
   Bündel von Normen dafür, wie gearbeitet wird („Dateinamen sind Kebab-Case“). Wo ihr Grund nicht
   selbstverständlich ist, trägt sie ihn mit, damit eine spätere Änderung ihn abwägen kann. Ihr Ort bestimmt
@@ -53,7 +52,7 @@ Reihenfolge. Der erste Treffer entscheidet:
 
 Repo-Wissen hat Vorrang vor Trainingswissen. `fact` bleibt an seine externe Quelle gebunden, eine Projekt-
 oder Library-`policy` an eine Entscheidung des Nutzers. Der Agent hält eine eigene Entscheidung nie als
-`policy` fest. Eine offene Frage bleibt in ihrem Plan oder Task, bis der Nutzer sie entscheidet.
+`policy` fest. Eine offene Frage bleibt in ihrem Task, bis der Nutzer sie entscheidet.
 
 ## Bearbeitungsrechte
 
@@ -73,17 +72,15 @@ pauschal. Ordne Inhalte nach ihrem Inhalt ein und hole die nötige Freigabe ein.
 |---|---|
 | `meta` | keine, nur ein Projektkopf im lokalen Backlog ergänzt `status` |
 | `task` | `status` |
-| `plan` | `status` (`active` oder `done`) |
 | `policy` | optional `paths` |
 | `playbook`, `knowledge`, `memory` | keine |
 | `fact` | optional `source` |
 
-Die Task-Statuswerte legt die Backlog-Norm fest. Ein Plan ist `done`, sobald er erfüllt oder
-verworfen ist. Er leitet dann keine laufende Arbeit mehr, und was daraus gilt, steht in den reservierten
-Dateien.
+Die Task-Statuswerte legt die Backlog-Norm fest.
 Feste `meta`-Ziele sind `BACKLOG.md`, `IDEAS.md`, `MEMORY.md`, ein Projektkopf im lokalen Backlog und eine
 `FRAMEWORK.md` außerhalb des Wissensraums. Die reservierten Root-Dateien tragen ihren Inhaltstyp:
-`CONVENTIONS.md`, `TESTING.md` und `CONTRIBUTING.md` sind `policy`, `ARCHITECTURE.md` ist `knowledge`.
+`PROJECT.md`, `CONVENTIONS.md`, `TESTING.md` und `CONTRIBUTING.md` sind `policy`, `ARCHITECTURE.md` ist
+`knowledge`.
 
 Eine mitgelieferte, kopierfertige Vorlage unter `skills/*/assets/` darf das Frontmatter ihres Ziels schon
 tragen, wenn ihr Text die konkrete Zieldatei nennt und verlangt, vor dem Schreiben alle Platzhalter zu

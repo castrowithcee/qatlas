@@ -2,8 +2,8 @@
 name: qatlas-core-navigation
 description: >
   Projektwissen gezielt erschließen, sobald eine Aufgabe Kontext aus dem Repo braucht: Einstieg über
-  AGENTS.md und deren Lesebedingungen, die reservierten Dateien CONVENTIONS.md, ARCHITECTURE.md, TESTING.md
-  und CONTRIBUTING.md, Scope-READMEs und FRAMEWORK.md, Suche über Frontmatter, Memory lesen, Roster und
+  AGENTS.md und deren Lesebedingungen, die reservierten Dateien PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md,
+  TESTING.md und CONTRIBUTING.md, Scope-READMEs und FRAMEWORK.md, Suche über Frontmatter, Memory lesen, Roster und
   Ideen des lokalen Backlogs. Nicht zum Anlegen, Ändern oder Verschieben von Dateien.
 ---
 
@@ -38,8 +38,7 @@ Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags`, `type` 
 - Die reservierten Dateien von `.qatlas-brain/` binden jedes Vorhaben, bis der Nutzer sie ändert. Lies vor
   dem Planen, Zuschneiden oder Ausführen von Arbeit diejenigen, deren Lesebedingung die Arbeit erfüllt.
 - Die aktuelle Version einer Datei gilt. Frühere Versionen in Git dienen nur der Wiederherstellung. Lies sie
-  nur, um etwas wiederherzustellen oder wenn der Nutzer die Historie verlangt. Ein Plan mit `status: done`
-  leitet keine laufende Arbeit mehr.
+  nur, um etwas wiederherzustellen oder wenn der Nutzer die Historie verlangt.
 - Fach-READMEs, Frameworks und `INDEX.md`-Dateien außerhalb des Wissensraums behalten ihren lokalen Zweck.
   Fachinhalt außerhalb des Wissensraums bleibt für seinen Gegenstand maßgeblich.
 

@@ -5,5 +5,5 @@ alle gelten soll. Native globale und projektlokale Agentenanweisungen haben Vorr
 
 ## Library
 
-Lies `README.md` in diesem Ordner, wenn ein Task deine projektübergreifenden Konventionen, Policies,
+Lies `README.md` in diesem Ordner, wenn ein Task deine projektübergreifenden Policies,
 Playbooks oder dein Wissen braucht.

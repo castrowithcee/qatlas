@@ -11,8 +11,7 @@ description: >
   `.qatlas-brain/backlog/task-<id>-<slug>.md`. Die ID folgt den Task-IDs des
   [Projekt-Wissensraums](../../qatlas-core-filing/references/structure.md).
 - Ein Projekt ist ein optionaler Ordner `backlog/<project>/` mit eigenen Tasks und `README.md`. Sein Slug ist
-  Kebab-Case, beginnt nicht mit `task-` und ist nicht `done`. Setzt das Projekt einen Plan um, verlinkt sein
-  Kopf auf `.qatlas-brain/plans/plan-<slug>.md`, statt Ziel und Umfang zu wiederholen.
+  Kebab-Case, beginnt nicht mit `task-` und ist nicht `done`.
 - Die Ordnerzugehörigkeit bestimmt die Projektzugehörigkeit. Es gibt kein Feld `project:`.
 - Echte Abhängigkeiten und Reihenfolge stehen im Roster, für Tasks eines Projekts in dessen `README.md`. Ein
   Link ersetzt keinen Kontext, den der Task braucht, um eigenständig ausgeführt zu werden.
@@ -61,7 +60,8 @@ ersetzen sie nicht.
   `README.md`.
 - Pflege bei jedem Statuswechsel im selben Schritt den Roster.
 - Der Abschluss ist ein einziger Schritt: `status: done`, abschließender `Abschlussbericht` und Verschieben
-  nach `done/`. Ein `done`-Task liegt nur dort.
+  nach `done/` neben dem Task: ein Root-Task nach `.qatlas-brain/backlog/done/`, ein Task eines Projekts nach
+  `.qatlas-brain/backlog/<project>/done/`. Ein `done`-Task liegt nur dort.
 - Ein Task mit dem früheren Status `next` gilt als `ready`. Setze ihn bei der nächsten Änderung auf `ready`
   und stelle ihn im Roster vor die übrigen `ready`-Tasks.
 
@@ -78,6 +78,7 @@ Aufbauverlauf behalten.
 
 ## Ideen
 
-`IDEAS.md` ist das getrennte Inventar unverbindlicher Ideen und wird mit der ersten Idee angelegt. Sie
+`.qatlas-brain/backlog/IDEAS.md` ist das getrennte Inventar unverbindlicher Ideen und wird mit der ersten
+Idee angelegt. Sie
 trägt keine Task-IDs, Datumsfelder oder Status. Wird eine Idee bewusst zu Arbeit, lege zuerst den
 vollständigen Task oder das vollständige Projekt an und entferne dann den übernommenen Ideeneintrag.

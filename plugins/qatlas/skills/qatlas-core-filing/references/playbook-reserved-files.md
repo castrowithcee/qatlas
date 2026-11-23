@@ -1,8 +1,8 @@
 ---
 description: >
   Eine reservierte Datei des Wissensraums erstmals füllen: Antworten aus dem Vorhandenen belegen, nur das
-  Offene in einfachen Worten fragen, dazu die Kernfragen für CONTRIBUTING.md, TESTING.md, CONVENTIONS.md und
-  ARCHITECTURE.md.
+  Offene in einfachen Worten fragen, dazu die Kernfragen für PROJECT.md, CONTRIBUTING.md, TESTING.md,
+  CONVENTIONS.md und ARCHITECTURE.md.
 ---
 
 # Reservierte Datei füllen
@@ -25,6 +25,17 @@ Entsteht sie, weil eine Arbeit ihre Antworten braucht, gehe so vor:
 
 Die Kernfragen sind das Mindeste, kein Formular: Trifft eine Frage auf das Projekt nicht zu, etwa die nach
 einer Plattform bei einem Repo ohne Remote, entfällt sie ohne Eintrag.
+
+## PROJECT.md
+
+Der Code ist für diese Datei kein Beleg: Er zeigt, was gebaut ist, nicht, was gewollt ist. Belege eine Antwort
+nur aus Aussagen des Nutzers und aus seinen eigenen Texten, etwa einem Briefing oder der README, und frage
+alles Übrige. Leite weder Zielbild noch Nicht-Ziele aus dem Bestand ab.
+
+1. Wozu gibt es das Projekt, und für wen?
+2. Was soll es sein, wenn es fertig ist?
+3. Was soll es ausdrücklich nicht sein oder nicht können?
+4. Welche Produktentscheidungen sind bindend, und aus welchem Grund?
 
 ## CONTRIBUTING.md
 

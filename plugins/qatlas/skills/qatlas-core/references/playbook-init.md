@@ -45,12 +45,12 @@ Nenne nur, was angelegt wurde, und jeden Punkt unter `PROBLEMS`. Nach der ersten
 Orientierungspunkte:
 
 - `AGENTS.md` trägt die Projektanweisungen und ist der Einstieg in `.qatlas-brain/`. `CLAUDE.md` bindet sie
-  für Claude ein. `README.md` ist der kompakte Projektkopf und wächst mit dem Projekt.
-- `.qatlas-brain/` trägt den Wegweiser zum maßgeblichen Planungssystem, die beiden unversionierten Zonen
-  `zone-import/` für Rohmaterial und `zone-export/` für verlangte Lieferergebnisse und, sofern die
-  Konfiguration Repo-Memory nicht abschaltet, den Memory-Index. Seine reservierten Dateien `CONVENTIONS.md`,
-  `ARCHITECTURE.md`, `TESTING.md` und `CONTRIBUTING.md` sowie seine Ordner entstehen mit ihrem ersten
-  Eintrag. Fachinhalte bleiben an ihren vorhandenen maßgeblichen Orten. Ein Scope bekommt neben seiner
+  für Claude ein. `README.md` gehört den Lesern des Repos. Qatlas pflegt sie nicht.
+- `.qatlas-brain/` trägt den Wegweiser zum maßgeblichen Planungssystem, die unversionierte Zone
+  `zone-import/` für Rohmaterial und, sofern die Konfiguration Repo-Memory nicht abschaltet, den
+  Memory-Index. Seine reservierten Dateien `PROJECT.md`,
+  `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md` und `CONTRIBUTING.md` sowie seine Ordner entstehen mit
+  ihrem ersten Eintrag. Fachinhalte bleiben an ihren vorhandenen maßgeblichen Orten. Ein Scope bekommt neben seiner
   README nur für eigene dauerhafte Besonderheiten eine optionale `FRAMEWORK.md`.
 - `.qatlas/plugins/config.json` ist die optionale versionierte Projektkonfiguration.
 - `~/.qatlas/plugins/config.json` ist optional und enthält nur nutzerweite Abweichungen von den

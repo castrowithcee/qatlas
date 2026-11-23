@@ -5,7 +5,8 @@ description: >
   archivieren oder löschen, Markdown-Inhalte ändern, Verweise einfügen und Rohmaterial aus
   .qatlas-brain/zone-import/ verarbeiten, sobald der Nutzer es ankündigt oder den Pfad nennt: legt Ort,
   Namen, Typ und Frontmatter fest und hält Navigation und Verweise konsistent, einschließlich der
-  reservierten Dateien CONVENTIONS.md, ARCHITECTURE.md, TESTING.md und CONTRIBUTING.md des Wissensraums.
+  reservierten Dateien PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md, TESTING.md und CONTRIBUTING.md des
+  Wissensraums.
   Nicht für reines Lesen, für Codeänderungen in bestehenden Dateien oder für Konvertierungen außerhalb der
   Importzone.
 ---
@@ -21,8 +22,8 @@ festen Ordner, und jede nimmt nur ihre Aufgabe oder ihre Typen auf.
 - Für gewöhnliche Datei- und Ordnernamen gelten Kebab-Case, reines ASCII und keine Leerzeichen. Müller wird
   zu `mueller`.
 - Reservierte Funktions- und Agentendateien behalten ihre feste Schreibweise: `README.md`, `AGENTS.md`,
-  `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md`,
-  `CONTRIBUTING.md`, `FRAMEWORK.md` und `INDEX.md`. Bestehende Funktionsdateien behalten ihren Zweck und
+  `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `IDEAS.md`, `PROJECT.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`,
+  `TESTING.md`, `CONTRIBUTING.md`, `FRAMEWORK.md` und `INDEX.md`. Bestehende Funktionsdateien behalten ihren Zweck und
   ihren lokalen Geltungsbereich.
 - Inhaltsdateien im Wissensraum beginnen mit dem Frontmatter-`type`. Nur Tasks tragen zusätzlich eine ID.
 - Daten werden als `YYYY-MM-DD` geschrieben. Chronologische Dateien dürfen mit diesem Datum beginnen.

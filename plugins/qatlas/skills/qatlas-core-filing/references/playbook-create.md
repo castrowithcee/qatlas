@@ -8,7 +8,7 @@ description: >
 1. **Gegenstand:** Bestimme, worüber die Datei eine Aussage macht. Projektzustand und Pflege gehören unter
    den [Projekt-Wissensraum](structure.md) in `.qatlas-brain/`, Fachinhalt an seinen maßgeblichen Ort.
 2. **Typ:** Bestimme den `type` mit den Fragen des [Frontmatter-Schemas](frontmatter.md). Eine offene Frage
-   des Nutzers ist noch keine Entscheidung. Sie bleibt in ihrem Plan oder Task.
+   des Nutzers ist noch keine Entscheidung. Sie bleibt in ihrem Task.
 3. **Ort:** Im Wissensraum wählt die Aufgabe die reservierte Datei, sonst wählt der Typ den festen Ordner.
    Prüfe vor dem Anlegen, ob eine bestehende Datei derselben Aufgabe oder desselben Typs stattdessen wachsen
    sollte. Eine reservierte Datei sammelt jede Aussage ihrer Aufgabe bis zur Umfangsgrenze. Ein Ergebnis für
