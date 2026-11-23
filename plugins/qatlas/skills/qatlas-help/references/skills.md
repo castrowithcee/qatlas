@@ -12,7 +12,6 @@ passt.
 
 - **`qatlas`:** die Arbeitsschleife mit `goal`, `shape`, `run` und `review`.
 - **`qatlas-core`:** seltene Administration wie Einrichtung, Diagnose und Statusline.
-- **`qatlas-work`:** einzelne Verfahren außerhalb der Schleife, etwa die Verwaltung von Git-Worktrees.
 - **`qatlas-mode`:** Zusammenarbeitsmodi für den Rest der Session, etwa für Leser mit ADHS.
 - **`qatlas-help`:** dieses Handbuch.
 

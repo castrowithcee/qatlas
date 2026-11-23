@@ -21,7 +21,7 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
    Git-Norm](../../../qatlas-core-git/SKILL.md) mit ihrer
    [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md), [die
    Commit-Grenze](../../../qatlas-core-git/references/commit-boundaries.md) und [der
-   Worktree-Vertrag](../../../qatlas-work/references/worktree-contract.md).
+   Worktree-Vertrag](worktree-contract.md).
 2. **Für Integration über Pull Requests, vor der ersten Integration:** [Integration über Pull
    Requests](playbook-git-pr.md), bei einem GitHub-Repo mit `gh` außerdem [Pull Requests auf
    GitHub](playbook-git-pr-github.md).
@@ -31,12 +31,12 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
 - **Übergaben:** Warte mit `<run> wait --role integrator --since <cursor>` als Hintergrundbefehl, dessen
   Abschluss der Host meldet, ohne eigenes `--timeout`. Kennt dein Host keine solchen Hintergrundbefehle, führe
   ihn im Vordergrund aus, mit `--timeout` knapp unter dem höchsten Befehls-Timeout des Hosts. Beginne mit
-  `--since 0` und gib danach jeweils den `cursor` der letzten Ausgabe von `wait` mit. `wait` blockiert,
-  solange keine neue Übergabe und kein Laufende eintrifft. Unter `queue` nennt jede Ausgabe alle offenen,
-  unbeantworteten Übergaben, die älteste zuerst, auch nach einem Wechsel des Integrators. Nimm als nächste
-  Übergabe immer die älteste aus `queue`, die du noch nicht integrierst. Startest du nachträglich in einem
-  laufenden Lauf, haben Leads frühere Tasks selbst integriert. Solange ein Lead eine eigene Integration offen
-  hat, liefert `wait` keine Übergabe, du schreibst den Kontroll-Branch also nie gleichzeitig mit ihm.
+  `--since 0` und gib danach jeweils den `cursor` der letzten Ausgabe von `wait` mit. Unter `queue` nennt jede
+  Ausgabe alle offenen, unbeantworteten Übergaben, die älteste zuerst, auch nach einem Wechsel des
+  Integrators. Nimm als nächste Übergabe immer die älteste aus `queue`, die du noch nicht integrierst. Startest
+  du nachträglich in einem laufenden Lauf, haben Leads frühere Tasks selbst integriert. Solange ein Lead eine
+  eigene Integration offen hat, liefert `wait` keine Übergabe, du schreibst den Kontroll-Branch also nie
+  gleichzeitig mit ihm.
 - **Antworten an Leads:** Antworte mit `<run> answer --package <package> --answer "integrated <sha>"` oder
   mit einem `rework` in der Form aus „Integration“.
 - **Fragen:** Lies vor einer Frage die geltenden Entscheidungen mit `<run> report --notes regel`. Deckt
@@ -44,12 +44,14 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
   ausschließlich den Supervisor mit `<run> ask --role integrator --question "<Frage mit Kontext, Optionen und
   Empfehlung>"`. Die Ausgabe ist die Antwort. Kommt keine, rufe denselben Befehl erneut auf.
 - **Log:** Protokolliere sofort mit `<run> log --type <type> --package <package> --task <id> --text
-  "<text>"`, was in den Abschluss gehört (`annahme`, `abweichung`, `risiko`, `erfasst`, `entscheiden`,
-  `werkzeug` wie in [der Lead-Rolle](lead.md#umsetzen)), so formuliert, wie es im Abschlussblock stehen wird.
-- **Kontext verdichtet:** Schätze deinen Kontext nicht. Hat der Host ihn nach dem Merkmal aus [der
-  Lead-Rolle](lead.md#ende) verdichtet, schließe die laufende Integration ab, nimm keine neue Übergabe an,
-  protokolliere dein Ende mit `<run> done --role integrator --text "Kontext verdichtet"` und ende mit einer
-  Zeile.
+  "<text>"`, was in den Abschluss gehört, so formuliert, wie es im Abschlussblock stehen wird: `annahme`,
+  `abweichung`, `risiko` (nicht öffentlich erfasst), `erfasst` (jeder Entwurf, den du anlegst), `entscheiden`
+  und `werkzeug` (Steuerskript, Lauf-Werkzeuge oder diese Anweisungen verhalten sich anders, als sie selbst
+  beschreiben, oder zwei ihrer Regeln widersprechen sich, mit Nachweis).
+- **Kontext verdichtet:** Schätze deinen Kontext nicht. Verdichtet ist er, wenn der Host frühere Nachrichten
+  durch eine Zusammenfassung ersetzt hat und dir der Wortlaut früherer Schritte fehlt. Schließe dann die
+  laufende Integration ab, nimm keine neue Übergabe an, protokolliere dein Ende mit `<run> done --role
+  integrator --text "Kontext verdichtet"` und ende mit einer Zeile.
 - **Nachfolger:** Rekonstruiere den Stand aus `report` und dem Planungssystem. Übersprungene Prüfungen findest
   du mit `report --notes skipped`. Starte `wait --role integrator --since 0` und nimm Übergaben
   nur aus `wait`.

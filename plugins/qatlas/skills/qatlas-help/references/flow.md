@@ -18,8 +18,9 @@ description: >
    Lead mit mehreren Tasks verteilt Aufträge an Worker und prüft deren Ergebnisse, ein Lead mit einem
    einzelnen Task setzt selbst um. Ändern mehrere Pakete Dateien im selben Repo, nimmt ein Integrator jede
    Übergabe ab und committet lokal. Sonst integriert jeder Lead selbst, bis ein weiteres Paket im selben Repo
-   einen Integrator nötig macht. Nennst du während des Laufs ausdrücklich weitere Tasks, nimmt er sie wie einen
-   neuen Aufruf auf und erhöht sein Budget. Der Lauf
+   einen Integrator nötig macht. Der Lauf arbeitet die Tasks ab, die zu Beginn in seine Pakete passen: Fällt
+   einer aus, rückt keiner nach, und der Rest bleibt für den nächsten Lauf. Nennst du während des Laufs
+   ausdrücklich weitere Tasks, nimmt er sie wie einen neuen Aufruf auf. Der Lauf
    arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder übergibt an `review`, nachdem
    integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Brichst du
    einen Lauf ab, sichert er jeden begonnenen Task so, dass der nächste Lauf ihn fortsetzt. Push und

@@ -1,12 +1,12 @@
 ---
 description: >
-  Vertrag für zentrale Git-Worktrees: Branch-Namen, Pfad, Kollisionen, Anlegen, Zuständigkeit und sicheres
-  Aufräumen, gemeinsam genutzt von Qatlas Work Tree und Qatlas Run.
+  Vertrag für die zentralen Git-Worktrees eines Laufs: Branch-Namen, Pfad, Kollisionen, Anlegen, Namensraum
+  und sicheres Aufräumen.
 ---
 
 # Worktree-Vertrag
 
-Git registriert alle Worktrees eines Repos gemeinsam. Dieses Register ist die maßgebliche Quelle. Der Ordner
+Behandle das Register, in dem Git alle Worktrees eines Repos führt, als maßgebliche Quelle. Der Ordner
 `worktrees/` im Zustandsordner des Projekts unter `~/.qatlas/projects/` ist nur der gemeinsame Speicherort für
 alle Agents desselben Nutzers.
 
@@ -19,8 +19,8 @@ alle Agents desselben Nutzers.
    Planungssystem als ASCII-Slug, `<slug>` stammt aus dem Dateinamen oder Titel des Tasks. Arbeit ohne Task
    bekommt einen eindeutigen `work/<purpose>`-Branch. Ein Sub-Branch hängt `--<role>` an den Namen seines
    Task-Branches an, zum Beispiel `task/0042-export--tests`. Existiert bereits ein Branch `task` oder `work`,
-   ersetzt `-` den Schrägstrich nach diesem Präfix. Was der Agent selbst benennt, nennt nie Qatlas, einen Agent, Host oder
-   ein Modell, weil Branch-Namen in der Historie des Repos landen können.
+   ersetzt `-` den Schrägstrich nach diesem Präfix. Was der Agent selbst benennt, nennt nie Qatlas, einen
+   Agent, Host oder ein Modell, weil Branch-Namen in der Historie des Repos landen können.
 3. Bestimme den Pfad mit `node <plugin-root>/scripts/qatlas-worktree-path.js <branch> --target <repo-root>`.
    `<plugin-root>` ist die im Sessionkontext genannte `QATLAS PLUGIN ROOT`. Bereits unter einem anderen Pfad
    registrierte Worktrees bleiben dort.
@@ -38,14 +38,13 @@ Ein Worktree enthält nur versionierte Dateien. Ignorierte Dateien, eingebettete
 `.env` fehlen dort und werden nicht hineinkopiert. Prüfungen, die solche Inhalte brauchen, laufen im primären
 Arbeitsbaum, solange dort kein anderer Schreiber arbeitet.
 
-## Zuständigkeit
+## Namensraum
 
 Der Namensraum eines Tasks umfasst seine Task-Branches, deren Sub-Branches und die daraus abgeleiteten
-Worktrees. Er gehört dem Lead, der den Task beansprucht hat. Nur dieser Lead legt darin Branches und Worktrees
-an, integriert und entfernt sie. Ein Name begründet keine Zuständigkeit. Maßgeblich bleiben der Anspruch und
-das Git-Register. Worktrees gehören zu einem Arbeitsstück, nie zu einer Agent-Identität. Übergibt ein Lead
-einen Task an einen anderen Integrationsverantwortlichen, geht der Namensraum mit: Nur Letzterer integriert
-danach und räumt auf. Der übergebende Lead rührt die übergebenen Branches und Worktrees nicht mehr an.
+Worktrees. Wem er gehört, regelt „Zuständigkeit“ im Git-Workflow: Nur wer ihn gerade hält, legt darin
+Branches und Worktrees an, integriert und entfernt sie. Ein Name begründet keine Zuständigkeit. Maßgeblich
+bleiben der Anspruch und das Git-Register. Worktrees gehören zu einem Arbeitsstück, nie zu einer
+Agent-Identität.
 
 ## Aufräumen
 
@@ -66,9 +65,7 @@ danach und räumt auf. Der übergebende Lead rührt die übergebenen Branches un
    `worktrees/` und der Zustandsordner selbst bleiben.
 4. Lösche den lokalen Branch nach der Zielprüfung nur mit `git branch -d`. Schlägt der Befehl fehl, erzwinge
    das Löschen nicht. Die einzige Ausnahme ist ein Branch mit erbrachtem Squash-Nachweis, den `git branch -D`
-   entfernen darf. Remote-Branches werden nur auf ausdrücklichen Wunsch oder nach einer Regel des laufenden
-   Verfahrens gelöscht. Nenne verbleibende gesammelt im Abschluss.
+   entfernen darf. Lösche einen Remote-Branch nur nach einer Regel des Laufs und nenne verbleibende gesammelt
+   im Abschluss.
 
-Das Verwerfen eines unsauberen oder nicht integrierten Strangs ist eine eigene destruktive Handlung: Zeige den
-genauen Stand und hole ausdrückliche Bestätigung für genau diesen Worktree ein. Lösche einen Worktree-Ordner
-nie von Hand.
+Verwirf keinen unsauberen oder nicht integrierten Strang, und lösche einen Worktree-Ordner nie von Hand.

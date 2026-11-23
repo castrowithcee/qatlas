@@ -6,8 +6,7 @@ description: >
 
 # Einen Task ausführen
 
-Schreibe Anspruch, Statuswechsel und Entwürfe nach „Planungssystem“ im Git-Workflow. Lass keinen Worker
-Planungssystem oder Branch-Verwaltung ändern, Commits anlegen oder eigene Subagents starten.
+Schreibe Anspruch, Statuswechsel und Entwürfe nach „Planungssystem“ im Git-Workflow.
 
 ## Worker beauftragen
 
@@ -72,21 +71,18 @@ gleichzeitig. Nur schreibgeschützte Analysen und Reviews dürfen parallel laufe
 nichts verändern. Achte darauf, dass sich die Aufträge nachweislich ergänzen, keine konkurrierenden Lösungen
 bauen und zusammen im Korrekturbudget dieses einen Tasks bleiben.
 
-Führe lokale Nachweise über `<tools> slot -- <test command>` aus: `slot` begrenzt gleichzeitige Testläufe
-auf dem ganzen Host und verwendet einen grünen Nachweis desselben Trees wieder. Das gilt für alles, was Tests
-ausführt, baut oder eine geteilte Ressource braucht, auch für einen Befehl, der schnelle Prüfungen mit Tests
-verkettet. Führe Prüfungen, die den Host kaum belasten und in der Regel unter einer Minute enden, etwa
-Formatierung, statische Analyse oder Syntaxprüfung, direkt ohne `slot` aus: Ihre Wiederholung kostet nichts,
-deshalb brauchen sie keinen gespeicherten Nachweis. Entnimm Projektwerte für Gültigkeit,
-unversionierte Eingaben, Slot-Anzahl und exklusive Ressourcen der Teststrategie des Projekts in „Abnehmen und
-integrieren“, die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl, den die Projektvorgaben einer
+Führe lokale Nachweise über `<tools> slot -- <test command>` aus. Das gilt für alles, was Tests ausführt, baut
+oder eine geteilte Ressource braucht, auch für einen Befehl, der schnelle Prüfungen mit Tests verkettet. Führe
+Prüfungen, die den Host kaum belasten und in der Regel unter einer Minute enden, etwa Formatierung, statische
+Analyse oder Syntaxprüfung, direkt ohne `slot` aus. Entnimm Projektwerte für Gültigkeit, unversionierte
+Eingaben, Slot-Anzahl und exklusive Ressourcen der Teststrategie des Projekts in „Abnehmen und integrieren“,
+die Optionen dem Kopfkommentar des Skripts. Führe einen Befehl, den die Projektvorgaben einer
 exklusiven Ressource zuweisen, über `slot --resource <name> -- <command>` aus. Führe vollständige Tests immer
 selbst über `slot` aus, im Vordergrund oder über die Hintergrundausführung des Hosts mit ihrer
 Abschlussmeldung, und warte auf diese Meldung, nie mit `sleep`, Schleifen, Monitoren oder Abfragen von
 Prozessen, Lock-Ordnern oder Ausgabedateien. Gib einem Worker nur Prüfungen, die absehbar in
 unter zwei Minuten enden, etwa Formatierung, statische Analyse oder einen gezielten Test seiner Änderung, und
-trage ihm kein höheres Befehls-Timeout auf. Vollständige Tests und alles Längere führst du selbst aus. Ein
-Worker, der auf eigene Hintergrundarbeit wartet, gilt dem Host als angehalten.
+trage ihm kein höheres Befehls-Timeout auf. Vollständige Tests und alles Längere führst du selbst aus.
 
 Nenne im Bericht des Tasks für jeden Worker Profil, Modell und Effort. Meldet der Host die tatsächliche
 Kombination nicht zurück, nenne die angeforderte und kennzeichne sie mit „angefordert“. Halte nur bei einer
@@ -113,9 +109,8 @@ Laufs das Anlegen weiterer Arbeit nicht einschließt:
 - ein mögliches oder bestätigtes Sicherheitsrisiko,
 - nachweislich falsche Dokumentation.
 
-Nenne im Entwurf den Befund, den Ort, den Nachweis und den Task, bei dem er gefunden wurde. Unterstützt das
-Planungssystem Labels, gib ihm `run-fund`. Arbeite ihn nicht weiter aus: Die Reife klärt der Supervisor am
-Laufende, den Rest `shape`. Deckt ein bestehender Task den Befund bereits ab, lege nichts an und nenne diesen
+Nenne im Entwurf den Befund, den Ort, den Nachweis und den Task, bei dem er gefunden wurde. Arbeite ihn nicht
+weiter aus: Die Reife klärt der Supervisor am Laufende, den Rest `shape`. Deckt ein bestehender Task den Befund bereits ab, lege nichts an und nenne diesen
 Task. Fasse dasselbe Muster an mehreren Stellen in einem Entwurf zusammen.
 Halte Verbesserungsideen, Refactoring, Stilfragen und mögliche
 Erweiterungen nicht fest, denn sie sind keine Nebenbefunde.
@@ -123,7 +118,7 @@ Erweiterungen nicht fest, denn sie sind keine Nebenbefunde.
 Lass ein unbehobenes Sicherheitsrisiko nie an einen öffentlich einsehbaren Ort gelangen, weder in
 Planungssystem, Task, Bericht, Commit-Nachricht, Branch-Namen, Pull Request noch Kommentar. Beurteile dafür die
 Sichtbarkeit des Orts, an dem der Eintrag tatsächlich liegt: Ein Issue in einem öffentlichen Repo ist
-öffentlich, auch wenn das Board, das es verwaltet, privat ist, und ein lokales Backlog teilt die Sichtbarkeit
+öffentlich, auch wenn das Board, das es verwaltet, privat ist, und ein lokaler Backlog teilt die Sichtbarkeit
 seines Repos und seiner Remotes. Halte es nur dann als Entwurf fest, wenn dieser Ort belegt nicht öffentlich
 ist, etwa über die verifizierte Sichtbarkeit des Repos. Ist er öffentlich oder lässt sich seine Sichtbarkeit
 nicht belegen, halte nichts fest und protokolliere es nur als `risiko`. Schreibe auch an einem nicht

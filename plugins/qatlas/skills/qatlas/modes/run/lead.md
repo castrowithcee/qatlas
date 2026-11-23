@@ -27,7 +27,7 @@ Lies jeden Block zum genannten Zeitpunkt vollständig:
    Git-Norm](../../../qatlas-core-git/SKILL.md) mit ihrer
    [Commit-Referenz](../../../qatlas-core-git/references/playbook-commit.md), [die
    Commit-Grenze](../../../qatlas-core-git/references/commit-boundaries.md) und [der
-   Worktree-Vertrag](../../../qatlas-work/references/worktree-contract.md).
+   Worktree-Vertrag](worktree-contract.md).
 2. **Für Integration über Pull Requests, vor dem ersten Push:** [Integration über Pull
    Requests](playbook-git-pr.md), bei einem GitHub-Repo mit `gh` außerdem [Pull Requests auf
    GitHub](playbook-git-pr-github.md).
@@ -54,11 +54,10 @@ Nennt der aktuelle Eintrag eines Tasks Task-Branch, Worktree-Pfad und Stand aus 
 dort fort, statt neu von `<basis>` zu beginnen. Prüfe vorher wie ein Nachfolger nach „Ende“, dass kein
 laufender oder unbekannter Worker Branch und Worktree nutzt und der Branch den genannten Stand trägt, und
 kläre eine Abweichung mit dem Supervisor. Fehlt nur der Worktree, lege ihn für den vorhandenen Branch neu an.
-Nennt der Eintrag einen Vorgänger mit gemerkter Spitze, behandle den Task als vorgebaut. Bereinige einen
-Checkpoint vor der Übergabe nach der Git-Norm. Ein Task ohne Dateiänderung braucht weder Worktree noch
-Integration: Schließe ihn nach deiner Abnahme selbst und protokolliere ihn mit `<run> log --type integrated
---task <id> --text "ohne Dateiänderung"`. Scheitert eine Prüfung an der Umgebung, etwa an Platz oder
-Speicher, frage den Supervisor, bevor du sie als rot wertest.
+Nennt der Eintrag einen Vorgänger mit gemerkter Spitze, behandle den Task als vorgebaut. Ein Task ohne
+Dateiänderung braucht weder Worktree noch Integration: Schließe ihn nach deiner Abnahme selbst und
+protokolliere ihn mit `<run> log --type integrated --task <id> --text "ohne Dateiänderung"`. Scheitert eine
+Prüfung an der Umgebung, etwa an Platz oder Speicher, frage den Supervisor, bevor du sie als rot wertest.
 
 Protokolliere sofort mit `<run> log --type <type> --task <id> --text "<text>"`, was in den Abschlussblock des
 Laufs gehört, so formuliert, wie es dort stehen wird: `annahme`, `abweichung`, `risiko` (nicht öffentlich
@@ -131,19 +130,20 @@ Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
 
 ## Ohne Integrator
 
-Läuft kein Integrator, bist du der einzige Schreiber des Kontroll-Branches, bis der Supervisor einen
-zuschaltet. Melde deshalb jede eigene Integration vor ihrem Beginn mit `<run> integrate --task <id>` an.
-Lautet die Antwort `handover`, ist ein Integrator zugeschaltet: Integriere nicht, übergib diesen und jeden
-weiteren Task nach „Übergeben“, lies vorher Punkt 2 der Leseliste, falls er zutrifft, und führe keine
-Schlussprüfung aus. Lautet sie `self`, integriere den Task selbst nach „Integration“ und „Nachweise und
-Delta-Prüfungen“ der Integrator-Rolle, mit diesen Abweichungen:
+Melde ohne Integrator jede eigene Integration vor ihrem Beginn mit `<run> integrate --task <id>` an, weil der
+Supervisor jederzeit einen zuschalten kann. Lautet die Antwort `handover`, ist ein Integrator zugeschaltet:
+Integriere nicht, übergib diesen und jeden weiteren Task nach „Übergeben“, lies vorher Punkt 2 der Leseliste,
+falls er zutrifft, und führe keine Schlussprüfung aus. Lautet sie `self`, integriere den Task selbst nach
+„Integration“ und „Nachweise und Delta-Prüfungen“ der Integrator-Rolle, mit diesen Abweichungen:
 
 - Wiederhole die Abnahme aus Schritt 2 nicht, denn du hast sie schon gemacht.
 - Löse einen Konflikt selbst im Task-Branch, statt ihn zurückzugeben.
 - Protokolliere statt einer Antwort jede Integration mit `<run> log --type integrated --task <id> --text
-  "<sha>"`. Das schließt die Anmeldung, ebenso dein `done`.
+  "<sha>"`. Das schließt die Anmeldung, ebenso dein `done` und jede deiner Übergaben. Übergib deshalb erst,
+  wenn keine eigene Integration mehr läuft.
 - Endest du ohne Rest und zeigt `<run> report` unter `integrator.attached` `false`, führe vorher die
-  Schlussprüfung aus und nenne ihr Ergebnis in `done --text`.
+  Schlussprüfung der Integrator-Rolle auf deinem Endstand aus, ohne auf `end` zu warten, und nenne ihr
+  Ergebnis in `done --text`.
 
 ## Rote Schlussprüfung korrigieren
 
@@ -199,9 +199,8 @@ vorgebauten und jeden Rest-Task Branch und Worktree. Alles andere steht im Proto
 
 **Nachfolger:** Übernimmst du ein Paket, übernimm Branches und Worktrees eines Tasks erst, wenn kein laufender
 oder unbekannter Worker sie nutzt und die Branches den in Task oder Protokoll genannten Stand tragen. Das Ende
-deines Vorgängers allein belegt das nicht. Kläre eine Abweichung vor jeder Änderung mit dem Supervisor. Nenne
-übernommene Branches und Worktrees, die inzwischen integriert sind, in deiner Schlussmeldung zur Bereinigung
-über `qatlas-work tree`. Zeigt `report` unter `open` eine offene Rückfrage oder Übergabe deines Pakets, rufe
-denselben Befehl mit derselben Frage oder dem dort genannten Bericht erneut auf, um die Antwort abzuholen. Die
-letzte Antwort auf die Übergabe eines Tasks, auch eine nie abgeholte, steht in `report` beim Task unter
-`answer`.
+deines Vorgängers allein belegt das nicht. Kläre eine Abweichung vor jeder Änderung mit dem Supervisor. Räume
+übernommene Branches und Worktrees, die inzwischen integriert sind, nach dem Worktree-Vertrag auf. Zeigt
+`report` unter `open` eine offene Rückfrage oder Übergabe deines Pakets, rufe denselben Befehl mit derselben
+Frage oder dem dort genannten Bericht erneut auf, um die Antwort abzuholen. Die letzte Antwort auf die Übergabe
+eines Tasks, auch eine nie abgeholte, steht in `report` beim Task unter `answer`.

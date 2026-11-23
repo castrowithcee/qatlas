@@ -3,12 +3,12 @@
   "name": "qatlas",
   "displayName": "Qatlas",
   "version": "4.0.1",
-  "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kern- und Workspace-Verwaltung.",
+  "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kernverwaltung.",
   "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
   "homepage": "https://github.com/castrowithcee/qatlas",
   "repository": "https://github.com/castrowithcee/qatlas",
   "license": "MIT",
-  "keywords": ["context", "scaffold", "brainstorming", "planning", "backlog", "orchestration", "subagents", "workflow", "worktree", "review", "automation"],
+  "keywords": ["context", "scaffold", "brainstorming", "planning", "backlog", "orchestration", "subagents", "workflow", "review", "automation"],
   "skills": "./skills/",
   "hooks": "./hooks/qatlas-hooks.json"
 }

@@ -37,8 +37,8 @@
 //     {"result":"unproven","reason",...}. Exit: 0 proven, 7 unproven, 2 usage error, 3 check not possible.
 //   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
-//     --slots, else run.test-slots in ~/.qatlas/plugins/config.json, else 2. Waiting callers are
-//     served in arrival order; --priority queues ahead of every caller without it.
+//     run.test-slots in ~/.qatlas/plugins/config.json, else 2; --slots can only lower it. Waiting callers
+//     are served in arrival order; --priority queues ahead of every caller without it.
 //     Locks and queue live under ~/.qatlas/state/slots, so the slots are shared by every repo and run of
 //     this user on the host. No JSON output; the command exit code is passed through (signal: 128 plus
 //     signal number). Each executed command adds one line to runs.jsonl in the slot store of the repo:
@@ -335,14 +335,14 @@ function land() {
 
 function slotCount() {
   const given = flag('--slots');
-  if (given !== null) return /^[1-9]\d*$/.test(given) ? Number(given) : fail('Invalid: --slots needs a positive integer', 2);
+  if (given !== null && !/^[1-9]\d*$/.test(given)) fail('Invalid: --slots needs a positive integer', 2);
   const { readConfig } = require('../../../../../scripts/runtime/config-loader.js');
   const state = readConfig();
   if (state.userError) fail(state.configFile + ' not readable: ' + state.userError, 3);
-  const value = state.run ? state.run['test-slots'] : undefined;
-  if (value === undefined) return 2;
-  if (Number.isInteger(value) && value > 0) return value;
-  return fail('Invalid: run.test-slots in ' + state.configFile + ' needs a positive integer', 3);
+  const value = state.run && state.run['test-slots'] !== undefined ? state.run['test-slots'] : 2;
+  if (!Number.isInteger(value) || value < 1) fail('Invalid: run.test-slots in ' + state.configFile + ' needs a positive integer', 3);
+  // The user's number is the limit for the host; a project may only ask for fewer.
+  return given === null ? value : Math.min(Number(given), value);
 }
 
 function alive(pid) {

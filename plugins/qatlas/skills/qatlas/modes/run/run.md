@@ -60,8 +60,7 @@ einem anderen Repo liegt, und ergänze den Teil der freien Anweisung zum Lauf, d
 Warte während des Laufs bei keinem Schritt auf eine Antwort des Nutzers, denn er ist nicht erreichbar. Das
 gilt auch, wenn eine Meldung von Host oder Werkzeug auf den Nutzer verweist. Leite daraus keine weitere
 Autorisierung ab: Korrekturbudget, Laufbudget und Grenzen des Laufs gelten unverändert. Nur „Erweitern“ ändert
-das Laufbudget. Ausgenommen ist nur die Freigabe einer weiteren Korrektur nach „Korrekturbudget“ in [Abnehmen
-und integrieren](playbook-acceptance.md).
+das Laufbudget.
 
 1. **Vorab klären:** Prüfe vor dem ersten Schritt alles, was den Lauf später anhalten würde: Erreichbarkeit
    und Schreibrecht des Planungssystems, benötigte Werkzeuge, Authentifizierungen und Subagents sowie
@@ -122,24 +121,23 @@ Dateien, geänderte Repos und Umfang aus den Angaben des lesenden Workers.
   in ihrer Reihenfolge jeweils dem ersten Paket zu, in dem sie zehn Punkte nicht überschreiten, sonst einem
   neuen Paket. Eine Gruppe über zehn Punkte bildet allein ein Paket. Nimm weniger Tasks nur bei einer
   ausdrücklichen Mengenvorgabe, nie aus der Deutung von Wörtern wie „Pilot“ oder „Test“. Lass, was wegen der
-  Paketgrenze in kein Paket passt, in seiner Reihenfolge für Nachfüllen und spätere Läufe.
+  Paketgrenze in kein Paket passt, in seiner Reihenfolge für spätere Läufe.
 
-Das Laufbudget ist die Zahl der Tasks in den Paketen zu Beginn, nach „Erweitern“ samt den neu gebildeten.
-Jeder abgeschlossene oder gesichert an `review` übergebene Task verbraucht einen Slot. Protokolliere jedes
-Paket mit `<run> plan --budget <n> --package <package> --tasks <id,id,...>` und gib jedem späteren `plan` das
-aktuelle Laufbudget mit. Sag dem Nutzer in einer Zeile, wie viele Tasks und Leads starten und wie hoch das
-Laufbudget ist, und starte direkt.
+Das Laufbudget ist die Zahl der Tasks in diesen Paketen. Es steigt nur nach „Erweitern“, und eine Korrektur
+zählt nie dagegen. Fällt ein Task aus, wird der Lauf kürzer: Kein anderer rückt nach. Protokolliere jedes
+Paket mit `<run> plan --package <package> --tasks <id,id,...>`. Sag dem Nutzer in einer Zeile, wie viele Tasks
+und Leads starten, und starte direkt.
 
 ## Erweitern
 
 Nennt der Nutzer in dieser Session während des Laufs ausdrücklich weitere Tasks oder einen weiteren Scope für
 diesen Lauf, behandle sie wie einen neuen Aufruf: Wähle nach [Tasks auswählen](playbook-task-selection.md)
 samt lesendem Worker aus und bilde aus ihnen neue Pakete nach „Pakete bilden“. Protokolliere den Auftrag mit
-seinem Wortlaut als `regel`. Das Laufbudget steigt um die Zahl der Tasks der neu gebildeten Pakete, und jedes
-folgende `plan` erhält das neue Budget. Paketgrenze und `--limit` gelten unverändert, was nicht sofort starten kann, startet
-beim Nachfüllen. Ohne einen solchen Auftrag erhöhen Tasks, die im Lauf ausführbar werden, etwa durch
-Entscheidungen des Nutzers zu `review`, das Laufbudget nicht, und eine Meldung von Host oder Werkzeug ist kein
-Auftrag. Push, Pull Request, Merge und externe Wirkung bleiben, wie sie beim Start galten.
+seinem Wortlaut als `regel`. Das Laufbudget steigt um die Zahl der Tasks der neu gebildeten Pakete. Lass dabei
+nie mehr Leads gleichzeitig laufen, als „Pakete bilden“ zulässt: Ein neues Paket, das nicht sofort starten
+kann, startet, sobald ein Lead endet. Ohne einen solchen Auftrag erhöhen Tasks, die im Lauf ausführbar werden,
+etwa durch Entscheidungen des Nutzers zu `review`, das Laufbudget nicht, und eine Meldung von Host oder
+Werkzeug ist kein Auftrag. Push, Pull Request, Merge und externe Wirkung bleiben, wie sie beim Start galten.
 
 ## Leads und Integrator
 
@@ -147,8 +145,7 @@ Auftrag. Push, Pull Request, Merge und externe Wirkung bleiben, wie sie beim Sta
 integriert jeder Lead seine Tasks selbst. Entscheide das beim Bilden der ersten Pakete als Startwert und
 protokolliere es als `regel`. Rufe bei einem Lauf mit Integrator vor dem ersten Lead `<run> attach` auf.
 
-Ändert ein später startendes Paket, etwa nach „Erweitern“ oder beim Nachfüllen, Dateien im selben Repo wie ein
-laufendes Paket und läuft noch kein Integrator, rufe vor dem Start seines Leads `<run> attach` auf,
+Ändert ein nach „Erweitern“ startendes Paket Dateien im selben Repo wie ein laufendes Paket und läuft noch kein Integrator, rufe vor dem Start seines Leads `<run> attach` auf,
 protokolliere als `regel`, dass der Lauf ab jetzt mit Integrator läuft, und starte den Integrator nach dem
 Lead wie unten. Er bleibt bis zum Laufende. Laufende Leads erfahren es aus der Antwort auf ihre Anmeldung
 und übergeben ab ihrer nächsten Integration.
@@ -181,7 +178,7 @@ Hintergrundbefehle, führe es im Vordergrund aus, mit `--timeout` knapp unter de
 Hosts. Überwache sonst nur über die Abschlussmeldungen deines Hosts zu seinen Subagents, ohne eigene Monitore,
 Crons oder Warteschleifen.
 Blockiert ein Stop-Hook des Hosts dein Stoppen, weil der Lauf aktiv ist und keine Hintergrundarbeit läuft,
-fülle nach Lage Pakete nach, starte Nachfolger oder führe `<run> end` aus. Nach `end` bring den Lauf nach
+starte nach Lage wartende Pakete oder Nachfolger oder führe `<run> end` aus. Nach `end` bring den Lauf nach
 „Laufende“ bis zu `<run> close`.
 
 Protokolliere, was du selbst zum Abschlussblock beiträgst, sofort mit `<run> log --type <type> --package
@@ -194,8 +191,8 @@ alle) und `werkzeug` (Defekt des Steuerskripts, der Lauf-Werkzeuge oder dieser A
   `--role integrator`) und `--answer "<Antwort>"`: aus dem Projektwissen mit Quelle, sonst nach
   „Ohne Nutzer“. Kann die Lage wiederkehren, etwa ein instabiler Test, protokolliere die Antwort einmal als
   `regel` mit `--text "<Lage>: <Entscheidung>"`. Fragt ein Lead nach einer weiteren Korrektur, antworte nach
-  „Korrekturbudget“ in [Abnehmen und integrieren](playbook-acceptance.md) und protokolliere jede Freigabe mit
-  `log --type annahme`.
+  „Korrekturbudget“ in [Abnehmen und integrieren](playbook-acceptance.md) und protokolliere die Freigabe mit
+  `log --type annahme` und `--task <id>`.
 - **`disk`:** Führe den Bereinigungsschritt aus, den das Projekt dafür nennt. Ohne einen handle nach
   „Ohne Nutzer“. Fragt ein Lead danach zu einer Prüfung, die an der Umgebung scheiterte, lass sie ihn einmal
   wiederholen, nicht gleichzeitig mit einer anderen langen Prüfung dieses Laufs.
@@ -221,7 +218,7 @@ mit dem Profil `standard` und diesem Auftrag:
 Setze `<tmp>` auf `<repo-root>/.qatlas/local/run/tmp/drafts/`. Übernimm bei `reif` den Vertrag unverändert aus
 der Datei ins Planungssystem und setze den Task auf `ready`. Bei `offen` bleibt er `draft`, bis der Nutzer
 `shape` dafür startet. Nenne unter `Neu` im Abschlussblock jeden Entwurf mit seinem Status, bei `draft` mit
-der offenen Frage. Ein reif gewordener Task startet in diesem Lauf nicht und ändert das Laufbudget nicht.
+der offenen Frage. Ein reif gewordener Task startet in diesem Lauf nicht.
 
 ## Ende eines Subagents
 
@@ -229,24 +226,20 @@ der offenen Frage. Ein reif gewordener Task startet in diesem Lauf nicht und än
   zählt weder gegen die Paketzahl noch gegen das Laufbudget.
 - **Lead endet ohne `done`:** Protokolliere es mit `<run> done --package <package> --rest <id,id,...>` für die
   Tasks des Pakets, die `report` nicht als `integrated` führt, und starte einen Nachfolger wie bei `rest`.
-  Endet auch er ohne `done`, sichere die offenen Tasks nach dem Git-Workflow als Übergabe an `review`.
+  Endet auch er ohne `done`, bleiben nie begonnene Tasks `ready`. Sichere nur Tasks mit eigener Arbeit, wie
+  Schritt 3 von „Abbruch“ sie bestimmt, nach dem Git-Workflow als Übergabe an `review`.
 - **Integrator `done` oder Ende ohne `done` vor `end`:** Starte einen neuen.
 - **Rote Schlussprüfung:** Meldet sie das `done` des Integrators nach `end` oder, ohne Integrator, das eines
   Leads, handle nach `<run> end` nach „Rote Schlussprüfung“.
 
-**Nachfüllen:** Endet ein Paket und ist das Laufbudget nicht aufgebraucht, bilde aus den verbleibenden Tasks
-ein neues, von allen laufenden unabhängiges Paket nach der Größenregel mit höchstens so vielen Tasks wie das
-Restbudget, mit neuem Namen, protokolliere es mit `plan` und starte seinen Lead. Lass nie mehr Leads
-gleichzeitig laufen, als „Pakete bilden“ zulässt.
-
 ## Fortsetzen
 
 Rekonstruiere nach einer Verdichtung deines Kontexts oder in einer neuen Session den Stand aus `<run> report`
-(Pakete, Laufbudget, beendete Pakete mit `rest`, offene Rückfragen und Übergaben) und dem Planungssystem.
+(Pakete, beendete Pakete mit `rest`, offene Rückfragen und Übergaben) und dem Planungssystem.
 Beantworte offene Rückfragen und setze `wait` ab dem `cursor` von `report` fort. Behandle in einer neuen
 Session jedes Paket ohne `done` als „Lead endet ohne `done`“ und starte bei `integrator.attached: true` in
-`report` einen neuen Integrator, weil die Subagents der alten Session nicht mehr laufen. Bilde keine Pakete
-über das restliche Laufbudget hinaus.
+`report` einen neuen Integrator, weil die Subagents der alten Session nicht mehr laufen. Bilde keine neuen
+Pakete.
 
 ## Abbruch
 
@@ -280,10 +273,10 @@ Lauf jeden begonnenen Task ohne Rückfrage fortsetzen kann:
 
 ## Laufende
 
-Führe `<run> end` aus, sobald kein Nachfüllen mehr möglich ist, jedes Paket mit `done` ohne `rest` geendet hat
-oder gesichert ist und `report` keine offene Übergabe zeigt. Melde dem Nutzer bei zugeschaltetem Integrator
+Führe `<run> end` aus, sobald jedes Paket mit `done` ohne `rest` geendet hat oder gesichert ist und `report`
+keine offene Übergabe zeigt. Melde dem Nutzer bei zugeschaltetem Integrator
 dann in genau einer Zeile, dass alle Tasks integriert oder übergeben sind und die Schlussprüfung läuft, und
-warte auf sein `done` nach seiner Schlussprüfung. Ohne Integrator hat der letzte Lead sie vor seinem `done`
+warte auf sein `done` nach seiner Schlussprüfung. Ohne Integrator hat jeder Lead sie vor seinem `done`
 ausgeführt. War sie rot, handle zuerst nach „Rote Schlussprüfung“. Führe danach die Bereinigungsschritte aus, die
 Projektanweisungen für das Ende eines Laufs nennen, und committe die entstandenen Änderungen. Leert ein
 solcher Schritt etwas, das andere Projekte auf dem Host mitnutzen, etwa einen Build-Cache oder ein gemeinsames

@@ -13,9 +13,10 @@
 // Usage:
 //   qatlas-run.js begin --repo <root> [--discard]
 //     Resumes an unfinished run; --discard archives it and starts anew.
-//   qatlas-run.js plan --repo <root> --budget <n> --package <package> --tasks <id,id,...>
+//   qatlas-run.js plan --repo <root> --package <package> --tasks <id,id,...>
 //   qatlas-run.js ask --repo <root> (--package <package> | --role integrator) --question <text> [--timeout <s>]
 //   qatlas-run.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
+//     ask and handover wait 100 s for the answer unless --timeout says otherwise.
 //   qatlas-run.js answer --repo <root> (--package <package> | --role integrator) --answer <text>
 //   qatlas-run.js wait --repo <root> [--role supervisor|integrator] [--since <seq>] [--timeout <s>] [--min-free <GB>]
 //     Both wait forms default to 3000 s; wait returns at once on an event, so only idle wakeups depend on it.
@@ -31,8 +32,9 @@
 //   qatlas-run.js integrate --repo <root> --package <package> --task <id>
 //     Lead without integrator, before each own integration. Output {"integrate":"handover"} once the integrator
 //     is attached (hand over with handover), else {"integrate":"self"} and the registration stays open until
-//     log --type integrated for the same package and task or done of the package. While one is open, the
-//     integrator's wait lists no handover (not as event, not in queue); it is delivered after the last closes.
+//     log --type integrated for the same package and task, or a handover or done of the package. While one
+//     is open, the integrator's wait lists no handover (not as event, not in queue); it is delivered after
+//     the last closes.
 //   qatlas-run.js report --repo <root> [--code-repo <path>] [--notes <type>]
 //     "summed" adds up over all agents working in parallel, so its times can exceed "duration". It counts, in
 //     seconds since begin, the commands run through slot in the repo of the code ("checks", of them "red",
@@ -106,7 +108,7 @@ function record(repo, type, fields = {}) {
   const file = eventsFile(repo, true);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const entry = { at: new Date().toISOString(), type };
-  for (const key of ['sender', 'package', 'task', 'budget', 'tasks', 'rest', 'text', 'report', 'session']) if (fields[key]) entry[key] = fields[key];
+  for (const key of ['sender', 'package', 'task', 'tasks', 'rest', 'text', 'report', 'session']) if (fields[key]) entry[key] = fields[key];
   fs.appendFileSync(file, JSON.stringify(entry) + '\n');
 }
 
@@ -156,8 +158,9 @@ const ended = all => all.some(e => e.type === 'end');
 const closed = all => all.some(e => e.type === 'close');
 const attached = all => all.some(e => e.type === 'attach');
 
-// Own integrations a lead announced and has not closed yet. closedAt is the seq of the latest closing event: a
-// handover held back meanwhile counts as new from there, so a wait whose cursor already passed it still wakes.
+// Own integrations a lead announced and has not closed yet. A lead that hands over or ends is not integrating
+// itself, so both close what it left open. closedAt is the seq of the latest closing event: a handover held
+// back meanwhile counts as new from there, so a wait whose cursor already passed it still wakes.
 function registrations(all) {
   const open = new Map();
   let closedAt = -1;
@@ -165,7 +168,7 @@ function registrations(all) {
     const key = e.package + '\0' + e.task;
     if (e.type === 'integrate') open.set(key, e);
     else if (e.type === 'integrated' && open.delete(key)) closedAt = e.seq;
-    else if (e.type === 'done') {
+    else if (e.type === 'done' || e.type === 'handover') {
       for (const [k, r] of open) if (r.package === e.sender) { open.delete(k); closedAt = e.seq; }
     }
   }
@@ -191,16 +194,14 @@ function begin() {
 
 function plan() {
   const repo = repoKey();
-  const budget = Number(need('--budget')[0]);
   const [name] = need('--package');
-  if (!Number.isInteger(budget) || budget < 1) fail('--budget must be a positive integer', 2);
   if (name === INTEGRATOR) fail('Reserved package name: integrator', 2);
   const tasks = idList('--tasks');
   const all = events(repo);
   if (!all.some(e => e.type === 'begin') || ended(all)) fail('No running run: start one with begin', 2);
   if (all.some(e => e.type === 'plan' && e.package === name)) fail('Package already planned: ' + name, 2);
-  record(repo, 'plan', { package: name, budget, tasks });
-  out({ planned: name, budget, tasks });
+  record(repo, 'plan', { package: name, tasks });
+  out({ planned: name, tasks });
 }
 
 function attach() {
@@ -382,8 +383,6 @@ function end() {
   out({ ended: true });
 }
 
-// Times in seconds. Cycle time per task: from the plan of its package or the last integration in it to the
-// first handover. Wait time: last handover to the answer integrated.
 // Commands run through slot since the run began, from the run log of the slot store.
 function slotRuns(repo, since) {
   const dir = readState(repo);
@@ -392,6 +391,8 @@ function slotRuns(repo, since) {
     .filter(run => Date.parse(run.time) >= since);
 }
 
+// Times in seconds. Cycle time per task: from the plan of its package or the last integration in it to the
+// first handover. Wait time: last handover to the answer integrated.
 function reportData(repo) {
   const all = events(repo);
   const time = e => Date.parse(e.at);
@@ -402,7 +403,6 @@ function reportData(repo) {
   const counts = { rerun: 0, conflict: 0, integrated: 0 };
   const notes = {};
   const since = {};
-  let budget = null;
   let integrating = 0;
   for (const e of all) {
     if (Object.hasOwn(counts, e.type)) counts[e.type]++;
@@ -410,7 +410,6 @@ function reportData(repo) {
       (notes[e.type] ||= []).push(Object.fromEntries(['package', 'task', 'text'].filter(k => e[k]).map(k => [k, e[k]])));
     }
     if (e.type === 'plan') {
-      budget = e.budget;
       packages[e.package] = { tasks: e.tasks, questions: 0, finished: 0 };
       since[e.package] = time(e);
     }
@@ -442,7 +441,7 @@ function reportData(repo) {
   const runs = all.length ? slotRuns(codeRepo(repo), time(all[0])) : [];
   const sum = key => secs(runs.reduce((total, run) => total + (Number(run[key]) || 0), 0));
   return { ended: ended(all), cursor: all.length, duration: all.length ? secs(time(all[all.length - 1]) - time(all[0])) : null,
-    budget, packages, open, tasks, integrator, log: counts,
+    packages, open, tasks, integrator, log: counts,
     summed: { checks: runs.length, red: runs.filter(run => run.exit !== 0).length, checking: sum('duration'), queued: sum('waited'), integrating: secs(integrating) },
     notes };
 }
@@ -539,7 +538,7 @@ function validateHandover(text, repo) {
   const str = key => (typeof data[key] === 'string' && data[key].trim() ? data[key].trim() : bad(`"${key}" must be a non-empty string.`));
   const prMode = ['pr-title', 'pr-body', 'last', 'base', 'pr', 'head', 'pushed', 'cut-exception'].some(key => data[key] !== undefined);
   const checkTrees = (ref, label) => {
-    if (data.checks === undefined) return;
+    if (data.checks === undefined) bad('"checks" is required.');
     if (!Array.isArray(data.checks) || !data.checks.length) bad('"checks" must be a non-empty list.');
     data.checks.forEach((entry, i) => {
       const name = `checks[${i}]`;
@@ -560,7 +559,6 @@ function validateHandover(text, repo) {
   if (!prMode) {
     const branch = str('branch');
     resolveCommit(repo, branch, 'branch', bad);
-    if (data.checks === undefined) bad('"checks" is required without pull request fields.');
     return checkTrees(branch, `branch ${branch}`);
   }
   const title = str('pr-title');
@@ -590,21 +588,10 @@ function validateHandover(text, repo) {
 }
 
 // Whether the session of a hook input has an active run. A subagent may sit in a task worktree, so the folder
-// of the call and the project folder count, each as its own worktree and as the main one.
+// of the call and the project folder count; the store resolves each to its project.
 function sessionRuns(input, over = ended) {
-  const roots = new Set();
-  for (const dir of [input.cwd, process.env.CLAUDE_PROJECT_DIR]) {
-    if (!dir) continue;
-    for (const [query, main] of [[['--show-toplevel'], false], [['--path-format=absolute', '--git-common-dir'], true]]) {
-      try {
-        const found = execFileSync('git', ['-C', dir, 'rev-parse', ...query],
-          { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000 }).trim();
-        roots.add(main ? path.dirname(found) : found);
-      } catch { /* no repo here */ }
-    }
-  }
-  return [...roots].some(root => {
-    const all = events(root);
+  return [input.cwd, process.env.CLAUDE_PROJECT_DIR].filter(Boolean).some(dir => {
+    const all = events(dir);
     if (!all.some(e => e.type === 'begin') || over(all)) return false;
     const started = all.filter(e => e.type === 'begin' || e.type === 'resume').pop();
     return Boolean(started.session) && started.session === input.session_id;
@@ -618,7 +605,7 @@ function stopHook() {
     if (!Array.isArray(input.background_tasks) || input.stop_hook_active === true) return;
     if (input.background_tasks.some(task => task && task.status === 'running')) return;
     if (!sessionRuns(input, closed)) return;
-    out({ decision: 'block', reason: 'The run is not closed and no background work is running: refill packages, start successors, or run end; after end finish the closing work and run close.' });
+    out({ decision: 'block', reason: 'The run is not closed and no background work is running: start waiting packages or successors, or run end; after end finish the closing work and run close.' });
   } catch { /* allow the stop */ }
 }
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// Prints the central worktree path for a branch of the repo in the current or given dir.
+// Prints the central worktree path for a branch of the repo in the current or given dir. The path lies in the
+// state folder of the project, so the call creates project id and state folder when they are missing.
 // Usage: node qatlas-worktree-path.js <branch> [--target <dir>]
 
 const path = require('path');

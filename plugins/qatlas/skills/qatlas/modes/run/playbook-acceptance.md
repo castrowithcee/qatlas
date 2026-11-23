@@ -1,7 +1,7 @@
 ---
 description: >
-  Taskergebnisse im Lauf selbst abnehmen, Fehlschläge einordnen, Korrekturen begrenzen und weitere nur nach
-  Freigabe zulassen, die Dokumentationswirkung klären und das Ergebnis integrieren.
+  Taskergebnisse im Lauf selbst abnehmen, Fehlschläge einordnen, Korrekturen begrenzen und eine letzte nur
+  nach Freigabe zulassen, die Dokumentationswirkung klären und das Ergebnis integrieren.
 ---
 
 # Abnehmen und integrieren
@@ -82,16 +82,16 @@ Task zu, auch wenn mehrere Abnahmekriterien betroffen sind. Jede Korrektur brauc
 daraus abgeleitete Änderung. Bloßes Umformulieren, ein anderer Subagent oder eine neue Session setzt den
 Zähler nicht zurück.
 
-Ist das Kriterium nach der zweiten oder einer freigegebenen Korrektur weiterhin nicht erfüllt, frage als Lead
-den Supervisor nach einer weiteren Korrektur. Nenne darin belegte Ursache, neuen Nachweis und die konkrete
-Korrektur so, dass er ohne Diff und Log entscheiden kann. Der Supervisor gibt genau eine weitere Korrektur
-frei, wenn alle drei Bedingungen gelten, gleich ob sie das Produkt oder den Prüfaufbau betrifft:
+Ist das Kriterium nach der zweiten Korrektur weiterhin nicht erfüllt, darfst du als Lead den Supervisor je
+Task einmal um eine dritte und letzte bitten. Nenne darin belegte Ursache, neuen Nachweis und die konkrete
+Korrektur so, dass er ohne Diff und Log entscheiden kann. Der Supervisor gibt sie nur frei, wenn alle drei
+Bedingungen gelten, gleich ob sie das Produkt oder den Prüfaufbau betrifft:
 
 1. Die Ursache ist mit neuem Nachweis belegt.
 2. Die Korrektur ist konkret benannt.
 3. Sie ändert weder Ziel, Scope noch Abnahme.
 
-Jede weitere Freigabe braucht eine neue Anfrage mit neuem Nachweis. Gibt der Supervisor keine Korrektur frei:
+Eine vierte Korrektur gibt es nicht. Ohne Freigabe, oder wenn auch die dritte das Kriterium nicht erfüllt:
 
 1. Beende jede weitere Umsetzung dieses Tasks.
 2. Sichere den aktuellen Diff, die belegte Ursache, die geprüften Korrekturen und die weiterhin verletzte
@@ -152,8 +152,5 @@ der Ausführungsgrundlage ab.
   dem Task-Branch.
 
 Wähle den Status und schreibe die Übergabe nach „Übergabe an den Nutzer“ der Backlog-Norm. Frage als Lead vor
-`review` zuerst den Supervisor, außer der Taskvertrag selbst weist die Prüfung dem Nutzer zu. Verhindert eine
-externe Voraussetzung, Ressource oder Umgebung das Weiterarbeiten, gehört der Task nach dem maßgeblichen
-Statusmodell auf `waiting`. Schreibe den Status nur so, wie „Planungssystem“ im Git-Workflow es regelt. Ändere
-den Status nicht wegen einer nicht erfüllten internen Task-Abhängigkeit. Die Reihenfolge im Planungssystem
-genügt.
+`review` zuerst den Supervisor, außer der Taskvertrag selbst weist die Prüfung dem Nutzer zu. Schreibe den
+Status nur so, wie „Planungssystem“ im Git-Workflow es regelt.

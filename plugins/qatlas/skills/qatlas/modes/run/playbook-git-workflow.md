@@ -25,19 +25,18 @@ description: >
 
 ## Kollisionsflächen
 
-Ein Worktree trennt nur Arbeitsdateien, Index und `HEAD`. Refs, Objekte, Stash, Hooks und Repo-Konfiguration
-teilen sich alle Worktrees eines Repos. Ports, Datenbanken, Build-Ausgaben, Caches und ignorierte Dateien sind
-weitere Kollisionsflächen. Nutzt du als Lead eine solche Fläche parallel zu anderen, verwende eine eigene
-Instanz oder serialisiere ihre Nutzung über `slot --resource`. Braucht ein Werkzeug echte Repo- oder
+Behandle als Kollisionsfläche, was sich die Worktrees eines Repos teilen: Refs, Objekte, Stash, Hooks und
+Repo-Konfiguration, ebenso Ports, Datenbanken, Build-Ausgaben, Caches und ignorierte Dateien. Getrennt sind nur
+Arbeitsdateien, Index und `HEAD`. Nutzt du als Lead eine solche Fläche parallel zu anderen, verwende eine
+eigene Instanz oder serialisiere ihre Nutzung über `slot --resource`. Braucht ein Werkzeug echte Repo- oder
 Sicherheitsisolation, nenne einen separaten Clone oder eine Sandbox als Voraussetzung. Lassen sich fremde
 Änderungen nicht sicher trennen, gib den Task mit dem Befund an `review`.
 
 ## Planungssystem
 
-Als Lead: Beanspruche jeden Task unmittelbar vor der ersten schreibenden Ausführung, setze `review`,
-`waiting` oder `draft` selbst und lege Entwürfe selbst an. Ist ein Task inzwischen fremd beansprucht oder sein
-Anspruch unklar, ändere nichts daran und frage den Supervisor. `done` setzt, wer integriert, nach Integration
-und Nachweis auf dem Kontroll-Branch, einen Task ohne Dateiänderung der Lead nach seiner Abnahme.
+Als Lead: Beanspruche deine Tasks selbst, setze `review`, `waiting` oder `draft` selbst und lege Entwürfe
+selbst an. Ist ein Task inzwischen fremd beansprucht oder sein Anspruch unklar, ändere nichts daran und frage
+den Supervisor. `done` setzt, wer integriert, nach Integration und Nachweis auf dem Kontroll-Branch.
 
 ## Commits und Checkpoints
 
@@ -60,7 +59,6 @@ und Nachweis auf dem Kontroll-Branch, einen Task ohne Dateiänderung der Lead na
   einzeln und prüfe vor jeder Integration erneut, ob die Spitze des Kontroll-Branches deinem zuletzt
   geprüften Stand entspricht. Hat jemand anderes sie verändert, stoppe die Integration und frage den
   Supervisor.
-- Schreibe geteilte Historie nie um.
 - Behalte Task-Branch und Worktree, bis die Integration bestätigt ist oder der Nutzer sie bewusst aufgibt.
   Entferne nach dem Worktree-Vertrag nur Worktrees und Branches, die dieser Lauf angelegt hat und die sauber
   und vollständig integriert sind.

@@ -1,6 +1,7 @@
 ---
 description: >
-  Original copyright and MIT license notice for content adapted from ayghri/i-have-adhd.
+  Original copyright and license notices for third-party content: the adapted ayghri/i-have-adhd (MIT) and
+  the bundled yaml library (ISC).
 ---
 
 # Third-Party Licenses
@@ -34,3 +35,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## yaml
+
+Source: https://github.com/eemeli/yaml
+License: ISC, https://github.com/eemeli/yaml/blob/main/LICENSE
+
+The run mode of the `qatlas` skill bundles a subset of version 2.9.0 as
+`skills/qatlas/modes/run/scripts/vendor/yaml-2.9.0.js`. Its copyright and license notice lies next to it as
+`yaml-license.txt`.

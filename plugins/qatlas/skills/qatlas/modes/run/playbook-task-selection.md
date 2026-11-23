@@ -1,21 +1,17 @@
 ---
 description: >
-  Ausführbare Tasks eines Laufs auswählen, ihre Zuständigkeit klären und die Auswahl bei jedem Nachfüllen
-  neu bewerten.
+  Ausführbare Tasks eines Laufs auswählen und ihre Zuständigkeit klären.
 ---
 
 # Tasks auswählen
 
-Nimm in einen Lauf höchstens so viele Tasks auf, wie sein Laufbudget erlaubt. Werte das Budget weder als
-Commit- noch als Subagent-Zahl und passe es nicht an die Zahl der `ready`-Tasks an. Lass weitere
-`ready`-Tasks in ihrer bestehenden Reihenfolge für spätere Läufe.
+Wähle nicht mehr Tasks, als die Pakete nach „Pakete bilden“ fassen können.
 
 1. Bestimme aus der Übersicht des Planungssystems für den gewählten Scope Status, Kurzstand, Reihenfolge,
    Abhängigkeiten und Zuständigkeitssignale. Nennt der Aufruf Tasks ausdrücklich, bestimme das nur für sie.
 2. Nimm ausführbare `ready`-Tasks in der Reihenfolge des Planungssystems. Legt es unter ihnen keine
    Reihenfolge fest, wähle nach erfüllbaren Abhängigkeiten, fachlichem Wert, früher Risikoklärung und
-   sinnvoller Integration. Einen `deferred`-Task nimmst du nach der Backlog-Norm nur auf, wenn der Aufruf ihn
-   ausdrücklich nennt.
+   sinnvoller Integration.
 3. Lies die gewählten Tasks nicht selbst. Ein einzelner Task bildet ohne Lesen ein Paket. Gib mehrere einem
    lesenden Worker mit dem Profil `standard`, der jeden gewählten Task und seine echten Blocker vollständig
    liest, keine weiteren Kandidaten, und je Task in einer Zeile zurückgibt: Abhängigkeiten, Kopplung mit
@@ -36,5 +32,3 @@ Commit- noch als Subagent-Zahl und passe es nicht an die Zahl der `ready`-Tasks 
    Eigentümer und Arbeitsstand.
 6. Prüfe vor dem Start bei Git Root, Branch, Upstream, Worktrees und den vollständigen Status. Beginne den
    Lauf nur auf einem sauberen Kontroll-Branch.
-
-Bewerte Auswahl, Reihenfolge, Abhängigkeiten und verbleibendes Laufbudget bei jedem Nachfüllen neu.

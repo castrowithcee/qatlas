@@ -43,7 +43,7 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 - <Schwäche mit ihrem Nachweis aus diesem Lauf> (#<Entwurf-ID>): <Datei>: „<Textvorschlag>“.
 - <Werkzeug> <Version>: Beobachtung: <…>. Erwartung: <…>. Nachweis: <…>. Melden: <Adresse, die das Werkzeug nennt>.
 
-**Kennzahlen:** Dauer <Zeit> · <n> Rückfragen · <n> Nacharbeiten · <n> Konflikte · <n> Wiederholungen · <n> Anstöße · summiert über parallele Arbeit: Prüfungen <Zeit> in <n> Durchläufen, <n> rot · Warten auf Test-Slots <Zeit> · Warten auf Integration <Zeit>
+**Kennzahlen:** Dauer <Zeit> · <n> Rückfragen · <n> Nacharbeiten · <n> Konflikte · <n> Wiederholungen · summiert über parallele Arbeit: Prüfungen <Zeit> in <n> Durchläufen, <n> rot · Warten auf Test-Slots <Zeit> · Warten auf Integration <Zeit>
 **Nicht gepusht:** <Repo>: <Commit-ID> <Betreff>
 
 Weiter in einer neuen Session: <Modi>

@@ -151,9 +151,14 @@ function testSlotCount() {
   const status = () => spawnSync(process.execPath, [tools, 'slot', '--repo', repo, 'status'],
     { encoding: 'utf8', env: { ...process.env, HOME: home } });
   const slots = () => { const r = status(); assert.strictEqual(r.status, 0, r.stderr); return JSON.parse(r.stdout).slots; };
+  // --slots only lowers the number of the user, also the default of 2.
+  const asked = count => JSON.parse(spawnSync(process.execPath, [tools, 'slot', '--repo', repo, '--slots', count, 'status'],
+    { encoding: 'utf8', env: { ...process.env, HOME: home } }).stdout).slots;
   assert.strictEqual(slots(), 2);
+  assert.deepStrictEqual([asked('1'), asked('9')], [1, 2]);
   fs.writeFileSync(cfg, JSON.stringify({ format: 1, run: { 'test-slots': 5 } }));
   assert.strictEqual(slots(), 5);
+  assert.deepStrictEqual([asked('3'), asked('5'), asked('9')], [3, 5, 5]);
   fs.writeFileSync(cfg, JSON.stringify({ format: 1 }));
   assert.strictEqual(slots(), 2);
   for (const bad of [{ format: 1, run: { 'test-slots': 0 } }, { format: 1, run: { 'test-slots': 'x' } },
@@ -718,11 +723,12 @@ try {
     return spawnSync(process.execPath, [runner, 'handover', '--repo', c.repo, '--package', 'p', '--task', 't',
       '--report', c.report, '--timeout', '0.1', ...more], { encoding: 'utf8', env: env(c.stubDir) });
   };
+  const checked = (repo, ref) => `\nchecks:\n  - command: node test\n    exit: 0\n    tree: "${git(repo, 'rev-parse', ref + '^{tree}')}"`;
   c = setup('pr-handover');
   const pushed = c.sha;
   commit(c.repo, 'fix.txt', 'fix\n');
   const fixed = git(c.repo, 'rev-parse', 'HEAD');
-  r = handover(c, `\npr: 16\nhead: ${fixed}\npushed: ${pushed}`);
+  r = handover(c, `\npr: 16\nhead: ${fixed}\npushed: ${pushed}${checked(c.repo, fixed)}`);
   assert.doesNotMatch(r.stderr, /Handover rejected/);
   assert.notStrictEqual(r.status, 2, r.stderr);
   // Same report without pr: the old check counts base..branch and rejects the CI fix commit.
@@ -790,6 +796,9 @@ try {
   r = handChecks(prFm(wrongTree));
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /has tree 1{40}/);
+  r = handChecks(prFm(tree).replace(/checks:[\s\S]*/, ''));
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"checks" is required/);
 
   // Two milestones at the first push: cut rejects before the push, a handover with pushed = second milestone too.
   c = setup('cut', { extra: ['d.txt'] });
@@ -802,7 +811,7 @@ try {
   r = handover(c, `\npr: 16\nhead: ${c.sha}\npushed: ${c.sha}`);
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /at first push .* has 2 non-merge commits over main/);
-  r = handover(c, `\ncut-exception: two milestones\npr: 16\nhead: ${c.sha}\npushed: ${c.sha}`);
+  r = handover(c, `\ncut-exception: two milestones\npr: 16\nhead: ${c.sha}\npushed: ${c.sha}${checked(c.repo, c.sha)}`);
   assert.notStrictEqual(r.status, 2, r.stderr);
   c = setup('cut-ok');
   r = cutRun(c);
@@ -853,6 +862,7 @@ try {
   r = hand(c);
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /does not resolve to a commit/);
+  write(c.report, fs.readFileSync(c.report, 'utf8').replace('last: true', 'last: true' + checked(c.codeDir, 'task')));
   r = hand(c, '--code-repo', c.codeDir, '--timeout', '0.1');
   assert.doesNotMatch(r.stderr, /Handover rejected/);
 
@@ -873,13 +883,13 @@ try {
     const supervise = since => ok('wait', '--since', String(since), '--timeout', '0.1', '--min-free', '0.000001');
     const integrate = since => ok('wait', '--role', 'integrator', '--since', String(since), '--timeout', '0.1');
 
-    refused(/start one with begin/, 'plan', '--budget', '3', '--package', 'a', '--tasks', '1,2');
+    refused(/start one with begin/, 'plan', '--package', 'a', '--tasks', '1,2');
     assert.strictEqual(ok('begin').cursor, 1);
-    ok('plan', '--budget', '3', '--package', 'a', '--tasks', '1,2');
-    ok('plan', '--budget', '3', '--package', 'b', '--tasks', '3');
-    refused(/already planned/, 'plan', '--budget', '3', '--package', 'a', '--tasks', '9');
-    refused(/Reserved package name/, 'plan', '--budget', '3', '--package', 'integrator', '--tasks', '9');
-    refused(/comma-separated ids/, 'plan', '--budget', '3', '--package', 'c', '--tasks', '1,,2');
+    ok('plan', '--package', 'a', '--tasks', '1,2');
+    ok('plan', '--package', 'b', '--tasks', '3');
+    refused(/already planned/, 'plan', '--package', 'a', '--tasks', '9');
+    refused(/Reserved package name/, 'plan', '--package', 'integrator', '--tasks', '9');
+    refused(/comma-separated ids/, 'plan', '--package', 'c', '--tasks', '1,,2');
 
     // Question: no answer within the timeout, the supervisor wakes, repeating the call collects the answer.
     assert.strictEqual(ok('ask', '--package', 'a', '--question', 'Q1?', '--timeout', '0.1').answer, null);
@@ -971,7 +981,7 @@ try {
     assert.deepStrictEqual(rep.log, { rerun: 0, conflict: 2, integrated: 1 });
     assert.strictEqual(rep.tasks['1'].integrated, true);
     assert.ok(!rep.notes.integrated);
-    assert.deepStrictEqual([rep.ended, rep.budget, rep.open], [false, 3, []]);
+    assert.deepStrictEqual([rep.ended, rep.open], [false, []]);
     assert.deepStrictEqual(rep.packages, { a: { tasks: ['1', '2'], questions: 1, finished: 1, rest: ['2'] },
       b: { tasks: ['3'], questions: 0, finished: 0 } });
     assert.deepStrictEqual([rep.tasks['3'].integrated, rep.tasks['3'].rework, rep.tasks['3'].handovers], [true, 1, 3]);
@@ -1010,14 +1020,14 @@ try {
     // end wakes the integrator and closes the run; a new run archives the log and needs --since 0.
     ok('end');
     assert.deepStrictEqual(types(integrate(integ.cursor)), ['end']);
-    refused(/start one with begin/, 'plan', '--budget', '1', '--package', 'z', '--tasks', '1');
+    refused(/start one with begin/, 'plan', '--package', 'z', '--tasks', '1');
     const last = ok('report');
     assert.strictEqual(last.ended, true);
     ok('begin');
     assert.ok(!fs.existsSync(path.dirname(path.dirname(tmpFile))), 'new run clears run/tmp');
     refused(/past the end of the log/, 'wait', '--since', String(last.cursor), '--timeout', '0.1');
     assert.strictEqual(fs.readdirSync(path.join(stateOf(repo), 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
-    ok('plan', '--budget', '1', '--package', 'z', '--tasks', '1');
+    ok('plan', '--package', 'z', '--tasks', '1');
     assert.strictEqual(ok('begin').resumed, true);
     assert.deepStrictEqual(Object.keys(ok('report').packages), ['z']);
     assert.strictEqual(archives(), 1);
@@ -1030,7 +1040,7 @@ try {
 
     // A blocked landing is no correction; an answered signal of a sender that logged done is no longer open, and
     // its answer stays readable in the task for a successor.
-    ok('plan', '--budget', '1', '--package', 'p', '--tasks', '5,6,7');
+    ok('plan', '--package', 'p', '--tasks', '5,6,7');
     ok('handover', '--package', 'p', '--task', '5', '--report', report, '--timeout', '0.1');
     ok('answer', '--package', 'p', '--answer', 'rework blocked: CI size limit');
     ok('done', '--package', 'p', '--rest', '5,6,7');
@@ -1105,7 +1115,7 @@ try {
       withSession('s1', 'begin', '--discard');
       assert.strictEqual(JSON.parse(hook({}).stdout).decision, 'block');
       refused(/run end first/, 'close');
-      ok('plan', '--budget', '2', '--package', 'c', '--tasks', '1,2');
+      ok('plan', '--package', 'c', '--tasks', '1,2');
       ok('log', '--type', 'integrated', '--package', 'c', '--task', '1', '--text', 'abc');
       ok('log', '--type', 'entscheiden', '--text', 'x');
       ok('end');
@@ -1235,7 +1245,7 @@ try {
     assert.strictEqual(low(), 2);
   }
 
-  // Late integrator: lead announcements, held handovers and the budget across attach, plan and resume.
+  // Late integrator: lead announcements and held handovers across attach, plan and resume.
   {
     const repo = fs.realpathSync(fs.mkdtempSync(path.join(root, 'attach-')));
     git(repo, 'init', '-q', '-b', 'main');
@@ -1256,8 +1266,8 @@ try {
     refused(/start one with begin/, 'attach');
     refused(/start one with begin/, 'integrate', '--package', 'a', '--task', '1');
     ok('begin');
-    ok('plan', '--budget', '2', '--package', 'a', '--tasks', '1,2');
-    ok('plan', '--budget', '2', '--package', 'b', '--tasks', '3');
+    ok('plan', '--package', 'a', '--tasks', '1,2');
+    ok('plan', '--package', 'b', '--tasks', '3');
     assert.strictEqual(ok('report').integrator.attached, false);
     refused(/Reserved package name/, 'integrate', '--package', 'integrator', '--task', '1');
     refused(/Reserved event type/, 'log', '--type', 'attach');
@@ -1300,7 +1310,7 @@ try {
     ok('begin', '--discard');
 
     // Attach: idempotent, answers handover for every lead, also one that integrated itself before.
-    ok('plan', '--budget', '2', '--package', 'a', '--tasks', '1');
+    ok('plan', '--package', 'a', '--tasks', '1');
     assert.strictEqual(announce('a', '1'), 'self');
     ok('log', '--type', 'integrated', '--package', 'a', '--task', '1');
     assert.deepStrictEqual(ok('attach'), { attached: true });
@@ -1310,10 +1320,24 @@ try {
     assert.strictEqual(announce('a', '2'), 'handover');
     assert.strictEqual(announce('c', '5'), 'handover');
     assert.strictEqual(ok('report').cursor, cursorAttached);
+    // A lead that left an announcement open and hands over after attach releases the queue: its own handover
+    // closes the announcement, so neither it nor another lead waits forever.
+    ok('begin', '--discard');
+    ok('plan', '--package', 'a', '--tasks', '1,2');
+    ok('plan', '--package', 'b', '--tasks', '3');
+    assert.strictEqual(announce('a', '1'), 'self');
+    ok('attach');
+    hand('b', '3');
+    assert.deepStrictEqual(integrate(0).queue, []);
+    assert.strictEqual(announce('a', '2'), 'handover');
+    const stale = integrate(0).cursor;
+    hand('a', '2');
+    const released = integrate(stale);
+    assert.deepStrictEqual([released.events.map(e => e.task), released.queue.map(q => q.task)], [['3', '2'], ['3', '2']]);
     // An announcement left open by a lead that attach caught mid-integration still holds the handover.
     ok('begin', '--discard');
-    ok('plan', '--budget', '2', '--package', 'a', '--tasks', '1');
-    ok('plan', '--budget', '2', '--package', 'b', '--tasks', '3');
+    ok('plan', '--package', 'a', '--tasks', '1');
+    ok('plan', '--package', 'b', '--tasks', '3');
     assert.strictEqual(announce('a', '1'), 'self');
     ok('attach');
     hand('b', '3');
@@ -1321,14 +1345,11 @@ try {
     ok('done', '--package', 'a');
     assert.deepStrictEqual(integrate(0).queue.map(q => q.task), ['3']);
 
-    // Report: attachment and the budget of the latest plan, also after begin resumes the run.
-    let rep = ok('report');
-    assert.deepStrictEqual([rep.integrator.attached, rep.budget], [true, 2]);
-    ok('plan', '--budget', '5', '--package', 'd', '--tasks', '8,9,10');
-    assert.strictEqual(ok('report').budget, 5);
+    // Report: attachment and every planned package, also after begin resumes the run.
+    ok('plan', '--package', 'd', '--tasks', '8,9,10');
     assert.strictEqual(ok('begin').resumed, true);
-    rep = ok('report');
-    assert.deepStrictEqual([rep.integrator.attached, rep.budget], [true, 5]);
+    const rep = ok('report');
+    assert.deepStrictEqual([rep.integrator.attached, Object.keys(rep.packages)], [true, ['a', 'b', 'd']]);
     assert.deepStrictEqual(rep.notes, {});
   }
 
