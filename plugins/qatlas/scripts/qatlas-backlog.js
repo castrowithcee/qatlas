@@ -2,8 +2,9 @@
 'use strict';
 
 // The local backlog: issues as text files on the branch qatlas-backlog of the project repo, checked out once
-// per host in the state folder of the project. The branch shares no history with the code, so every working
-// tree of the repo sees one live state and the backlog travels with the remote of the repo.
+// under .qatlas/local/backlog/ of the primary working tree, where agents may edit files. The branch shares no
+// history with the code, so every working tree of the repo sees one live state and the backlog travels with
+// the remote of the repo.
 // Usage: node qatlas-backlog.js <command> [--target <dir>]
 //   fields                                    the selection of every field, also before the first issue
 //   fields add <field> [<value>] [--means <qatlas status>] [--no-work]
@@ -23,7 +24,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { projectDir, readState, ensureState } = require('./runtime/project-store.js');
+const { projectDir, excludeLocal } = require('./runtime/project-store.js');
 
 const BRANCH = 'qatlas-backlog';
 const REF = 'refs/heads/' + BRANCH;
@@ -196,9 +197,9 @@ function locate(start, write) {
   const project = projectDir(start);
   const common = project && gitDir(project);
   if (!common) refuse('The local backlog needs a git repo. qatlas-core init sets one up.');
-  const state = write ? ensureState(project) : readState(project);
-  const dir = state && path.join(state, 'backlog');
-  if (dir && write) fs.mkdirSync(dir, { recursive: true });
+  const state = path.join(project, '.qatlas', 'local');
+  const dir = path.join(state, 'backlog');
+  if (write && !fs.existsSync(dir)) { excludeLocal(project); fs.mkdirSync(dir, { recursive: true }); }
   // Reading creates nothing, so the checkout may not exist yet.
   const git = (args, options = {}) => {
     const checkedOut = fs.existsSync(dir);
@@ -219,10 +220,8 @@ function locate(start, write) {
 // a missing backlog is started. Returns null when there is no backlog and none was asked for.
 function open(start, write = false) {
   const at = locate(start, write);
-  if (!at.state) {
-    if (!write && projectDir(start) && findRemoteTip(projectDir(start))) return open(start, true);
-    return write ? null : { ...at, fields: startFields(at.project), issues: [], created: false };
-  }
+  // A clone or a cleaned working tree has the branch but no checkout yet; reading takes it over.
+  if (!write && !fs.existsSync(at.dir) && findTip(at.project)) return open(start, true);
   let tip = at.git(['rev-parse', '-q', '--verify', REF], { allowFail: true });
   if (!tip) {
     const remote = at.git(['for-each-ref', '--format=%(objectname)', 'refs/remotes/*/' + BRANCH]).split('\n').filter(Boolean);
@@ -246,7 +245,7 @@ function open(start, write = false) {
   return store;
 }
 
-function findRemoteTip(project) {
+function findTip(project) {
   try {
     return execFileSync('git', ['-C', project, 'for-each-ref', '--format=%(objectname)', 'refs/remotes/*/' + BRANCH,
       REF], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
@@ -333,9 +332,8 @@ function counts(store) {
 function summary(start) {
   try {
     const project = projectDir(start);
-    const state = project && readState(project);
-    if (!state) return null;
-    const dir = path.join(state, 'backlog');
+    if (!project) return null;
+    const dir = path.join(project, '.qatlas', 'local', 'backlog');
     const fields = JSON.parse(fs.readFileSync(path.join(dir, 'fields.json'), 'utf8'));
     const found = counts({ fields, issues: readIssues(dir) });
     const parts = [...QATLAS_STATUS, 'no-status'].filter(key => key !== 'done' && found[key]).map(key => found[key] + ' ' + key);
@@ -347,8 +345,7 @@ function summary(start) {
 // For the doctor: reads an existing checkout only and creates nothing.
 function check(start) {
   const project = projectDir(start);
-  const state = project && gitDir(project) && readState(project);
-  const dir = state && path.join(state, 'backlog');
+  const dir = project && path.join(project, '.qatlas', 'local', 'backlog');
   if (!dir || !fs.existsSync(path.join(dir, 'fields.json'))) return [];
   let fields;
   try { fields = JSON.parse(fs.readFileSync(path.join(dir, 'fields.json'), 'utf8')); }

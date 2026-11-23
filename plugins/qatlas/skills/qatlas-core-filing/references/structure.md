@@ -92,8 +92,8 @@ Frage an den Nutzer, kein Grund für einen neuen Ordner.
   `zone-export/` ab.
 - Große oder sich ändernde Binärdateien gehören in einen Dateispeicher oder Git LFS, nicht dauerhaft in eine
   Zone.
-- Technische Projektkonfiguration liegt unter `.qatlas/plugins/`, Projektkennung und Arbeitsdateien von
-  Agenten unter `.qatlas/local/`, Laufzeitzustand und die Issues des lokalen Backlogs unter
+- Technische Projektkonfiguration liegt unter `.qatlas/plugins/`, Projektkennung, Arbeitsdateien von
+  Agenten und die ausgecheckten Issues des lokalen Backlogs unter `.qatlas/local/`, Laufzeitzustand unter
   `~/.qatlas/projects/`. Nichts davon gehört zum Wissensraum.
 
 ## FRAMEWORK.md

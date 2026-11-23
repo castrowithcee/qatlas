@@ -52,14 +52,15 @@ function testFieldsAndIssues() {
   assert.strictEqual(preview.created, false, 'Reading starts no backlog.');
   assert.deepStrictEqual(preview.type.map(entry => entry.name), ['task', 'feature', 'bug', 'idea']);
   assert.strictEqual(preview.status.length, 7);
-  assert.strictEqual(fs.existsSync(path.join(d.home, '.qatlas')), false, 'Reading writes nothing.');
+  assert.strictEqual(fs.existsSync(path.join(d.project, '.qatlas')), false, 'Reading writes nothing.');
   assert.deepStrictEqual(d.ok('list').issues, []);
 
   const first = d.ok('add', '--title', 'First task');
   assert.strictEqual(first.id, '0001');
   assert.strictEqual(first.status, 'draft');
   assert.ok(fs.readFileSync(first.path, 'utf8').includes('## Erledigt, wenn'), 'A task starts from the template.');
-  assert.ok(!first.path.startsWith(d.project), 'Issues live outside the project tree.');
+  assert.strictEqual(first.path, path.join(fs.realpathSync(d.project), '.qatlas', 'local', 'backlog', 'issues', '0001.md'),
+    'Issues are checked out where agents may edit files.');
   assert.strictEqual(d.git('status', '--porcelain'), '', 'The project tree stays clean.');
   assert.strictEqual(d.git('worktree', 'list').split('\n').length, 1, 'The backlog is no registered worktree.');
   assert.strictEqual(d.git('rev-parse', '--abbrev-ref', 'HEAD'), 'main');
@@ -137,6 +138,11 @@ function testFieldsAndIssues() {
   const fromTree = spawnSync(process.execPath, [script, 'set', '3', '--status', 'ready'], { cwd: tree, env: gitEnv(d.home), encoding: 'utf8' });
   assert.strictEqual(fromTree.status, 0, fromTree.stderr);
   assert.strictEqual(d.ok('show', '3').status, 'ready');
+  assert.strictEqual(fs.existsSync(path.join(tree, '.qatlas')), false, 'A linked working tree holds no checkout.');
+
+  // A cleaned working tree loses the checkout, not the backlog.
+  fs.rmSync(path.join(d.project, '.qatlas'), { recursive: true });
+  assert.strictEqual(d.ok('list', '--all').issues.length, 4);
   assert.strictEqual(git(d.home, tree, 'status', '--porcelain'), '');
 }
 
