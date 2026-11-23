@@ -5,6 +5,7 @@
 // Usage: node qatlas-doctor.js [--target <dir>]
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
 const { readConfig } = require('./runtime/config-loader.js');
@@ -56,7 +57,7 @@ for (const folder of stateFolders()) {
 
 // Files of the knowledge space stay lean. A reserved root file moves details into the folder of the same
 // name, any other file is split by subject. Zones and the user's own templates are not Qatlas content.
-const reserved = ['CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md'];
+const reserved = ['PROJECT.md', 'CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md'];
 const brain = path.join(target, '.qatlas-brain');
 function markdownFiles(dir, top) {
   let entries = [];
@@ -81,6 +82,68 @@ for (const file of markdownFiles(brain, true)) {
         ? 'Move details into ' + name.replace('.md', '').toLowerCase() + '/ and keep the file as the entry.'
         : 'Split it by subject into several files of the same folder.'));
   }
+}
+
+// The structure the filing rules fix: folders, file names that carry their type, and the two entries that
+// lead to a file. Everything here is a note, as the user may have asked for an exception.
+const folders = ['backlog', 'memory', 'knowledge', 'playbooks', 'templates', 'zone-import', 'zone-export',
+  ...reserved.map(name => name.replace('.md', '').toLowerCase())];
+const types = ['task', 'meta', 'policy', 'playbook', 'fact', 'memory', 'knowledge'];
+const fixedNames = ['BACKLOG.md', 'IDEAS.md', 'MEMORY.md', 'README.md'];
+const text = file => { try { return fs.readFileSync(file, 'utf8'); } catch { return null; } };
+let rootEntries = [];
+try { rootEntries = fs.readdirSync(brain, { withFileTypes: true }); } catch { /* no knowledge space */ }
+for (const entry of rootEntries.sort((a, b) => a.name.localeCompare(b.name))) {
+  if (entry.name.startsWith('.')) continue;
+  if (entry.isDirectory() && entry.name === 'plans') {
+    notes.push('.qatlas-brain/plans/ is no folder of the knowledge space any more. Work lives in the planning '
+      + 'system; what still binds belongs in a reserved file. Clear it up with the user.');
+  } else if (entry.isDirectory() && !folders.includes(entry.name)) {
+    notes.push('.qatlas-brain/' + entry.name + '/ is none of the fixed folders.');
+  } else if (entry.isFile() && !reserved.includes(entry.name)) {
+    notes.push('.qatlas-brain/' + entry.name + ' is none of the reserved files.');
+  }
+}
+for (const file of markdownFiles(brain, true)) {
+  const name = path.relative(brain, file).split(path.sep).join('/');
+  const base = path.basename(file);
+  const head = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---/.exec(text(file) || '');
+  const type = head && (/^type:[ \t]*(\S+)/m.exec(head[1]) || [])[1];
+  if (!head) notes.push('.qatlas-brain/' + name + ' has no frontmatter.');
+  else if (!types.includes(type)) notes.push('.qatlas-brain/' + name + ' has no known type.');
+  else if (!reserved.includes(name) && !fixedNames.includes(base) && !base.startsWith(type + '-')) {
+    notes.push('.qatlas-brain/' + name + ' has the type ' + type + ', so its name starts with ' + type + '-.');
+  }
+}
+const indexFile = text(path.join(brain, 'memory', 'MEMORY.md'));
+if (indexFile !== null) {
+  // The seed explains the line format in a comment.
+  const index = indexFile.replace(/<!--[\s\S]*?-->/g, '');
+  const present = fs.readdirSync(path.join(brain, 'memory')).filter(name => name.endsWith('.md') && name !== 'MEMORY.md');
+  for (const name of present.sort()) {
+    if (!index.includes('(' + name + ')')) notes.push('.qatlas-brain/memory/' + name + ' has no line in MEMORY.md.');
+  }
+  for (const link of index.match(/\]\(memory-[^)\s]+\.md\)/g) || []) {
+    const name = link.slice(2, -1);
+    if (!present.includes(name)) notes.push('.qatlas-brain/memory/MEMORY.md links ' + name + ', which does not exist.');
+  }
+}
+const instructions = ['AGENTS.md', 'CLAUDE.md'].map(name => text(path.join(target, name)) || '').join('\n');
+for (const name of reserved) {
+  if (fs.existsSync(path.join(brain, name)) && !instructions.includes(name)) {
+    notes.push('.qatlas-brain/' + name + ' has no line with its reading condition in AGENTS.md.');
+  }
+}
+
+// Leftovers of places older plugin versions wrote to. Nothing reads them any more.
+const leftovers = [
+  [path.join(os.homedir(), '.qatlas', 'state', 'worktrees'), 'worktrees from before the project state folders. '
+    + 'Check each against git worktree list of its repo before the user removes it'],
+  [path.join(target, '.qatlas', 'local', 'team'), 'run state of the mode once named team'],
+  [path.join(target, '.qatlas', 'local', 'run', 'events.jsonl'), 'a run log from before the project state folder'],
+];
+for (const [place, what] of leftovers) {
+  if (fs.existsSync(place)) notes.push('leftover ' + place + ': ' + what + '.');
 }
 
 const out = [];

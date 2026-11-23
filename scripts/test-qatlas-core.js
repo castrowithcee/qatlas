@@ -446,10 +446,46 @@ function testInit() {
   const limits = run(doctor).stdout;
   assert.ok(limits.includes('.qatlas-brain/TESTING.md has 3501 words, limit 3500. Move details into testing/'), limits);
   assert.ok(limits.includes('.qatlas-brain/knowledge/knowledge-long.md has 3501 words, limit 3500. Split it'), limits);
-  assert.ok(!/knowledge-short|raw\.md|template\.md/.test(limits), 'Files at the limit, zones and templates stay unreported.');
+  assert.ok(!/knowledge-short\.md has \d|raw\.md|template\.md/.test(limits), 'Files at the limit, zones and templates stay unreported.');
   for (const part of ['TESTING.md', 'knowledge', 'templates', path.join('zone-import', 'raw.md')]) {
     fs.rmSync(path.join(f.project, '.qatlas-brain', part), { recursive: true });
   }
+
+  const brainDir = path.join(f.project, '.qatlas-brain');
+  const typed = type => '---\ndescription: >\n  Test.\ntype: ' + type + '\nedit: shared\n---\n';
+  write(path.join(brainDir, 'PROJECT.md'), typed('policy'));
+  write(path.join(brainDir, 'NOTES.md'), typed('knowledge'));
+  write(path.join(brainDir, 'plans', 'plan-old.md'), typed('plan'));
+  write(path.join(brainDir, 'docs', 'knowledge-docs.md'), typed('knowledge'));
+  write(path.join(brainDir, 'knowledge', 'knowledge-fine.md'), typed('knowledge'));
+  write(path.join(brainDir, 'knowledge', 'fact-wrong.md'), typed('knowledge'));
+  write(path.join(brainDir, 'knowledge', 'knowledge-bare.md'), '# Bare\n');
+  write(path.join(brainDir, 'backlog', 'web', 'README.md'), typed('meta'));
+  write(path.join(brainDir, 'memory', 'memory-lost.md'), typed('memory'));
+  fs.appendFileSync(path.join(brainDir, 'memory', 'MEMORY.md'), '- [Gone](memory-gone.md) - hook.\n');
+  write(path.join(f.home, '.qatlas', 'state', 'worktrees', 'x', 'file'), 'x');
+  write(path.join(f.project, '.qatlas', 'local', 'team', 'events.jsonl'), '');
+  const structure = run(doctor).stdout;
+  for (const note of ['.qatlas-brain/NOTES.md is none of the reserved files.',
+    '.qatlas-brain/plans/ is no folder of the knowledge space any more.',
+    '.qatlas-brain/docs/ is none of the fixed folders.',
+    '.qatlas-brain/knowledge/fact-wrong.md has the type knowledge, so its name starts with knowledge-.',
+    '.qatlas-brain/knowledge/knowledge-bare.md has no frontmatter.',
+    '.qatlas-brain/plans/plan-old.md has no known type.',
+    '.qatlas-brain/memory/memory-lost.md has no line in MEMORY.md.',
+    '.qatlas-brain/memory/MEMORY.md links memory-gone.md, which does not exist.',
+    '.qatlas-brain/PROJECT.md has no line with its reading condition in AGENTS.md.',
+    path.join('.qatlas', 'state', 'worktrees') + ': worktrees from before',
+    path.join('.qatlas', 'local', 'team') + ': run state']) {
+    assert.ok(structure.includes(note), note + '\n' + structure);
+  }
+  assert.ok(!/knowledge-fine|backlog\/web|PROJECT\.md has (no|the)(?! line)/.test(structure), structure);
+  assert.ok(!structure.includes('MISSING'), 'Structure findings are notes.');
+  for (const part of ['PROJECT.md', 'NOTES.md', 'plans', 'docs', 'knowledge', path.join('backlog', 'web')]) {
+    fs.rmSync(path.join(brainDir, part), { recursive: true });
+  }
+  fs.rmSync(path.join(f.home, '.qatlas'), { recursive: true });
+  fs.rmSync(path.join(f.project, '.qatlas'), { recursive: true });
 
   const memoryDir = path.join(f.project, '.qatlas-brain', 'memory');
   fs.rmSync(memoryDir, { recursive: true });
