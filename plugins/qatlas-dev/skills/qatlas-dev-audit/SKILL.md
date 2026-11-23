@@ -4,8 +4,7 @@ description: >
   Quality audit of a whole repo: bugs, security holes, what breaks under real
   load, risky code without tests, slow paths, and what to delete, merge or
   split. Ranked, each finding explained in plain language. One-shot report,
-  changes nothing. Use for "audit this codebase", "review the whole repo",
-  "find bloat", "what can I delete", qatlas-dev-audit.
+  changes nothing.
 disable-model-invocation: true
 attribution: github.com/DietrichGebert/ponytail
 ---

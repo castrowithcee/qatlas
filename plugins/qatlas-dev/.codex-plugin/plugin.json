@@ -1,6 +1,6 @@
 {
   "name": "qatlas-dev",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Code pack: the smallest change that fully solves the task, in three levels, plus a review of a change and an audit of a whole repo. Requires qatlas.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
@@ -18,8 +18,8 @@
     "capabilities": ["Instructions", "Lifecycle hooks"],
     "defaultPrompt": [
       "Build this the laziest way that works.",
-      "Review this change.",
-      "Audit this repo."
+      "Use $qatlas-dev-review to review this change.",
+      "Use $qatlas-dev-audit to audit this repo."
     ]
   }
 }

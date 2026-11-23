@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 // An explicitly set dev mode applies only to the session that set it: set on invocation,
-// re-injected after compaction and into subagents, cleared at session end.
+// re-injected after resume and compaction and into subagents, kept until the session goes stale.
 
 const crypto = require('crypto');
 const fs = require('fs');
@@ -10,6 +10,7 @@ const path = require('path');
 
 const LEVELS = ['lite', 'full', 'ultra'];
 const DEFAULT_LEVEL = 'full';
+const MAX_IDLE_MS = 30 * 24 * 60 * 60 * 1000;
 const SKILL_PATH = path.join(__dirname, '..', 'skills', 'qatlas-dev', 'SKILL.md');
 const STATE_DIR = path.join(process.env.CLAUDE_PLUGIN_DATA || process.env.PLUGIN_DATA ||
   path.join(os.homedir(), '.qatlas', 'state', 'qatlas-dev'), 'sessions');
@@ -38,6 +39,16 @@ function clearLevel(sessionId) {
   try { fs.unlinkSync(statePath(sessionId)); } catch { /* already off */ }
 }
 
+// A session can be resumed long after it ended, so state goes by age, not at session end.
+function pruneStale() {
+  const cutoff = Date.now() - MAX_IDLE_MS;
+  for (const name of fs.readdirSync(STATE_DIR)) {
+    const file = path.join(STATE_DIR, name);
+    try { if (fs.statSync(file).mtimeMs < cutoff) fs.unlinkSync(file); }
+    catch { /* another session removed it first */ }
+  }
+}
+
 // Keeps only the active level's row of the level table.
 function filterSkillBodyForLevel(body, level) {
   return body.replace(/^---[\s\S]*?---\s*/, '').split(/\r?\n/).filter((line) => {
@@ -62,20 +73,16 @@ function emit(context) {
 }
 
 function isDeactivation(prompt) {
-  const value = prompt.replace(/[.!?\s]+$/, '');
-  return value === 'stop qatlas-dev' || value === 'normal mode';
+  return prompt.replace(/[.!?\s]+$/, '') === 'stop qatlas-dev';
 }
 
 function handle(payload) {
   const sessionId = payload.session_id;
   if (!sessionId) return;
 
-  if (event === 'SessionEnd') {
-    clearLevel(sessionId);
-    return;
-  }
-
   if (event === 'SessionStart' || event === 'SubagentStart') {
+    // No host documents whether /clear keeps the session id: the mode ends with the context either way.
+    if (payload.source === 'clear') return clearLevel(sessionId);
     const level = readLevel(sessionId);
     if (level) emit(rules(level));
     return;
@@ -85,18 +92,19 @@ function handle(payload) {
   const command = prompt.match(/^[/@$](?:qatlas-dev:)?qatlas-dev(?![-\w:])\s*(\S*)/);
   const argument = command ? command[1] : null;
 
-  if (argument === 'off' || argument === 'stop' || isDeactivation(prompt)) {
+  if (argument === 'off' || isDeactivation(prompt)) {
     clearLevel(sessionId);
     emit('QATLAS-DEV MODE OFF');
     return;
   }
 
   let level = readLevel(sessionId);
-  if (argument === '' || normalizeLevel(argument)) {
-    level = normalizeLevel(argument) || level || DEFAULT_LEVEL;
-    setLevel(sessionId, level);
-  }
-  if (level) emit(status(level));
+  const set = argument === '' || normalizeLevel(argument);
+  if (set) level = normalizeLevel(argument) || level || DEFAULT_LEVEL;
+  if (!level) return;
+  setLevel(sessionId, level); // rewritten on every prompt: its age is the session's idle time
+  emit(status(level));
+  if (set) pruneStale();
 }
 
 let input = '';
