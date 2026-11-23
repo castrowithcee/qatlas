@@ -7,7 +7,7 @@ description: >
 
 # Projekt-Wissensraum
 
-`.qatlas-brain/` ist der versionierte, im Repo geführte Stand von Wissen und Arbeit. Er hält fest, wie das
+`.qatlas-brain/` ist der versionierte, im Repo geführte Stand des Projektwissens. Er hält fest, wie das
 Projekt gebaut, geprüft, bearbeitet und gepflegt wird. Der Fachinhalt des Repos bleibt an seinem
 maßgeblichen Ort: In einem persönlichen OS liegen Policies zu Weiterbildung oder Finanzen außerhalb, Policies
 zu Struktur und Pflege der Sammlung innerhalb. Bestehende Spezifikationen und Dokumentationsbäume werden

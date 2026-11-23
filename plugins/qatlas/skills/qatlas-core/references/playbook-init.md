@@ -1,6 +1,6 @@
 ---
 description: >
-  Qatlas in einem Projekt einrichten: Git-Repo, Projektanweisungen, README, Projektzustand, Nutzerbibliothek
+  Qatlas in einem Projekt einrichten: Git-Repo, Projektanweisungen, README, Projektzustand, Nutzer-Library
   und Ignore-Regeln ohne Rückfrage anlegen, ohne Vorhandenes zu ersetzen.
 ---
 
@@ -11,8 +11,7 @@ Prüfungen des Skripts.
 
 ## Ausführen
 
-`<plugin-root>` ist die im Sessionkontext genannte `QATLAS PLUGIN ROOT`, sonst der Ordner drei Ebenen über
-dieser `playbook-init.md`.
+Verwende das vom Router aufgelöste `<plugin-root>`.
 
 ```text
 node <plugin-root>/scripts/qatlas-init.js
@@ -31,6 +30,12 @@ bei Bedarf vollständig und behalte ihre Struktur. Die Seeds unter `.qatlas-brai
 Ergänze darüber hinaus nichts und stelle dazu keine Fragen. `AGENTS.md` wächst mit dem Projekt: Eine
 reservierte Datei des Wissensraums bekommt ihre Zeile unter `Projektwissen`, sobald sie mit ihrem ersten
 Eintrag entsteht.
+
+## Vorhandene `CLAUDE.md`
+
+Meldet das Skript unter `NOTES`, dass eine vorhandene `CLAUDE.md` die `AGENTS.md` nicht einbindet, schlage dem
+Nutzer die Zeile `@AGENTS.md` für seine `CLAUDE.md` vor und ergänze sie erst nach seiner Zustimmung. Ändere
+sonst nichts an der Datei.
 
 ## Planungssystem
 
@@ -55,7 +60,7 @@ Orientierungspunkte:
 - `.qatlas/plugins/config.json` ist die optionale versionierte Projektkonfiguration.
 - `~/.qatlas/plugins/config.json` ist optional und enthält nur nutzerweite Abweichungen von den
   ausgelieferten Standardwerten.
-- `~/qatlas/` ist die eigene Bibliothek des Nutzers. `AGENTS.qatlas.md` darin enthält die globale
+- `~/qatlas/` ist die eigene Library des Nutzers. `AGENTS.qatlas.md` darin enthält die globale
   Arbeitsvereinbarung und gehört dem Nutzer ab dem Moment, in dem sie angelegt wird.
 
 Schließe immer mit dem Hinweis auf `qatlas-help`. Gab es nichts zu tun, antworte nur mit einer Zeile in der

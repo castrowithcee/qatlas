@@ -5,8 +5,8 @@ description: >
 
 # Qatlas-Plugin Core
 
-Diese Regeln werden per SessionStart-Hook gelesen und gelten vollständig in jeder Session und vor der ersten Antwort.
-Filtere sie nicht nach der vermuteten Relevanz des Nutzerprompts. Anweisungen des Nutzers und native Projektanweisungen haben Vorrang.
+Diese Regeln gelten vollständig in jeder Session und vor der ersten Antwort. Filtere sie nicht nach der
+vermuteten Relevanz des Nutzerprompts. Anweisungen des Nutzers und native Projektanweisungen haben Vorrang.
 Ein zweckgebundener Skill darf sie für sein Verfahren verfeinern. Ist ein Qatlas-Block im Sessionkontext
 unvollständig oder nur als Vorschau vorhanden, lies vor der Arbeit die im Block genannte Quelldatei
 vollständig.

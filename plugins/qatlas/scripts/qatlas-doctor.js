@@ -7,7 +7,8 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
+const { execFileSync } = require('child_process');
+const { claudeImportNote, hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
 const { readConfig } = require('./runtime/config-loader.js');
 const { readState, stateFolders, readId } = require('./runtime/project-store.js');
 
@@ -32,6 +33,22 @@ if (!hasGit()) {
 const configState = readConfig(target);
 for (const problem of configState.problems) missing.push('config: ' + problem);
 for (const unknown of configState.unknown) notes.push('config: ' + unknown + ' Qatlas does not read it.');
+// The backlog script owns the content of the backlog block; a new local backlog would refuse it.
+if (configState.backlog) {
+  try {
+    for (const problem of require('./qatlas-backlog.js').configProblems(configState.backlog)) {
+      missing.push('config: ' + configState.configFile + ': backlog: ' + problem);
+    }
+  } catch (error) { notes.push('config: the backlog block could not be checked: ' + error.message); }
+}
+
+// The sync of the local backlog merges without a working tree, which git offers from 2.38.
+try {
+  const version = /(\d+)\.(\d+)/.exec(execFileSync('git', ['--version'], { encoding: 'utf8' }));
+  if (version && (Number(version[1]) < 2 || (Number(version[1]) === 2 && Number(version[2]) < 38))) {
+    notes.push('git ' + version[0] + ' is older than 2.38, which the sync of the local backlog needs.');
+  }
+} catch { /* no git: reported above */ }
 
 for (const item of plan(target)) missing.push(item.shown + ' is missing; qatlas-core init adds it.');
 
@@ -140,6 +157,8 @@ if (indexFile !== null) {
     if (!present.includes(name)) notes.push('.qatlas-brain/memory/MEMORY.md links ' + name + ', which does not exist.');
   }
 }
+const importNote = claudeImportNote(target);
+if (importNote) notes.push(importNote);
 const instructions = ['AGENTS.md', 'CLAUDE.md'].map(name => text(path.join(target, name)) || '').join('\n');
 for (const name of reserved) {
   if (fs.existsSync(path.join(brain, name)) && !instructions.includes(name)) {
@@ -153,6 +172,7 @@ const leftovers = [
     + 'Check each against git worktree list of its repo before the user removes it'],
   [path.join(target, '.qatlas', 'local', 'team'), 'run state of the mode once named team'],
   [path.join(target, '.qatlas', 'local', 'run', 'events.jsonl'), 'a run log from before the project state folder'],
+  [path.join(target, '.qatlas', 'local', 'slots'), 'test results and their log from before the project state folder'],
 ];
 for (const [place, what] of leftovers) {
   if (fs.existsSync(place)) notes.push('leftover ' + place + ': ' + what + '.');

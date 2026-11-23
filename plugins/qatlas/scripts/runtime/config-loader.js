@@ -104,6 +104,7 @@ function readFile(file) {
 
 const RUN_PROFILES = ['light', 'standard', 'demanding'];
 const RUN_ROLES = ['integrator', 'lead'];
+const RUN_HOSTS = ['claude-code', 'codex'];
 
 function runProblems(value) {
   const problems = [];
@@ -129,6 +130,27 @@ function runProblems(value) {
     }
   }
   return problems;
+}
+
+// A misspelt key would silently fall back to a default, so every key the run block does not know is named.
+function runUnknown(value) {
+  const unknown = [];
+  const extra = (object, known, prefix) => {
+    if (!isObject(object)) return;
+    for (const key of Object.keys(object)) if (!known.includes(key)) unknown.push('unknown key run.' + prefix + key + '.');
+  };
+  extra(value, ['test-slots', 'profiles', 'hosts'], '');
+  extra(value.profiles, RUN_PROFILES, 'profiles.');
+  extra(value.hosts, RUN_HOSTS, 'hosts.');
+  for (const [host, entry] of Object.entries(isObject(value.hosts) ? value.hosts : {})) {
+    if (!isObject(entry)) continue;
+    const at = 'hosts.' + host + '.';
+    extra(entry, [...RUN_ROLES, 'worker'], at);
+    extra(entry.worker, RUN_PROFILES, at + 'worker.');
+    for (const role of RUN_ROLES) extra(entry[role], ['model', 'effort'], at + role + '.');
+    for (const profile of RUN_PROFILES) extra((entry.worker || {})[profile], ['model', 'effort'], at + 'worker.' + profile + '.');
+  }
+  return unknown;
 }
 
 function knownProtection(value) {
@@ -248,6 +270,7 @@ function readConfig(projectRoot = null) {
     else {
       runBlock = value.run;
       problems.push(...runProblems(runBlock).map(problem => paths.configFile + ': run.' + problem));
+      unknown.push(...runUnknown(runBlock).map(text => paths.configFile + ': ' + text));
     }
   }
 

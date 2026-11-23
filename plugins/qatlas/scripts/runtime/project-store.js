@@ -29,7 +29,16 @@ function projectDir(start) {
   const home = real(os.homedir());
   let found = null;
   try {
-    found = real(path.dirname(git(dir, ['rev-parse', '--path-format=absolute', '--git-common-dir'])));
+    const [gitDir, common, top] = git(dir, ['rev-parse', '--path-format=absolute', '--git-dir', '--git-common-dir',
+      '--show-toplevel']).split('\n');
+    if (gitDir === common) found = real(top);
+    else {
+      // A linked working tree. The git dir of a submodule or a separate git dir is not below the primary
+      // working tree; there core.worktree names it.
+      let configured = '';
+      try { configured = git(dir, ['config', '--file', path.join(common, 'config'), 'core.worktree']); } catch { /* unset */ }
+      found = real(configured ? path.resolve(common, configured) : path.dirname(common));
+    }
   } catch {
     for (let d = dir, parent = null; d !== parent && !found; parent = d, d = path.dirname(d)) {
       if (d !== home && fs.existsSync(path.join(d, '.qatlas'))) found = d;

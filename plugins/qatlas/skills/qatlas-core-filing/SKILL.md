@@ -53,8 +53,9 @@ Eintrag an und nie einen Ordner über die festen hinaus, außer der Nutzer verla
 
 Folgt das Anlegen, Ändern oder Verschieben einer Datei einer kanonischen Vorlage oder einem Fachvertrag,
 etwa die Bindung eines Planungssystems nach der Backlog-Norm, genügen Vorlage und Vertrag. Issues des lokalen
-Backlogs sind keine Dateien des Wissensraums und folgen allein der Backlog-Norm. Lies die folgenden Referenzen nur für das, was beide offenlassen. Andernfalls lies die Referenz des
-Vorgangs vollständig vor dem Vorgang:
+Backlogs sind keine Dateien des Wissensraums und folgen allein der Backlog-Norm. Lies die folgenden
+Referenzen nur für das, was beide offenlassen. Andernfalls lies die Referenz des Vorgangs vollständig vor dem
+Vorgang:
 
 - Anlegen ohne passende Vorlage: [Datei](references/playbook-create.md)
 - Reservierte Datei erstmals füllen: [Reservierte Datei füllen](references/playbook-reserved-files.md)

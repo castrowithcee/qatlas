@@ -62,16 +62,16 @@ function plan(target) {
   ];
   const missing = copies.filter(item => !fs.existsSync(item.to));
 
-  // An existing AGENTS.md or CLAUDE.md belongs to the user. A project with neither gets both; one with only
-  // AGENTS.md gets the CLAUDE.md that binds it for Claude.
-  const hasAgents = fs.existsSync(path.join(target, 'AGENTS.md'));
-  const hasClaude = fs.existsSync(path.join(target, 'CLAUDE.md'));
-  if (!hasAgents && !hasClaude) {
+  // An existing AGENTS.md or CLAUDE.md belongs to the user and stays untouched. AGENTS.md is the entry on
+  // every host, so it is added wherever it is missing; a missing CLAUDE.md binds it for Claude.
+  if (!fs.existsSync(path.join(target, 'AGENTS.md'))) {
     missing.push({ from: path.join(bundle, 'agents-template.md'), to: path.join(target, 'AGENTS.md'), shown: 'AGENTS.md' });
   }
-  if (!hasClaude) missing.push({ text: '@AGENTS.md\n', to: path.join(target, 'CLAUDE.md'), shown: 'CLAUDE.md' });
+  if (!fs.existsSync(path.join(target, 'CLAUDE.md'))) {
+    missing.push({ text: '@AGENTS.md\n', to: path.join(target, 'CLAUDE.md'), shown: 'CLAUDE.md' });
+  }
 
-  // The README is the compact project head; any existing README in whatever format stays the user's.
+  // Any existing README in whatever format stays the user's.
   let names = [];
   try { names = fs.readdirSync(target); } catch { /* target does not exist yet */ }
   if (!names.some(name => /^readme(\.|$)/i.test(name))) {
@@ -86,6 +86,15 @@ function plan(target) {
     missing.push({ append: blocks.join('\n\n') + '\n', to: gitignore, shown: '.gitignore (Qatlas rules)' });
   }
   return missing;
+}
+
+// An existing CLAUDE.md that never names AGENTS.md keeps Claude from loading the entry. Only the user
+// changes that file.
+function claudeImportNote(target) {
+  const claude = readText(path.join(target, 'CLAUDE.md'));
+  if (!claude || claude.includes('AGENTS.md') || !fs.existsSync(path.join(target, 'AGENTS.md'))) return null;
+  return 'CLAUDE.md does not import AGENTS.md, so Claude does not load it. Propose the line @AGENTS.md to the '
+    + 'user and add it only with their consent.';
 }
 
 function apply(item) {
@@ -127,13 +136,15 @@ function main() {
     }
   }
 
+  const note = claudeImportNote(target);
   const out = [];
   if (created.length) out.push('CREATED\n' + created.map(line => '- ' + line).join('\n'));
   if (problems.length) out.push('PROBLEMS\n' + problems.map(line => '- ' + line).join('\n'));
+  if (note) out.push('NOTES\n- ' + note);
   process.stdout.write((out.length ? out.join('\n\n') : 'OK: nothing to do.') + '\n');
   process.exitCode = problems.length ? 1 : 0;
 }
 
 if (require.main === module) main();
 
-module.exports = { hasGit, isRepo, missingIdentity, plan, projectRoot };
+module.exports = { claudeImportNote, hasGit, isRepo, missingIdentity, plan, projectRoot };

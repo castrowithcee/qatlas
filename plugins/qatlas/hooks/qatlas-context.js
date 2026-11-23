@@ -125,7 +125,7 @@ const specification = specifications[block];
 if (!pluginRoot || !specification) process.exit(0);
 if ((specification.scaffold && !scaffold) || (specification.repoMemory && !repoMemory)) quiet();
 
-// Old forms of the user config are upgraded before anything of this version reads it.
+// Old forms of the user config are upgraded once per session start, by the rule block.
 if (block === 'qatlas') {
   try { require('../scripts/runtime/config-migrations.js').migrateUserConfig(); }
   catch { /* a failed upgrade never blocks the session */ }
@@ -154,7 +154,10 @@ lines.push('', body);
 
 if (block === 'project-backlog') {
   let state = null;
-  try { state = require('../scripts/qatlas-backlog.js').summary(root); } catch { /* the index alone is enough */ }
+  // Only a project bound to the local backlog gets its counts; a leftover checkout of a former binding stays out.
+  try {
+    if (body.includes('qatlas-backlog.js')) state = require('../scripts/qatlas-backlog.js').summary(root);
+  } catch { /* the index alone is enough */ }
   if (state) lines.push('', 'LOCAL BACKLOG: ' + state);
 }
 
@@ -162,7 +165,7 @@ if (block === 'qatlas') {
   lines.push('', scaffold
     ? 'QATLAS SCAFFOLD: yes (.qatlas-brain/ exists; AGENTS.md is the entry; backlog is injected separately; '
       + (repoMemory ? 'memory index too)' : 'repo memory is disabled)')
-    : 'QATLAS SCAFFOLD: no (no .qatlas-brain/, so no local backlog and no repo memory)');
+    : 'QATLAS SCAFFOLD: no (no .qatlas-brain/, so no backlog binding and no repo memory)');
   lines.push('QATLAS PLUGIN ROOT: ' + portable(pluginRoot)
     + ' (version-bound source of rules, skills and scripts)');
   if (!scaffold) {

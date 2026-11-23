@@ -25,10 +25,9 @@ ein. Schreibe ihn nie fest ein, denn der Installationspfad trägt die Version.
 
 ## Claude Code
 
-Claude Code führt einen externen Renderer aus und übergibt Session-JSON über stdin. Der Renderer wendet die
-ausgelieferten Standardwerte an und liest nur die Abweichungen aus dem optionalen Block `statusline` in
-`~/.qatlas/plugins/config.json`. Seine stabile Kopie ist ausgelieferte Payload, die der Nutzer nie
-bearbeitet.
+Ändere das Aussehen nur über den optionalen Block `statusline` in `~/.qatlas/plugins/config.json`. Er enthält
+allein Abweichungen von den ausgelieferten Standardwerten. Bearbeite nie die Kopie des Renderers unter
+`~/.qatlas/plugins/`.
 
 ### Einrichten
 
@@ -37,11 +36,9 @@ bearbeitet.
 3. Frage, ob das Layout passt. Schneidet der dynamische Umbruch Widgets ab oder verhält er sich im Terminal
    schlecht, setze `"layout": "fixed"` im Block `statusline`.
 
-Das Setup kopiert Renderer und Config-Loader nach `~/.qatlas/plugins/`, legt einen früheren
-`statusLine`-Eintrag der `~/.claude/settings.json` für `remove` beiseite und lässt die Einstellungen auf die
-stabile Kopie mit einem Aktualisierungsintervall von 60 Sekunden zeigen. Es schreibt keine `config.json`. Eine
-vorhandene bleibt unverändert. Der Sessionstart erneuert die Kopie, sobald
-eine neuere Plugin-Version läuft.
+Nenne dem Nutzer aus der Ausgabe des Skripts, was es angelegt und was es beiseitegelegt hat. Einen früheren
+`statusLine`-Eintrag der `~/.claude/settings.json` stellt `remove` wieder her. Das Setup schreibt keine
+`config.json`, und nach einem Plugin-Update ist kein neues Setup nötig.
 
 ### Entfernen
 

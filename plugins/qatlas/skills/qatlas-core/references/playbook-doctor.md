@@ -1,7 +1,7 @@
 ---
 description: >
   Rein lesende Diagnose eines Qatlas-Projekts: prüft Git, Konfiguration, Projektanweisungen, Projektzustand
-  und Nutzerbibliothek, ohne etwas zu ändern.
+  und Nutzer-Library, ohne etwas zu ändern.
 ---
 
 # Qatlas diagnostizieren

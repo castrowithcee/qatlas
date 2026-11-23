@@ -144,6 +144,16 @@ function testDoctorRunBlock() {
   assert.ok(bad.includes('run.test-slots needs a positive integer'), bad);
   write(config, { format: 1, team: VALID_RUN });
   assert.ok(check().stdout.includes('unknown key team.'), 'Doctor only reads: the old team block is an unknown key.');
+  const misspelt = JSON.parse(JSON.stringify(VALID_RUN));
+  misspelt.test_slots = 4;
+  misspelt.hosts['claude-code'].lead.modell = 'opus';
+  misspelt.hosts['claude-code'].worker.heavy = { model: 'opus', effort: null };
+  misspelt.hosts.claude = misspelt.hosts['claude-code'];
+  write(config, { format: 1, run: misspelt });
+  const typo = check().stdout;
+  for (const key of ['test_slots', 'hosts.claude', 'hosts.claude-code.lead.modell', 'hosts.claude-code.worker.heavy']) {
+    assert.ok(typo.includes('unknown key run.' + key + '. Qatlas does not read it'), typo);
+  }
 }
 
 // The session start upgrades old forms of the user config silently, once, and touches nothing else.
@@ -465,6 +475,7 @@ function testInit() {
   fs.appendFileSync(path.join(brainDir, 'memory', 'MEMORY.md'), '- [Gone](memory-gone.md) - hook.\n');
   write(path.join(f.home, '.qatlas', 'state', 'worktrees', 'x', 'file'), 'x');
   write(path.join(f.project, '.qatlas', 'local', 'team', 'events.jsonl'), '');
+  write(path.join(f.project, '.qatlas', 'local', 'slots', 'runs.jsonl'), '');
   const structure = run(doctor).stdout;
   for (const note of ['.qatlas-brain/NOTES.md is none of the reserved files.',
     '.qatlas-brain/plans/ is no folder of the knowledge space any more.',
@@ -477,7 +488,8 @@ function testInit() {
     '.qatlas-brain/PROJECT.md has no line with its reading condition in AGENTS.md.',
     '.qatlas-brain/backlog/ holds more than BACKLOG.md.',
     path.join('.qatlas', 'state', 'worktrees') + ': worktrees from before',
-    path.join('.qatlas', 'local', 'team') + ': run state']) {
+    path.join('.qatlas', 'local', 'team') + ': run state',
+    path.join('.qatlas', 'local', 'slots') + ': test results']) {
     assert.ok(structure.includes(note), note + '\n' + structure);
   }
   assert.ok(!/knowledge-fine|task-0001-old|PROJECT\.md has (no|the)(?! line)/.test(structure), structure);
@@ -519,6 +531,31 @@ function testInit() {
   assert.strictEqual(fs.readFileSync(path.join(agentsOnly.project, 'AGENTS.md'), 'utf8'), '# Own\n');
   assert.strictEqual(fs.existsSync(path.join(agentsOnly.project, 'README.md')), false,
     'An existing README in any format stays the only one.');
+
+  const claudeOnly = fixture('init-claude-only');
+  initProject(claudeOnly);
+  write(path.join(claudeOnly.project, 'CLAUDE.md'), '# Own\n');
+  const entry = runNode(init, ['--target', claudeOnly.project], { cwd: claudeOnly.project, home: claudeOnly.home });
+  assert.strictEqual(entry.status, 0, entry.stdout);
+  assert.ok(fs.readFileSync(path.join(claudeOnly.project, 'AGENTS.md'), 'utf8').includes('## Projektwissen'),
+    'A project with only CLAUDE.md still gets AGENTS.md as the entry.');
+  assert.strictEqual(fs.readFileSync(path.join(claudeOnly.project, 'CLAUDE.md'), 'utf8'), '# Own\n',
+    'The CLAUDE.md of the user stays untouched.');
+  assert.ok(entry.stdout.includes('NOTES\n- CLAUDE.md does not import AGENTS.md'), entry.stdout);
+  assert.ok(!bound.stdout.includes('NOTES'), 'A CLAUDE.md that imports AGENTS.md needs no note.');
+}
+
+// The backlog block carries the counts of the local backlog only while the project is bound to it.
+function testLocalBacklogLine() {
+  const f = fixture('context-local-backlog');
+  initProject(f);
+  const run = (script, ...args) => runNode(path.join(pluginRoot, 'scripts', script), args, { cwd: f.project, home: f.home });
+  assert.strictEqual(run('qatlas-init.js').status, 0);
+  const added = run('qatlas-backlog.js', 'add', '--title', 'First');
+  assert.strictEqual(added.status, 0, added.stderr);
+  assert.ok(hookOutput(f, 'project-backlog').includes('LOCAL BACKLOG: 1 draft'), hookOutput(f, 'project-backlog'));
+  write(path.join(f.project, '.qatlas-brain', 'backlog', 'BACKLOG.md'), '# Backlog\n\n- Tracker elsewhere.\n');
+  assert.ok(!hookOutput(f, 'project-backlog').includes('LOCAL BACKLOG'), 'A leftover checkout of a former binding stays out.');
 }
 
 function testStatuslineRefresh() {
@@ -724,6 +761,17 @@ function testProjectStore() {
     assert.strictEqual(store.ensureState(home), null);
     assert.strictEqual(store.projectDir(path.join(home, 'work')), path.join(home, 'work'));
     assert.strictEqual(fs.existsSync(path.join(home, '.qatlas', 'local')), false);
+
+    // A submodule is a project in its own working tree, also seen from one of its linked working trees.
+    const outer = path.join(root, 'outer');
+    fs.mkdirSync(outer);
+    git(outer, 'init', '-q');
+    const mod = path.join(outer, 'mod');
+    assert.strictEqual(git(outer, '-c', 'protocol.file.allow=always', 'submodule', '--quiet', 'add', clone, 'mod').status, 0);
+    assert.strictEqual(store.projectDir(mod), mod);
+    const modTree = path.join(root, 'mod-tree');
+    assert.strictEqual(git(mod, 'worktree', 'add', '-q', '-b', 'mod-side', modTree).status, 0);
+    assert.strictEqual(store.projectDir(modTree), mod);
   } finally {
     process.env.HOME = previous;
   }
@@ -830,6 +878,7 @@ try {
   testDoctorRunBlock();
   testConfigMigration();
   testProjectContext();
+  testLocalBacklogLine();
   testBrainMigration();
   testInit();
   testLibraryAndSubagent();
@@ -838,7 +887,7 @@ try {
   testProjectStore();
   testDoctorProjectState();
   testWorktreePath();
-  process.stdout.write('✓ Qatlas init, doctor and context: 12 scenarios passed.\n');
+  process.stdout.write('✓ Qatlas init, doctor and context: 13 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }
