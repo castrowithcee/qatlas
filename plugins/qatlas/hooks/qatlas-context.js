@@ -168,6 +168,17 @@ if (block === 'qatlas') {
     : 'QATLAS SCAFFOLD: no (no .qatlas-brain/, so no backlog binding and no repo memory)');
   lines.push('QATLAS PLUGIN ROOT: ' + portable(pluginRoot)
     + ' (version-bound source of rules, skills and scripts)');
+  if (scaffold) {
+    // Nothing else is guaranteed to run in a session, so the foundation and the entry are checked here.
+    try {
+      const checks = require('../scripts/runtime/knowledge-checks.js');
+      const missing = checks.missingProjectNote(root);
+      if (missing) lines.push('QATLAS PROJECT: ' + missing);
+      for (const name of checks.unreferencedFiles(root)) {
+        lines.push('QATLAS ENTRY: ' + checks.unreferencedNote(name) + ' Add the line.');
+      }
+    } catch { /* a failed check never blocks the rules */ }
+  }
   if (!scaffold) {
     lines.push('Ambient mode: Qatlas rules and skills are active. qatlas-core init sets up a project on '
       + 'request.');

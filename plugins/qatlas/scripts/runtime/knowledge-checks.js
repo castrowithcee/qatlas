@@ -55,5 +55,17 @@ function unreferencedFiles(target) {
 
 const unreferencedNote = name => '.qatlas-brain/' + name + ' has no line with its reading condition in AGENTS.md.';
 
+const PROJECT_REFERENCE = path.resolve(__dirname, '..', '..', 'skills', 'qatlas-core-filing', 'references',
+  'playbook-reserved-files.md');
+
+// The note for a set-up project without its foundation, or null.
+function missingProjectNote(target) {
+  if (fs.existsSync(path.join(target, '.qatlas-brain', 'PROJECT.md'))) return null;
+  return '.qatlas-brain/PROJECT.md is missing. It is the foundation of the knowledge space. When work comes up '
+    + 'that it would bind, such as clarifying, planning or shaping, tell the user once in this session that it '
+    + 'is missing and that you can create it with them. Create it only on their request, following the section '
+    + 'PROJECT.md of ' + PROJECT_REFERENCE.split(path.sep).join('/');
+}
+
 module.exports = { RESERVED, SIZE_REFERENCE, countWords, wordLimit, markdownFiles, sizeNote, unreferencedFiles,
-  unreferencedNote };
+  unreferencedNote, missingProjectNote };

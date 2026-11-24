@@ -225,6 +225,25 @@ function testProjectContext() {
   assert.ok(!hookOutput(f, 'project-backlog').includes('edit: shared'), 'Frontmatter is stripped.');
   assert.ok(hookOutput(f, 'qatlas').includes('QATLAS SCAFFOLD: yes'));
 
+  write(path.join(f.project, 'AGENTS.md'), '# Project\n');
+  for (const codex of [false, true]) {
+    const start = hookOutput(f, 'qatlas', codex);
+    assert.ok(start.includes('QATLAS PROJECT: .qatlas-brain/PROJECT.md is missing.'), start);
+    assert.ok(start.includes('playbook-reserved-files.md'), 'The note names the procedure.');
+    assert.ok(!start.includes('QATLAS ENTRY: '), 'No reserved file exists yet.');
+  }
+  write(path.join(f.project, '.qatlas-brain', 'PROJECT.md'), '# Project\n');
+  write(path.join(f.project, '.qatlas-brain', 'TESTING.md'), '# Tests\n');
+  write(path.join(f.project, 'AGENTS.md'), '# Project\n\n- `.qatlas-brain/PROJECT.md` before planning.\n');
+  const unreferenced = hookOutput(f, 'qatlas');
+  assert.ok(!unreferenced.includes('QATLAS PROJECT: '), 'An existing foundation is no finding.');
+  assert.ok(unreferenced.includes('QATLAS ENTRY: .qatlas-brain/TESTING.md has no line'), unreferenced);
+  assert.ok(!unreferenced.includes('QATLAS ENTRY: .qatlas-brain/PROJECT.md'), 'A named file is no finding.');
+  assert.ok(!hookOutput(f, 'subagent').includes('QATLAS PROJECT: '), 'Only the session start reports.');
+  fs.rmSync(path.join(f.project, '.qatlas-brain', 'PROJECT.md'));
+  fs.rmSync(path.join(f.project, '.qatlas-brain', 'TESTING.md'));
+  fs.rmSync(path.join(f.project, 'AGENTS.md'));
+
   const missing = fixture('context-missing');
   fs.mkdirSync(path.join(missing.project, '.qatlas-brain'));
   assert.strictEqual(hookOutput(missing, 'project-backlog'), '', 'A missing index yields no output.');

@@ -98,9 +98,6 @@ das Laufbudget.
    integrieren](playbook-acceptance.md) beantwortet, soweit Manifeste, CI-Konfiguration und vorhandene
    Anweisungen sie belegen. Bis dahin gilt der Standard aus
    „Abnehmen und integrieren“.
-7. **Projektgrundlage:** Fehlt `.qatlas-brain/PROJECT.md` in einem vorhandenen `.qatlas-brain/`, lege sie
-   nicht an und arbeite ohne sie weiter. Nenne ihr Fehlen einmal im Abschlussblock unter `Handeln`, mit dem
-   Hinweis, dass sie in `goal` oder `shape` entsteht.
 
 ## Pakete bilden
 
