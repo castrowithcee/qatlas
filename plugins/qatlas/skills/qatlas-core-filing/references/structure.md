@@ -1,8 +1,8 @@
 ---
 description: >
   Aufbau des Projekt-Wissensraums .qatlas-brain/: AGENTS.md als Einstieg, die reservierten Root-Dateien mit
-  ihrer Aufgabe und Lesebedingung, die festen Ordner mit ihren Typen, das Verbot weiterer Ordner, die
-  Umfangsgrenze, Zonen, FRAMEWORK.md außerhalb des Raums, die Library des Nutzers und Dateinamen.
+  ihrer Aufgabe und Lesebedingung, die festen Ordner mit ihren Typen, das Verbot weiterer Ordner,
+  Zonen, FRAMEWORK.md außerhalb des Raums, die Library des Nutzers und Dateinamen.
 ---
 
 # Projekt-Wissensraum
@@ -46,20 +46,6 @@ und überholter Inhalt wird ersetzt, nicht archiviert.
 was der Code selbst zeigt. Ändere sie nur, wenn eine Entscheidung des Nutzers Zweck, Zielbild, Nicht-Ziele
 oder eine Produktentscheidung ändert, etwa weil etwas entfällt oder ersetzt wird. Ein erledigter Task ändert
 sie nicht.
-
-## Umfangsgrenze
-
-Jede Markdown-Datei im Wissensraum umfasst höchstens 3.500 Wörter einschließlich Frontmatter, ausgenommen die
-Zonen und `templates/`. Dieselbe Grenze gilt für Dokumentation, die du außerhalb des Wissensraums anlegst,
-solange das Projekt keine eigene nennt. Schneide nach Gegenstand, nicht nach Datum:
-
-- Bei einer reservierten Datei verlagere Details in den gleichnamigen Ordner in Kleinschreibung, etwa
-  `conventions/`, und behalte die Datei als Einstieg, der dorthin verweist.
-- Jede andere Datei teile in mehrere Dateien desselben Ordners, je Gegenstand eine.
-
-Bleibt eine Datei notwendig länger, etwa eine einzelne Tabelle, nenne dem Nutzer Datei, Wortzahl und Grund
-im selben Zug, in einem Modus mit Abschlussblock dort. Doctor meldet jede Datei über der Grenze und ändert
-nichts.
 
 ## Feste Ordner
 

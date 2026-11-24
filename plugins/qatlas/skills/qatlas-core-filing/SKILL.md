@@ -64,3 +64,5 @@ Vorgang:
 - Import: [Import](references/playbook-import.md)
 - Frontmatter setzen oder ändern: [Frontmatter](references/frontmatter.md)
 - Ordner oder Namen im Wissensraum bestimmen: [Projekt-Wissensraum](references/structure.md)
+- Inhalt im Wissensraum schreiben oder erweitern: [Umfangsgrenzen](references/size-limits.md)
+- Inhalt einer reservierten Datei ändern: [Projekt-Wissensraum](references/structure.md)
