@@ -28,7 +28,11 @@ Zuschnitt.
 Die Blöcke wiederholen nichts aus dieser Datei und nichts voneinander: Was du nicht liest, fehlt in diesem
 Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
 
-1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md).
+1. **Vor dem ersten Schritt:** [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md) und, in einem
+   eingerichteten Projekt, eine vorhandene `.qatlas-brain/PROJECT.md` als Grundlage des Zuschnitts. Fehlt sie,
+   lege sie im Gespräch nach
+   [PROJECT.md](../../../qatlas-core-filing/references/playbook-reserved-files.md#projectmd) an, bevor du
+   zuschneidest.
 2. **Vor der ersten Vorlage einer echten Nutzerentscheidung:** [Entscheidungen
    vorlegen](../../references/playbook-decision-card.md).
 3. **Vor dem Sammelcommit:** [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre

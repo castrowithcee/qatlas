@@ -42,10 +42,18 @@ Was in jeder Session gelten muss, etwa Zweck, Grenzen, Sichtbarkeit und die Lese
 mit ihrem Grund in die reservierte Datei eingearbeitet, die sie betrifft. Es gibt kein Entscheidungsregister,
 und überholter Inhalt wird ersetzt, nicht archiviert.
 
+`PROJECT.md` ist die Grundlage des Wissensraums: Die übrigen reservierten Dateien führen aus, was sie will.
+Widerspricht eine von ihnen oder ein Task der `PROJECT.md`, gilt `PROJECT.md`, bis der Nutzer sie ändert oder
+Änderungen freigibt.
+
 `PROJECT.md` hält die Absicht fest, nie den Bestand: keine Funktionsliste, keinen Umsetzungsstand und nichts,
 was der Code selbst zeigt. Ändere sie nur, wenn eine Entscheidung des Nutzers Zweck, Zielbild, Nicht-Ziele
 oder eine Produktentscheidung ändert, etwa weil etwas entfällt oder ersetzt wird. Ein erledigter Task ändert
 sie nicht.
+
+Fehlt `PROJECT.md` in einem eingerichteten Projekt, entsteht sie im Gespräch, in neuen wie in bestehenden
+Projekten nach derselben Regel: Verfahren und Bestätigung stehen unter `PROJECT.md` in
+[Reservierte Datei füllen](playbook-reserved-files.md).
 
 ## Feste Ordner
 

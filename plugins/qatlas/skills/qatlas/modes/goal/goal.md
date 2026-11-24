@@ -15,6 +15,10 @@ dass ein vom Nutzer gestartetes `shape` daraus Tasks schneiden kann, ohne das Zi
 
 Bei `goal <Task>` lies vor dem Task vollständig [die Backlog-Norm](../../../qatlas-core-backlog/SKILL.md).
 
+Lies in einem eingerichteten Projekt eine vorhandene `.qatlas-brain/PROJECT.md` vollständig als Grundlage,
+bevor du klärst. Fehlt sie, lege sie im Gespräch nach [PROJECT.md](../../../qatlas-core-filing/references/playbook-reserved-files.md#projectmd)
+an, bevor du klärst.
+
 ## Grenze zu Shape
 
 Kläre den Plan und zerlege ihn nicht. Das Zerlegen gehört zu `shape`.
@@ -32,9 +36,10 @@ Lege auch keinen Entwurf oder Gesprächsmitschnitt ab. Beginne keine Umsetzung u
 
 Halte das Ergebnis vollständig im Gespräch. Zustimmung zum Plan autorisiert weder dauerhafte
 Dokumentation noch Planung oder Umsetzung. Starte keinen weiteren Modus selbst.
-Einzige Ausnahme: Stimmt der Nutzer dem Angebot aus „Abschluss“ zu oder verlangt er es von sich aus,
-schreibe das bestätigte Goal-Briefing in eine Datei: nach `.qatlas-brain/zone-export/goal-<slug>.md`, ohne
-`.qatlas-brain/` an den Ort, den er nennt.
+Es gibt zwei Ausnahmen. Erstens: Stimmt der Nutzer dem Angebot aus „Abschluss“ zu oder verlangt er es von sich
+aus, schreibe das bestätigte Goal-Briefing in eine Datei: nach `.qatlas-brain/zone-export/goal-<slug>.md`, ohne
+`.qatlas-brain/` an den Ort, den er nennt. Zweitens: Hat der Nutzer den Inhalt einer fehlenden `PROJECT.md`
+ausdrücklich bestätigt, schreibe diese Datei und ihre Zeile in `AGENTS.md`, sonst nichts.
 
 ## Eingang verstehen
 
