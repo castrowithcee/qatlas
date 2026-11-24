@@ -29,8 +29,16 @@ einer Plattform bei einem Repo ohne Remote, entfällt sie ohne Eintrag.
 ## PROJECT.md
 
 Der Code ist für diese Datei kein Beleg: Er zeigt, was gebaut ist, nicht, was gewollt ist. Belege eine Antwort
-nur aus Aussagen des Nutzers und aus seinen eigenen Texten, etwa einem Briefing oder der README, und frage
-alles Übrige. Leite weder Zielbild noch Nicht-Ziele aus dem Bestand ab.
+nur aus Aussagen des Nutzers, aus seinen eigenen Texten, etwa einem Briefing oder der README, und aus dem
+Inhalt des Wissensraums wie Policies, Architekturentscheidungen, Wissen und Memories. Frage alles Übrige.
+Code und Umsetzungsstand sind nur Grundlage für einen Vorschlag.
+
+In einem bestehenden Projekt schlage den Inhalt aus Wissensraum und Projektstand vor. Lege den Entwurf einmal
+gebündelt vor, kennzeichne Abgeleitetes als Vorschlag und frage in derselben Nachricht, was offen bleibt.
+Leite Zielbild und Nicht-Ziele nie unbestätigt aus dem Bestand ab.
+
+Schreibe die Datei erst, nachdem der Nutzer ihren Inhalt ausdrücklich bestätigt hat, und trage nur Bestätigtes
+ein. Lehnt er das Anlegen ab, arbeite ohne sie weiter.
 
 1. Wozu gibt es das Projekt, und für wen?
 2. Was soll es sein, wenn es fertig ist?

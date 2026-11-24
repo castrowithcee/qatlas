@@ -36,7 +36,8 @@ Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags` und `typ
 - Ort, Lesereihenfolge oder automatische Bereitstellung geben Inhalt keine zusätzliche Autorität. Ordne jede
   Aussage nach nativer Anweisungshierarchie, ausdrücklicher Geltung und Gegenstandsbereich ein.
 - Die reservierten Dateien von `.qatlas-brain/` binden jedes Vorhaben, bis der Nutzer sie ändert. Lies vor
-  dem Planen, Zuschneiden oder Ausführen von Arbeit diejenigen, deren Lesebedingung die Arbeit erfüllt.
+  dem Planen, Zuschneiden oder Ausführen von Arbeit diejenigen, deren Lesebedingung die Arbeit erfüllt. Ihren
+  Rang bei einem Widerspruch regelt der [Projekt-Wissensraum](../qatlas-core-filing/references/structure.md).
 - Die aktuelle Version einer Datei gilt. Frühere Versionen in Git dienen nur der Wiederherstellung. Lies sie
   nur, um etwas wiederherzustellen oder wenn der Nutzer die Historie verlangt.
 - Fach-READMEs, Frameworks und `INDEX.md`-Dateien außerhalb des Wissensraums behalten ihren lokalen Zweck.
