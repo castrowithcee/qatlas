@@ -455,11 +455,19 @@ function testInit() {
   write(path.join(f.project, '.qatlas-brain', 'templates', 'template.md'), long);
   const limits = run(doctor).stdout;
   assert.ok(limits.includes('.qatlas-brain/TESTING.md has 3501 words, limit 3500. Move details into testing/'), limits);
+  assert.ok(limits.includes('Procedure: ' + path.join(pluginRoot, 'skills', 'qatlas-core-filing', 'references',
+    'size-limits.md')), 'The note names the absolute path of the reference.\n' + limits);
   assert.ok(limits.includes('.qatlas-brain/knowledge/knowledge-long.md has 3501 words, limit 3500. Split it'), limits);
   assert.ok(!/knowledge-short\.md has \d|raw\.md|template\.md/.test(limits), 'Files at the limit, zones and templates stay unreported.');
   for (const part of ['TESTING.md', 'knowledge', 'templates', path.join('zone-import', 'raw.md')]) {
     fs.rmSync(path.join(f.project, '.qatlas-brain', part), { recursive: true });
   }
+
+  write(path.join(f.project, '.qatlas-brain', 'PROJECT.md'), 'word\n'.repeat(1001));
+  assert.ok(run(doctor).stdout.includes('.qatlas-brain/PROJECT.md has 1001 words, limit 1000. Move details into project/'));
+  write(path.join(f.project, '.qatlas-brain', 'PROJECT.md'), 'word\n'.repeat(1000));
+  assert.ok(!/PROJECT\.md has \d/.test(run(doctor).stdout), 'PROJECT.md at its limit stays unreported.');
+  fs.rmSync(path.join(f.project, '.qatlas-brain', 'PROJECT.md'));
 
   const brainDir = path.join(f.project, '.qatlas-brain');
   const typed = type => '---\ndescription: >\n  Test.\ntype: ' + type + '\nedit: shared\n---\n';
@@ -790,6 +798,18 @@ function listFiles(dir) {
   return out.sort();
 }
 
+function testSizeLimitsMatchReference() {
+  const checks = require('../plugins/qatlas/scripts/runtime/knowledge-checks.js');
+  const lines = fs.readFileSync(checks.SIZE_REFERENCE, 'utf8').split('\n').filter(line => line.includes('Wörter'));
+  const limitOf = pattern => {
+    const found = lines.filter(line => pattern.test(line));
+    assert.strictEqual(found.length, 1, 'One limit line per kind in the reference: ' + pattern);
+    return Number(/höchstens ([\d.]+) Wörter/.exec(found[0])[1].replace(/\./g, ''));
+  };
+  assert.strictEqual(limitOf(/PROJECT\.md/), checks.wordLimit('PROJECT.md'));
+  assert.strictEqual(limitOf(/^(?!.*PROJECT\.md)/), checks.wordLimit('knowledge/knowledge-x.md'));
+}
+
 function testDoctorProjectState() {
   const f = fixture('doctor-state');
   const projects = path.join(f.home, '.qatlas', 'projects');
@@ -886,8 +906,9 @@ try {
   testStatuslineCodex();
   testProjectStore();
   testDoctorProjectState();
+  testSizeLimitsMatchReference();
   testWorktreePath();
-  process.stdout.write('✓ Qatlas init, doctor and context: 13 scenarios passed.\n');
+  process.stdout.write('✓ Qatlas init, doctor and context: 14 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }

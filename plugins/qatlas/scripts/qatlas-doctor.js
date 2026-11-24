@@ -11,6 +11,7 @@ const { execFileSync } = require('child_process');
 const { claudeImportNote, hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
 const { readConfig } = require('./runtime/config-loader.js');
 const { readState, stateFolders, readId } = require('./runtime/project-store.js');
+const { RESERVED: reserved, markdownFiles, sizeNote, unreferencedFiles, unreferencedNote } = require('./runtime/knowledge-checks.js');
 
 const target = projectRoot(process.argv);
 
@@ -72,33 +73,14 @@ for (const folder of stateFolders()) {
   }
 }
 
-// Files of the knowledge space stay lean. A reserved root file moves details into the folder of the same
-// name, any other file is split by subject. Zones and the user's own templates are not Qatlas content.
-const reserved = ['PROJECT.md', 'CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md'];
 const brain = path.join(target, '.qatlas-brain');
-function markdownFiles(dir, top) {
-  let entries = [];
-  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return []; }
-  const found = [];
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    if (top && ['zone-import', 'zone-export', 'templates'].includes(entry.name)) continue;
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) found.push(...markdownFiles(full, false));
-    else if (entry.isFile() && entry.name.endsWith('.md')) found.push(full);
-  }
-  return found;
-}
 for (const file of markdownFiles(brain, true)) {
   const name = path.relative(brain, file).split(path.sep).join('/');
-  let words;
-  try { words = fs.readFileSync(file, 'utf8').split(/\s+/).filter(Boolean).length; }
+  let content;
+  try { content = fs.readFileSync(file, 'utf8'); }
   catch (error) { missing.push('.qatlas-brain/' + name + ' is not readable: ' + error.message); continue; }
-  if (words > 3500) {
-    notes.push('.qatlas-brain/' + name + ' has ' + words + ' words, limit 3500. '
-      + (reserved.includes(name)
-        ? 'Move details into ' + name.replace('.md', '').toLowerCase() + '/ and keep the file as the entry.'
-        : 'Split it by subject into several files of the same folder.'));
-  }
+  const note = sizeNote(name, content);
+  if (note) notes.push(note);
 }
 
 // The structure the filing rules fix: folders, file names that carry their type, and the two entries that
@@ -159,12 +141,7 @@ if (indexFile !== null) {
 }
 const importNote = claudeImportNote(target);
 if (importNote) notes.push(importNote);
-const instructions = ['AGENTS.md', 'CLAUDE.md'].map(name => text(path.join(target, name)) || '').join('\n');
-for (const name of reserved) {
-  if (fs.existsSync(path.join(brain, name)) && !instructions.includes(name)) {
-    notes.push('.qatlas-brain/' + name + ' has no line with its reading condition in AGENTS.md.');
-  }
-}
+for (const name of unreferencedFiles(target)) notes.push(unreferencedNote(name));
 
 // Leftovers of places older plugin versions wrote to. Nothing reads them any more.
 const leftovers = [
