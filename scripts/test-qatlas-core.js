@@ -864,6 +864,78 @@ function testDoctorProjectState() {
   assert.deepStrictEqual([listFiles(f.home), listFiles(f.project)], before, 'Doctor changes neither home nor project.');
 }
 
+function testKnowledgeHook() {
+  const f = fixture('knowledge-hook');
+  initProject(f);
+  const script = path.join(pluginRoot, 'hooks', 'qatlas-knowledge-check.js');
+  const brain = path.join(f.project, '.qatlas-brain');
+  const doctor = path.join(pluginRoot, 'scripts', 'qatlas-doctor.js');
+  const hook = (input, codex = false, cwd = f.project) => {
+    const env = codex ? { PLUGIN_ROOT: pluginRoot, CLAUDE_PLUGIN_ROOT: '' } : {};
+    const result = spawnSync(process.execPath, [script], { cwd, encoding: 'utf8',
+      env: { ...process.env, HOME: f.home, ...env }, input });
+    assert.strictEqual(result.status, 0, result.stderr);
+    return result.stdout;
+  };
+  const claude = (tool = 'Write') => JSON.stringify({ hook_event_name: 'PostToolUse', cwd: f.project, tool_name: tool,
+    tool_input: { file_path: path.join(brain, 'x.md') } });
+  const codex = JSON.stringify({ hook_event_name: 'PostToolUse', cwd: f.project, tool_name: 'apply_patch',
+    tool_input: { command: '*** Begin Patch\n*** End Patch' } });
+  const notes = out => out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
+
+  write(path.join(f.project, 'AGENTS.md'), '# Own\n');
+  write(path.join(brain, 'knowledge', 'knowledge-a.md'), 'word\n');
+  assert.strictEqual(hook(claude()), '', 'The first call only stores the baseline.');
+  assert.deepStrictEqual(fs.readdirSync(f.project).sort(), ['.git', '.qatlas', 'AGENTS.md', '.qatlas-brain'].sort());
+
+  write(path.join(brain, 'knowledge', 'knowledge-a.md'), 'word '.repeat(3501));
+  const over = hook(claude('Edit'));
+  const parsed = JSON.parse(over).hookSpecificOutput;
+  assert.strictEqual(parsed.hookEventName, 'PostToolUse');
+  assert.ok(parsed.additionalContext.includes('.qatlas-brain/knowledge/knowledge-a.md has 3501 words, limit 3500.'), over);
+  assert.ok(parsed.additionalContext.includes('size-limits.md'), 'The note names the reference.');
+  assert.strictEqual(hook(codex, true), '', 'An unchanged file over the limit is not reported again.');
+  write(path.join(f.project, 'src', 'code.js'), 'x\n');
+  assert.strictEqual(hook(claude()), '', 'A change outside the knowledge space stays silent.');
+
+  write(path.join(brain, 'knowledge', 'knowledge-a.md'), 'word '.repeat(3500));
+  assert.strictEqual(hook(claude()), '', 'A file at its limit stays silent.');
+  write(path.join(brain, 'PROJECT.md'), 'word\n'.repeat(1001));
+  const project = notes(hook(codex, true));
+  assert.ok(project.includes('.qatlas-brain/PROJECT.md has 1001 words, limit 1000. Move details into project/'), project);
+  assert.ok(project.includes('.qatlas-brain/PROJECT.md has no line with its reading condition in AGENTS.md.'), project);
+
+  write(path.join(brain, 'PROJECT.md'), 'word\n'.repeat(5));
+  const open = notes(hook(claude()));
+  assert.ok(open.includes('PROJECT.md has no line'), 'A reserved file without a line is reported after its write.');
+  write(path.join(f.project, 'AGENTS.md'), '# Own\nPROJECT.md: read it first.\n');
+  assert.strictEqual(hook(claude()), '', 'A written AGENTS.md that names the file stays silent.');
+  write(path.join(brain, 'TESTING.md'), 'word\n');
+  write(path.join(f.project, 'AGENTS.md'), '# Own\nPROJECT.md: read it first.\n\n');
+  assert.strictEqual(notes(hook(claude())), '.qatlas-brain/TESTING.md has no line with its reading condition in AGENTS.md.',
+    'Writing AGENTS.md reports a reserved file it leaves out.');
+
+  // The doctor reports the same sentences from the same code.
+  write(path.join(brain, 'knowledge', 'knowledge-a.md'), 'word '.repeat(3501));
+  const hooked = notes(hook(claude()));
+  const doctored = runNode(doctor, ['--target', f.project], { cwd: f.project, home: f.home }).stdout;
+  for (const line of hooked.split('\n')) assert.ok(doctored.includes(line), 'The doctor lacks: ' + line);
+
+  assert.strictEqual(hook('{broken'), '', 'Broken input ends silently with 0.');
+  assert.strictEqual(hook(''), '', 'Empty input ends silently with 0.');
+  assert.strictEqual(hook(claude(), false, path.join(f.project, 'src')), '', 'A subfolder finds the project.');
+
+  const plain = fixture('knowledge-hook-plain');
+  initProject(plain);
+  write(path.join(plain.project, 'AGENTS.md'), '# Own\n');
+  const quiet = spawnSync(process.execPath, [script], { cwd: plain.project, encoding: 'utf8', input: JSON.stringify({ cwd: plain.project }),
+    env: { ...process.env, HOME: plain.home } });
+  assert.strictEqual(quiet.status, 0);
+  assert.strictEqual(quiet.stdout, '');
+  assert.strictEqual(fs.existsSync(path.join(plain.project, '.qatlas')), false, 'No state without a knowledge space.');
+  assert.strictEqual(fs.existsSync(path.join(plain.home, '.qatlas')), false);
+}
+
 function testWorktreePath() {
   const f = fixture('worktree');
   initProject(f);
@@ -907,8 +979,9 @@ try {
   testProjectStore();
   testDoctorProjectState();
   testSizeLimitsMatchReference();
+  testKnowledgeHook();
   testWorktreePath();
-  process.stdout.write('✓ Qatlas init, doctor and context: 14 scenarios passed.\n');
+  process.stdout.write('✓ Qatlas init, doctor and context: 15 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }
