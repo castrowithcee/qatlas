@@ -2,10 +2,11 @@
 name: qatlas-core
 description: >
   Bündelt ausdrücklich aufgerufene Qatlas-Kernadministration: ein Projekt einrichten, den Projektzustand
-  diagnostizieren oder die Statusline konfigurieren.
+  diagnostizieren, ein Projekt oder die Library in das gültige Layout übernehmen oder die Statusline
+  konfigurieren.
   Ohne Argument eine kompakte Karte der verfügbaren Modi zeigen und nichts ausführen.
 disable-model-invocation: true
-argument-hint: "[init|doctor|statusline] [Argumente]"
+argument-hint: "[init|doctor|migrate|statusline] [Argumente]"
 ---
 
 # Qatlas-Core
@@ -24,6 +25,7 @@ bleiben. Lies keine Modus-Referenz und ändere keinen Zustand.
 |---|---|
 | `init` | Richtet Qatlas und seinen Projektzustand ein. |
 | `doctor` | Prüft Qatlas, Scaffold und Abhängigkeiten des Projekts, ohne zu reparieren. |
+| `migrate` | Übernimmt den Wissensraum des Projekts in das gültige Layout, mit `library` die Library des Nutzers, ohne Inhalt zu löschen. |
 | `statusline` | Richtet die Statusline des aktuellen Hosts ein, passt sie an oder entfernt sie. |
 
 Aufruf: `qatlas-core <argument>`
@@ -37,9 +39,11 @@ Aufruf: `qatlas-core <argument>`
   Verfahren aus.
 - **`doctor`:** Lies [Qatlas diagnostizieren](references/playbook-doctor.md) vollständig und führe nur dieses
   Verfahren aus.
+- **`migrate [library]`:** Lies [Qatlas übernehmen](references/playbook-migrate.md) vollständig und führe nur
+  dieses Verfahren aus.
 - **`statusline [Argumente]`:** Lies [Statusline konfigurieren](references/playbook-statusline.md)
   vollständig und führe nur dieses Verfahren mit den übrigen Argumenten aus.
 
 Ist ein übergebenes Argument mehrdeutig, nenne die passenden Optionen in je einem kurzen Satz und frage genau
 eine ab. Ist es unbekannt, zeige die kompakte Karte und nenne das unbekannte Argument in einem Satz. Nimm
-ein allgemeines Gespräch über Diagnose oder die Statusline nie als Aufruf dieses Skills.
+ein allgemeines Gespräch über Diagnose, Übernahme oder die Statusline nie als Aufruf dieses Skills.

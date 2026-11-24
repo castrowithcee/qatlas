@@ -24,7 +24,7 @@ Windows kann ein frisch installiertes Node ein neues Terminal brauchen.
 
 Dateien, die das Skript neu angelegt hat, sind der eigene Text des Nutzers und bekommen seine Sprache:
 `AGENTS.md` folgt der Sprache der vorhandenen Dokumentation des Repos, sonst der Gesprächssprache.
-`~/qatlas/AGENTS.qatlas.md` und `~/qatlas/README.md` folgen der Gesprächssprache. Übersetze eine solche Datei
+`~/qatlas/AGENTS.qatlas.md` folgt der Gesprächssprache. Übersetze eine solche Datei
 bei Bedarf vollständig und behalte ihre Struktur. Die Seeds unter `.qatlas-brain/` bleiben, wie sie sind.
 
 Ergänze darüber hinaus nichts und stelle dazu keine Fragen. `AGENTS.md` wächst mit dem Projekt: Eine
@@ -54,14 +54,15 @@ Orientierungspunkte:
 - `.qatlas-brain/` trägt den Wegweiser zum maßgeblichen Planungssystem, die unversionierte Zone
   `zone-import/` für Rohmaterial und, sofern die Konfiguration Repo-Memory nicht abschaltet, den
   Memory-Index. Seine reservierten Dateien `PROJECT.md`,
-  `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md` und `CONTRIBUTING.md` sowie seine Ordner entstehen mit
+  `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md`, `CONTRIBUTING.md` und `OPERATIONS.md` sowie seine Ordner entstehen mit
   ihrem ersten Eintrag. Fachinhalte bleiben an ihren vorhandenen maßgeblichen Orten. Ein Scope bekommt neben seiner
   README nur für eigene dauerhafte Besonderheiten eine optionale `FRAMEWORK.md`.
 - `.qatlas/plugins/config.json` ist die optionale versionierte Projektkonfiguration.
 - `~/.qatlas/plugins/config.json` ist optional und enthält nur nutzerweite Abweichungen von den
   ausgelieferten Standardwerten.
 - `~/qatlas/` ist die eigene Library des Nutzers. `AGENTS.qatlas.md` darin enthält die globale
-  Arbeitsvereinbarung und gehört dem Nutzer ab dem Moment, in dem sie angelegt wird.
+  Arbeitsvereinbarung, ist der Einstieg in die Library und gehört dem Nutzer ab dem Moment, in dem sie
+  angelegt wird.
 
 Schließe immer mit dem Hinweis auf `qatlas-help`. Gab es nichts zu tun, antworte nur mit einer Zeile in der
 Gesprächssprache, dass Qatlas eingerichtet ist, samt diesem Hinweis.

@@ -5,5 +5,7 @@ alle gelten soll. Native globale und projektlokale Agentenanweisungen haben Vorr
 
 ## Library
 
-Lies `README.md` in diesem Ordner, wenn ein Task deine projektübergreifenden Policies,
-Playbooks oder dein Wissen braucht.
+Lies jede hier genannte Datei dieses Ordners vor der Arbeit, die ihre Lesebedingung nennt. Die gleichnamige
+Datei eines Projekts hat Vorrang.
+
+<!-- Eine Zeile pro Datei: Pfad und die Arbeit, vor der sie gelesen wird. -->

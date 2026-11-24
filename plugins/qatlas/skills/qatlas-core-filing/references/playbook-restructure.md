@@ -8,15 +8,16 @@ description: >
 
 1. **Bestandsaufnahme:** Bestimme Ziel, Bearbeitungsrechte, betroffene Verweise und mögliche Namenskollisionen,
    bevor du etwas änderst. `edit: locked` braucht ausdrückliche Freigabe.
-2. **Umbenennen und verschieben:** Das Typpräfix bleibt stabil. Suche nach Verweisen auf den alten
-   Pfad und ändere nur die tatsächlich gebrochenen.
+2. **Umbenennen und verschieben:** Das Präfix folgt dem Ordner: Zieht eine Datei in einen anderen Ordner
+   des Wissensraums, wechselt es mit. Suche nach Verweisen auf den alten Pfad und ändere nur die
+   tatsächlich gebrochenen.
 3. **Zusammenführen:** Übernimm alle verbindlichen Aussagen in die Zieldatei am maßgeblichen Ort. Entferne
    dann die Quelle und lenke ihre Verweise auf das Ziel um.
-4. **Aufwerten:** Wird Inhalt verbindlicher, etwa wenn aus einer Memory eine Policy wird, braucht das eine
-   Entscheidung des Nutzers. Der Inhalt zieht in eine Datei des neuen Typs in deren Ordner. Die alte Datei
-   und ihre Indexzeile werden entfernt.
+4. **Aufwerten:** Wird Inhalt verbindlicher, etwa wenn aus einer Memory eine Regel wird, braucht das eine
+   Entscheidung des Nutzers. Der Inhalt zieht in die reservierte Datei, deren Aufgabe er betrifft. Die alte
+   Datei und ihre Indexzeile werden entfernt.
 5. **Archivieren und löschen:** Lösche eine Nutzerdatei nur auf ausdrückliche Bitte. Der Wissensraum führt
    keinen Archivordner, denn Git bewahrt das Entfernte. Außerhalb davon bewahre Inhalt nur dann in einem
    Archiv auf, wenn die lokale Konvention es vorsieht.
-6. **Navigation:** Bringe Lesebedingungen in betroffenen READMEs und Indexzeilen in `MEMORY.md` auf den
+6. **Navigation:** Bringe Lesebedingungen in `AGENTS.md`, reservierten Dateien und betroffenen READMEs sowie Indexzeilen in `MEMORY.md` auf den
    neuen Stand.

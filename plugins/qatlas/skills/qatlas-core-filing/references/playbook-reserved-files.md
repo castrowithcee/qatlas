@@ -2,12 +2,12 @@
 description: >
   Eine reservierte Datei des Wissensraums erstmals füllen: Antworten aus dem Vorhandenen belegen, nur das
   Offene in einfachen Worten fragen, dazu die Kernfragen für PROJECT.md, CONTRIBUTING.md, TESTING.md,
-  CONVENTIONS.md und ARCHITECTURE.md.
+  CONVENTIONS.md, ARCHITECTURE.md und OPERATIONS.md.
 ---
 
 # Reservierte Datei füllen
 
-Aufgabe, Lesebedingung und Typ jeder reservierten Datei stehen im [Projekt-Wissensraum](structure.md).
+Aufgabe, Lesebedingung und Bearbeitungsrecht jeder reservierten Datei stehen im [Projekt-Wissensraum](structure.md).
 
 Entsteht die Datei aus einer einzelnen Aussage des Nutzers, trage genau diese ein und frage nichts weiter.
 Entsteht sie, weil eine Arbeit ihre Antworten braucht, gehe so vor:
@@ -81,3 +81,14 @@ ein. Lehnt er das Anlegen ab, arbeite ohne sie weiter.
 2. Welcher Teil darf welchen kennen oder aufrufen, und wie fließen die Daten?
 3. Welche Grenzen gelten unbedingt, etwa zwischen öffentlich und privat oder an einer Sicherheitsgrenze?
 4. Welche Entscheidungen sind bindend, und aus welchem Grund? Frage nach dem Grund, wenn ihn nichts belegt.
+
+## OPERATIONS.md
+
+1. In welchen Umgebungen läuft das System, und wo? Belegt meist durch Konfiguration, Skripte und CI.
+2. Wie wird ausgeliefert oder veröffentlicht, mit welchem Befehl oder welcher Pipeline, und was muss davor
+   erfüllt sein?
+3. Wie wird eine Auslieferung zurückgenommen?
+4. Wo liegen Zugänge und Secrets, und wie kommt ein Agent an das, was er braucht, ohne sie ins Repo zu
+   schreiben?
+5. Was darf ein Agent ohne Rückfrage: ausliefern, veröffentlichen, in eine laufende Umgebung eingreifen? Immer
+   eine Frage an den Nutzer.

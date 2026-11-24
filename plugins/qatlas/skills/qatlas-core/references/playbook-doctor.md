@@ -31,4 +31,5 @@ zusätzlich gegen deren Bindungsvorlage. Melde als Hinweis:
 
 Fasse die Befunde nach Priorität zusammen: Blocker, fehlende Projektbestandteile, Hinweise. Erfinde keine
 Reparatur und melde nicht pauschal Drift, nur weil sich Plugin-Vorlage und vorhandene Repo-Datei inhaltlich
-unterscheiden. Fehlende Bestandteile ergänzt `qatlas-core init`, ohne Vorhandenes zu ersetzen.
+unterscheiden. Fehlende Bestandteile ergänzt `qatlas-core init`, ohne Vorhandenes zu ersetzen. Ein
+abweichendes Layout des Wissensraums übernimmt `qatlas-core migrate`.

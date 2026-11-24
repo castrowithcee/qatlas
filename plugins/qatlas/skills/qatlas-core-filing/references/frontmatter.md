@@ -1,7 +1,7 @@
 ---
 description: >
-  Frontmatter-Schema für Inhalts-Markdown-Dateien: description, die sechs Inhaltstypen und ihre
-  Unterscheidung, Bearbeitungsrechte, Pflichtfelder und Änderungen an Ort und Stelle.
+  Frontmatter-Schema für Inhalts-Markdown-Dateien: description, die vier Inhaltstypen, wo sie gelten und
+  wie sie sich unterscheiden, Bearbeitungsrechte, Pflichtfelder und Änderungen an Ort und Stelle.
 ---
 
 # Frontmatter-Schema
@@ -26,17 +26,23 @@ Optionale `tags` sind eine Liste kleingeschriebener Kebab-Case-Werte, kein zweit
 
 ## Typen
 
+Einen `type` trägt nur eine Inhaltsdatei, deren Ort ihre Behandlung nicht schon festlegt: Dateien in
+`knowledge/` und `playbooks/` des Wissensraums und der Library sowie Inhaltsdateien außerhalb davon.
+Reservierte Dateien, die Dateien ihrer Ordner, `BACKLOG.md`, `MEMORY.md`, Memories und eine `FRAMEWORK.md`
+tragen keinen: Ihre Aufgabe sagt, wie sie zu behandeln sind.
+
 `type` sagt, wie eine Datei zu behandeln ist, ohne ihren Inhalt zu lesen. Prüfe die Fragen in dieser
 Reihenfolge. Der erste Treffer entscheidet:
 
 | Reihenfolge | `type` | Frage | Standard-`edit` |
 |---|---|---|---|
-| 1 | `meta` | Ist es eine Datei, die existiert, weil Qatlas sie ins Projekt bringt: Navigation, Index, Bindung des Planungssystems oder Scope-Rahmen? | `shared`, für `FRAMEWORK.md` `locked` |
-| 2 | `policy` | Bindet es alle, die in seinem Geltungsbereich arbeiten, Mensch oder Agent, bis der Nutzer es ändert? | `locked` |
-| 3 | `playbook` | Beschreibt es Schritte, wie etwas zu tun ist, für Mensch oder Agent? | `shared` |
-| 4 | `fact` | Gibt es eine externe Quelle wieder? | `shared` |
-| 5 | `memory` | Ist es ein kurzer Hinweis für spätere Sessions? | `shared` |
-| 6 | `knowledge` | Alles andere: Fachwissen, Synthese, Beschreibung der aktuellen Architektur. | `shared` |
+| 1 | `policy` | Bindet es alle, die in seinem Geltungsbereich arbeiten, Mensch oder Agent, bis der Nutzer es ändert? | `locked` |
+| 2 | `playbook` | Beschreibt es Schritte, wie etwas zu tun ist, für Mensch oder Agent? | `shared` |
+| 3 | `fact` | Gibt es eine externe Quelle wieder? | `shared` |
+| 4 | `knowledge` | Alles andere: Fachwissen und Synthese. | `shared` |
+
+Eine `policy` als eigene Datei gibt es nur im Fachinhalt außerhalb von Wissensraum und Library. Dort steht
+Bindendes in der reservierten Datei, deren Aufgabe es betrifft.
 
 - **Vorhaben oder Policy:** Ein Vorhaben hat ein Ende („Mountainbike kaufen“). Es ist Arbeit und lebt als
   Tasks im Planungssystem, nicht als Datei im Wissensraum. Eine Policy hat kein Ende. Sie gilt („das Fahrrad ist
@@ -45,14 +51,14 @@ Reihenfolge. Der erste Treffer entscheidet:
 - **Was eine Policy enthält:** eine einzelne festgelegte Wahl („die Datenbank ist Postgres“) ebenso wie ein
   Bündel von Normen dafür, wie gearbeitet wird („Dateinamen sind Kebab-Case“). Wo ihr Grund nicht
   selbstverständlich ist, trägt sie ihn mit, damit eine spätere Änderung ihn abwägen kann. Ihr Ort bestimmt
-  ihre Reichweite: Die Policies des Projekts liegen in den reservierten Dateien seines Wissensraums, die
-  projektübergreifenden Policies des Nutzers in dessen Library, die Qatlas-Policies im Plugin.
+  ihre Reichweite: Was das Projekt bindet, steht in den reservierten Dateien seines Wissensraums, was den
+  Nutzer projektübergreifend bindet, in denen seiner Library, die Regeln von Qatlas im Plugin.
 - **Playbook oder Skill:** Ein Playbook ist Inhalt, dem jeder folgen kann. Ein Skill ist eine
   agentenstandardkonforme `SKILL.md` und liegt außerhalb dieses Schemas.
 
-Repo-Wissen hat Vorrang vor Trainingswissen. `fact` bleibt an seine externe Quelle gebunden, eine Projekt-
-oder Library-`policy` an eine Entscheidung des Nutzers. Der Agent hält eine eigene Entscheidung nie als
-`policy` fest. Eine offene Frage bleibt in ihrem Task, bis der Nutzer sie entscheidet.
+Repo-Wissen hat Vorrang vor Trainingswissen. `fact` bleibt an seine externe Quelle gebunden, Bindendes
+an eine Entscheidung des Nutzers. Der Agent hält eine eigene Entscheidung nie als `policy` oder als Regel in
+einer reservierten Datei fest. Eine offene Frage bleibt in ihrem Task, bis der Nutzer sie entscheidet.
 
 ## Bearbeitungsrechte
 
@@ -60,23 +66,16 @@ oder Library-`policy` an eine Entscheidung des Nutzers. Der Agent hält eine eig
 normative oder anweisende Inhalte. Ändere sie nur mit Freigabe des Nutzers oder eines ausdrücklich gestarteten
 Qatlas-Verfahrens und an Ort und Stelle. `edit: shared` lässt Agent und Nutzer die Datei im autorisierten
 Ablauf pflegen, ändert aber nie die Absicht des Projekts ohne passende Entscheidung des Nutzers. Folge dem
-Standard aus der Tabelle und weiche nur mit benanntem Grund ab. Entferne ein bestehendes `locked` nie
+Standard und weiche nur mit benanntem Grund ab: für eine Datei mit `type` aus der Tabelle oben, für eine
+reservierte Datei und die Dateien ihres Ordners aus dem [Projekt-Wissensraum](structure.md), für
+`BACKLOG.md`, `MEMORY.md` und Memories `shared`, für eine `FRAMEWORK.md` `locked`. Entferne ein bestehendes `locked` nie
 pauschal. Ordne Inhalte nach ihrem Inhalt ein und hole die nötige Freigabe ein. Weder Umbenennen, Verschieben,
 `type`, Ordner noch bloßes Lesen ändern Bearbeitungsrechte, Geltungsbereich oder Rang einer Aussage.
 
 ## Felder
 
-`description`, `type` und `edit` sind immer vorhanden. Die zusätzlichen Felder sind abschließend:
-
-| `type` | Zusätzliche Felder |
-|---|---|
-| `policy` | optional `paths` |
-| `meta`, `playbook`, `knowledge`, `memory` | keine |
-| `fact` | optional `source` |
-
-Feste `meta`-Ziele sind `BACKLOG.md`, `MEMORY.md` und eine `FRAMEWORK.md` außerhalb des Wissensraums. Die reservierten Root-Dateien tragen ihren Inhaltstyp:
-`PROJECT.md`, `CONVENTIONS.md`, `TESTING.md` und `CONTRIBUTING.md` sind `policy`, `ARCHITECTURE.md` ist
-`knowledge`.
+`description` und `edit` sind immer vorhanden, `type` nur nach dem Abschnitt „Typen“. Die zusätzlichen Felder
+sind abschließend: `policy` darf `paths` tragen, `fact` darf `source` tragen.
 
 Eine mitgelieferte, kopierfertige Vorlage unter `skills/*/assets/` darf das Frontmatter ihres Ziels schon
 tragen, wenn ihr Text die konkrete Zieldatei nennt und verlangt, vor dem Schreiben alle Platzhalter zu
@@ -97,12 +96,12 @@ an Ort und Stelle geändert. Git bewahrt ihre früheren Stände.
 
 1. Ändere `type` nachträglich nur nach Rückfrage. Setze `edit` nach tatsächlicher Verbindlichkeit und
    Pflegeberechtigung, nicht allein nach `type`, Pfad oder Dateiname.
-2. Vermische `meta` nicht mit Inhaltstypen und `policy` nicht mit unverbindlichem Inhalt in derselben Datei.
+2. Vermische in einer Datei mit `type` nicht `policy` mit unverbindlichem Inhalt.
 3. Eine Datei hat ein `edit`, bestimmt durch ihr strengstes Material. Kennzeichne Abschnitte nicht einzeln.
 4. Teile eine Datei nicht künstlich nur wegen ihres Frontmatters.
 5. Ändere ein `fact` nur zusammen mit seiner Quelle.
 
-Minimale Form für `knowledge`:
+Minimale Form für `knowledge`. Eine Datei ohne `type` lässt nur diese Zeile weg:
 
 ```yaml
 ---

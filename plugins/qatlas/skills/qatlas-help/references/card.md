@@ -13,6 +13,7 @@ description: >
 | **qatlas review** | Geht konkrete Prüfungen Schritt für Schritt durch und klärt Entscheidungen einzeln. |
 | **qatlas-core init** | Richtet Git-Repo, Projektzustand, Projektanweisungen und Library ein. |
 | **qatlas-core doctor** | Prüft Abhängigkeiten, Scaffold und Library, ohne etwas zu reparieren. |
+| **qatlas-core migrate [library]** | Übernimmt den Wissensraum eines Projekts oder die Library in das gültige Layout, ohne Inhalt zu löschen. |
 | **qatlas-core statusline** | Konfiguriert oder entfernt die Statusline des aktuellen Hosts. |
 | **qatlas-mode adhd** | Gestaltet die Zusammenarbeit für den Rest der Session so, dass ein Leser mit ADHS danach handeln kann. |
 | **qatlas-help [Thema]** | Führt wie ein Handbuch durch Qatlas. |

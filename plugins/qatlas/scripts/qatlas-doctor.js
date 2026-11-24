@@ -11,7 +11,7 @@ const { execFileSync } = require('child_process');
 const { claudeImportNote, hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
 const { readConfig } = require('./runtime/config-loader.js');
 const { readState, stateFolders, readId } = require('./runtime/project-store.js');
-const { RESERVED: reserved, markdownFiles, sizeNote, unreferencedFiles, unreferencedNote } = require('./runtime/knowledge-checks.js');
+const { findings } = require('./runtime/knowledge-checks.js');
 
 const target = projectRoot(process.argv);
 
@@ -74,35 +74,10 @@ for (const folder of stateFolders()) {
 }
 
 const brain = path.join(target, '.qatlas-brain');
-for (const file of markdownFiles(brain, true)) {
-  const name = path.relative(brain, file).split(path.sep).join('/');
-  let content;
-  try { content = fs.readFileSync(file, 'utf8'); }
-  catch (error) { missing.push('.qatlas-brain/' + name + ' is not readable: ' + error.message); continue; }
-  const note = sizeNote(name, content);
-  if (note) notes.push(note);
-}
-
-// The structure the filing rules fix: folders, file names that carry their type, and the two entries that
-// lead to a file. Everything here is a note, as the user may have asked for an exception.
-const folders = ['backlog', 'memory', 'knowledge', 'playbooks', 'templates', 'zone-import', 'zone-export',
-  ...reserved.map(name => name.replace('.md', '').toLowerCase())];
-const types = ['meta', 'policy', 'playbook', 'fact', 'memory', 'knowledge'];
-const fixedNames = ['BACKLOG.md', 'MEMORY.md'];
 const text = file => { try { return fs.readFileSync(file, 'utf8'); } catch { return null; } };
-let rootEntries = [];
-try { rootEntries = fs.readdirSync(brain, { withFileTypes: true }); } catch { /* no knowledge space */ }
-for (const entry of rootEntries.sort((a, b) => a.name.localeCompare(b.name))) {
-  if (entry.name.startsWith('.')) continue;
-  if (entry.isDirectory() && entry.name === 'plans') {
-    notes.push('.qatlas-brain/plans/ is no folder of the knowledge space any more. Work lives in the planning '
-      + 'system; what still binds belongs in a reserved file. Clear it up with the user.');
-  } else if (entry.isDirectory() && !folders.includes(entry.name)) {
-    notes.push('.qatlas-brain/' + entry.name + '/ is none of the fixed folders.');
-  } else if (entry.isFile() && !reserved.includes(entry.name)) {
-    notes.push('.qatlas-brain/' + entry.name + ' is none of the reserved files.');
-  }
-}
+// The layout the filing rules fix. Everything here is a note, as the user may have asked for an exception.
+// qatlas-core migrate works through the same findings.
+for (const finding of findings(target)) notes.push(finding.note);
 // The folder backlog/ holds the binding alone; issues of the local backlog live on their own branch.
 let backlogEntries = [];
 try { backlogEntries = fs.readdirSync(path.join(brain, 'backlog')).filter(name => name !== 'BACKLOG.md'); } catch { /* none */ }
@@ -114,18 +89,6 @@ try {
   for (const problem of require('./qatlas-backlog.js').check(target)) notes.push('local backlog: ' + problem);
 } catch (error) { notes.push('local backlog: ' + error.message); }
 
-for (const file of markdownFiles(brain, true)) {
-  const name = path.relative(brain, file).split(path.sep).join('/');
-  if (name.startsWith('backlog/') && name !== 'backlog/BACKLOG.md') continue;
-  const base = path.basename(file);
-  const head = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---/.exec(text(file) || '');
-  const type = head && (/^type:[ \t]*(\S+)/m.exec(head[1]) || [])[1];
-  if (!head) notes.push('.qatlas-brain/' + name + ' has no frontmatter.');
-  else if (!types.includes(type)) notes.push('.qatlas-brain/' + name + ' has no known type.');
-  else if (!reserved.includes(name) && !fixedNames.includes(base) && !base.startsWith(type + '-')) {
-    notes.push('.qatlas-brain/' + name + ' has the type ' + type + ', so its name starts with ' + type + '-.');
-  }
-}
 const indexFile = text(path.join(brain, 'memory', 'MEMORY.md'));
 if (indexFile !== null) {
   // The seed explains the line format in a comment.
@@ -141,7 +104,6 @@ if (indexFile !== null) {
 }
 const importNote = claudeImportNote(target);
 if (importNote) notes.push(importNote);
-for (const name of unreferencedFiles(target)) notes.push(unreferencedNote(name));
 
 // Leftovers of places older plugin versions wrote to. Nothing reads them any more.
 const leftovers = [

@@ -3,7 +3,7 @@ name: qatlas-core-navigation
 description: >
   Projektwissen gezielt erschließen, sobald eine Aufgabe Kontext aus dem Repo braucht: Einstieg über
   AGENTS.md und deren Lesebedingungen, die reservierten Dateien PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md,
-  TESTING.md und CONTRIBUTING.md, Scope-READMEs und FRAMEWORK.md, Suche über Frontmatter, Memory und
+  TESTING.md, CONTRIBUTING.md und OPERATIONS.md, Scope-READMEs und FRAMEWORK.md, Suche über Frontmatter, Memory und
   Planungssystem lesen. Nicht zum Anlegen, Ändern oder Verschieben von Dateien.
 ---
 
@@ -17,7 +17,8 @@ Aufgabe braucht.
 1. Beginne mit dem Abschnitt `Projektwissen` der bereits geladenen Projektanweisungen. Er nennt die
    reservierten Dateien von `.qatlas-brain/` mit ihren Lesebedingungen. Folge nur denen, die zur Aufgabe
    passen. Eine reservierte Datei, die ohne Zeile dort existiert, gilt trotzdem unter ihrer
-   Standard-Lesebedingung.
+   Standard-Lesebedingung. Nennt eine reservierte Datei eine Datei ihres Ordners mit eigener
+   Lesebedingung, folge dieser ebenso.
 2. Nimm Aufgabe und diese Dateien für den nächsten relevanten Scope. Lies die `README.md` eines Scopes beim
    ersten Betreten, wenn sie als Einstieg für diesen Scope dient, und folge nur passenden Lesebedingungen.
    Verweist sie für die aktuelle Arbeit auf eine danebenliegende `FRAMEWORK.md`, lies diese vor der Arbeit.
@@ -40,7 +41,7 @@ Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags` und `typ
   Rang bei einem Widerspruch regelt der [Projekt-Wissensraum](../qatlas-core-filing/references/structure.md).
 - Die aktuelle Version einer Datei gilt. Frühere Versionen in Git dienen nur der Wiederherstellung. Lies sie
   nur, um etwas wiederherzustellen oder wenn der Nutzer die Historie verlangt.
-- Fach-READMEs, Frameworks und `INDEX.md`-Dateien außerhalb des Wissensraums behalten ihren lokalen Zweck.
+- Fach-READMEs und Frameworks außerhalb des Wissensraums behalten ihren lokalen Zweck.
   Fachinhalt außerhalb des Wissensraums bleibt für seinen Gegenstand maßgeblich.
 
 ## Vorgang wählen

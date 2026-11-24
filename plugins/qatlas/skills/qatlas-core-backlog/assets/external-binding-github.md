@@ -2,7 +2,6 @@
 description: >
   Startvorlage einer Bindung an GitHub-Issues mit Status über Labels, für Projekte ohne eigene Vorgabe zum
   Planungssystem.
-type: meta
 edit: shared
 ---
 

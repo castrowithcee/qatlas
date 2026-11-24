@@ -34,7 +34,7 @@ sparsam und sicher bleibt.
 
 | Ort | Inhalt |
 |---|---|
-| `.qatlas-brain/` im Repo | Projektzustand: die reservierten Dateien `PROJECT.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md` und `CONTRIBUTING.md`, Wissen, Memory, der Backlog-Wegweiser sowie `zone-import/` und `zone-export/` als flüchtige Puffer |
+| `.qatlas-brain/` im Repo | Projektzustand: die reservierten Dateien `PROJECT.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md`, `CONTRIBUTING.md` und `OPERATIONS.md`, Wissen, Memory, der Backlog-Wegweiser sowie `zone-import/` und `zone-export/` als flüchtige Puffer |
 | `.qatlas/plugins/config.json` im Repo | Projektkonfiguration einschließlich der Freigaben der Schutzprüfung |
 | `~/qatlas/` | die eigene Library des Nutzers mit der globalen Arbeitsvereinbarung in `AGENTS.qatlas.md` |
 | `~/.qatlas/` | technischer Zustand wie globale Konfiguration, Statusline und Worktrees |

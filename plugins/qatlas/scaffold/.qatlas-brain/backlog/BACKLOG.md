@@ -2,7 +2,6 @@
 description: >
   Dauerhaft geladener Wegweiser zum einzigen maßgeblichen Planungssystem und seine Bindung, damit jeder
   Agent dieselbe operative Autorität findet.
-type: meta
 edit: shared
 ---
 

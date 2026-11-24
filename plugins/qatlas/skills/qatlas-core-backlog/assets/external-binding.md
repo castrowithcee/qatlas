@@ -2,7 +2,6 @@
 description: >
   Verweist auf das externe maßgebliche Planungssystem und bindet Zugang, Statusmerkmale, Reihenfolge und
   Lesepolitik ohne lokalen Spiegel.
-type: meta
 edit: shared
 ---
 

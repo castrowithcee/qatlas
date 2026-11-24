@@ -5,8 +5,8 @@ description: >
   archivieren oder löschen, Markdown-Inhalte ändern, Verweise einfügen und Rohmaterial aus
   .qatlas-brain/zone-import/ verarbeiten, sobald der Nutzer es ankündigt oder den Pfad nennt: legt Ort,
   Namen, Typ und Frontmatter fest und hält Navigation und Verweise konsistent, einschließlich der
-  reservierten Dateien PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md, TESTING.md und CONTRIBUTING.md des
-  Wissensraums.
+  reservierten Dateien PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md, TESTING.md, CONTRIBUTING.md und
+  OPERATIONS.md des Wissensraums.
   Nicht für reines Lesen, für Codeänderungen in bestehenden Dateien oder für Konvertierungen außerhalb der
   Importzone.
 ---
@@ -15,7 +15,7 @@ description: >
 
 Der Ort einer Datei folgt dem Gegenstand ihrer Aussage. Weder Markdown noch Agentenleserschaft noch
 Gewohnheit entscheiden ihn allein. Innerhalb von `.qatlas-brain/` entscheiden die reservierten Dateien und
-festen Ordner, und jede nimmt nur ihre Aufgabe oder ihre Typen auf.
+festen Ordner, und jede nimmt nur auf, was zu ihrer Aufgabe gehört.
 
 ## Namen und Format
 
@@ -23,9 +23,9 @@ festen Ordner, und jede nimmt nur ihre Aufgabe oder ihre Typen auf.
   zu `mueller`.
 - Reservierte Funktions- und Agentendateien behalten ihre feste Schreibweise: `README.md`, `AGENTS.md`,
   `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `PROJECT.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`,
-  `TESTING.md`, `CONTRIBUTING.md`, `FRAMEWORK.md` und `INDEX.md`. Bestehende Funktionsdateien behalten ihren Zweck und
-  ihren lokalen Geltungsbereich.
-- Inhaltsdateien im Wissensraum beginnen mit dem Frontmatter-`type`.
+  `TESTING.md`, `CONTRIBUTING.md`, `OPERATIONS.md` und `FRAMEWORK.md`. Bestehende Funktionsdateien behalten
+  ihren Zweck und ihren lokalen Geltungsbereich.
+- Dateien in einem Ordner des Wissensraums beginnen mit dem Namen dieses Ordners in der Einzahl.
 - Daten werden als `YYYY-MM-DD` geschrieben. Chronologische Dateien dürfen mit diesem Datum beginnen.
 - ä, ö, ü und ß werden in deutschen Dateien direkt geschrieben.
 
