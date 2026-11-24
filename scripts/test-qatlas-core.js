@@ -384,10 +384,10 @@ function testLibraryAndSubagent() {
   const agentsFile = path.join(f.home, 'qatlas', 'AGENTS.qatlas.md');
   assert.strictEqual(hookOutput(f, 'library'), '', 'No pointer without the library.');
   const report = runNode(doctor, ['--target', f.project], { cwd: f.project, home: f.home }).stdout;
-  assert.ok(report.includes('~/qatlas/AGENTS.qatlas.md is missing') && report.includes('~/qatlas/README.md is missing'));
+  assert.ok(report.includes('~/qatlas/AGENTS.qatlas.md is missing') && !report.includes('~/qatlas/README.md'));
   assert.strictEqual(fs.existsSync(path.join(f.home, 'qatlas')), false, 'The doctor writes nothing.');
   assert.strictEqual(runNode(init, ['--target', f.project], { cwd: f.project, home: f.home }).status, 0);
-  assert.deepStrictEqual(fs.readdirSync(path.join(f.home, 'qatlas')).sort(), ['AGENTS.qatlas.md', 'README.md']);
+  assert.deepStrictEqual(fs.readdirSync(path.join(f.home, 'qatlas')).sort(), ['AGENTS.qatlas.md']);
   fs.writeFileSync(agentsFile, '# Own version\n');
   runNode(init, ['--target', f.project], { cwd: f.project, home: f.home });
   assert.strictEqual(fs.readFileSync(agentsFile, 'utf8'), '# Own version\n', 'The user file stays unchanged.');
@@ -467,18 +467,19 @@ function testInit() {
   assert.strictEqual(fs.readFileSync(path.join(f.project, '.gitignore'), 'utf8'), ignore, 'Rules are added once.');
 
   const long = 'word '.repeat(3501);
-  write(path.join(f.project, '.qatlas-brain', 'TESTING.md'), long);
+  write(path.join(f.project, '.qatlas-brain', 'TESTING.md'), 'word '.repeat(2501));
+  write(path.join(f.project, '.qatlas-brain', 'OPERATIONS.md'), 'word '.repeat(2500));
   write(path.join(f.project, '.qatlas-brain', 'knowledge', 'knowledge-long.md'), long);
   write(path.join(f.project, '.qatlas-brain', 'knowledge', 'knowledge-short.md'), 'word\n'.repeat(3500));
   write(path.join(f.project, '.qatlas-brain', 'zone-import', 'raw.md'), long);
   write(path.join(f.project, '.qatlas-brain', 'templates', 'template.md'), long);
   const limits = run(doctor).stdout;
-  assert.ok(limits.includes('.qatlas-brain/TESTING.md has 3501 words, limit 3500. Move details into testing/'), limits);
+  assert.ok(limits.includes('.qatlas-brain/TESTING.md has 2501 words, limit 2500. Move details into testing/'), limits);
   assert.ok(limits.includes('Procedure: ' + path.join(pluginRoot, 'skills', 'qatlas-core-filing', 'references',
     'size-limits.md')), 'The note names the absolute path of the reference.\n' + limits);
   assert.ok(limits.includes('.qatlas-brain/knowledge/knowledge-long.md has 3501 words, limit 3500. Split it'), limits);
-  assert.ok(!/knowledge-short\.md has \d|raw\.md|template\.md/.test(limits), 'Files at the limit, zones and templates stay unreported.');
-  for (const part of ['TESTING.md', 'knowledge', 'templates', path.join('zone-import', 'raw.md')]) {
+  assert.ok(!/knowledge-short\.md has \d|OPERATIONS\.md has \d|raw\.md|template\.md/.test(limits), 'Files at the limit, zones and templates stay unreported.');
+  for (const part of ['TESTING.md', 'OPERATIONS.md', 'knowledge', 'templates', path.join('zone-import', 'raw.md')]) {
     fs.rmSync(path.join(f.project, '.qatlas-brain', part), { recursive: true });
   }
 
@@ -490,7 +491,11 @@ function testInit() {
 
   const brainDir = path.join(f.project, '.qatlas-brain');
   const typed = type => '---\ndescription: >\n  Test.\ntype: ' + type + '\nedit: shared\n---\n';
-  write(path.join(brainDir, 'PROJECT.md'), typed('policy'));
+  write(path.join(brainDir, 'PROJECT.md'), typed('policy').replace('type: policy\n', ''));
+  write(path.join(brainDir, 'CONVENTIONS.md'), typed('policy'));
+  write(path.join(brainDir, 'conventions', 'policy-names.md'), typed('policy'));
+  write(path.join(brainDir, 'conventions', 'conventions-fine.md'), typed('policy').replace('type: policy\n', ''));
+  write(path.join(brainDir, 'playbooks', 'playbook-fine.md'), typed('playbook'));
   write(path.join(brainDir, 'NOTES.md'), typed('knowledge'));
   write(path.join(brainDir, 'plans', 'plan-old.md'), typed('plan'));
   write(path.join(brainDir, 'docs', 'knowledge-docs.md'), typed('knowledge'));
@@ -507,9 +512,12 @@ function testInit() {
   for (const note of ['.qatlas-brain/NOTES.md is none of the reserved files.',
     '.qatlas-brain/plans/ is no folder of the knowledge space any more.',
     '.qatlas-brain/docs/ is none of the fixed folders.',
-    '.qatlas-brain/knowledge/fact-wrong.md has the type knowledge, so its name starts with knowledge-.',
+    '.qatlas-brain/knowledge/fact-wrong.md lies in knowledge/, so its name starts with knowledge-.',
+    '.qatlas-brain/CONVENTIONS.md carries the type policy, which its place replaces. Remove the line.',
+    '.qatlas-brain/conventions/policy-names.md carries the type policy,',
+    '.qatlas-brain/conventions/policy-names.md lies in conventions/, so its name starts with conventions-.',
+    '.qatlas-brain/memory/memory-lost.md carries the type memory,',
     '.qatlas-brain/knowledge/knowledge-bare.md has no frontmatter.',
-    '.qatlas-brain/plans/plan-old.md has no known type.',
     '.qatlas-brain/memory/memory-lost.md has no line in MEMORY.md.',
     '.qatlas-brain/memory/MEMORY.md links memory-gone.md, which does not exist.',
     '.qatlas-brain/PROJECT.md has no line with its reading condition in AGENTS.md.',
@@ -519,9 +527,39 @@ function testInit() {
     path.join('.qatlas', 'local', 'slots') + ': test results']) {
     assert.ok(structure.includes(note), note + '\n' + structure);
   }
-  assert.ok(!/knowledge-fine|task-0001-old|PROJECT\.md has (no|the)(?! line)/.test(structure), structure);
+  assert.ok(!/knowledge-fine|conventions-fine|playbook-fine|plan-old|task-0001-old|PROJECT\.md (has (no|the)(?! line)|carries)/.test(structure), structure);
   assert.ok(!structure.includes('MISSING'), 'Structure findings are notes.');
-  for (const part of ['PROJECT.md', 'NOTES.md', 'plans', 'docs', 'knowledge', path.join('backlog', 'task-0001-old.md')]) {
+
+  // qatlas-core migrate reads the same findings and changes nothing.
+  const migrate = path.join(pluginRoot, 'scripts', 'qatlas-migrate.js');
+  const tree = () => spawnSync('git', ['-C', f.project, 'status', '--porcelain', '-uall'], { encoding: 'utf8' }).stdout;
+  const treeBefore = tree();
+  const overview = run(migrate).stdout;
+  for (const line of ['MIGRATION ' + brainDir, '- rename: 2 ', '- frontmatter: 5 ', '- sort: 3 ', '- entry: 2 ']) {
+    assert.ok(overview.includes(line), line + '\n' + overview);
+  }
+  const listed = runNode(migrate, ['--target', f.project, '--list'], { cwd: f.project, home: f.home }).stdout;
+  assert.ok(listed.includes('rename: .qatlas-brain/knowledge/fact-wrong.md -> .qatlas-brain/knowledge/knowledge-wrong.md'), listed);
+  assert.ok(listed.includes('rename: .qatlas-brain/conventions/policy-names.md -> .qatlas-brain/conventions/conventions-names.md'), listed);
+  assert.ok(listed.includes('sort: .qatlas-brain/docs/ is none of the fixed folders.'), listed);
+  assert.strictEqual(tree(), treeBefore, 'Migrate writes nothing.');
+
+  // The library takes the functions that can apply across projects and names them in AGENTS.qatlas.md.
+  const lib = path.join(f.home, 'qatlas');
+  write(path.join(lib, 'policies', 'tmux.md'), '# Tmux\n');
+  write(path.join(lib, 'PROJECT.md'), '# Project\n');
+  write(path.join(lib, 'CONVENTIONS.md'), typed('policy').replace('type: policy\n', ''));
+  write(path.join(lib, 'playbooks', 'git.md'), typed('playbook'));
+  const libraryList = runNode(migrate, ['--library', '--list'], { cwd: f.project, home: f.home }).stdout;
+  for (const line of ['sort: ~/qatlas/policies/ is none of the fixed folders.',
+    'sort: ~/qatlas/PROJECT.md is none of the reserved files.',
+    'rename: ~/qatlas/playbooks/git.md -> ~/qatlas/playbooks/playbook-git.md',
+    'entry: ~/qatlas/CONVENTIONS.md has no line with its reading condition in AGENTS.qatlas.md.']) {
+    assert.ok(libraryList.includes(line), line + '\n' + libraryList);
+  }
+  assert.ok(!libraryList.includes('AGENTS.qatlas.md is none'), libraryList);
+  for (const part of ['policies', 'PROJECT.md', 'CONVENTIONS.md', 'playbooks']) fs.rmSync(path.join(lib, part), { recursive: true });
+  for (const part of ['PROJECT.md', 'CONVENTIONS.md', 'conventions', 'playbooks', 'NOTES.md', 'plans', 'docs', 'knowledge', path.join('backlog', 'task-0001-old.md')]) {
     fs.rmSync(path.join(brainDir, part), { recursive: true });
   }
   fs.rmSync(path.join(f.home, '.qatlas'), { recursive: true });
@@ -826,7 +864,8 @@ function testSizeLimitsMatchReference() {
     return Number(/höchstens ([\d.]+) Wörter/.exec(found[0])[1].replace(/\./g, ''));
   };
   assert.strictEqual(limitOf(/PROJECT\.md/), checks.wordLimit('PROJECT.md'));
-  assert.strictEqual(limitOf(/^(?!.*PROJECT\.md)/), checks.wordLimit('knowledge/knowledge-x.md'));
+  assert.strictEqual(limitOf(/reservierte Datei/), checks.wordLimit('TESTING.md'));
+  assert.strictEqual(limitOf(/Markdown-Datei/), checks.wordLimit('knowledge/knowledge-x.md'));
 }
 
 function testDoctorProjectState() {
