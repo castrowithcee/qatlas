@@ -10,6 +10,7 @@ description: >
    an, ohne etwas Vorhandenes zu ersetzen. `qatlas-core doctor` prüft den Zustand jederzeit.
 2. **Plan klären:** `qatlas goal <Idee>` macht aus einer Idee im Gespräch einen Plan mit beantworteten Fragen,
    den `shape` in Tasks zerlegt. Der Plan bleibt im Gespräch. Eine Datei entsteht nur mit deiner Zustimmung.
+   Mit `--check` bewerten vorab mehrere unabhängige Subagents die Idee, bevor ein Plan entsteht.
 3. **Shape:** `qatlas shape` hält bestätigtes Wissen aus dem geklärten Gesprächskontext fest und schneidet
    kleine, ausführungsreife Tasks zu. `qatlas shape <Datei>` tut das für eine Datei. `qatlas shape <Task>`
    schärft einen bestehenden Task, `qatlas shape backlog` ordnet bestehende Arbeit neu.
