@@ -178,6 +178,12 @@ if (block === 'qatlas') {
         lines.push('QATLAS ENTRY: ' + checks.unreferencedNote(name) + ' Add the line.');
       }
     } catch { /* a failed check never blocks the rules */ }
+    // Reads an existing state folder only: the session start creates no project state.
+    try {
+      const state = require('../scripts/runtime/project-store.js').readState(root);
+      const change = state && require('../scripts/runtime/project-watch.js').projectChange(root, state);
+      if (change) lines.push(change);
+    } catch { /* a failed watch never blocks the rules */ }
   }
   if (!scaffold) {
     lines.push('Ambient mode: Qatlas rules and skills are active. qatlas-core init sets up a project on '

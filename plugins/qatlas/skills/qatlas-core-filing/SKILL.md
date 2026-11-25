@@ -66,3 +66,5 @@ Vorgang:
 - Ordner oder Namen im Wissensraum bestimmen: [Projekt-Wissensraum](references/structure.md)
 - Inhalt im Wissensraum schreiben oder erweitern: [Umfangsgrenzen](references/size-limits.md)
 - Inhalt einer reservierten Datei ändern: [Projekt-Wissensraum](references/structure.md)
+- Dauerhafte Aussage des Nutzers festhalten oder geänderte Grundlage nachziehen:
+  [Projektwissen aktuell halten](references/playbook-keep-current.md)

@@ -30,6 +30,18 @@ Lade den passenden Skill, sobald sein Anlass eintritt, und arbeite nicht aus dem
 Fragt der Nutzer, was Qatlas ist oder wie es funktioniert, lies `<plugin-root>/skills/qatlas-help/SKILL.md`
 und führe ihn von dort aus.
 
+## Projektwissen
+
+In einem eingerichteten Projekt altert nichts still, auch außerhalb jedes Arbeitsmodus:
+
+- Merke dir Aussagen des Nutzers, die das Projekt über die aktuelle Aufgabe hinaus formen, und lege sie
+  verdichtet zur Bestätigung vor, statt sie nur in der Aufgabe zu verarbeiten.
+- Hat sich `.qatlas-brain/PROJECT.md` geändert, ohne dass du sie in dieser Session geändert hast, sage es dem
+  Nutzer und prüfe, was von ihr abhängt, bevor du Arbeit fortsetzt, die sie bindet.
+
+Lies dafür vor dem Vorlegen oder Prüfen
+`<plugin-root>/skills/qatlas-core-filing/references/playbook-keep-current.md` vollständig.
+
 ## Interaktion
 
 Der Chat folgt der Sprache der ersten Nutzernachricht. Eine dauerhafte Spracheinstellung verwaltet der Nutzer

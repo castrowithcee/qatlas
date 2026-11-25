@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
-// PostToolUse after a file write: tells the agent when a changed file of the knowledge space is over its limit
-// or a reserved file lacks its line in AGENTS.md. It only reports and always exits 0.
+// PostToolUse after a file write: tells the agent when a changed file of the knowledge space is over its limit,
+// a reserved file lacks its line in AGENTS.md or PROJECT.md changed from outside. It only reports and always
+// exits 0.
 //
 // Both hosts report the changed paths differently (Codex only as patch text), so the hook compares content
 // hashes of the checked files with the ones stored after the previous call. The first call has no earlier
@@ -13,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { BRAIN } = require('../scripts/runtime/brain-migration.js');
 const { ensureState } = require('../scripts/runtime/project-store.js');
+const { namesProject, projectChange } = require('../scripts/runtime/project-watch.js');
 const { RESERVED, markdownFiles, sizeNote, unreferencedFiles, unreferencedNote } =
   require('../scripts/runtime/knowledge-checks.js');
 
@@ -27,12 +29,12 @@ function projectRoot(start) {
   return null;
 }
 
-function startDir() {
+function readPayload() {
   try {
     const payload = JSON.parse(fs.readFileSync(0, 'utf8').replace(/^﻿/, ''));
-    if (typeof payload.cwd === 'string' && payload.cwd) return payload.cwd;
+    if (payload && typeof payload === 'object') return payload;
   } catch { /* fall back to the working directory */ }
-  return process.cwd();
+  return {};
 }
 
 // Map of checked file (relative to the project root, forward slashes) to its content hash and text.
@@ -51,10 +53,25 @@ function readChecked(root) {
 }
 
 function main() {
-  const root = projectRoot(startDir());
+  const payload = readPayload();
+  const root = projectRoot(typeof payload.cwd === 'string' && payload.cwd ? payload.cwd : process.cwd());
   if (!root) return;
   const state = ensureState(root);
   if (!state) return;
+  const notes = knowledgeNotes(root, state);
+  // Claude Code marks the call of a subagent with agent_id; its parent is the one who talks to the user.
+  try {
+    const change = projectChange(root, state, { own: namesProject(payload.tool_input), consume: !payload.agent_id });
+    if (change) notes.push(change);
+  } catch { /* the watch never costs the other notes */ }
+  if (!notes.length) return;
+
+  process.stdout.write(JSON.stringify({
+    hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: notes.join('\n') },
+  }));
+}
+
+function knowledgeNotes(root, state) {
   // Linked worktrees share the state folder but not their files, so each root keeps its own snapshot.
   const rootId = crypto.createHash('sha1').update(root).digest('hex').slice(0, 12);
   const stateFile = path.join(state, 'knowledge-snapshot-' + rootId + '.json');
@@ -66,7 +83,7 @@ function main() {
   const temp = stateFile + '.' + process.pid + '.tmp';
   fs.writeFileSync(temp, JSON.stringify(hashes));
   fs.renameSync(temp, stateFile);
-  if (!previous || typeof previous !== 'object') return;
+  if (!previous || typeof previous !== 'object') return [];
 
   const changed = new Set([...Object.keys(hashes), ...Object.keys(previous)].filter(name => hashes[name] !== previous[name]));
   const notes = [];
@@ -79,11 +96,7 @@ function main() {
   const touchesReferences = [...changed].some(name => name === 'AGENTS.md' || name === 'CLAUDE.md'
     || RESERVED.includes(name.slice(BRAIN.length + 1)) && name.startsWith(BRAIN + '/'));
   if (touchesReferences) for (const name of unreferencedFiles(root)) notes.push(unreferencedNote(name));
-  if (!notes.length) return;
-
-  process.stdout.write(JSON.stringify({
-    hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: notes.join('\n') },
-  }));
+  return notes;
 }
 
 try { main(); } catch { /* a failing check never disturbs the session */ }
