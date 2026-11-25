@@ -8,7 +8,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { claudeImportNote, hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
+const { claudeImportNote, gitleaksNote, hasGit, isRepo, missingIdentity, plan, projectRoot } = require('./qatlas-init.js');
 const { readConfig } = require('./runtime/config-loader.js');
 const { readState, stateFolders, readId } = require('./runtime/project-store.js');
 const { findings } = require('./runtime/knowledge-checks.js');
@@ -104,6 +104,8 @@ if (indexFile !== null) {
 }
 const importNote = claudeImportNote(target);
 if (importNote) notes.push(importNote);
+const leaksNote = gitleaksNote();
+if (leaksNote) notes.push(leaksNote);
 
 // Leftovers of places older plugin versions wrote to. Nothing reads them any more.
 const leftovers = [

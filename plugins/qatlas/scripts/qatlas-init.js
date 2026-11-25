@@ -8,7 +8,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawnSync } = require('child_process');
 const { readConfig } = require('./runtime/config-loader.js');
 const { BRAIN, migrateBrain } = require('./runtime/brain-migration.js');
 
@@ -97,6 +97,13 @@ function claudeImportNote(target) {
     + 'user and add it only with their consent.';
 }
 
+// Without gitleaks the protection check falls back to its own smaller pattern set. Installing it is the
+// user's call.
+function gitleaksNote() {
+  if (!spawnSync('gitleaks', ['version'], { stdio: 'ignore' }).error) return null;
+  return 'gitleaks: not on PATH, so the protection check scans for secrets with its built-in patterns only.';
+}
+
 function apply(item) {
   fs.mkdirSync(path.dirname(item.to), { recursive: true });
   if (item.from) fs.copyFileSync(item.from, item.to, fs.constants.COPYFILE_EXCL);
@@ -136,15 +143,15 @@ function main() {
     }
   }
 
-  const note = claudeImportNote(target);
+  const notes = [claudeImportNote(target), gitleaksNote()].filter(Boolean);
   const out = [];
   if (created.length) out.push('CREATED\n' + created.map(line => '- ' + line).join('\n'));
   if (problems.length) out.push('PROBLEMS\n' + problems.map(line => '- ' + line).join('\n'));
-  if (note) out.push('NOTES\n- ' + note);
+  if (notes.length) out.push('NOTES\n' + notes.map(line => '- ' + line).join('\n'));
   process.stdout.write((out.length ? out.join('\n\n') : 'OK: nothing to do.') + '\n');
   process.exitCode = problems.length ? 1 : 0;
 }
 
 if (require.main === module) main();
 
-module.exports = { claudeImportNote, hasGit, isRepo, missingIdentity, plan, projectRoot };
+module.exports = { claudeImportNote, gitleaksNote, hasGit, isRepo, missingIdentity, plan, projectRoot };

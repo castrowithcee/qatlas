@@ -62,7 +62,24 @@ function addedLines(diff) {
   return lines;
 }
 
-const stagedLines = () => addedLines(git(['diff', '--cached', '--no-color', '--no-ext-diff', '--unified=0']));
+const diffLines = (...base) => addedLines(git(['diff', '--cached', '--no-color', '--no-ext-diff', '--unified=0', ...base]));
+
+// The other parents of a pending merge commit; empty outside a merge.
+function mergeParents() {
+  try { return fs.readFileSync(path.resolve(target, git(['rev-parse', '--git-path', 'MERGE_HEAD']).trim()), 'utf8').split(/\s+/).filter(Boolean); }
+  catch { return []; }
+}
+
+// In a merge a line counts only if it is new against every parent: what a merged-in branch already holds
+// is not part of this change.
+function stagedLines(parents) {
+  let lines = diffLines();
+  for (const parent of parents) {
+    const added = new Set(diffLines(parent).map(entry => entry.file + '\0' + entry.text));
+    lines = lines.filter(entry => added.has(entry.file + '\0' + entry.text));
+  }
+  return lines;
+}
 
 function scan(lines, rules) {
   const found = [];
@@ -119,7 +136,7 @@ function gitleaks() {
       if (result.error) return null;
       if (result.status !== 0 && result.status !== 1) continue;
       const findings = JSON.parse(fs.readFileSync(report, 'utf8') || '[]');
-      return findings.map(item => ({ item: item.File + ':' + item.StartLine + ' ' + item.RuleID }));
+      return findings.map(item => ({ at: item.File + ':' + item.StartLine, item: item.File + ':' + item.StartLine + ' ' + item.RuleID }));
     } catch {
       // No readable report: this version does not know the call; try the older one.
       continue;
@@ -149,8 +166,10 @@ function main() {
   if (!root) process.exit(0);
 
   let lines;
+  let parents;
   try {
-    lines = stagedLines();
+    parents = mergeParents();
+    lines = stagedLines(parents);
   } catch {
     process.stdout.write('protection: check not possible, staged diff not readable.\n');
     process.exit(3);
@@ -192,7 +211,13 @@ function main() {
 
   const results = [];
   if (protection.secrets !== 'allow') {
-    results.push(['secrets', protection.secrets, gitleaks() || scan(lines, SECRET_RULES)]);
+    let leaks = gitleaks();
+    // gitleaks diffs against HEAD only; in a merge keep its findings on lines new against every parent.
+    if (leaks && parents.length) {
+      const fresh = new Set(lines.map(entry => entry.file + ':' + entry.line));
+      leaks = leaks.filter(hit => fresh.has(hit.at));
+    }
+    results.push(['secrets', protection.secrets, leaks || scan(lines, SECRET_RULES)]);
   }
   if (protection['personal-data'] !== 'allow') {
     const found = scan(lines, PERSONAL_RULES)
