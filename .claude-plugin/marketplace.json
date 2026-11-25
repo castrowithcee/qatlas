@@ -5,6 +5,7 @@
   "plugins": [
     { "name": "qatlas", "source": "./plugins/qatlas", "category": "productivity", "defaultEnabled": true, "description": "Qatlas verbindet passiven Sessionkontext und Projektzustand mit einem ausdrücklich gestarteten Arbeitsloop für Zielklärung, Zuschnitt, Ausführung und Review sowie Kernverwaltung." },
     { "name": "qatlas-dev", "source": "./plugins/qatlas-dev", "category": "productivity", "description": "Code pack: the smallest change that fully solves the task, in three levels, plus a review of a change and an audit of a whole repo. Requires qatlas." },
-    { "name": "qatlas-design", "source": "./plugins/qatlas-design", "category": "productivity", "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas." }
+    { "name": "qatlas-design", "source": "./plugins/qatlas-design", "category": "productivity", "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas." },
+    { "name": "qatlas-sentinel", "source": "./plugins/qatlas-sentinel", "category": "productivity", "description": "Beta-Pack Wächter: Eine Session prüft auf Aufruf alle 45 Minuten die Qatlas-Läufe und Planungssysteme ausgewählter Projekte und meldet nur, was den Nutzer braucht. Braucht qatlas." }
   ]
 }
