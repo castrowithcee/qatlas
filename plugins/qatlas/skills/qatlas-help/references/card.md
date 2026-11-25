@@ -21,6 +21,7 @@ description: >
 | **qatlas-dev-review** | Prüft eine Änderung auf Bugs, Risiko, Skalierung, fehlende Tests, Geschwindigkeit und Ballast, ohne Code zu ändern. |
 | **qatlas-dev-audit** | Prüft ein ganzes Repo auf dieselbe Weise, mit Rangfolge, ohne Code zu ändern. |
 | **qatlas-design** | Gibt einer Webseite oder einem App-Screen eine recherchierte Art Direction und prüft sie in einem echten Browser. |
+| **qatlas-sentinel run** | Beta: Behält mehrere Projekte im Blick und meldet alle 45 Minuten neue Hinweise zu ihren Läufen und Issues, ohne etwas zu entscheiden. |
 
-Claude nutzt `/<aufruf>`, Codex `$<aufruf>` oder das Menü `/skills`. `qatlas-dev` und `qatlas-design` sind
-nur verfügbar, wenn ihr Pack installiert ist.
+Claude nutzt `/<aufruf>`, Codex `$<aufruf>` oder das Menü `/skills`. `qatlas-dev`, `qatlas-design` und
+`qatlas-sentinel` sind nur verfügbar, wenn ihr Pack installiert ist.
