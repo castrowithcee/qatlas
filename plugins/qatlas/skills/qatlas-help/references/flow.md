@@ -37,8 +37,7 @@ hält die Antwort fest und setzt den Status. Es setzt nichts um und integriert n
 ## Ohne die Schleife
 
 Auch ohne diese Schleife arbeitet der Agent mit Qatlas: Er findet Wissen über die Navigation, legt Dokumente
-nach den Regeln ab, arbeitet im maßgeblichen Planungssystem und prüft Git vor Eingriffen. Zur Beratung startet
-`qatlas-council` unabhängige Perspektiven, ohne etwas umzusetzen.
+nach den Regeln ab, arbeitet im maßgeblichen Planungssystem und prüft Git vor Eingriffen.
 
 ## Pflege
 
