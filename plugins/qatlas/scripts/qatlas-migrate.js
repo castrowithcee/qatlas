@@ -7,7 +7,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { projectRoot } = require('./qatlas-init.js');
+const { plan, projectRoot } = require('./qatlas-init.js');
 const { findings } = require('./runtime/knowledge-checks.js');
 
 const KINDS = {
@@ -16,6 +16,7 @@ const KINDS = {
   sort: 'folder(s) or file(s) outside the layout whose content needs a place',
   split: 'file(s) over their size limit',
   entry: 'reserved file(s) without a reading condition in the entry file',
+  missing: 'part(s) of the setup that are missing and that init adds',
 };
 
 const library = process.argv.includes('--library');
@@ -27,7 +28,9 @@ if (!fs.existsSync(space)) {
   process.exit(0);
 }
 
-const found = findings(target, library);
+// A part init always ships, such as the import zone, can be lost without any layout finding.
+const absent = library ? [] : plan(target).map(item => ({ kind: 'missing', note: item.shown + ' is missing.' }));
+const found = [...findings(target, library), ...absent];
 if (!found.length) {
   process.stdout.write('OK: nothing to migrate.\n');
 } else if (process.argv.includes('--list')) {

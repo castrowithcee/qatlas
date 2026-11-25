@@ -10,6 +10,7 @@ description: >
 Übernimm `.qatlas-brain/` des Projekts in das gültige Layout, mit dem Argument `library` stattdessen
 `~/qatlas/`. Das Verfahren berührt nur diesen Ordner und seine Einstiegsdatei, also `AGENTS.md` oder
 `AGENTS.qatlas.md`. Es löscht keinen Inhalt: Eine Quelle entfällt erst, wenn ihr ganzer Inhalt am Ziel steht.
+Ein leerer fester Ordner wie `zone-import/` bleibt bestehen.
 
 ## Ermitteln
 
@@ -56,6 +57,8 @@ Setze erst nach der Freigabe um und nur, was freigegeben ist. Es gilt
 - **`split`:** Gehe nach den
   [Umfangsgrenzen](../../qatlas-core-filing/references/size-limits.md) vor.
 - **`entry`:** Ergänze die Zeile mit der Lesebedingung in der Einstiegsdatei.
+- **`missing`:** Führe `node <plugin-root>/scripts/qatlas-init.js` aus. Es ergänzt nur, was fehlt, auch
+  außerhalb des Ordners, und ersetzt nichts.
 
 Widersprechen sich zwei Aussagen beim Zusammenführen, übernimm keine stillschweigend und frage den Nutzer.
 
