@@ -557,6 +557,14 @@ function testInit() {
   assert.ok(listed.includes('rename: .qatlas-brain/conventions/policy-names.md -> .qatlas-brain/conventions/conventions-names.md'), listed);
   assert.ok(listed.includes('sort: .qatlas-brain/docs/ is none of the fixed folders.'), listed);
   assert.strictEqual(tree(), treeBefore, 'Migrate writes nothing.');
+  assert.ok(!overview.includes('- missing:'), overview);
+  // A lost part of the setup is a finding of its own, so a migration never ends on OK without it.
+  const keep = path.join(brainDir, 'zone-import', '.gitkeep');
+  fs.rmSync(path.join(brainDir, 'zone-import'), { recursive: true });
+  assert.ok(run(migrate).stdout.includes('- missing: 1 '), run(migrate).stdout);
+  const lost = runNode(migrate, ['--target', f.project, '--list'], { cwd: f.project, home: f.home }).stdout;
+  assert.ok(lost.includes('missing: .qatlas-brain/zone-import/.gitkeep is missing.'), lost);
+  write(keep, '');
 
   // The library takes the functions that can apply across projects and names them in AGENTS.qatlas.md.
   const lib = path.join(f.home, 'qatlas');
