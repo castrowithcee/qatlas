@@ -1016,6 +1016,66 @@ function testKnowledgeHook() {
   assert.strictEqual(fs.existsSync(path.join(plain.home, '.qatlas')), false);
 }
 
+function testProjectWatch() {
+  const f = fixture('project-watch');
+  initProject(f);
+  const script = path.join(pluginRoot, 'hooks', 'qatlas-knowledge-check.js');
+  const file = path.join(f.project, '.qatlas-brain', 'PROJECT.md');
+  const other = path.join(f.project, 'src', 'code.js');
+  const hook = input => {
+    const result = spawnSync(process.execPath, [script], { cwd: f.project, encoding: 'utf8',
+      env: { ...process.env, HOME: f.home }, input: JSON.stringify({ hook_event_name: 'PostToolUse', cwd: f.project, ...input }) });
+    assert.strictEqual(result.status, 0, result.stderr);
+    return result.stdout ? JSON.parse(result.stdout).hookSpecificOutput.additionalContext : '';
+  };
+  const wrote = target => ({ tool_name: 'Write', tool_input: { file_path: target } });
+  const start = () => hookOutput(f, 'qatlas');
+  const MARK = 'QATLAS PROJECT CHANGED: ';
+  const git = (...args) => assert.strictEqual(spawnSync('git', ['-C', f.project, ...args]).status, 0, args.join(' '));
+
+  write(path.join(f.project, 'AGENTS.md'), '# Own\nPROJECT.md: read it first.\n');
+  write(file, 'a\n');
+  assert.ok(!start().includes(MARK), 'Without state the session start has no baseline.');
+  assert.strictEqual(fs.existsSync(path.join(f.home, '.qatlas')), false, 'The session start creates no state.');
+  assert.strictEqual(hook(wrote(other)), '', 'The first call only stores the baseline.');
+
+  write(file, 'b\n');
+  assert.ok(!hook(wrote(file)).includes(MARK), 'A write that names the file is the agent\'s own.');
+  assert.ok(!start().includes(MARK), 'An own change is known at the next session start.');
+
+  write(file, 'c\n');
+  const started = start();
+  assert.ok(started.includes(MARK) && started.includes('uncommitted in the working tree'), started);
+  assert.ok(started.includes('playbook-keep-current.md'), 'The note names the reference.');
+  assert.ok(!start().includes(MARK), 'The note appears once.');
+  assert.ok(!hookOutput(f, 'subagent').includes(MARK), 'Only the session start reports.');
+
+  write(file, 'd\n');
+  assert.ok(hook(wrote(other)).includes(MARK), 'A change beside another write is from outside.');
+  assert.strictEqual(hook(wrote(other)), '', 'It is reported once.');
+
+  write(file, 'e\n');
+  const patch = { tool_name: 'apply_patch',
+    tool_input: { command: '*** Begin Patch\n*** Update File: .qatlas-brain/PROJECT.md\n*** End Patch' } };
+  assert.ok(!hook(patch).includes(MARK), 'A patch text that names the file is the agent\'s own.');
+
+  write(file, 'f\n');
+  assert.ok(!hook({ ...wrote(other), agent_id: 'a1' }).includes(MARK), 'A subagent leaves the note to its parent.');
+  assert.ok(hook(wrote(other)).includes(MARK), 'The parent still gets it.');
+
+  // Only a reflog entry makes a pull or merge certain.
+  git('add', '-A');
+  git('commit', '-q', '-m', 'base');
+  git('checkout', '-q', '-b', 'elsewhere');
+  write(file, 'g\n');
+  git('commit', '-q', '-am', 'change');
+  git('checkout', '-q', '-');
+  assert.ok(!start().includes(MARK), 'The known content is back after the switch.');
+  git('merge', '-q', 'elsewhere');
+  const merged = start();
+  assert.ok(merged.includes(MARK) && merged.includes('certain: it arrived in this checkout with "merge elsewhere'), merged);
+}
+
 function testWorktreePath() {
   const f = fixture('worktree');
   initProject(f);
@@ -1060,6 +1120,7 @@ try {
   testDoctorProjectState();
   testSizeLimitsMatchReference();
   testKnowledgeHook();
+  testProjectWatch();
   testWorktreePath();
   process.stdout.write('✓ Qatlas init, doctor and context: 15 scenarios passed.\n');
 } finally {
