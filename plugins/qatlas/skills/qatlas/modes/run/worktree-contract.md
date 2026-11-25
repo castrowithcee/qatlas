@@ -53,19 +53,19 @@ Agent-Identität.
 2. Prüfe im Ziel Status, nicht verfolgte Dateien, Branch, Upstream und nicht integrierte Commits. Das
    Integrationsziel eines Sub-Branches ist sein Task-Branch, das eines Task-Branches der Kontroll-Branch.
    Prüfe mit `git merge-base --is-ancestor <branch> <target>`, ob die Branch-Spitze darin enthalten ist. Nach
-   einem Squash-Merge schlägt diese Prüfung immer fehl. Integration bedeutet dann den Squash-Nachweis: Der
-   Pull Request des Branches ist gemergt, sein Merge-Commit liegt auf dem Kontroll-Branch, und entweder hat
-   `qatlas-run-tools.js land` ihn mit `proof` `tree`, `patch-id` oder `merge-tree` belegt, oder
-   `git rev-parse <merge-commit>^{tree}` ist gleich `git rev-parse <branch>^{tree}` der zuletzt geprüften,
-   unveränderten Branch-Spitze. Ist der Arbeitsbaum nicht sauber, das Ziel nicht eindeutig festgestellt oder
-   keiner der beiden Nachweise erbracht, entferne nichts und zeige den konkreten Stand. Beanspruchte Arbeit
-   eines laufenden oder unbekannten Workers bleibt.
+   einem Merge-Commit genügt sie. Nach einem Squash- oder Rebase-Merge schlägt sie immer fehl. Dann gilt der
+   Nachweis der Landung: Der Pull Request des Branches ist gemergt, sein Merge-Commit liegt auf dem
+   Kontroll-Branch, und entweder hat `qatlas-run-tools.js land` oder `proof` ihn mit `tree`, `patch-id` oder
+   `merge-tree` belegt, oder `git rev-parse <merge-commit>^{tree}` ist gleich `git rev-parse <branch>^{tree}`
+   der zuletzt geprüften, unveränderten Branch-Spitze. Ist der Arbeitsbaum nicht sauber, das Ziel nicht
+   eindeutig festgestellt oder keiner der beiden Nachweise erbracht, entferne nichts und zeige den konkreten
+   Stand. Beanspruchte Arbeit eines laufenden oder unbekannten Workers bleibt.
 3. Entferne einen sauberen, vollständig integrierten Arbeitsbaum mit `git worktree remove <path>` ohne
    `--force`. Entferne danach mit `rmdir` die leer gewordenen Zwischenordner unterhalb von `worktrees/`.
    `worktrees/` und der Zustandsordner selbst bleiben.
 4. Lösche den lokalen Branch nach der Zielprüfung nur mit `git branch -d`. Schlägt der Befehl fehl, erzwinge
-   das Löschen nicht. Die einzige Ausnahme ist ein Branch mit erbrachtem Squash-Nachweis, den `git branch -D`
-   entfernen darf. Lösche einen Remote-Branch nur nach einer Regel des Laufs und nenne verbleibende gesammelt
-   im Abschluss.
+   das Löschen nicht. Die einzige Ausnahme ist ein Branch mit erbrachtem Nachweis der Landung, den `git branch
+   -D` entfernen darf. Lösche einen Remote-Branch nur nach einer Regel des Laufs und nenne verbleibende
+   gesammelt im Abschluss.
 
 Verwirf keinen unsauberen oder nicht integrierten Strang, und lösche einen Worktree-Ordner nie von Hand.

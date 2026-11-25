@@ -21,8 +21,12 @@ auch wenn Projektanweisungen sie anders verteilen.
 Committe im gewählten Scope lokal und lass lokal integrieren, ohne nachzufragen. Pushe, öffne Pull Requests
 und merge sie nur, wenn Nutzer- oder Projektanweisungen es verlangen und erlauben. Protokolliere dann vor dem
 ersten Lead einmal als `regel`, welche Vorgabe Push, Pull Request und Merge erlaubt, mit ihrem Ort, und mit
-welchen Mitteln das Projekt sie ausführt. Gleiche eine Warnung des Hosts zu einem Merge damit ab. Löse keine
-andere externe oder unumkehrbare Wirkung aus.
+welchen Mitteln das Projekt sie ausführt. Bestimme bei Integration über Pull Requests die Merge-Form einmal je
+Lauf ohne Rückfrage: aus `.qatlas-brain/CONTRIBUTING.md` oder anderen Nutzer- oder Projektvorgaben, sonst aus
+dem, was das Ziel-Repo zulässt. Lässt es genau eine Form zu, gilt diese. Lässt es mehrere zu und nennt das
+Projekt keine, gilt Merge-Commit. Protokolliere die Form mit ihrer Quelle in derselben `regel`. Sie gilt für
+den ganzen Lauf. Gleiche eine Warnung des Hosts zu einem Merge damit ab. Löse keine andere externe oder
+unumkehrbare Wirkung aus.
 
 `<run>` ist das Steuerskript `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run.js`, `<tools>`
 sind die Lauf-Werkzeuge `node <plugin-root>/skills/qatlas/modes/run/scripts/qatlas-run-tools.js` und

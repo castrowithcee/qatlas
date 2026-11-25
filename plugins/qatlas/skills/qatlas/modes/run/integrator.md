@@ -81,11 +81,13 @@ jeden Wiederholungslauf eines CI-Jobs ebenso mit `--type rerun`. Beide zählen i
    verfügbar ist, sichere den Task stattdessen nach dem Git-Workflow als Übergabe an `review`.
 2. Prüfe ohne Konflikt oder nach deiner Lösung Diff, Nachweis, Abnahme und Dokumentationswirkung selbst, wie
    „Abnehmen und integrieren“ es beschreibt. Gib inhaltlichen Korrekturbedarf als `rework <Grund>` zurück. Er
-   zählt als Korrekturversuch nach „Korrekturbudget“ dort. Bei Pull Requests hat `handover` bereits geprüft,
-   dass der Branch einen Nicht-Merge-Commit oder eine `cut-exception` trägt. Trägt diese Ausnahme im Sinne der
-   Commit-Grenze nicht, gib die Übergabe als `rework cut: <verlangter Schnitt>` zurück. Das zählt nicht als
-   Korrekturversuch. Lief ein Worker mit einem anderen Modell oder Effort als sein Profil im Block `run`,
-   protokolliere das als `abweichung`, ohne deshalb `rework` zu antworten.
+   zählt als Korrekturversuch nach „Korrekturbudget“ dort. Weicht bei Pull Requests `merge-method` des
+   Berichts von der Form des Laufs ab, gib die Übergabe als `rework cut: merge-method <Form>` zurück. Bei
+   Squash-Merge hat `handover` bereits geprüft, dass der Branch genau einen Nicht-Merge-Commit oder eine
+   `cut-exception` trägt. Trägt diese Ausnahme im Sinne der Commit-Grenze nicht, gib die Übergabe als `rework
+   cut: <verlangter Schnitt>` zurück. Beides zählt nicht als Korrekturversuch. Lief ein Worker mit einem
+   anderen Modell oder Effort als sein Profil im Block `run`, protokolliere das als `abweichung`, ohne deshalb
+   `rework` zu antworten.
 3. Hat die Übergabe die Abnahme bestanden, integriere sie nach dem Git-Workflow, bei Integration über Pull
    Requests nach „Integration über Pull Requests“, indem du den vom Lead geöffneten Pull Request landest.
    Welche lokalen Prüfungen bleiben, entscheiden die [Nachweise und
@@ -133,6 +135,6 @@ Schritt 3 aus und überspringe keine.
   --text "<Befehl>: <Befund in einem Satz>"`, pushe nicht und korrigiere nichts. Die Korrektur veranlasst der
   Supervisor. Lass bereits integrierte Tasks, wie sie sind.
 
-Räume lokale Worktrees und Branches nach dem Worktree-Vertrag auf, mit dem Squash-Beleg der Landung als
-Nachweis. Ist eine Merge-Queue aktiv, lösche den Remote-Branch nach dem Worktree-Vertrag, nachdem die Queue
+Räume lokale Worktrees und Branches nach dem Worktree-Vertrag auf, mit dem Nachweis der Landung in ihrer
+Form. Ist eine Merge-Queue aktiv, lösche den Remote-Branch nach dem Worktree-Vertrag, nachdem die Queue
 gemergt hat.
