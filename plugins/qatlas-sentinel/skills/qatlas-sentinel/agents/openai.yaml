@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qatlas Sentinel"
+  short_description: "Ein Ort, der deine Projekte im Blick behält"
+  default_prompt: "Behalte meine Projekte mit $qatlas-sentinel run im Blick."
