@@ -13,7 +13,7 @@ jede Karte so, dass er dafür keinen Task suchen oder lesen muss.
 ## Aufruf
 
 Nimm bei `review [Scope]` einen Task, ein Projekt oder ohne Scope alle offenen Übergaben des maßgeblichen
-Planungssystems. `review` kennt keine Flags und erhält keine Freigabe für gesperrte Projektdokumentation.
+Planungssystems. `review` kennt keine Flags und ändert gesperrte Projektdokumentation nur nach „Abschluss“.
 Lies den aktuellen Stand, ändere Status und Entscheidungen im maßgeblichen Planungssystem und lege am
 vollständigen Ende einen lokalen Sammelcommit an. Setze nichts um, starte keine Worker und keine technischen
 Tests, integriere nichts, löse keine externe Wirkung aus und pushe nichts.
@@ -76,7 +76,9 @@ Antwort: ok, die Abweichung beschreiben oder überspringen.
 Halte jede Antwort und jedes Prüfergebnis so fest, wie es das Vorlegen von Entscheidungen beschreibt. Was du
 im Planungssystem festhältst, gilt sofort. Für geänderte Dateien des Repos legst du keinen Zwischencommit an
 und prüfst nach jeder Antwort, dass der Steuerungs-Branch nicht von jemand anderem geändert wurde. Erst wenn
-jede Übergabe der Ausgangs-Queue abgeschlossen oder übersprungen ist, lies den vollständigen Diff und lege
-nach der Git-Norm genau einen lokalen Sammelcommit pro betroffenem Repo an. Der ausdrückliche Aufruf ersetzt
+jede Übergabe der Ausgangs-Queue abgeschlossen oder übersprungen ist, lege das Dauerhafte aus dem Gespräch
+nach dem gemeinsamen Vertrag als eine letzte Karte vor: nummerierte Punkte statt Optionen, beantwortbar mit
+den Nummern, einer Korrektur oder einer Ablehnung. Lies danach den vollständigen Diff und lege nach der
+Git-Norm genau einen lokalen Sammelcommit pro betroffenem Repo an. Der ausdrückliche Aufruf ersetzt
 die vorherige Freigabe seiner Nachricht. Zeige danach Nachricht und ID. Bei offenem Rest oder vorzeitigem
 Ende committest du diese Dateien nicht. Pushe nichts.

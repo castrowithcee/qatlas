@@ -106,6 +106,7 @@ Nach der Bestätigung gib ein kompaktes Goal-Briefing ausschließlich im Chat au
 - getroffene Entscheidungen mit knapper Begründung,
 - mögliche spätere Fähigkeiten mit ihren Einführungssignalen,
 - bestätigte Annahmen und akzeptierte Risiken,
+- Dauerhaftes fürs Projekt nach dem gemeinsamen Vertrag, verdichtet und mit Zieldatei, ohne es einzutragen,
 - nur ausdrücklich zurückgestellte oder erst beim Zuschnitt beantwortbare Fragen, jeweils mit Grund.
 
 Biete danach einmal an, das Briefing als Datei abzulegen, damit eine andere Session es mit `shape <Datei>`

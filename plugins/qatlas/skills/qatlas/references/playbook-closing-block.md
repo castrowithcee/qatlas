@@ -1,15 +1,15 @@
 ---
 description: >
   Gemeinsamer Abschluss von run und shape im Chat: Ergebnis, nummerierte, im Chat beantwortbare
-  Nutzerpunkte, neue Tasks, offene Risiken, überlange Dateien und Tasks, Prozessverbesserungen, Kennzahlen
-  und ungepushte Commits.
+  Nutzerpunkte, Dauerhaftes fürs Projektwissen, neue Tasks, offene Risiken, überlange Dateien und Tasks,
+  Prozessverbesserungen, Kennzahlen und ungepushte Commits.
 ---
 
 # Abschlussblock
 
 Beende den Modus mit genau diesem Block. Jeder Punkt steht nur hier, einmal, mit dem Thema zuerst und der
-Task-ID danach. Nummeriere die Punkte von `Entscheiden`, `Prüfen` und `Angenommen` fortlaufend, damit der
-Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
+Task-ID danach. Nummeriere die Punkte von `Entscheiden`, `Prüfen`, `Angenommen` und `Festhalten` fortlaufend,
+damit der Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 
 ```markdown
 <Projekt> · <Modus> · <Stand, z. B. fertig, 2 Entscheidungen offen>
@@ -26,6 +26,9 @@ Nutzer mit der Nummer antworten kann. Lass leere Kategorien weg.
 
 **Angenommen**
 3. <Thema> (#<ID>): <Annahme>, weil <Grund>. Sie zurückzunehmen hätte <Folge>.
+
+**Festhalten**
+4. <Thema>: <Aussage, wie sie in der Datei stehen wird>, weil <Grund>. Ziel: <Datei>, Abschnitt <Abschnitt>.
 
 **Handeln**
 - <Thema> (#<ID>): <Aktion mit genauem Ort oder Befehl>.
@@ -55,6 +58,8 @@ Weiter in einer neuen Session: <Modi>
   ausführungsreif macht. Formuliere protokollierte Einträge dafür neu. Herleitung und technische Details
   bleiben im Task.
 - **Angenommen:** nur Annahmen, deren Umkehr etwas ändern würde.
+- **Festhalten:** das Dauerhafte aus dem Gespräch nach dem gemeinsamen Vertrag. Der Nutzer bestätigt mit der
+  Nummer, korrigiert den Punkt oder lehnt ihn ab.
 - **Risiken:** nur Risiken, die nach dem Lauf noch offen sind, darunter ein unbehobenes Sicherheitsrisiko,
   das nicht öffentlich festgehalten werden darf. Was wie erwartet behandelt wurde, bleibt draußen.
   Code-Stellen gehören in den Task.
@@ -87,6 +92,6 @@ Weiter in einer neuen Session: <Modi>
 ## Antworten in diesem Chat
 
 Der Nutzer antwortet meist sofort. Halte jeden beantworteten Punkt vor Sessionende nach den
-Aufzeichnungsregeln von [Entscheidungen vorlegen](playbook-decision-card.md) fest. Kläre nur einen
-mehrdeutigen Punkt. Bringe daraus folgende Dateiänderungen in einen weiteren lokalen Commit pro betroffenem
+Aufzeichnungsregeln von [Entscheidungen vorlegen](playbook-decision-card.md) fest, einen Punkt aus
+`Festhalten` nach dem gemeinsamen Vertrag. Kläre nur einen mehrdeutigen Punkt. Bringe daraus folgende Dateiänderungen in einen weiteren lokalen Commit pro betroffenem
 Repo, pushe nichts und bestätige in einer Zeile, was festgehalten wurde.

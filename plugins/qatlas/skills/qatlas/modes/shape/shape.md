@@ -112,5 +112,8 @@ Ausführungsgrundlage bleibt trotzdem Pflicht.
 Setze in diesem Modus nie `in-progress`, beginne keine Umsetzung und führe keinen Task aus. `done` setzt du
 nur, wenn der Nutzer entscheidet, einen Task als verworfen oder Duplikat zu schließen.
 
+Lege das Dauerhafte aus dem Gespräch nach dem gemeinsamen Vertrag unter `Festhalten` im Abschlussblock vor,
+auch die Punkte, die ein Goal-Briefing dafür nennt.
+
 In jeder Variante endet `shape` mit genau einem lokalen Sammelcommit pro betroffenem Repo über die in diesem
 Lauf geänderten Dateien, damit ein folgender `run` von einem sauberen Stand startet.

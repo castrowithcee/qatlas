@@ -34,6 +34,28 @@ Anweisungen. Ändere weder Ziel noch Abnahmekriterien stillschweigend.
 Nutze installierte Plugins und deren Skills, wenn ihre Methode zur Aufgabe passt. Gespräch, Planungssystem und
 Status bleiben beim Modus.
 
+## Dauerhaftes aus dem Gespräch
+
+Merke dir in einem eingerichteten Projekt während des Laufs jede Aussage des Nutzers, die das Projekt über
+den Task hinaus formt: eine Regel, ein gewünschtes Verhalten, eine Grenze oder eine Entscheidung zu Produkt
+oder Architektur, jeweils mit ihrem Grund. Maßgeblich ist, ob sie noch gilt, wenn der Task geschlossen ist.
+Was nur ein einzelnes Vorhaben betrifft, etwa ein Umzug oder eine Restrukturierung, bleibt im Task.
+
+Lege das Gesammelte einmal gebündelt zur Bestätigung vor, an der Stelle, die die Datei des Modus nennt:
+
+- **Verdichtet:** Gib je Punkt in ein bis zwei Sätzen wieder, was du verstanden hast, mit dem Grund, und
+  nicht, was der Nutzer gesagt hat. Das gilt gerade dann, wenn er lang ausgeführt hat. Fasse mehrere
+  Ausführungen zum selben Gegenstand zu einem Punkt zusammen.
+- **Wie es stehen wird:** Formuliere jeden Punkt so, wie du ihn eintragen wirst, in der Art seiner Zieldatei,
+  etwa als Regel, Grenze, Prüfvorgabe oder Entscheidung. Wähle die Zieldatei nach ihrer Aufgabe im
+  [Projekt-Wissensraum](../../qatlas-core-filing/references/structure.md) und nenne sie mit dem Abschnitt.
+  Teile eine Aussage, die mehrere Dateien betrifft, in je einen Punkt.
+- **Nur Neues:** Lass weg, was das Projektwissen schon so festhält. Widerspricht eine Aussage dem
+  Festgehaltenen, nenne im Punkt, was sie ersetzt.
+- **Eintragen:** Trage einen bestätigten Punkt nach [der Ablage-Norm](../../qatlas-core-filing/SKILL.md) an
+  seinem Platz ein und ersetze Überholtes, statt anzuhängen. Die Bestätigung gibt eine gesperrte Datei für
+  genau diesen Punkt frei. Ohne Bestätigung änderst du nichts und fragst in diesem Lauf nicht erneut.
+
 ## Mit dem Nutzer sprechen
 
 Der Nutzer führt viele Projekte parallel, seine Aufmerksamkeit je Nachricht ist knapp. Schreibe jede
