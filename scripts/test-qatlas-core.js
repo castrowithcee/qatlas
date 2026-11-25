@@ -10,6 +10,11 @@ const { spawnSync } = require('child_process');
 const pluginRoot = path.resolve(__dirname, '..', 'plugins', 'qatlas');
 const temporary = [];
 
+// A stub gitleaks on PATH keeps init and doctor reports independent of the host; testInit removes it.
+const stubBin = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-stub-bin-'));
+temporary.push(stubBin);
+fs.writeFileSync(path.join(stubBin, 'gitleaks'), '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+
 function fixture(name) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-' + name + '-'));
   temporary.push(root);
@@ -28,7 +33,8 @@ function write(file, content) {
 function runNode(script, args, options = {}) {
   return spawnSync(process.execPath, [script, ...args], {
     cwd: options.cwd,
-    env: { ...process.env, HOME: options.home, CLAUDE_PLUGIN_ROOT: options.pluginRoot || pluginRoot, ...options.env },
+    env: { ...process.env, PATH: stubBin + path.delimiter + process.env.PATH, HOME: options.home,
+      CLAUDE_PLUGIN_ROOT: options.pluginRoot || pluginRoot, ...options.env },
     encoding: 'utf8',
   });
 }
@@ -462,6 +468,14 @@ function testInit() {
   const second = run(init);
   assert.strictEqual(second.status, 0, second.stdout);
   assert.strictEqual(second.stdout.trim(), 'OK: nothing to do.');
+  const gitDir = path.dirname(spawnSync('which', ['git'], { encoding: 'utf8' }).stdout.trim());
+  const bare = { PATH: [gitDir, path.dirname(process.execPath)].join(path.delimiter) };
+  const noLeaks = script => runNode(script, ['--target', f.project], { cwd: f.project, home: f.home, env: { ...bare,
+    GIT_CONFIG_GLOBAL: path.join(f.home, '.gitconfig'), GIT_CONFIG_NOSYSTEM: '1' } });
+  const leaksInit = noLeaks(init);
+  assert.strictEqual(leaksInit.status, 0, 'Missing gitleaks is a note, not a problem.');
+  assert.ok(leaksInit.stdout.includes('NOTES\n- gitleaks: not on PATH'), leaksInit.stdout);
+  assert.ok(noLeaks(doctor).stdout.includes('- gitleaks: not on PATH'));
   assert.ok(fs.readFileSync(backlog, 'utf8').includes('https://example.invalid/project'));
   assert.strictEqual(fs.readFileSync(path.join(f.project, 'AGENTS.md'), 'utf8'), '# Own\n');
   assert.strictEqual(fs.readFileSync(path.join(f.project, '.gitignore'), 'utf8'), ignore, 'Rules are added once.');

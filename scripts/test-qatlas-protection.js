@@ -147,7 +147,43 @@ try {
   const localCheck = spawnSync(process.execPath, [script, '--target', localRepo], { encoding: 'utf8', env: localEnv });
   assert.strictEqual(localCheck.status, 0, 'The user allowlist suppresses the finding.');
 
-  process.stdout.write('✓ Qatlas protection: 18 scenarios passed.\n');
+  // A merge commit counts only what is new against every parent, not the merged-in branch.
+  const mergeRepo = path.join(root, 'merge');
+  const mergeEnv = { ...process.env, HOME: path.join(root, 'merge-home'), PATH: [gitDir, path.dirname(process.execPath)].join(':') };
+  const g = (...args) => spawnSync('git', ['-C', mergeRepo, '-c', 'user.name=t', '-c', 'user.email=t@example.invalid', ...args],
+    { encoding: 'utf8', env: mergeEnv });
+  execFileSync('git', ['init', '-q', '-b', 'main', mergeRepo]);
+  write(path.join(mergeRepo, 'conflict.txt'), 'a\n');
+  g('add', '.'); g('commit', '-qm', 'base'); g('checkout', '-qb', 'old');
+  write(path.join(mergeRepo, 'conflict.txt'), 'old\n');
+  g('commit', '-qam', 'old'); g('checkout', '-q', 'main');
+  write(path.join(mergeRepo, 'conflict.txt'), 'main\n');
+  write(path.join(mergeRepo, 'people.md'), mail['notes.md']);
+  g('add', '.'); g('commit', '-qm', 'main'); g('checkout', '-q', 'old');
+  assert.notStrictEqual(g('merge', 'main').status, 0, 'The merge stops on the conflict.');
+  write(path.join(mergeRepo, 'conflict.txt'), 'resolved\n' + mail['notes.md']);
+  g('add', 'conflict.txt');
+  result = spawnSync(process.execPath, [script, '--target', mergeRepo], { encoding: 'utf8', env: mergeEnv });
+  assert.strictEqual(result.status, 2, result.stdout);
+  assert.match(result.stdout, /conflict\.txt:2 email/);
+  assert.doesNotMatch(result.stdout, /people\.md/, 'A file equal to the merged-in branch is no finding.');
+
+  // gitleaks diffs against HEAD only; its findings on merged-in lines are dropped.
+  const mergeBin = path.join(root, 'merge-gitleaks-bin');
+  write(path.join(mergeBin, 'gitleaks'), [
+    '#!/bin/sh',
+    'while [ $# -gt 0 ]; do [ "$1" = --report-path ] && report="$2"; shift; done',
+    'echo \'[{"File":"people.md","StartLine":1,"RuleID":"stub"},{"File":"conflict.txt","StartLine":2,"RuleID":"stub"}]\' > "$report"',
+    'exit 1',
+  ].join('\n') + '\n');
+  fs.chmodSync(path.join(mergeBin, 'gitleaks'), 0o755);
+  result = spawnSync(process.execPath, [script, '--target', mergeRepo],
+    { encoding: 'utf8', env: { ...mergeEnv, PATH: mergeBin + ':' + mergeEnv.PATH } });
+  assert.strictEqual(result.status, 1, result.stdout);
+  assert.match(result.stdout, /secrets \(block\):\n- conflict\.txt:2 stub\n/);
+  assert.doesNotMatch(result.stdout, /people\.md/);
+
+  process.stdout.write('✓ Qatlas protection: 20 scenarios passed.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }
