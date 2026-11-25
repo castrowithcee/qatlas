@@ -7,7 +7,7 @@ description: >
 
 | Aufruf | Zweck |
 |---|---|
-| **qatlas goal [Idee, Task oder Datei]** | Erarbeitet im Gespräch einen Plan mit beantworteten Fragen, als Grundlage für Shape. |
+| **qatlas goal [Idee, Task oder Datei] [--check]** | Erarbeitet im Gespräch einen Plan mit beantworteten Fragen, als Grundlage für Shape. Mit `--check` bewerten vorab mehrere unabhängige Subagents die Idee aus verschiedenen Blickwinkeln, und du entscheidest, ob sie weiterverfolgt wird. |
 | **qatlas shape [Datei, Task oder Backlog]** | Hält bestätigtes Wissen aus dem Gesprächskontext oder einer Datei fest und schneidet kleine, ausführungsreife Tasks zu. Mit einem Task oder `backlog [Scope]` schärft es bestehende Arbeit und repariert die Queue. |
 | **qatlas run [--limit <n\|0>]** | Arbeitet bis zu vier unabhängige Pakete parallel als Subagents ab. Ein Paket fasst zehn Punkte: Ein kleiner Task zählt 1, ein mittlerer 2, ein großer 5. `--limit <n>` erlaubt bis zu `n` Pakete, `--limit 0` hebt die Grenze auf. |
 | **qatlas review** | Geht konkrete Prüfungen Schritt für Schritt durch und klärt Entscheidungen einzeln. |
@@ -21,7 +21,6 @@ description: >
 | **qatlas-dev-review** | Prüft eine Änderung auf Bugs, Risiko, Skalierung, fehlende Tests, Geschwindigkeit und Ballast, ohne Code zu ändern. |
 | **qatlas-dev-audit** | Prüft ein ganzes Repo auf dieselbe Weise, mit Rangfolge, ohne Code zu ändern. |
 | **qatlas-design** | Gibt einer Webseite oder einem App-Screen eine recherchierte Art Direction und prüft sie in einem echten Browser. |
-| **qatlas-council [arch]** | Berät mit unabhängigen Subagents zu Plänen oder Architektur. |
 
-Claude nutzt `/<aufruf>`, Codex `$<aufruf>` oder das Menü `/skills`. `qatlas-dev`, `qatlas-design` und
-`qatlas-council` sind nur verfügbar, wenn ihr Pack installiert ist.
+Claude nutzt `/<aufruf>`, Codex `$<aufruf>` oder das Menü `/skills`. `qatlas-dev` und `qatlas-design` sind
+nur verfügbar, wenn ihr Pack installiert ist.
