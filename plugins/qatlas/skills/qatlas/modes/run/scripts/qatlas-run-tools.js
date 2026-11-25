@@ -13,9 +13,14 @@
 //     Integrates one pull request via gh: reads branch, pr-title and pr-body (and the optional head) from the
 //     report frontmatter, checks that the PR head is the head the report vouches for (frontmatter "head",
 //     else the local branch tip), waits until no check of the PR is running (transient gh errors are retried,
-//     at most 5 in a row), squash-merges with --match-head-commit (one retry), proves the squash (merge tree
-//     equals PR head tree, else equal patch-id, else equal to the conflict-free merge of its parent and the PR
-//     head) and only then deletes the remote branch. Does not open PRs or touch local worktrees/branches.
+//     at most 5 in a row), merges with --match-head-commit (one retry) in the form of the optional report field
+//     "merge-method" (merge | squash | rebase, default squash; anything else exits 2; --subject/--body not for
+//     rebase), proves the merge and only then deletes the remote branch. Proof: squash (merge tree equals PR
+//     head tree, else equal patch-id, else equal to the conflict-free merge of its parent and the PR head);
+//     merge (merge commit on origin/<base> with the PR head as ancestor: "ancestor"); rebase (the same ways as
+//     squash, with the tip of origin/<base> fetched right before the merge instead of the merge commit's parent,
+//     and the reported merge commit being the last rebased commit).
+//     Does not open PRs or touch local worktrees/branches.
 //     A PR head ahead of the vouched head is accepted if the vouched head is its ancestor and the commits in
 //     between are merge commits or already on origin/<base> (e.g. GitHub "Update branch"); any new own
 //     commit stays head-mismatch, as does a merge whose tree is not the conflict-free merge of its two
@@ -27,15 +32,16 @@
 //     it briefly right after the PR is opened) land does not merge: result "no-ci". With --no-ci the merger
 //     confirms that the merged state was tested locally with the project tests or that a valid taken-over evidence
 //     covers its tree; land then merges without CI. Checks that do exist are still waited for.
-//     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|"merge-tree"|null,"branch_deleted",...}; result is
+//     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|"merge-tree"|"ancestor"|null,"branch_deleted",...}; result is
 //     merged | ci-fail | timeout | no-ci | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
 //     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed, 8 no-ci,
 //     2 usage error (also missing frontmatter or field), 3 gh/git check not possible.
-//   qatlas-run-tools.js proof --merge <sha> --head <sha> --base <branch> [--repo <path>]
+//   qatlas-run-tools.js proof --merge <sha> --head <sha> --base <branch> [--parent <sha>] [--repo <path>]
 //     Squash evidence without gh, for a pull request merged by other means: fetches origin <base> and checks
 //     that the merge commit lies on it and carries exactly the change of the head (equal tree, else equal
 //     patch-id, else equal to the conflict-free merge of its parent and the head; git >= 2.38, without it this
-//     way proves nothing). Output: {"result":"proven","proof":"tree"|"patch-id"|"merge-tree","merge_sha","head"} or
+//     way proves nothing). --parent is the tip of the base before a rebase merge (merge = last rebased commit,
+//     must be its ancestor); default <merge>^. A merge commit needs no tool: git merge-base --is-ancestor. Output: {"result":"proven","proof":"tree"|"patch-id"|"merge-tree","merge_sha","head"} or
 //     {"result":"unproven","reason",...}. Exit: 0 proven, 7 unproven, 2 usage error, 3 check not possible.
 //   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
@@ -114,16 +120,33 @@ const git = args => execFileSync('git', ['-C', repo, ...args],
 
 const tryGit = args => { try { return git(args); } catch { return null; } };
 
-// The merge commit must lie on origin/<base> and carry exactly the change of the head: equal tree, equal
-// patch-id once the base moved, or equal to the merge of its parent and the head once the base also touched
-// the head's files (shifted diff context). Returns {proof} or {reason}.
-function squashProof(mergeSha, sha, base) {
+// Fetches origin/<base>; returns {reason} unless the merge commit lies on it.
+function onBase(mergeSha, base) {
   try { git(['fetch', '--quiet', 'origin', base]); } catch (error) {
     return { reason: 'git fetch failed: ' + ((error.stderr || error.message) + '').trim() };
   }
   if (tryGit(['merge-base', '--is-ancestor', mergeSha, 'FETCH_HEAD']) === null) {
     return { reason: `merge commit is not on origin/${base}` };
   }
+  return null;
+}
+
+// Merge commit form: the PR head must be an ancestor of the merge commit on origin/<base>.
+function ancestorProof(mergeSha, sha, base) {
+  const off = onBase(mergeSha, base);
+  if (off) return off;
+  return tryGit(['merge-base', '--is-ancestor', sha, mergeSha]) === null
+    ? { reason: 'pull request head is not an ancestor of the merge commit' } : { proof: 'ancestor' };
+}
+
+// The merge commit must lie on origin/<base> and carry exactly the change of the head: equal tree, equal
+// patch-id once the base moved, or equal to the merge of its parent and the head once the base also touched
+// the head's files (shifted diff context). Returns {proof} or {reason}.
+// For a rebase merge, mergeSha is the last rebased commit and parent the base tip before the merge.
+function squashProof(mergeSha, sha, base, parent = mergeSha + '^') {
+  const off = onBase(mergeSha, base);
+  if (off) return off;
+  if (tryGit(['merge-base', '--is-ancestor', parent, mergeSha]) === null) return { reason: 'parent is not an ancestor of the merge commit' };
   if (tryGit(['rev-parse', mergeSha + '^{tree}']) === tryGit(['rev-parse', sha + '^{tree}'])) return { proof: 'tree' };
   const patchId = diffArgs => {
     const diff = tryGit(['diff', ...diffArgs]);
@@ -131,11 +154,11 @@ function squashProof(mergeSha, sha, base) {
     const run = spawnSync('git', ['-C', repo, 'patch-id', '--stable'], { input: diff + '\n', encoding: 'utf8', maxBuffer: 1 << 28 });
     return run.status === 0 ? run.stdout.split(/\s/)[0] || null : null;
   };
-  const mergeBase = tryGit(['merge-base', mergeSha + '^', sha]);
-  const want = patchId([mergeSha + '^', mergeSha]);
+  const mergeBase = tryGit(['merge-base', parent, sha]);
+  const want = patchId([parent, mergeSha]);
   if (want && mergeBase && want === patchId([mergeBase, sha])) return { proof: 'patch-id' };
   // Exit 1 (conflicts) or a git before 2.38 proves nothing here.
-  const merged = spawnSync('git', ['-C', repo, 'merge-tree', '--write-tree', mergeSha + '^', sha], { encoding: 'utf8', maxBuffer: 1 << 28 });
+  const merged = spawnSync('git', ['-C', repo, 'merge-tree', '--write-tree', parent, sha], { encoding: 'utf8', maxBuffer: 1 << 28 });
   if (merged.status === 0 && merged.stdout.split('\n')[0].trim() === tryGit(['rev-parse', mergeSha + '^{tree}'])) return { proof: 'merge-tree' };
   return { reason: 'merge commit content differs from the branch' };
 }
@@ -144,7 +167,9 @@ function proof() {
   const [mergeSha, head, base] = need('--merge', '--head', '--base');
   for (const ref of [mergeSha, head, base]) if (ref.startsWith('-')) fail('Invalid: a ref must not start with "-"', 2);
   if (!tryGit(['rev-parse', '--verify', '--quiet', head + '^{commit}'])) fail(`Check not possible: head ${head} does not resolve to a commit`, 3);
-  const result = squashProof(mergeSha, head, base);
+  const parent = flag('--parent');
+  if (parent && parent.startsWith('-')) fail('Invalid: a ref must not start with "-"', 2);
+  const result = squashProof(mergeSha, head, base, parent || undefined);
   if (result.proof) return out({ result: 'proven', proof: result.proof, merge_sha: mergeSha, head });
   out({ result: 'unproven', reason: result.reason, merge_sha: mergeSha, head });
   process.exit(7);
@@ -237,6 +262,8 @@ function land() {
   const field = key => typeof parsed.data[key] === 'string' && parsed.data[key].trim()
     ? parsed.data[key].trim() : fail(`Report frontmatter: "${key}" must be a non-empty string`, 2);
   const branch = field('branch'), title = field('pr-title'), body = field('pr-body');
+  const method = parsed.data['merge-method'] === undefined ? 'squash' : parsed.data['merge-method'];
+  if (!['merge', 'squash', 'rebase'].includes(method)) fail('Invalid: "merge-method" must be merge, squash or rebase', 2);
   // Refs come from an untrusted report: they reach git only as arguments and may not start with "-".
   const safeRef = (ref, what) => ref.startsWith('-') ? fail(`Invalid: ${what} must not start with "-"`, 2) : ref;
   safeRef(branch, 'branch');
@@ -307,7 +334,10 @@ function land() {
 
   // 4. Merge with one retry; --match-head-commit refuses a head that moved after the comparison. A failed
   // call may still have merged on GitHub (e.g. a dropped connection), so the PR state decides.
-  const mergeArgs = ['pr', 'merge', pr, '--squash', '--subject', title, '--body', body, '--match-head-commit', sha];
+  // A rebase merge is proven against the base tip held right before the merge.
+  const before = method === 'rebase' ? (gitOr3(['fetch', '--quiet', 'origin', base]), gitOr3(['rev-parse', 'FETCH_HEAD^{commit}'])) : null;
+  const mergeArgs = ['pr', 'merge', pr, '--' + method, ...(method === 'rebase' ? [] : ['--subject', title, '--body', body]),
+    '--match-head-commit', sha];
   const isMerged = () => {
     const run = gh(['pr', 'view', pr, '--json', 'state']);
     try { return run.status === 0 && JSON.parse(run.stdout).state === 'MERGED'; } catch { return false; }
@@ -321,13 +351,14 @@ function land() {
     }
   }
 
-  // 5. Squash evidence
+  // 5. Evidence per form
   const view = ghJson(['pr', 'view', pr, '--json', 'mergeCommit'], 'gh pr view');
   const mergeSha = view.mergeCommit && view.mergeCommit.oid;
   if (typeof mergeSha !== 'string' || !/^[0-9a-f]{40,64}$/.test(mergeSha)) {
     finish('proof-failed', { reason: 'merge commit not reported by gh' });
   }
-  const { proof: squash, reason: unproven } = squashProof(mergeSha, sha, base);
+  const { proof: squash, reason: unproven } = method === 'merge' ? ancestorProof(mergeSha, sha, base)
+    : squashProof(mergeSha, sha, base, before || undefined);
   if (!squash) finish('proof-failed', { merge_sha: mergeSha, reason: unproven });
 
   // 6. Only with proof: delete the remote branch.

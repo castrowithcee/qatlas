@@ -501,13 +501,14 @@ function cutBase(repo, base) {
   return git(['merge-base', '--is-ancestor', base, upstream]) !== null ? upstream : base;
 }
 
-// A pull request is one unit of the commit boundary: exactly one non-merge commit over the base.
-function checkCut(repo, given, tip, label, exception, bad) {
+// Squash form: a pull request is one unit of the commit boundary, exactly one non-merge commit over the base.
+// Other forms (squash = false) only need at least one.
+function checkCut(repo, given, tip, label, exception, bad, squash = true) {
   const base = cutBase(repo, given);
   const count = Number(execFileSync('git', ['-C', repo, 'rev-list', '--no-merges', '--count', `${base}..${tip}`], { encoding: 'utf8' }).trim());
   const limit = 'A pull request is one unit of the commit boundary: exactly one non-merge commit';
   if (count === 0) bad(`${label} has 0 non-merge commits over ${base}. ${limit}.`);
-  if (count > 1 && exception === undefined) {
+  if (squash && count > 1 && exception === undefined) {
     bad(`${label} has ${count} non-merge commits over ${base}. ${limit}; independent milestones become separate pull requests. For a justified exception, set "cut-exception: <reason>".`);
   }
 }
@@ -523,7 +524,8 @@ function cut(repo) {
 }
 
 // Frontmatter is required. Checks mode (no pull request field) needs branch and checks. PR mode needs pr-title,
-// pr-body, branch, base, last and checks; with "pr" the report hands over an open pull request: "pushed" (state
+// pr-body, branch, base, last and checks; optional "merge-method" (merge|squash|rebase, default squash) limits the cut
+// check to squash (cut-exception is then ignored); with "pr" the report hands over an open pull request: "pushed" (state
 // at the first push) carries the cut check, "head" is the handed-over tip and may lie behind later CI-fix
 // commits. Every checks tree must be the handed-over tree.
 function validateHandover(text, repo) {
@@ -536,7 +538,7 @@ function validateHandover(text, repo) {
   if (!parsed) return bad('the report must begin with YAML frontmatter ("---" in the first line).');
   const { data } = parsed;
   const str = key => (typeof data[key] === 'string' && data[key].trim() ? data[key].trim() : bad(`"${key}" must be a non-empty string.`));
-  const prMode = ['pr-title', 'pr-body', 'last', 'base', 'pr', 'head', 'pushed', 'cut-exception'].some(key => data[key] !== undefined);
+  const prMode = ['pr-title', 'pr-body', 'last', 'base', 'pr', 'head', 'pushed', 'cut-exception', 'merge-method'].some(key => data[key] !== undefined);
   const checkTrees = (ref, label) => {
     if (data.checks === undefined) bad('"checks" is required.');
     if (!Array.isArray(data.checks) || !data.checks.length) bad('"checks" must be a non-empty list.');
@@ -565,6 +567,9 @@ function validateHandover(text, repo) {
   if (/[\r\n]/.test(title)) bad('"pr-title" must be a single line.');
   str('pr-body');
   if (typeof data.last !== 'boolean') bad('"last" must be true or false.');
+  const method = data['merge-method'] === undefined ? 'squash' : data['merge-method'];
+  if (!['merge', 'squash', 'rebase'].includes(method)) bad('"merge-method" must be merge, squash or rebase.');
+  const squash = method === 'squash';
   const exception = data['cut-exception'];
   if (exception !== undefined && (typeof exception !== 'string' || !exception.trim())) bad('"cut-exception" must be a non-empty string.');
   const base = str('base');
@@ -572,7 +577,7 @@ function validateHandover(text, repo) {
   const branch = str('branch');
   if (data.pr === undefined) {
     resolveCommit(repo, branch, 'branch', bad);
-    checkCut(repo, base, branch, `branch ${branch}`, exception, bad);
+    checkCut(repo, base, branch, `branch ${branch}`, exception, bad, squash);
     return checkTrees(branch, `branch ${branch}`);
   }
   if (!Number.isInteger(data.pr) || data.pr <= 0) bad('"pr" must be a positive integer.');
@@ -583,7 +588,7 @@ function validateHandover(text, repo) {
   try {
     execFileSync('git', ['-C', repo, 'merge-base', '--is-ancestor', pushed, head], { stdio: 'ignore' });
   } catch { bad(`"pushed" ${pushed} is not an ancestor of "head" ${head}.`); }
-  checkCut(repo, base, pushed, `branch ${branch} at first push (${pushed.slice(0, 12)})`, exception, bad);
+  checkCut(repo, base, pushed, `branch ${branch} at first push (${pushed.slice(0, 12)})`, exception, bad, squash);
   checkTrees(head, `head ${head}`);
 }
 
