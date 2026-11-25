@@ -16,11 +16,6 @@
       "source": { "source": "local", "path": "./plugins/qatlas-design" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity",
-      "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas." },
-    { "name": "qatlas-council",
-      "source": { "source": "local", "path": "./plugins/qatlas-council" },
-      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
-      "category": "Productivity",
-      "description": "Optionales Beratungs-Pack: startet nur auf ausdrücklichen Aufruf unabhängige Subagents zu Ideen und Plänen, mit arch auch zu technischen Architekturentscheidungen. Erfordert qatlas." }
+      "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas." }
   ]
 }

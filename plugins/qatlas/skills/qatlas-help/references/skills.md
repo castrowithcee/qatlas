@@ -33,7 +33,5 @@ Jeder Core-Skill lädt zuerst nur seinen kurzen Kern und liest Details für die 
   `qatlas-dev-review` prüft eine Änderung und `qatlas-dev-audit` ein ganzes Repo.
 - **`qatlas-design`:** Art Direction und ein strikter Hausstil für Webseiten und App-Screens, geprüft in einem
   echten Browser.
-- **`qatlas-council`:** unabhängige Subagents beraten zu Ideen und Plänen, mit `arch` auch zur technischen
-  Architektur.
 
 Packs ergänzen Methode, besitzen aber weder das Gespräch noch das Planungssystem.

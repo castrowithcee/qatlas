@@ -21,7 +21,6 @@ description: >
 | **qatlas-dev-review** | Prüft eine Änderung auf Bugs, Risiko, Skalierung, fehlende Tests, Geschwindigkeit und Ballast, ohne Code zu ändern. |
 | **qatlas-dev-audit** | Prüft ein ganzes Repo auf dieselbe Weise, mit Rangfolge, ohne Code zu ändern. |
 | **qatlas-design** | Gibt einer Webseite oder einem App-Screen eine recherchierte Art Direction und prüft sie in einem echten Browser. |
-| **qatlas-council [arch]** | Berät mit unabhängigen Subagents zu Plänen oder Architektur. |
 
-Claude nutzt `/<aufruf>`, Codex `$<aufruf>` oder das Menü `/skills`. `qatlas-dev`, `qatlas-design` und
-`qatlas-council` sind nur verfügbar, wenn ihr Pack installiert ist.
+Claude nutzt `/<aufruf>`, Codex `$<aufruf>` oder das Menü `/skills`. `qatlas-dev` und `qatlas-design` sind
+nur verfügbar, wenn ihr Pack installiert ist.
