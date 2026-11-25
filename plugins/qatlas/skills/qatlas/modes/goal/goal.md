@@ -32,7 +32,7 @@ Benenne dann den Grund. Ziel ist ein Plan.
 
 Der Aufruf autorisiert ausschließlich Gespräch, Brainstorming und lesende Untersuchung.
 Verändere keine Datei, kein Planungssystem, keinen Task, keinen Status, kein Git-Objekt und keinen externen Zustand.
-Lege auch keinen Entwurf oder Gesprächsmitschnitt ab. Beginne keine Umsetzung und bereite sie nicht durch verdeckte Änderungen vor.
+Lege auch keinen Entwurf oder Gesprächsmitschnitt ab. Das gilt ebenso für die Subagents der Bewertung. Beginne keine Umsetzung und bereite sie nicht durch verdeckte Änderungen vor.
 
 Halte das Ergebnis vollständig im Gespräch. Zustimmung zum Plan autorisiert weder dauerhafte
 Dokumentation noch Planung oder Umsetzung. Starte keinen weiteren Modus selbst.
@@ -57,6 +57,15 @@ Ein Task oder eine Datei darf eine ungeklärte Richtungsentscheidung enthalten. 
 Prüfe die vom Nutzer vorgegebene Dokumentation und suche bei Bedarf nach bereits festgehaltenem Wissen in
 `.qatlas-brain/`, damit du Fragen selbst beantworten und Entscheidungen fundiert vorlegen kannst.
 Die Tiefenanalyse für den Taskschnitt bleibt bei `shape`. Prüfe jede Aussage auf Geltung für den konkreten Gegenstand.
+
+## Bewertung vorab
+
+Mit `--check` bewertest du den Eingang zuerst unabhängig. Alles außer dem Flag ist der Eingang. Ist der
+Eingang offen und fehlt `--check`, biete die Bewertung einmal an und starte sie nur nach Zustimmung. Lies vor
+dem Start [die Bewertung](check.md) vollständig.
+
+Entscheidet der Nutzer nach der Synthese für weiterverfolgen, setze in derselben Session mit „Plan
+entwickeln“ fort und nutze die Bewertung als Eingang. Sonst endet `goal` ohne Plan.
 
 ## Plan entwickeln
 
