@@ -14,7 +14,8 @@
 //     report frontmatter, checks that the PR head is the head the report vouches for (frontmatter "head",
 //     else the local branch tip), waits until no check of the PR is running (transient gh errors are retried,
 //     at most 5 in a row), squash-merges with --match-head-commit (one retry), proves the squash (merge tree
-//     equals PR head tree, else equal patch-id) and only then deletes the remote branch. Does not open PRs or touch local worktrees/branches.
+//     equals PR head tree, else equal patch-id, else equal to the conflict-free merge of its parent and the PR
+//     head) and only then deletes the remote branch. Does not open PRs or touch local worktrees/branches.
 //     A PR head ahead of the vouched head is accepted if the vouched head is its ancestor and the commits in
 //     between are merge commits or already on origin/<base> (e.g. GitHub "Update branch"); any new own
 //     commit stays head-mismatch, as does a merge whose tree is not the conflict-free merge of its two
@@ -26,14 +27,15 @@
 //     it briefly right after the PR is opened) land does not merge: result "no-ci". With --no-ci the merger
 //     confirms that the merged state was tested locally with the project tests or that a valid taken-over evidence
 //     covers its tree; land then merges without CI. Checks that do exist are still waited for.
-//     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|null,"branch_deleted",...}; result is
+//     Output: {"pr","result","merge_sha","proof":"tree"|"patch-id"|"merge-tree"|null,"branch_deleted",...}; result is
 //     merged | ci-fail | timeout | no-ci | head-mismatch | merge-failed | proof-failed; "reason" explains failures.
 //     Exit: 0 merged, 1 ci-fail, 4 timeout, 5 head-mismatch, 6 merge-failed, 7 proof-failed, 8 no-ci,
 //     2 usage error (also missing frontmatter or field), 3 gh/git check not possible.
 //   qatlas-run-tools.js proof --merge <sha> --head <sha> --base <branch> [--repo <path>]
 //     Squash evidence without gh, for a pull request merged by other means: fetches origin <base> and checks
 //     that the merge commit lies on it and carries exactly the change of the head (equal tree, else equal
-//     patch-id). Output: {"result":"proven","proof":"tree"|"patch-id","merge_sha","head"} or
+//     patch-id, else equal to the conflict-free merge of its parent and the head; git >= 2.38, without it this
+//     way proves nothing). Output: {"result":"proven","proof":"tree"|"patch-id"|"merge-tree","merge_sha","head"} or
 //     {"result":"unproven","reason",...}. Exit: 0 proven, 7 unproven, 2 usage error, 3 check not possible.
 //   qatlas-run-tools.js slot [--slots <count>] [--priority] [--repo <path>] -- <command> [args...]
 //     Runs the command once a test slot is free and releases the slot afterwards. Slot count:
@@ -112,8 +114,9 @@ const git = args => execFileSync('git', ['-C', repo, ...args],
 
 const tryGit = args => { try { return git(args); } catch { return null; } };
 
-// The merge commit must lie on origin/<base> and carry exactly the change of the head: equal tree, or equal
-// patch-id once the base moved. Returns {proof} or {reason}.
+// The merge commit must lie on origin/<base> and carry exactly the change of the head: equal tree, equal
+// patch-id once the base moved, or equal to the merge of its parent and the head once the base also touched
+// the head's files (shifted diff context). Returns {proof} or {reason}.
 function squashProof(mergeSha, sha, base) {
   try { git(['fetch', '--quiet', 'origin', base]); } catch (error) {
     return { reason: 'git fetch failed: ' + ((error.stderr || error.message) + '').trim() };
@@ -131,6 +134,9 @@ function squashProof(mergeSha, sha, base) {
   const mergeBase = tryGit(['merge-base', mergeSha + '^', sha]);
   const want = patchId([mergeSha + '^', mergeSha]);
   if (want && mergeBase && want === patchId([mergeBase, sha])) return { proof: 'patch-id' };
+  // Exit 1 (conflicts) or a git before 2.38 proves nothing here.
+  const merged = spawnSync('git', ['-C', repo, 'merge-tree', '--write-tree', mergeSha + '^', sha], { encoding: 'utf8', maxBuffer: 1 << 28 });
+  if (merged.status === 0 && merged.stdout.split('\n')[0].trim() === tryGit(['rev-parse', mergeSha + '^{tree}'])) return { proof: 'merge-tree' };
   return { reason: 'merge commit content differs from the branch' };
 }
 
