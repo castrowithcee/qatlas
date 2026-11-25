@@ -162,10 +162,12 @@ try {
   g('add', '.'); g('commit', '-qm', 'main'); g('checkout', '-q', 'old');
   assert.notStrictEqual(g('merge', 'main').status, 0, 'The merge stops on the conflict.');
   write(path.join(mergeRepo, 'conflict.txt'), 'resolved\n' + mail['notes.md']);
-  g('add', 'conflict.txt');
+  write(path.join(mergeRepo, 'extra.md'), mail['notes.md']);
+  g('add', 'conflict.txt', 'extra.md');
   result = spawnSync(process.execPath, [script, '--target', mergeRepo], { encoding: 'utf8', env: mergeEnv });
   assert.strictEqual(result.status, 2, result.stdout);
-  assert.match(result.stdout, /conflict\.txt:2 email/);
+  assert.match(result.stdout, /conflict\.txt:2 email/, 'A conflict resolution stays checked.');
+  assert.match(result.stdout, /extra\.md:1 email/, 'A change staged on top of the merge stays checked.');
   assert.doesNotMatch(result.stdout, /people\.md/, 'A file equal to the merged-in branch is no finding.');
 
   // gitleaks diffs against HEAD only; its findings on merged-in lines are dropped.
