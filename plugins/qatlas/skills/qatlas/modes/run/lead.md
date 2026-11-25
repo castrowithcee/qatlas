@@ -86,11 +86,12 @@ vollständiger Prüfung der Übergabe über `slot` oder einen anderen Nachweiswe
 mit `command` (wie ausgeführt), `exit` und `tree` (der Tree der übergebenen Branch-Spitze, z. B. aus `git
 rev-parse <branch>^{tree}` oder `slot results --tree`). `handover` weist jeden anderen `tree` zurück. Schnelle
 Prüfungen ohne `slot` brauchen keinen Eintrag, weil der Integrator sie selbst erneut ausführt. Hat die
-Übergabe sonst keine Prüfung, trage sie trotzdem ein, denn `handover` verlangt mindestens einen. Ergänze ohne Integration über Pull Requests `branch`, bei Integration über Pull
-Requests die Felder `pr-title` (eine nicht leere Zeile), `pr-body` (nicht leer, meist ein `|`-Blockskalar),
-`branch`, `base`, `last` (`true` oder `false`), `pr` (Nummer des offenen Pull Requests), `head` (SHA der
-Spitze des übergebenen Pull Requests) und `pushed` (SHA beim ersten Push), die SHAs in Anführungszeichen, und
-bei einer Ausnahme von der Zuschnittsregel `cut-exception: <Grund>`.
+Übergabe sonst keine Prüfung, trage sie trotzdem ein, denn `handover` verlangt mindestens einen. Ergänze ohne
+Integration über Pull Requests `branch`, bei Integration über Pull Requests die Felder `pr-title` (eine nicht
+leere Zeile), `pr-body` (nicht leer, meist ein `|`-Blockskalar), `branch`, `base`, `last` (`true` oder
+`false`), `pr` (Nummer des offenen Pull Requests), `head` (SHA der Spitze des übergebenen Pull Requests) und
+`pushed` (SHA beim ersten Push), die SHAs in Anführungszeichen, und `merge-method` (die Form aus der `regel`
+des Laufs). Bei Squash-Merge ergänze bei einer Ausnahme von der Zuschnittsregel `cut-exception: <Grund>`.
 
 Die Antwort lautet `integrated <sha>` oder `rework <Grund>`. Nur ein `rework` ohne `conflict:`, `cut:` oder
 `blocked:` zählt als Korrekturversuch. Kommt keine, warte nach der Regel aus „Umsetzen“ und rufe denselben
@@ -124,7 +125,7 @@ bis die Antwort da ist, und übergib den nächsten Task erst danach. Gib einem `
 laufenden Task am nächsten geprüften Meilenstein als Checkpoint, arbeite am Grund, übergib erneut und mach
 danach weiter.
 
-Prüfe bei Integration über Pull Requests den Zuschnitt vor dem ersten Push mit
+Prüfe bei Integration über Pull Requests mit Squash-Merge den Zuschnitt vor dem ersten Push mit
 `<run> cut --branch <task-branch> --base <basis>`, mit `--code-repo` für Code außerhalb der Steuerwurzel.
 `handover` weist einen Branch mit mehr als einem Nicht-Merge-Commit ohne `cut-exception` ebenso ab.
 

@@ -24,7 +24,7 @@ const stateOf = (repo, home = process.env.HOME) => {
 
 // gh stub, steered by files in $STUB_DIR: view.json, checks.json, merge-mode (same|different),
 // merge-fail-first, (no checks.json: gh reports "no checks reported") merge-fail-after (merges, then reports failure), merge-calls (log), merge-oid. `pr merge` writes the squash commit (the merge of main and
-// the head, as GitHub computes it) to the bare remote.
+// the head, as GitHub computes it) to the bare remote; with --merge a merge commit, with --rebase one replayed commit per head commit.
 const stub = `#!${process.execPath}
 'use strict';
 const fs = require('fs');
@@ -52,13 +52,29 @@ if (group === 'pr' && action === 'view') {
   const index = path.join(dir, 'stub-index');
   const env = { GIT_INDEX_FILE: index };
   const mainTip = git(['rev-parse', 'refs/heads/main']);
-  git(['read-tree', git(['merge-tree', '--write-tree', mainTip, sha]).split('\\n')[0]], undefined, env);
-  if (read('merge-mode') === 'different') {
+  // 'different' adds an extra file to the tree of a commit.
+  const tainted = tree => {
+    if (read('merge-mode') !== 'different') return tree;
+    git(['read-tree', tree], undefined, env);
     const blob = git(['hash-object', '-w', '--stdin'], 'unexpected\\n');
     git(['update-index', '--add', '--cacheinfo', '100644,' + blob + ',extra.txt'], undefined, env);
-  }
-  const tree = git(['write-tree'], undefined, env);
-  const commit = git(['commit-tree', tree, '-p', mainTip, '-m', 'squash'], undefined);
+    return git(['write-tree'], undefined, env);
+  };
+  const mergedTree = (...args) => git(['merge-tree', '--write-tree', ...args]).split('\\n')[0];
+  let commit;
+  if (process.argv.includes('--rebase')) {
+    // One rebased commit per non-merge commit of the head, replayed on main; the last one is reported.
+    const pick = git(['rev-list', '--no-merges', '--reverse', git(['merge-base', mainTip, sha]) + '..' + sha]).split('\\n');
+    commit = mainTip;
+    pick.forEach((c, i) => {
+      const tree = mergedTree('--merge-base', c + '^', commit, c);
+      commit = git(['commit-tree', i === pick.length - 1 ? tainted(tree) : tree, '-p', commit, '-m', 'rebase'], undefined);
+    });
+  } else if (process.argv.includes('--merge')) {
+    // 'different' drops the head from the parents: the merge commit does not contain it.
+    const parents = read('merge-mode') === 'different' ? ['-p', mainTip] : ['-p', mainTip, '-p', sha];
+    commit = git(['commit-tree', mergedTree(mainTip, sha), ...parents, '-m', 'merge'], undefined);
+  } else commit = git(['commit-tree', tainted(mergedTree(mainTip, sha)), '-p', mainTip, '-m', 'squash'], undefined);
   git(['update-ref', 'refs/heads/main', commit]);
   fs.writeFileSync(path.join(dir, 'merge-oid'), commit);
   const view = JSON.parse(read('view.json'));
@@ -610,6 +626,69 @@ try {
   assert.strictEqual(r.status, 7, r.stdout);
   assert.strictEqual(json(r).result, 'unproven');
 
+  // Merge forms: report field "merge-method" picks the gh flag and the proof.
+  const withMethod = (cc, method) => write(cc.report, fs.readFileSync(cc.report, 'utf8').replace('last: true', 'last: true\nmerge-method: ' + method));
+  const callOf = cc => JSON.parse(mergeCalls(cc)[0]);
+  c = setup('method-merge', { extra: ['d.txt'] });
+  withMethod(c, 'merge');
+  r = land(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  o = json(r);
+  assert.deepStrictEqual([o.result, o.proof, o.branch_deleted], ['merged', 'ancestor', true]);
+  assert.ok(callOf(c).includes('--merge') && !callOf(c).includes('--squash'));
+  assert.strictEqual(git(c.bare, 'rev-list', '--parents', '-n', '1', o.merge_sha).split(' ').length, 3);
+  // A merge commit that does not contain the PR head stays unproven.
+  c = setup('method-merge-different', { extra: ['d.txt'], mode: 'different' });
+  withMethod(c, 'merge');
+  r = land(c);
+  assert.strictEqual(r.status, 7);
+  assert.strictEqual(json(r).result, 'proof-failed');
+  assert.ok(hasBranch(c));
+
+  c = setup('method-rebase', { extra: ['d.txt'] });
+  withMethod(c, 'rebase');
+  r = land(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  o = json(r);
+  assert.deepStrictEqual([o.result, o.proof, o.branch_deleted], ['merged', 'tree', true]);
+  assert.ok(callOf(c).includes('--rebase') && !callOf(c).includes('--subject') && !callOf(c).includes('--body'));
+  assert.strictEqual(callOf(c)[callOf(c).indexOf('--match-head-commit') + 1], c.sha);
+  // Base moved so that the diff context shifts: only the merge of the base tip before the merge and the head proves it.
+  c = setup('method-rebase-moved', { extra: ['d.txt'], seed: lines(), edit: lines({ 5: ' head' }), moved: lines({ 8: ' base' }) });
+  withMethod(c, 'rebase');
+  r = land(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  o = json(r);
+  assert.deepStrictEqual([o.result, o.proof, o.branch_deleted], ['merged', 'merge-tree', true]);
+  const before = git(c.bare, 'rev-parse', o.merge_sha + '~3');
+  r = proof(c, '--merge', o.merge_sha, '--head', c.sha, '--base', 'main', '--parent', before);
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(json(r).proof, 'merge-tree');
+  // A parent that is not an ancestor of the merge commit, and a ref starting with "-", are refused.
+  assert.strictEqual(proof(c, '--merge', before, '--head', c.sha, '--base', 'main', '--parent', o.merge_sha).status, 7);
+  assert.strictEqual(proof(c, '--merge', o.merge_sha, '--head', c.sha, '--base', 'main', '--parent', '-x').status, 2);
+  // A rebase with an extra change stays unproven.
+  c = setup('method-rebase-different', { extra: ['d.txt'], seed: lines(), edit: lines({ 5: ' head' }), moved: lines({ 8: ' base' }), mode: 'different' });
+  withMethod(c, 'rebase');
+  r = land(c);
+  assert.strictEqual(r.status, 7);
+  assert.strictEqual(json(r).result, 'proof-failed');
+  assert.ok(hasBranch(c));
+
+  // Explicit squash behaves like no field; an unknown method is a usage error before gh is called.
+  c = setup('method-squash');
+  withMethod(c, 'squash');
+  r = land(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  o = json(r);
+  assert.deepStrictEqual([o.result, o.proof, o.branch_deleted], ['merged', 'tree', true]);
+  assert.ok(callOf(c).includes('--squash') && callOf(c).includes('--subject'));
+  c = setup('method-bad');
+  withMethod(c, 'octopus');
+  assert.strictEqual(land(c).status, 2);
+  assert.deepStrictEqual(mergeCalls(c), []);
+  assert.ok(hasBranch(c));
+
   c = setup('head-mismatch', { head: '0'.repeat(40) });
   r = land(c);
   assert.strictEqual(r.status, 5);
@@ -866,6 +945,30 @@ try {
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /0 non-merge commits/);
   assert.strictEqual(cutRun(c, '-x').status, 2);
+
+  // Merge form in the handover: only squash is cut to one commit; an unknown method is rejected.
+  c = setup('cut-method', { extra: ['d.txt'] });
+  for (const method of ['merge', 'rebase']) {
+    r = handover(c, `\nmerge-method: ${method}${checked(c.repo, 'task')}`);
+    assert.doesNotMatch(r.stderr, /Handover rejected/);
+  }
+  r = handover(c, `\nmerge-method: squash${checked(c.repo, 'task')}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /branch task has 2 non-merge commits over main/);
+  r = handover(c, `\nmerge-method: octopus${checked(c.repo, 'task')}`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /"merge-method" must be merge, squash or rebase/);
+  r = handover(c, `\nmerge-method: merge\npr: 16\nhead: ${c.sha}\npushed: ${c.sha}${checked(c.repo, c.sha)}`);
+  assert.doesNotMatch(r.stderr, /Handover rejected/);
+  // No commit of its own is rejected in every form.
+  c = setup('cut-method-empty');
+  git(c.repo, 'branch', 'empty', 'main');
+  write(c.report, fs.readFileSync(c.report, 'utf8').replace('branch: task', 'branch: empty'));
+  for (const method of ['merge', 'rebase']) {
+    r = handover(c, `\nmerge-method: ${method}${checked(c.repo, 'empty')}`);
+    assert.strictEqual(r.status, 2);
+    assert.match(r.stderr, /0 non-merge commits/);
+  }
 
   // A local base that lags behind its upstream is cut against the upstream; without one it stays local.
   c = setup('cut-remote', { moved: true });
