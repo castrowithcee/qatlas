@@ -23,7 +23,8 @@ const stateOf = (repo, home = process.env.HOME) => {
 };
 
 // gh stub, steered by files in $STUB_DIR: view.json, checks.json, merge-mode (same|different),
-// merge-fail-first, (no checks.json: gh reports "no checks reported") merge-fail-after (merges, then reports failure), merge-calls (log), merge-oid. `pr merge` writes the squash commit to the bare remote.
+// merge-fail-first, (no checks.json: gh reports "no checks reported") merge-fail-after (merges, then reports failure), merge-calls (log), merge-oid. `pr merge` writes the squash commit (the merge of main and
+// the head, as GitHub computes it) to the bare remote.
 const stub = `#!${process.execPath}
 'use strict';
 const fs = require('fs');
@@ -51,9 +52,7 @@ if (group === 'pr' && action === 'view') {
   const index = path.join(dir, 'stub-index');
   const env = { GIT_INDEX_FILE: index };
   const mainTip = git(['rev-parse', 'refs/heads/main']);
-  git(['read-tree', mainTip], undefined, env);
-  const diff = git(['diff', git(['merge-base', mainTip, sha]), sha]) + '\\n';
-  git(['apply', '--cached'], diff, env);
+  git(['read-tree', git(['merge-tree', '--write-tree', mainTip, sha]).split('\\n')[0]], undefined, env);
   if (read('merge-mode') === 'different') {
     const blob = git(['hash-object', '-w', '--stdin'], 'unexpected\\n');
     git(['update-index', '--add', '--cacheinfo', '100644,' + blob + ',extra.txt'], undefined, env);
@@ -82,8 +81,9 @@ const green = [{ name: 'build', state: 'SUCCESS', bucket: 'pass', link: 'http://
 const red = [{ name: 'build', state: 'FAILURE', bucket: 'fail', link: 'http://x/1' }];
 
 // Own bare remote, clone with main and branch "task" (one commit) per case.
+// seed: a.txt on main; edit: a.txt on task besides b.txt; moved: true adds c.txt to main, a string writes a.txt.
 function setup(name, { checks = green, mode = 'same', failFirst = false, failAfter = false, moved = false, head = null,
-  extra = [] } = {}) {
+  extra = [], seed = 'a\n', edit = null } = {}) {
   const base = path.join(root, name);
   const bare = path.join(base, 'remote.git');
   const repo = path.join(base, 'repo');
@@ -91,16 +91,17 @@ function setup(name, { checks = green, mode = 'same', failFirst = false, failAft
   git(root, 'init', '-q', '--bare', '-b', 'main', bare);
   git(root, 'clone', '-q', bare, repo, '--no-checkout');
   git(repo, 'checkout', '-q', '-b', 'main');
-  commit(repo, 'a.txt', 'a\n');
+  commit(repo, 'a.txt', seed);
   git(repo, 'push', '-q', 'origin', 'main');
   git(repo, 'checkout', '-q', '-b', 'task');
   commit(repo, 'b.txt', 'b\n');
+  if (edit !== null) commit(repo, 'a.txt', edit);
   for (const file of extra) commit(repo, file, file + '\n');
   git(repo, 'push', '-q', 'origin', 'task');
   if (moved) {
     const other = path.join(base, 'other');
     git(root, 'clone', '-q', bare, other);
-    commit(other, 'c.txt', 'c\n');
+    if (typeof moved === 'string') commit(other, 'a.txt', moved); else commit(other, 'c.txt', 'c\n');
     git(other, 'push', '-q', 'origin', 'HEAD:main');
   }
   const sha = git(repo, 'rev-parse', 'task');
@@ -565,6 +566,49 @@ try {
   assert.strictEqual(o.proof, 'patch-id');
   assert.strictEqual(o.branch_deleted, true);
   assert.strictEqual(json(proof(c, '--merge', o.merge_sha, '--head', c.sha, '--base', 'main')).proof, 'patch-id');
+
+  // Base and head change a.txt three lines apart: the moved base shifts the diff context, so the patch-ids
+  // differ and only the merge of the squash parent and the head proves the squash.
+  const lines = (changes = {}) => Array.from({ length: 12 }, (_, i) => `line ${i + 1}${changes[i + 1] || ''}\n`).join('');
+  c = setup('merge-tree', { seed: lines(), edit: lines({ 5: ' head' }), moved: lines({ 8: ' base' }) });
+  r = land(c);
+  assert.strictEqual(r.status, 0, r.stderr);
+  o = json(r);
+  assert.strictEqual(o.result, 'merged');
+  assert.strictEqual(o.proof, 'merge-tree');
+  assert.strictEqual(o.branch_deleted, true);
+  assert.strictEqual(json(proof(c, '--merge', o.merge_sha, '--head', c.sha, '--base', 'main')).proof, 'merge-tree');
+  // A squash with an extra change stays unproven.
+  c = setup('merge-tree-extra', { seed: lines(), edit: lines({ 5: ' head' }), moved: lines({ 8: ' base' }), mode: 'different' });
+  r = land(c);
+  assert.strictEqual(r.status, 7);
+  assert.strictEqual(json(r).result, 'proof-failed');
+  assert.ok(hasBranch(c));
+  // A squash that lacks part of the head (b.txt) stays unproven.
+  const squashOnMain = (cc, tree) => {
+    git(cc.repo, 'fetch', '-q', 'origin', 'main');
+    const sha = git(cc.repo, 'commit-tree', tree, '-p', 'FETCH_HEAD', '-m', 'squash');
+    git(cc.repo, 'push', '-q', 'origin', sha + ':refs/heads/main');
+    return sha;
+  };
+  c = setup('merge-tree-missing', { seed: lines(), edit: lines({ 5: ' head' }), moved: lines({ 8: ' base' }) });
+  git(c.repo, 'fetch', '-q', 'origin', 'main');
+  write(path.join(c.repo, 'a.txt'), lines({ 5: ' head', 8: ' base' }));
+  git(c.repo, 'read-tree', 'FETCH_HEAD');
+  git(c.repo, 'add', 'a.txt');
+  let squash = squashOnMain(c, git(c.repo, 'write-tree'));
+  r = proof(c, '--merge', squash, '--head', c.sha, '--base', 'main');
+  assert.strictEqual(r.status, 7, r.stdout);
+  assert.strictEqual(json(r).reason, 'merge commit content differs from the branch');
+  // Base and head conflict: even a squash carrying exactly the conflicted merge tree proves nothing.
+  c = setup('merge-tree-conflict', { seed: lines(), edit: lines({ 5: ' head' }), moved: lines({ 5: ' base' }) });
+  git(c.repo, 'fetch', '-q', 'origin', 'main');
+  const conflicted = spawnSync('git', ['-C', c.repo, 'merge-tree', '--write-tree', 'FETCH_HEAD', c.sha], { encoding: 'utf8' });
+  assert.strictEqual(conflicted.status, 1, conflicted.stderr);
+  squash = squashOnMain(c, conflicted.stdout.split('\n')[0].trim());
+  r = proof(c, '--merge', squash, '--head', c.sha, '--base', 'main');
+  assert.strictEqual(r.status, 7, r.stdout);
+  assert.strictEqual(json(r).result, 'unproven');
 
   c = setup('head-mismatch', { head: '0'.repeat(40) });
   r = land(c);
