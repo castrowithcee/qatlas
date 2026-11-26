@@ -571,16 +571,19 @@ function testInit() {
   write(path.join(lib, 'policies', 'tmux.md'), '# Tmux\n');
   write(path.join(lib, 'PROJECT.md'), '# Project\n');
   write(path.join(lib, 'CONVENTIONS.md'), typed('policy').replace('type: policy\n', ''));
+  write(path.join(lib, 'PLANNING.md'), typed('policy').replace('type: policy\n', ''));
+  write(path.join(lib, 'planning', 'planning-fine.md'), typed('policy').replace('type: policy\n', ''));
   write(path.join(lib, 'playbooks', 'git.md'), typed('playbook'));
   const libraryList = runNode(migrate, ['--library', '--list'], { cwd: f.project, home: f.home }).stdout;
   for (const line of ['sort: ~/qatlas/policies/ is none of the fixed folders.',
     'sort: ~/qatlas/PROJECT.md is none of the reserved files.',
     'rename: ~/qatlas/playbooks/git.md -> ~/qatlas/playbooks/playbook-git.md',
-    'entry: ~/qatlas/CONVENTIONS.md has no line with its reading condition in AGENTS.qatlas.md.']) {
+    'entry: ~/qatlas/CONVENTIONS.md has no line with its reading condition in AGENTS.qatlas.md.',
+    'entry: ~/qatlas/PLANNING.md has no line with its reading condition in AGENTS.qatlas.md.']) {
     assert.ok(libraryList.includes(line), line + '\n' + libraryList);
   }
-  assert.ok(!libraryList.includes('AGENTS.qatlas.md is none'), libraryList);
-  for (const part of ['policies', 'PROJECT.md', 'CONVENTIONS.md', 'playbooks']) fs.rmSync(path.join(lib, part), { recursive: true });
+  assert.ok(!/AGENTS\.qatlas\.md is none|planning/.test(libraryList), libraryList);
+  for (const part of ['policies', 'PROJECT.md', 'CONVENTIONS.md', 'PLANNING.md', 'planning', 'playbooks']) fs.rmSync(path.join(lib, part), { recursive: true });
   for (const part of ['PROJECT.md', 'CONVENTIONS.md', 'conventions', 'playbooks', 'NOTES.md', 'plans', 'docs', 'knowledge', path.join('backlog', 'task-0001-old.md')]) {
     fs.rmSync(path.join(brainDir, part), { recursive: true });
   }
