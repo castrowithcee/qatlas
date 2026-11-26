@@ -7,7 +7,9 @@ description: >
 # Motion
 
 Read this before adding any animation. The static page must already be finished and passing
-`inspect.mjs`; motion is the last pass, never a way to rescue a weak layout.
+`inspect.mjs --allow still-page`, which holds it to every rule but the motion floor; motion is the last
+pass, never a way to rescue a weak layout. Once the motion is built, the inspector runs without that
+allowance.
 
 ## Contents
 

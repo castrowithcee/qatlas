@@ -1,6 +1,7 @@
 ---
 description: >
-  Original copyright and MIT license notice for content taken from Leonxlnx/taste-skill.
+  Original copyright and MIT license notice for content taken from Leonxlnx/taste-skill, and the
+  services and libraries the pack loads at run time without shipping them.
 ---
 
 # Third-Party Licenses
@@ -35,3 +36,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Services and libraries loaded at run time
+
+None of these is shipped with the pack. The scripts or the built page fetch them from their own
+servers, and each is used under its own terms and license.
+
+- Lorem Picsum (picsum.photos), serving photographs from Unsplash: the placeholder photographs dealt on
+  a direction sheet and linked from the built page.
+- Google Fonts and Fontshare: the typefaces dealt on a direction or app sheet, linked from the built
+  page.
+- GSAP with its ScrollTrigger and SplitText plugins, and Lenis, loaded from cdn.jsdelivr.net: motion,
+  scroll scenes and smooth scrolling on the built page.
+- Openverse, Wikimedia Commons, the Art Institute of Chicago, The Metropolitan Museum of Art, the
+  Internet Archive and the NASA Image and Video Library: the open collections `scripts/assets.mjs`
+  searches and downloads pictures and footage from. Each downloaded file keeps the license its source
+  states, recorded in the project's `assets/credits.json`.

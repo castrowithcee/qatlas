@@ -1,7 +1,7 @@
 {
   "name": "qatlas-design",
-  "version": "1.0.1",
-  "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22 and Chrome. Requires qatlas.",
+  "version": "1.1.0",
+  "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22, Chrome and internet access. Requires qatlas.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
   "repository": "https://github.com/castrowithcee/qatlas",
@@ -11,7 +11,7 @@
   "interface": {
     "displayName": "Qatlas Design",
     "shortDescription": "Art direction and a no-ornament house style for web pages and app screens",
-    "longDescription": "Design pack for Qatlas. Deals researched directions (idea, composition, type, palette, pictures, section blueprints) from a library, enforces a strict no-ornament house style with a real-browser inspector, finds credited pictures in open collections and runs a look-and-fix loop on screenshots. Covers landing pages, marketing sites, portfolios and app screens such as dashboards. Needs Node 22+ and an installed Chrome, Edge or Chromium. Requires qatlas.",
+    "longDescription": "Design pack for Qatlas. Deals researched directions (idea, composition, type, palette, pictures, section blueprints) from a library, enforces a strict no-ornament house style with a real-browser inspector, finds credited pictures in open collections and runs a look-and-fix loop on screenshots. Covers landing pages, marketing sites, portfolios and app screens such as dashboards. Needs Node 22+, an installed Chrome, Edge or Chromium, and internet access. Requires qatlas.",
     "developerName": "Qatlas",
     "category": "Productivity",
     "capabilities": ["Instructions"],

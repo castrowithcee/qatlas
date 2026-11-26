@@ -6,8 +6,8 @@
 // --film also photographs the scroll as a visitor sees it (a frame every third of a screen, real wheel
 // input) into desktop-film-NN.jpg, so a scroll scene is judged by its in-between states.
 //
-// --app judges an app screen (dashboard, admin, settings) by the rules in references/app-screens.md; a
-// direction dealt with draw.mjs --app switches it on by itself.
+// --app judges an app screen (dashboard, admin, settings) by the rules in references/app-screens.md and
+// reads the app sheet instead of the page's direction.
 //
 // Exit code 0 = no FAIL findings. Exit code 1 = at least one FAIL (the page is not done).
 // Zero dependencies: drives an installed Chrome/Edge/Chromium. Node 22+.
@@ -33,9 +33,11 @@ if (!target || target === '-h' || target.startsWith('--')) {
   console.error('usage: node inspect.mjs <url | file.html> [--out DIR] [--widths 1440,768,390] [--allow rule,rule] [--app] [--film] [--json]');
   process.exit(2);
 }
-// Allowances granted by the drawn direction (written by draw.mjs) apply automatically.
-for (const p of ['.qatlas/local/qatlas-design/direction.json', join(outDir, '..', 'direction.json')]) {
-  if (existsSync(p)) { try { const d = JSON.parse(readFileSync(p, 'utf8')); allow = [...new Set([...allow, ...(d.allow || [])])]; if (d.kind === 'app') appMode = true; dealtFonts = (d.input?.keep || []).includes('type') ? [] : d.kind === 'app' ? [d.style?.tokens?.font?.family].filter(Boolean) : [d.type?.display?.family, d.type?.text?.family].filter(Boolean); } catch {} break; }
+// Allowances granted by the drawn direction (written by draw.mjs) apply automatically. A page and an
+// app screen keep separate sheets, so one never switches the other's rules.
+const sheetFile = appMode ? 'app-sheet.json' : 'direction.json';
+for (const p of [join('.qatlas/local/qatlas-design', sheetFile), join(outDir, '..', sheetFile)]) {
+  if (existsSync(p)) { try { const d = JSON.parse(readFileSync(p, 'utf8')); allow = [...new Set([...allow, ...(d.allow || [])])]; dealtFonts = (d.input?.keep || []).includes('type') ? [] : appMode ? [d.style?.tokens?.font?.family].filter(Boolean) : [d.type?.display?.family, d.type?.text?.family].filter(Boolean); } catch {} break; }
 }
 // A local file is served over http from a throwaway server on 127.0.0.1, so the browser never has to
 // open a file path (some sandboxes show Node and the browser different views of the disk) and relative
@@ -132,7 +134,8 @@ try {
     // walk the page one screen at a time so scroll reveals fire, photographing each screen
     const frames = [readFileSync(fold).toString('base64')];
     const frameChecks = [await page.eval(frame).catch(() => null)];
-    const screens = Math.min(11, Math.max(0, Math.ceil(metrics.page.height / h) - 1));
+    const pageScreens = Math.ceil(metrics.page.height / h);
+    const screens = Math.min(11, Math.max(0, pageScreens - 1));
     for (let i = 1; i <= screens; i++) {
       await page.eval(`window.scrollTo({ top: ${i * h}, behavior: 'instant' })`).catch(() => {});
       await page.wheel(2);
@@ -197,6 +200,7 @@ try {
       sheets.push(p);
     }
     let findings = [...judge(m, { width: w, allow }), ...sceneFindings];
+    if (pageScreens > frames.length && !allow.includes('unchecked-screens')) findings.push({ level: 'WARN', id: 'unchecked-screens', width: w, message: `The page is ${pageScreens} screens long at ${w}px; only the first ${frames.length} were photographed and checked while scrolling.`, fix: `Nothing past screen ${frames.length} is in the screenshots, and the scroll checks (covered text, empty screens, pinned runs) did not see it. Shorten the page, or look at the remaining screens with another tool and say in the report which ones the inspector did not cover.` });
     if (dealtFonts.length && w >= 1100 && !allow.includes('font-not-dealt')) {
       const norm = (f) => String(f).toLowerCase().replace(/["']/g, '').replace(/\s+variable$/, '').trim();
       const used = m.type.families.filter((f) => f.share >= 0.1).map((f) => norm(f.family));
@@ -206,9 +210,10 @@ try {
     // a third of the studied award pages were still unreadable 4.5s after load; the house sequence is over by 1.2s
     if (!appMode && early && early.found && !early.visible && !allow.includes('late-title')) findings.push({ level: 'FAIL', id: 'late-title', width: w, message: `The title is not readable 1.2s after the page loaded (${early.why}).`, fix: 'Put the headline in the HTML, painted on the first frame; the load sequence only adds arrival and is settled by 1.2s (references/motion.md, "Load sequence in 1.2 seconds"). No preloader, no gate, no waiting for the load event.' });
     if (lay) findings.push(...judgeLayout(lay, { width: w, allow }));
+    let appFindings = [];
     if (appMode) {
-      findings = findings.filter((f) => !APP_SKIP.has(f.id) && f.id !== 'no-title' && f.id !== 'small-title');
-      if (appM) findings.push(...judgeApp(appM, m, { width: w, allow }));
+      findings = findings.filter((f) => f.id !== 'no-title' && f.id !== 'small-title');
+      if (appM) appFindings = judgeApp(appM, m, { width: w, allow });
     }
     // what only shows up while scrolling: text hidden under something, and screens with almost nothing on them
     const coveredText = [...new Map(frameChecks.filter(Boolean).flatMap((f, i) => f.covered.map((c) => [c.text, { ...c, screen: i + 1 }]))).values()];
@@ -231,7 +236,8 @@ try {
     }
     if (w >= 1100 && empty.length >= 2 && !allow.includes('empty-screens')) findings.push({ level: 'FAIL', id: 'empty-screens', width: w, message: `${empty.length} of ${frameChecks.length} desktop screens are almost empty ground (under 20% of the screen holds text, a picture or a colour field): screens ${empty.map(({ i }) => i + 1).join(', ')}.`, fix: 'An empty screen is a rest only once per page. Elsewhere it means the section is underbuilt: set its content larger, give it the full information, put it on a colour field, or cut it.' });
     report.viewports.push({ width: w, height: h, load: how, screens: frames.length, filled: frameChecks.map((f) => f?.filled ?? null), motion, metrics: m, layout: lay, app: appM, consoleErrors: page.consoleErrors.slice(0, 5) });
-    report.findings.push(...(appMode ? findings.filter((f) => !APP_SKIP.has(f.id)) : findings));
+    // APP_SKIP drops page rules only: app rules may share an id with one (glass, size-count, mono)
+    report.findings.push(...(appMode ? [...findings.filter((f) => !APP_SKIP.has(f.id)), ...appFindings] : findings));
     report.images.push({ viewport: label, width: w, fold, pages: sheets, film: filmSheets });
     await page.close();
   }

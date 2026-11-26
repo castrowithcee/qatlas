@@ -11,9 +11,8 @@ import { join, extname, relative, resolve } from 'node:path';
 const args = process.argv.slice(2);
 const asJson = args.includes('--json');
 // App screens (references/app-screens.md) keep quiet table and panel lines, faint shadows, data labels
-// and their own typefaces; a sheet dealt with draw.mjs --app switches this on by itself.
-let appMode = args.includes('--app');
-try { if (JSON.parse(readFileSync('.qatlas/local/qatlas-design/direction.json', 'utf8')).kind === 'app') appMode = true; } catch {}
+// and their own typefaces.
+const appMode = args.includes('--app');
 const APP_LEVEL = { hairline: null, 'outlined-box': null, 'default-font': null, numbering: 'WARN', mono: 'WARN', shadow: 'WARN', eyebrow: 'WARN', 'cta-copy': null, 'h-screen': null };
 const roots = args.filter((a) => !a.startsWith('--'));
 if (!roots.length) roots.push('.');

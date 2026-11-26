@@ -172,11 +172,13 @@ Treatments stay within section 6: untouched, greyscale for the whole set, or mul
   for a client's site, which is why the script leaves them out unless asked. Read the `note` lines:
   some pictures carry personality rights or a trademark, are public domain only in the United States,
   or come with an archive's statement instead of a licence.
-- **Download, do not hotlink.** Save what you use into the project: `--get` puts it in `assets/` at
+- **Download what you find, do not hotlink it.** Save every picture and clip you take from the open
+  collections into the project: `--get` puts it in `assets/` at
   1920 pixels wide (pass `--width 1280` for a picture shown at half the screen, `--width 3840` for a
   very large hero where the source has it). The page then works offline, does not break when an
   archive moves a file, and does not load from someone else's server. Every licence the script
-  allows by default permits copying.
+  allows by default permits copying. The dealt photographs (section 4) are the one exception: they
+  are placeholders and stay linked.
 - **List them in the report:** file, title, creator, licence, source page, and where the credit sits.
   `--credits` prints that list too.
 
@@ -196,6 +198,8 @@ real footage with `--video` (section 11).
   black-and-white.
 - These are photographs from Unsplash served by Lorem Picsum under the Unsplash licence. List the ids
   you used in your report; they are meant to be replaced by the project's own pictures.
+- They are placeholders, so they are linked, not downloaded: the page loads them from picsum.photos
+  until the project's own pictures take their place.
 
 ## 5. Cropping and placing
 
@@ -321,7 +325,7 @@ A found picture, downloaded into the project with `--get`, used as the hero:
      alt="Hand-coloured engraving of a fig cut open, with its flowers and seeds, in black, pink and green">
 ```
 
-A dealt photograph further down the page:
+A dealt photograph further down the page, a placeholder linked from picsum.photos:
 
 ```html
 <img src="https://picsum.photos/id/626/2400/1500" width="2400" height="1500"

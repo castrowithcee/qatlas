@@ -2,8 +2,8 @@
 //
 //   node draw.mjs --app --kind <kind> --brief "one line" [--screens overview,list,detail,settings]
 //                 [--theme light|dark] [--keep palette,type] [--options 3] [--style <id>] [--seed N]
-//   node draw.mjs --show                      reprint the saved sheet
-//   node draw.mjs --redraw style|shell|screen:<name>
+//   node draw.mjs --app --show                reprint the saved sheet
+//   node draw.mjs --app --redraw style|shell|screen:<name>
 //   node draw.mjs --app --list kinds|styles|screens
 //
 // Same idea as the page draw: the script deals, you choose among what it dealt, so two products do not
@@ -22,7 +22,7 @@ const argv = process.argv.slice(2);
 const opt = (name, def) => { const i = argv.indexOf('--' + name); if (i === -1) return def; const v = argv[i + 1]; return v === undefined || v.startsWith('--') ? true : v; };
 const list = (v) => (typeof v === 'string' ? v.split(',').map((s) => s.trim()).filter(Boolean) : []);
 const outDir = resolve(String(opt('out', '.qatlas/local/qatlas-design')));
-const sheetPath = join(outDir, 'direction.json');
+const sheetPath = join(outDir, 'app-sheet.json'); // beside the page's direction.json, never in it
 
 const KINDS = Object.keys(LIB.kinds);
 // signature patterns are elements of one kind of product (a power flow, a sell-out strip), not whole screens
@@ -160,21 +160,23 @@ function render(s) {
     p();
   }
   const f = t.font || {};
-  if (!s.input.keep.includes('palette')) {
-    p('## 2. Tokens'); p('```css'); p(':root {');
-    for (const [k, v] of Object.entries(t)) {
-      if (k === 'font' || k === 'density') continue;
-      if (typeof v === 'string') p(`  --${kebab(k)}: ${v};`);
-      else if (typeof v === 'number') p(`  --${kebab(k)}: ${v}px;`);
-      else if (k === 'chart') v.forEach((c, i) => p(`  --chart-${i + 1}: ${c};`));
-      else if (k === 'pills') for (const [n, [bg, ink]] of Object.entries(v)) p(`  --pill-${n}-bg: ${bg}; --pill-${n}-ink: ${ink};`);
-      else if (k === 'radius') for (const [n, r] of Object.entries(v)) p(`  --radius-${n}: ${r}px;`);
-    }
-    if (f.sizes) for (const [n, v] of Object.entries(f.sizes)) p(`  --fs-${n}: ${v}px;`);
-    p('}'); p('```');
-    p(`Density: ${t.density}. One gap value, horizontally and vertically. ${t.shadow ? 'The shadow belongs to this dark style\'s cards only; nothing else casts one.' : 'No shadow on anything at rest.'}`);
-    p();
-  } else { p('## 2. Tokens'); p('Kept from the brand: map its colours onto this style\'s roles (ground, surface, raised, border, rule, control, text, muted, accent, status pills, chart) and keep its proportions: ' + (st.colourBudget || 'colour on data and status only') + '. Take the sizes, radii, row and control heights from the style as they are.'); p(); }
+  const keepPalette = s.input.keep.includes('palette');
+  p('## 2. Tokens');
+  if (keepPalette) p('Kept from the brand: map its colours onto this style\'s roles (ground, surface, raised, border, rule, control, text, muted, accent, status pills, chart) and keep its proportions: ' + (st.colourBudget || 'colour on data and status only') + '. Take the sizes, radii, row and control heights from the style as they are:');
+  p('```css'); p(':root {');
+  for (const [k, v] of Object.entries(t)) {
+    if (k === 'font' || k === 'density') continue;
+    if (keepPalette && typeof v !== 'number' && k !== 'radius' && k !== 'shadow') continue;
+    if (typeof v === 'string') p(`  --${kebab(k)}: ${v};`);
+    else if (typeof v === 'number') p(`  --${kebab(k)}: ${v}px;`);
+    else if (k === 'chart') v.forEach((c, i) => p(`  --chart-${i + 1}: ${c};`));
+    else if (k === 'pills') for (const [n, [bg, ink]] of Object.entries(v)) p(`  --pill-${n}-bg: ${bg}; --pill-${n}-ink: ${ink};`);
+    else if (k === 'radius') for (const [n, r] of Object.entries(v)) p(`  --radius-${n}: ${r}px;`);
+  }
+  if (f.sizes) for (const [n, v] of Object.entries(f.sizes)) p(`  --fs-${n}: ${v}px;`);
+  p('}'); p('```');
+  p(`Density: ${t.density}. One gap value, horizontally and vertically. ${t.shadow ? 'The shadow belongs to this dark style\'s cards only; nothing else casts one.' : 'No shadow on anything at rest.'}`);
+  p();
   if (!s.input.keep.includes('type') && f.family) {
     p(`## 3. Type — ${f.family}`);
     p('```html'); p(fontLink(f)); p('```');
@@ -195,9 +197,9 @@ function render(s) {
   p('Real data for this product, written before the markup: names, amounts that add up, dates in order, units on every figure,');
   p('honest zeros and dashes. One chart answers one question. No gradients, glows, glass, icons in tinted squares, sparklines on KPIs,');
   p('rainbow charts, emoji, lorem or Acme. `<skill>/assets/app.css` and `<skill>/assets/charts.js` are a neutral start set to these');
-  p('rules. Check with `node <skill>/scripts/lint.mjs <files>` and `node <skill>/scripts/inspect.mjs <page>`: this sheet switches both');
-  p('to app rules.');
+  p('rules. Check with `node <skill>/scripts/lint.mjs --app <files>` and `node <skill>/scripts/inspect.mjs --app <page>`: `--app` switches');
+  p('both to app rules.');
   p();
-  p(`Saved to ${sheetPath.split('\\').join('/')} · reprint with \`node <skill>/scripts/draw.mjs --show\``);
+  p(`Saved to ${sheetPath.split('\\').join('/')} · reprint with \`node <skill>/scripts/draw.mjs --app --show\``);
   return o.join('\n');
 }

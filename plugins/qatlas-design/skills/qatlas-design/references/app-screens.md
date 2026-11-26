@@ -255,7 +255,7 @@ node <skill>/scripts/draw.mjs --app <the same arguments, without --options> --st
 
 The sheet gives the style's tokens and type, its shell and one pattern for each screen you named.
 Keep the style's one move intact and take every other value from the defaults in this file. Redraw
-(`--redraw style | shell | screen:<name>`) only for a reason you can state: it contradicts the brand,
+(`draw.mjs --app --redraw style | shell | screen:<name>`) only for a reason you can state: it contradicts the brand,
 or the product is used in a way the style does not suit. With an existing brand, pass
 `--keep palette,type`, map its colours onto the roles in §9 and keep the style's colour budget.
 
@@ -301,7 +301,8 @@ node <skill>/scripts/lint.mjs --app <source files or folder>
 node <skill>/scripts/inspect.mjs --app <url or path/to/index.html>
 ```
 
-A sheet dealt with `--app` switches both tools to the app rules by itself. The inspector opens the
+`--app` switches both tools to the app rules, and the inspector reads the app sheet, which is saved
+apart from a page's direction. The inspector opens the
 screen at 1440, 768 and 390 and measures what this chapter asks for: an h1 (and reports it as the
 screen's hero); a sidebar that folds on the phone; the canvas used to its right edge; panel shadows
 and borders; the number of corner radii; cards in one row that end apart, where a column of cards

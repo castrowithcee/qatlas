@@ -36,6 +36,12 @@ to move it; where the file cannot be written, the draw works without it.
 everything the page loads from elsewhere: the dealt fonts (Google Fonts, Fontshare), the dealt
 photographs (picsum.photos) and any CDN script.
 
+Before the first script runs, tell the user in one line what the run does: an installed browser starts
+without a window; pictures are searched in open collections and downloaded into the project's
+`assets/` folder; working files are written to `.qatlas/local/qatlas-design/`; and the finished page
+loads fonts, placeholder photographs and scripts from other servers until they are stored in the
+project. This is a notice, not a question: do not wait for an answer.
+
 ## Page or app screen
 
 Decide first which of two kinds of work this is.
@@ -237,11 +243,13 @@ Take the detail behind every type, colour and layout decision from `references/t
 
 ```bash
 node <skill>/scripts/lint.mjs <source files or folder>
-node <skill>/scripts/inspect.mjs <url or path/to/index.html>
+node <skill>/scripts/inspect.mjs <url or path/to/index.html> --allow still-page
 ```
 
-With a scroll scene on the page, also run `scenes.mjs` and pass `--film` to `inspect.mjs`
-(`references/scenes.md` §6).
+The page is still, so `--allow still-page` sets aside the one rule it cannot meet yet, the motion
+floor. Every other rule holds now; step 9 runs the inspector without the allowance. With a scroll
+scene on the page, also run `scenes.mjs` and pass `--film` to `inspect.mjs` (`references/scenes.md`
+§6).
 
 `lint.mjs` checks the source for banned patterns and stock phrases; `inspect.mjs` renders the page at
 1440, 768 and 390 pixels, measures the house rules and the frame, and saves screenshots to
@@ -256,8 +264,8 @@ finish.
 Passing the gate means nothing banned was measured. It does not mean the page is good. Open the
 screenshots the inspector lists (every viewport, with your image viewer or Read tool) and critique them
 with `references/critique.md`: the fourteen passes, the Awwwards-weighted score, the caps. Write the critique
-down in its format, fix the top three problems, run the inspector again, look again. Three rounds at
-most.
+down in its format, fix the top three problems, run the inspector again the same way, look again.
+Three rounds at most.
 
 Judge only the pictures. If a problem is visible in a screenshot, it is real, whatever the code says.
 
@@ -267,13 +275,15 @@ Now build the motion layer from `references/motion.md`: its parts in §1, the re
 in §10. It is required, and it is more than one fade: the inspector fails a page on which fewer than
 eight elements move. A move that changes the colour or the layout of whole screens (colour by chapter,
 a pinned story, a scroll scene) is composition, so build it in step 6 and let every look round see it.
-Then run the inspector once more and check every screenshot for content that failed to appear.
+Then run the inspector once more, now without `--allow still-page`, fix every `FAIL` and check every
+screenshot for content that failed to appear.
 
 ### 10. Report
 
 Do not report until all of these are true:
 
-- `inspect.mjs` shows **0 FAIL** at 1440, 768 and 390, on the final version of the page.
+- `inspect.mjs`, run without `--allow still-page`, shows **0 FAIL** at 1440, 768 and 390, on the final
+  version of the page.
 - You opened every screenshot it listed after the last change, not only the first screen.
 - With a scroll scene: `scenes.mjs` ran on the final page with no problems, and you read every sheet
   (desktop, phone, reduced motion).
@@ -284,8 +294,8 @@ Do not report until all of these are true:
 Tell the user, briefly: the direction dealt (name and seed) and any redraws with reasons; the idea
 sentence and the live thing; the final scores from your last critique round and what still falls short;
 every found picture and clip with its title, creator, licence and source page (`assets.mjs --credits` prints
-the list) and where its credit sits on the page; which bundled photographs and which drawings stand in
-for photography (so they can be replaced); and any sample content that must be swapped before launch.
+the list) and where its credit sits on the page; which dealt photographs (still loaded from picsum.photos) and which
+drawings stand in for photography (so they can be replaced); and any sample content that must be swapped before launch.
 Do not claim a check you did not run.
 
 ## House rules
