@@ -1,6 +1,6 @@
 {
   "name": "qatlas-sentinel",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Beta-Pack Wächter: Eine Session prüft auf Aufruf alle 45 Minuten die Qatlas-Läufe und Planungssysteme ausgewählter Projekte und meldet nur, was den Nutzer braucht. Braucht qatlas.",
   "author": { "name": "Qatlas" },
   "homepage": "https://github.com/castrowithcee/qatlas",
@@ -11,7 +11,7 @@
   "interface": {
     "displayName": "Qatlas Sentinel",
     "shortDescription": "Ein Ort, der deine Projekte im Blick behält",
-    "longDescription": "Beta-Pack für Qatlas. qatlas-sentinel run macht eine Session zum Leitstand über mehrere Projekte: Alle 45 Minuten sammelt ein Skript den Stand ihrer Qatlas-Läufe und ihre Issues auf review oder waiting, und der Agent meldet jeden neuen Hinweis genau einmal, im Chat und über ein optionales Nutzermodul. Die Beta entscheidet nichts und ändert in keinem beobachteten Projekt etwas. Braucht qatlas.",
+    "longDescription": "Beta-Pack für Qatlas. qatlas-sentinel run macht eine Session zum Leitstand über mehrere Projekte: Alle 45 Minuten sammelt ein Skript den Stand ihrer Qatlas-Läufe und ihre Issues auf review oder waiting, und der Agent meldet jeden neuen Hinweis genau einmal, im Chat und über ein optionales Nutzermodul. Die Beta entscheidet nichts und ändert in keinem beobachteten Projekt eine Datei, einen Task oder einen Status. Der Host muss einen Termin in derselben Session planen können. Braucht qatlas.",
     "developerName": "Qatlas",
     "category": "Productivity",
     "capabilities": ["Instructions"],

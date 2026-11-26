@@ -4,15 +4,17 @@
 // Collects, per watched project, the state of its Qatlas run and its tasks on review or waiting, and prints
 // only what is new since the last tick. A hint is new while its key was absent in the previous tick, so it is
 // reported once and again only after it disappeared in between.
+// Text from a planning system reaches the script on stdin only, never as an argument: a shell would expand it.
 // Usage:
 //   qatlas-sentinel.js tick --workspace <dir> --qatlas-root <dir> [--stall <minutes>]
 //     Reads <workspace>/qatlas-sentinel.json: {"format": 1, "projects": ["<path>", ...]}.
 //     Output: {"signals":[{"project","repo","kind","text"}],"external":[{"project","repo","backlog"}]}
-//   qatlas-sentinel.js seen --workspace <dir> --qatlas-root <dir> --project <dir> [--unreachable <text>]
+//   qatlas-sentinel.js seen --workspace <dir> --qatlas-root <dir> --project <dir> [--unreachable]
 //     Issues of an external planning system as a JSON array of {"id","title","status"[,"url"]} on stdin,
-//     only those on review or waiting. Output: {"signals":[...]}
-//   qatlas-sentinel.js notify --workspace <dir> --text <text>
-//     Runs ~/.qatlas/plugins/hooks/sentinel.js once with {"event":"sentinel","workspace","text"} on stdin.
+//     only those on review or waiting; with --unreachable the reason as plain text instead.
+//     Output: {"signals":[...]}
+//   qatlas-sentinel.js notify --workspace <dir>
+//     The message as plain text on stdin. Runs ~/.qatlas/plugins/hooks/sentinel.js once with {"event":"sentinel","workspace","text"} on stdin.
 //     Output: {"hook":"none"|"ok"|"failed"[,"detail"]}; a failing or slow module never fails the call.
 
 const fs = require('fs');
@@ -27,6 +29,7 @@ const [command, ...argv] = process.argv.slice(2);
 const flag = name => { const at = argv.indexOf(name); return at >= 0 && at + 1 < argv.length ? argv[at + 1] : null; };
 const out = value => process.stdout.write(JSON.stringify(value) + '\n');
 const fail = message => { process.stderr.write(message + '\n'); process.exit(2); };
+const stdin = () => fs.readFileSync(0, 'utf8');
 const need = name => flag(name) ?? fail(`${command} needs ${name}`);
 const expand = p => path.resolve(p.startsWith('~/') ? path.join(os.homedir(), p.slice(2)) : p);
 const brief = error => String((error.stderr && error.stderr.toString().trim()) || error.message).split('\n').pop().slice(0, 200);
@@ -132,14 +135,14 @@ function seen() {
   const file = stateFile(ws);
   const state = load(file);
   const entry = state.projects[repo] ||= {};
-  const unreachable = flag('--unreachable');
   let hints;
-  if (unreachable !== null) {
+  if (argv.includes('--unreachable')) {
+    const reason = stdin().trim().slice(0, 200);
     // Keep the issues seen so far, so they are not reported again once the system is back.
-    hints = { ...entry.backlog, unreachable: { kind: 'problem', text: `Planungssystem nicht erreichbar: ${unreachable.slice(0, 200)}` } };
+    hints = { ...entry.backlog, unreachable: { kind: 'problem', text: 'Planungssystem nicht erreichbar' + (reason ? `: ${reason}` : '') } };
   } else {
     let issues;
-    try { issues = JSON.parse(fs.readFileSync(0, 'utf8')); } catch (error) { fail(`stdin needs a JSON array of issues: ${error.message}`); }
+    try { issues = JSON.parse(stdin()); } catch (error) { fail(`stdin needs a JSON array of issues: ${error.message}`); }
     if (!Array.isArray(issues)) fail('stdin needs a JSON array of issues');
     hints = {};
     for (const issue of issues) {
@@ -155,7 +158,8 @@ function seen() {
 // The user's module is foreign code: it gets data on stdin only, and nothing it does fails the tick.
 function notify() {
   const ws = workspace();
-  const text = need('--text');
+  const text = stdin().trim();
+  if (!text) fail('notify needs the message on stdin');
   const hook = path.join(os.homedir(), '.qatlas', 'plugins', 'hooks', 'sentinel.js');
   if (!fs.existsSync(hook)) return out({ hook: 'none' });
   const res = spawnSync(process.execPath, [hook], { input: JSON.stringify({ event: 'sentinel', workspace: ws, text }) + '\n', encoding: 'utf8', timeout: 60000 });

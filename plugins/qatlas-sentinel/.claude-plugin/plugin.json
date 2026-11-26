@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "qatlas-sentinel",
   "displayName": "Qatlas Sentinel",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Beta-Pack Wächter: Eine Session prüft auf Aufruf alle 45 Minuten die Qatlas-Läufe und Planungssysteme ausgewählter Projekte und meldet nur, was den Nutzer braucht. Braucht qatlas.",
   "author": { "name": "Qatlas", "url": "https://github.com/castrowithcee" },
   "homepage": "https://github.com/castrowithcee/qatlas",
