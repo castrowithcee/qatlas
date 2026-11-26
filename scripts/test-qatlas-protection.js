@@ -18,7 +18,7 @@ function write(file, content) {
 }
 
 // Own home and repo per case; PATH without gitleaks exercises the built-in pattern set.
-function run(name, { home = null, project = null, staged = {}, git = true, bin = null }) {
+function run(name, { home = null, project = null, stageProject = true, staged = {}, git = true, bin = null }) {
   const base = path.join(root, name);
   const repo = path.join(base, 'repo');
   const env = { ...process.env, HOME: path.join(base, 'home'),
@@ -27,6 +27,7 @@ function run(name, { home = null, project = null, staged = {}, git = true, bin =
   if (home) write(path.join(env.HOME, '.qatlas', 'plugins', 'config.json'), JSON.stringify(home));
   if (project) write(path.join(repo, '.qatlas', 'plugins', 'config.json'), JSON.stringify(project));
   if (git) execFileSync('git', ['init', '-q', repo]);
+  if (git && project && stageProject) execFileSync('git', ['-C', repo, 'add', '.qatlas/plugins/config.json']);
   for (const [file, content] of Object.entries(staged)) {
     write(path.join(repo, file), content);
     if (git) execFileSync('git', ['-C', repo, 'add', file]);
@@ -84,6 +85,24 @@ try {
     staged: secret,
   });
   assert.strictEqual(result.status, 1);
+
+  // The project levels count only in their staged version, so a relaxation is always part of the commit.
+  result = run('project-unstaged', {
+    project: { format: 1, protection: { secrets: 'allow', 'personal-data': 'allow' } }, stageProject: false,
+    staged: { ...secret, ...mail },
+  });
+  assert.strictEqual(result.status, 1, 'An unstaged relaxation changes nothing.');
+  assert.match(result.stdout, /secrets \(block\)[\s\S]*personal-data \(ask\)/);
+  const printed = spawnSync(process.execPath, [script, '--target', path.join(root, 'project-unstaged', 'repo'), '--print-config'],
+    { encoding: 'utf8', env: { ...process.env, HOME: path.join(root, 'project-unstaged', 'home') } });
+  assert.deepStrictEqual(JSON.parse(printed.stdout), { secrets: 'allow', 'personal-data': 'allow' },
+    '--print-config shows the files on disk.');
+
+  result = run('project-staged', {
+    project: { format: 1, protection: { secrets: 'allow', 'personal-data': 'allow' } }, staged: { ...secret, ...mail },
+  });
+  assert.strictEqual(result.status, 0, 'The staged relaxation applies.');
+  assert.strictEqual(result.stdout, '');
 
   result = run('invalid', { home: { format: 1, protection: { secrets: 'maybe' } }, staged: secret });
   assert.strictEqual(result.status, 3);
@@ -185,7 +204,7 @@ try {
   assert.match(result.stdout, /secrets \(block\):\n- conflict\.txt:2 stub\n/);
   assert.doesNotMatch(result.stdout, /people\.md/);
 
-  process.stdout.write('✓ Qatlas protection: 20 scenarios passed.\n');
+  process.stdout.write('✓ Qatlas protection: 22 scenarios passed.\n');
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

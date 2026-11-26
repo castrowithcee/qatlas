@@ -61,7 +61,7 @@ function testFieldsAndIssues() {
   assert.strictEqual(fs.existsSync(path.join(d.project, '.qatlas')), false, 'Reading writes nothing.');
   assert.deepStrictEqual(d.ok('list').issues, []);
 
-  assert.ok(d.refused('set', '1', '--status', 'ready').includes('no local backlog'));
+  assert.ok(d.refused('set', '1', '--status', 'ready').includes('no local backlog yet. add, fields add or sync starts one.'));
   assert.ok(d.refused('add', '--title', 'Wrong type', '--type', 'nonsense').includes('Unknown type nonsense'));
   assert.ok(d.refused('add', '--title', 'No text', '--body-file', path.join(root, 'missing.md')).includes('not readable'));
   assert.ok(untouched(d), 'A refused command starts no backlog.');
@@ -374,6 +374,17 @@ function testTravel() {
   a.ok('save');
   assert.strictEqual(a.git('log', '--format=%H', '-S', 'PRIVATE KEY', clean + '..qatlas-backlog'), '', 'No commit holds the secret.');
   assert.strictEqual(a.ok('sync').pushed, true);
+  // The project value counts only as committed in the project.
+  const projectFile = path.join(a.project, '.qatlas', 'plugins', 'config.json');
+  fs.mkdirSync(path.dirname(projectFile), { recursive: true });
+  fs.writeFileSync(projectFile, JSON.stringify({ format: 1, protection: { secrets: 'allow' } }));
+  assert.ok(a.refused('add', '--title', 'Uncommitted project value', '--body-file', secret).includes('possible secrets'));
+  a.git('add', '.qatlas/plugins/config.json');
+  a.git('commit', '-q', '-m', 'Allow secrets');
+  a.ok('add', '--title', 'Allowed by the project', '--body-file', secret);
+  a.git('rm', '-q', '.qatlas/plugins/config.json');
+  a.git('commit', '-q', '-m', 'Block secrets again');
+  assert.ok(a.refused('add', '--title', 'Blocked again', '--body-file', secret).includes('possible secrets'));
   fs.mkdirSync(path.join(a.home, '.qatlas', 'plugins'), { recursive: true });
   fs.writeFileSync(path.join(a.home, '.qatlas', 'plugins', 'config.json'), JSON.stringify({ format: 1, protection: { secrets: 'allow' } }));
   a.ok('add', '--title', 'Allowed by the user', '--body-file', secret);

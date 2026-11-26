@@ -80,20 +80,26 @@ try {
   const issues = JSON.stringify([{ id: 7, title: 'Freigabe', status: 'review', url: 'https://example.invalid/7' }, { id: 8, title: 'Offen', status: 'ready' }]);
   assert.deepStrictEqual(kinds(seen(issues)), ['external:review']);
   assert.deepStrictEqual(seen(issues).signals, []);
-  assert.deepStrictEqual(kinds(seen('', '--unreachable', 'Zugang gesperrt')), ['external:problem']);
+  const outage = seen('Zugang gesperrt $(touch pwned)\n', '--unreachable');
+  assert.deepStrictEqual(kinds(outage), ['external:problem']);
+  assert.strictEqual(outage.signals[0].text, 'Planungssystem nicht erreichbar: Zugang gesperrt $(touch pwned)');
   assert.deepStrictEqual(seen(issues).signals, []);
   const waiting = JSON.stringify([{ id: 7, title: 'Freigabe', status: 'waiting' }]);
   assert.deepStrictEqual(kinds(seen(waiting)), ['external:waiting']);
 
   // notify: no module, a working module and a failing one.
   const hooks = path.join(process.env.HOME, '.qatlas', 'plugins', 'hooks');
-  const notify = () => node(sentinel, ['notify', '--workspace', ws, '--text', 'Zwei Hinweise']);
+  // The message arrives on stdin and stays literal, whatever a foreign issue title holds.
+  const message = 'Zwei Hinweise: $(touch pwned) `id` "x"';
+  const notify = () => node(sentinel, ['notify', '--workspace', ws], message + '\n');
+  assert.strictEqual(spawnSync(process.execPath, [sentinel, 'notify', '--workspace', ws, '--text', 'x'], { input: '' }).status, 2,
+    'A message on the command line is not accepted.');
   assert.deepStrictEqual(notify(), { hook: 'none' });
   fs.mkdirSync(hooks, { recursive: true });
   const received = path.join(root, 'received.json');
   fs.writeFileSync(path.join(hooks, 'sentinel.js'), `require('fs').writeFileSync(${JSON.stringify(received)}, require('fs').readFileSync(0, 'utf8'));`);
   assert.deepStrictEqual(notify(), { hook: 'ok' });
-  assert.deepStrictEqual(JSON.parse(fs.readFileSync(received, 'utf8')), { event: 'sentinel', workspace: ws, text: 'Zwei Hinweise' });
+  assert.deepStrictEqual(JSON.parse(fs.readFileSync(received, 'utf8')), { event: 'sentinel', workspace: ws, text: message });
   fs.writeFileSync(path.join(hooks, 'sentinel.js'), `process.stderr.write('kaputt\\n'); process.exit(1);`);
   assert.deepStrictEqual(notify(), { hook: 'failed', detail: 'kaputt' });
 

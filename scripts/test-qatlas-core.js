@@ -1105,7 +1105,37 @@ function testWorktreePath() {
   assert.strictEqual(fs.existsSync(path.join(plain, '.qatlas')), false, 'No project id outside a repo.');
 }
 
+// Every registered hook names an existing script, and without Node only the first SessionStart command speaks.
+function testHookRegisters() {
+  const notice = 'QATLAS: Node.js is missing, so rules, project state and checks are not loaded. '
+    + 'Install Node.js 18.15 or newer.\n';
+  const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'qatlas-no-node-'));
+  temporary.push(empty);
+  let commands = 0;
+  for (const register of ['qatlas/hooks/qatlas-hooks.json', 'qatlas-dev/hooks/qatlas-dev-hooks.json']) {
+    const file = path.resolve(__dirname, '..', 'plugins', register);
+    const root = path.dirname(path.dirname(file));
+    const groups = Object.values(JSON.parse(fs.readFileSync(file, 'utf8')).hooks).flat();
+    for (const hook of groups.flatMap(group => group.hooks)) {
+      const posix = /\$PLUGIN_ROOT\}\/([^"]+)"/.exec(hook.command);
+      const windows = /\$root\\([^"]+)"/.exec(hook.commandWindows);
+      assert.ok(posix && windows, register + ': no script found in ' + hook.command);
+      assert.ok(fs.existsSync(path.join(root, posix[1])), register + ': missing ' + posix[1]);
+      assert.strictEqual(windows[1].split('\\').join('/'), posix[1], register + ': both commands name the same script.');
+      commands += 1;
+      if (process.platform === 'win32') continue;
+      const result = spawnSync('/bin/sh', ['-c', hook.command], { env: { PATH: empty, CLAUDE_PLUGIN_ROOT: root }, encoding: 'utf8' });
+      assert.strictEqual(result.status, 0, hook.command);
+      const first = register.startsWith('qatlas/') && hook.command.includes('qatlas-context.js" qatlas;');
+      assert.strictEqual(result.stdout, first ? notice : '', hook.command);
+      if (first) assert.ok(hook.commandWindows.includes("Write-Output '" + notice.trim() + "'"), 'Windows prints the same line.');
+    }
+  }
+  assert.strictEqual(commands, 11);
+}
+
 try {
+  testHookRegisters();
   testConfig();
   testDoctorRunBlock();
   testConfigMigration();
@@ -1122,7 +1152,7 @@ try {
   testKnowledgeHook();
   testProjectWatch();
   testWorktreePath();
-  process.stdout.write('✓ Qatlas init, doctor and context: 15 scenarios passed.\n');
+  process.stdout.write('✓ Qatlas init, doctor and context: 17 scenarios passed.\n');
 } finally {
   for (const directory of temporary) fs.rmSync(directory, { recursive: true, force: true });
 }
