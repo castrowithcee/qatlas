@@ -70,7 +70,7 @@ Weiter in einer neuen Session: <Modi>
   oder Abweichung, weil zwei Vorgaben sich widersprechen. Ohne Nachweis entsteht kein Eintrag, auch nicht für
   einen Wunsch.
   - **Projekt zuerst:** Lässt sich die Schwäche durch eine Vorgabe des Projekts lösen, etwa in Teststrategie,
-    Beitragsregeln, Konventionen oder im Zuschnitt der Tasks, ist sie eine Verbesserung des Projekts, auch
+    Beitragsregeln, Konventionen oder Planungsregeln, ist sie eine Verbesserung des Projekts, auch
     wenn ein Werkzeug beteiligt war. Erfasse sie vorher als Entwurf im Planungssystem mit der betroffenen
     Datei und dem konkreten Textvorschlag, sodass die Zustimmung des Nutzers genügt, und nenne seine ID.
     Ändere die Vorgabe dafür nicht selbst.

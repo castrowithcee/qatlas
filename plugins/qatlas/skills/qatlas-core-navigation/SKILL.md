@@ -2,9 +2,9 @@
 name: qatlas-core-navigation
 description: >
   Projektwissen gezielt erschließen, sobald eine Aufgabe Kontext aus dem Repo braucht: Einstieg über
-  AGENTS.md und deren Lesebedingungen, die reservierten Dateien PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md,
-  TESTING.md, CONTRIBUTING.md und OPERATIONS.md, Scope-READMEs und FRAMEWORK.md, Suche über Frontmatter, Memory und
-  Planungssystem lesen. Nicht zum Anlegen, Ändern oder Verschieben von Dateien.
+  AGENTS.md und deren Lesebedingungen, die reservierten Dateien PROJECT.md, PLANNING.md, CONVENTIONS.md,
+  ARCHITECTURE.md, TESTING.md, CONTRIBUTING.md und OPERATIONS.md, Scope-READMEs und FRAMEWORK.md, Suche über
+  Frontmatter, Memory und Planungssystem lesen. Nicht zum Anlegen, Ändern oder Verschieben von Dateien.
 ---
 
 # qatlas-core-navigation

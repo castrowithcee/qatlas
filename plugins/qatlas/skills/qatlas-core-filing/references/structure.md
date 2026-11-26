@@ -37,6 +37,7 @@ nicht ohnehin durchsetzen.
 | Datei | Aufgabe | Standard-Lesebedingung | Standard-`edit` |
 |---|---|---|---|
 | `PROJECT.md` | was das Projekt sein soll: Zweck, Zielgruppe, Zielbild, Nicht-Ziele und bindende Produktentscheidungen mit ihrem Grund | vor dem Klären, Planen oder Zuschneiden von Arbeit | `locked` |
+| `PLANNING.md` | was beim Planen und Zuschneiden mitzudenken ist: Kopplungen zwischen Teilen des Projekts, mitzuziehende Flächen, wiederkehrende und externe Abhängigkeiten und Pflichtteile einer Abnahme | vor dem Klären, Planen oder Zuschneiden von Arbeit | `locked` |
 | `CONVENTIONS.md` | wie gearbeitet wird: Codestil, Benennung, Muster, Ablage, verbotene Praktiken | vor dem Schreiben von Code oder Dateien | `locked` |
 | `ARCHITECTURE.md` | wie das System gebaut ist: Module, Datenflüsse, Abhängigkeiten, Grenzen, mit dem Grund jeder bindenden Entscheidung | vor dem Ändern von Struktur, Modulen oder Schnittstellen | `shared` |
 | `TESTING.md` | wie das Projekt geprüft wird: die Teststrategie des Projekts mit Befehlen, Stufen, Nachweis, Ressourcen, Abdeckungserwartungen und was vor einem Commit oder einer Übergabe grün sein muss | vor dem Ausführen von Prüfungen oder dem Ändern von Tests oder CI | `locked` |
@@ -60,6 +61,12 @@ was der Code selbst zeigt. Ändere sie nur, wenn eine Entscheidung des Nutzers Z
 oder eine Produktentscheidung ändert, etwa weil etwas entfällt oder ersetzt wird. Ein erledigter Task ändert
 sie nicht.
 
+`PLANNING.md` nimmt nur auf, was einen Task anders zugeschnitten hätte. Jeder Eintrag ist eine Anweisung für
+den Zuschnitt im Imperativ, ohne Hergang, Datum oder Anlass. Ein Beispiel steht nur dabei, wenn die Anweisung
+ohne es nicht verständlich ist. Die Tatsache hinter einer Anweisung, etwa ein gemeinsam genutzter Baustein
+oder eine Prüfvorgabe, steht in der reservierten Datei, zu deren Aufgabe sie gehört, und `PLANNING.md` nennt
+nur die Folge für den Zuschnitt.
+
 Fehlt `PROJECT.md` in einem eingerichteten Projekt, entsteht sie im Gespräch, in neuen wie in bestehenden
 Projekten nach derselben Regel: Verfahren und Bestätigung stehen unter `PROJECT.md` in
 [Reservierte Datei füllen](playbook-reserved-files.md).
@@ -79,7 +86,7 @@ der ausdrückliche Schritt des Nutzers. Jeder Ordner enthält genau das Aufgefü
 | `knowledge/` | Fachwissen, Synthese und Schnappschüsse externer Quellen | `knowledge`, `fact` |
 | `playbooks/` | wiederholbare Abläufe | `playbook` |
 | `templates/` | die eigenen Vorlagen des Nutzers. Qatlas legt dort nichts an und aktualisiert nichts | wie das Ziel der Vorlage |
-| `project/`, `conventions/`, `architecture/`, `testing/`, `contributing/`, `operations/` | Details der gleichnamigen reservierten Datei, die der Einstieg bleibt und jede dieser Dateien mit ihrer Lesebedingung nennt | keiner |
+| `project/`, `planning/`, `conventions/`, `architecture/`, `testing/`, `contributing/`, `operations/` | Details der gleichnamigen reservierten Datei, die der Einstieg bleibt und jede dieser Dateien mit ihrer Lesebedingung nennt | keiner |
 | `zone-import/` | per gitignore ausgeschlossener Puffer für nicht vertrauenswürdiges Rohmaterial | keiner |
 | `zone-export/` | per gitignore ausgeschlossener Puffer nur für ausdrücklich verlangte Lieferergebnisse | keiner |
 
@@ -115,9 +122,9 @@ Arbeitsregeln für das Projekt als Ganzes gehören in `CONVENTIONS.md`.
 ## Library des Nutzers
 
 `~/qatlas/` gehört dem Nutzer, ist optional und hält nur Projektübergreifendes. Sie folgt dem Layout des
-Wissensraums mit den Aufgaben, die über Projekte hinweg gelten können: `CONVENTIONS.md`, `TESTING.md`,
-`CONTRIBUTING.md` und `OPERATIONS.md` mit ihren gleichnamigen Ordnern sowie `knowledge/`, `playbooks/` und
-`templates/`. `PROJECT.md` und `ARCHITECTURE.md` gibt es dort nicht.
+Wissensraums mit den Aufgaben, die über Projekte hinweg gelten können: `PLANNING.md`, `CONVENTIONS.md`,
+`TESTING.md`, `CONTRIBUTING.md` und `OPERATIONS.md` mit ihren gleichnamigen Ordnern sowie `knowledge/`,
+`playbooks/` und `templates/`. `PROJECT.md` und `ARCHITECTURE.md` gibt es dort nicht.
 
 - Einstieg ist `AGENTS.qatlas.md`. Sie nennt jede vorhandene reservierte Datei der Library mit ihrer
   Lesebedingung.

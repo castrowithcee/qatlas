@@ -6,8 +6,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const RESERVED = ['PROJECT.md', 'CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md', 'CONTRIBUTING.md',
-  'OPERATIONS.md'];
+const RESERVED = ['PROJECT.md', 'PLANNING.md', 'CONVENTIONS.md', 'ARCHITECTURE.md', 'TESTING.md',
+  'CONTRIBUTING.md', 'OPERATIONS.md'];
 // The user library holds only what can apply across projects.
 const LIBRARY_RESERVED = RESERVED.filter(name => name !== 'PROJECT.md' && name !== 'ARCHITECTURE.md');
 const PROJECT_LIMIT = 1000;

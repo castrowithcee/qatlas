@@ -1,8 +1,8 @@
 ---
 description: >
   Eine reservierte Datei des Wissensraums erstmals füllen: Antworten aus dem Vorhandenen belegen, nur das
-  Offene in einfachen Worten fragen, dazu die Kernfragen für PROJECT.md, CONTRIBUTING.md, TESTING.md,
-  CONVENTIONS.md, ARCHITECTURE.md und OPERATIONS.md.
+  Offene in einfachen Worten fragen, dazu die Kernfragen für PROJECT.md, PLANNING.md, CONTRIBUTING.md,
+  TESTING.md, CONVENTIONS.md, ARCHITECTURE.md und OPERATIONS.md.
 ---
 
 # Reservierte Datei füllen
@@ -44,6 +44,16 @@ ein. Lehnt er das Anlegen ab, arbeite ohne sie weiter.
 2. Was soll es sein, wenn es fertig ist?
 3. Was soll es ausdrücklich nicht sein oder nicht können?
 4. Welche Produktentscheidungen sind bindend, und aus welchem Grund?
+
+## PLANNING.md
+
+Diese Datei entsteht meist aus einer einzelnen Anweisung. Belege eine Antwort aus Aussagen des Nutzers und
+aus dem, was die übrigen reservierten Dateien über Kopplungen und Abhängigkeiten festhalten.
+
+1. Welche Teile des Projekts hängen so zusammen, dass ein Fehler oder eine Änderung an einem auch die anderen
+   betrifft, etwa mehrere Oberflächen derselben Funktion?
+2. Was muss ein Task hier immer mittragen, das sich aus seinem Gegenstand allein nicht ergibt?
+3. Welche externen Abhängigkeiten, Freigaben oder Fristen bestimmen Zuschnitt oder Reihenfolge?
 
 ## CONTRIBUTING.md
 

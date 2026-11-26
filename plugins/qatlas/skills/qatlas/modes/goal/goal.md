@@ -17,7 +17,8 @@ Bei `goal <Task>` lies vor dem Task vollständig [die Backlog-Norm](../../../qat
 
 Lies in einem eingerichteten Projekt eine vorhandene `.qatlas-brain/PROJECT.md` vollständig als Grundlage,
 bevor du klärst. Fehlt sie, lege sie im Gespräch nach [PROJECT.md](../../../qatlas-core-filing/references/playbook-reserved-files.md#projectmd)
-an, bevor du klärst.
+an, bevor du klärst. Lies ebenso eine vorhandene `.qatlas-brain/PLANNING.md` und berücksichtige im Plan, was
+sie für den Gegenstand verlangt.
 
 ## Grenze zu Shape
 

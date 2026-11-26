@@ -32,7 +32,8 @@ Lauf. Lies jeden vollständig zum genannten Zeitpunkt:
    eingerichteten Projekt, eine vorhandene `.qatlas-brain/PROJECT.md` als Grundlage des Zuschnitts. Fehlt sie,
    lege sie im Gespräch nach
    [PROJECT.md](../../../qatlas-core-filing/references/playbook-reserved-files.md#projectmd) an, bevor du
-   zuschneidest.
+   zuschneidest. Lies ebenso eine vorhandene `.qatlas-brain/PLANNING.md` und wende jede ihrer Anweisungen
+   an, die den Gegenstand trifft.
 2. **Vor der ersten Vorlage einer echten Nutzerentscheidung:** [Entscheidungen
    vorlegen](../../references/playbook-decision-card.md).
 3. **Vor dem Sammelcommit:** [die Git-Norm](../../../qatlas-core-git/SKILL.md) und ihre

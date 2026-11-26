@@ -13,6 +13,10 @@ gewünschtes Verhalten, eine Grenze oder eine Entscheidung zu Produkt oder Archi
 Grund. Maßgeblich ist, ob sie noch gilt, wenn die Aufgabe erledigt ist. Was nur ein einzelnes Vorhaben
 betrifft, etwa ein Umzug oder eine Restrukturierung, gehört nicht ins Projektwissen.
 
+Dazu zählt, was eine Korrektur, eine Entscheidung oder eine Nacharbeit über die Planung zeigt: Hätte ein Task
+mit einem Wissen anders zugeschnitten werden müssen und gilt es für künftige Tasks ebenso, formuliere es als
+Anweisung für `PLANNING.md`.
+
 Lege das Gesammelte einmal gebündelt zur Bestätigung vor: in einem Arbeitsmodus an der Stelle, die er nennt,
 sonst am Ende der Aufgabe, in deren Gespräch es anfiel.
 

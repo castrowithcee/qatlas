@@ -54,7 +54,7 @@ Orientierungspunkte:
 - `.qatlas-brain/` trägt den Wegweiser zum maßgeblichen Planungssystem, die unversionierte Zone
   `zone-import/` für Rohmaterial und, sofern die Konfiguration Repo-Memory nicht abschaltet, den
   Memory-Index. Seine reservierten Dateien `PROJECT.md`,
-  `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md`, `CONTRIBUTING.md` und `OPERATIONS.md` sowie seine Ordner entstehen mit
+  `PLANNING.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`, `TESTING.md`, `CONTRIBUTING.md` und `OPERATIONS.md` sowie seine Ordner entstehen mit
   ihrem ersten Eintrag. Fachinhalte bleiben an ihren vorhandenen maßgeblichen Orten. Ein Scope bekommt neben seiner
   README nur für eigene dauerhafte Besonderheiten eine optionale `FRAMEWORK.md`.
 - `.qatlas/plugins/config.json` ist die optionale versionierte Projektkonfiguration.
