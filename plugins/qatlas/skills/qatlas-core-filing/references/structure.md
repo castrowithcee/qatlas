@@ -129,11 +129,11 @@ Wissensraums mit den Aufgaben, die über Projekte hinweg gelten können: `CONVEN
 
 ## Dateinamen
 
-Eine Datei in einem Ordner des Wissensraums heißt `<präfix>-<slug>.md`. Das Präfix ist der Name ihres Ordners
-in der Einzahl: `architecture-`, `conventions-`, `knowledge-`, `memory-`, `playbook-`. Reservierte Dateien,
-`BACKLOG.md` und `MEMORY.md` behalten ihren festen Namen, und die Vorlagen in `templates/` benennt der Nutzer.
-Der Slug ist Kebab-Case und je Ordner eindeutig. Ihn umzubenennen ist eine Umstrukturierung samt allen
-Verweisen.
+Eine Datei in einem Ordner des Wissensraums heißt `<präfix>-<slug>.md`. Das Präfix ist der Name ihres
+Ordners, etwa `architecture-`, `conventions-`, `knowledge-` oder `memory-`. Nur bei `playbooks/` lautet es
+`playbook-`. Reservierte Dateien, `BACKLOG.md` und `MEMORY.md` behalten ihren festen Namen, und die Vorlagen
+in `templates/` benennt der Nutzer. Der Slug ist Kebab-Case und je Ordner eindeutig. Ihn umzubenennen ist
+eine Umstrukturierung samt allen Verweisen.
 
 Funktionsdateien, technische Formate und rohe Zonenartefakte folgen ihren festen Namen oder eigenen
 Formaten. Nenne den Geltungsbereich, wenn ein Funktionsname mehrdeutig ist.

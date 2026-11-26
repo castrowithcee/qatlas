@@ -91,15 +91,17 @@ function parseConfigText(source) {
   return value;
 }
 
+function readText(source) {
+  try { return { exists: true, value: parseConfigText(source) }; }
+  catch (error) { return { exists: true, value: null, error }; }
+}
+
 // A missing file is the normal case.
 function readFile(file) {
-  let source;
-  try { source = fs.readFileSync(file, 'utf8'); }
+  try { return readText(fs.readFileSync(file, 'utf8')); }
   catch (error) {
     return error.code === 'ENOENT' ? { exists: false, value: null } : { exists: true, value: null, error };
   }
-  try { return { exists: true, value: parseConfigText(source) }; }
-  catch (error) { return { exists: true, value: null, error }; }
 }
 
 const RUN_PROFILES = ['light', 'standard', 'demanding'];
@@ -235,10 +237,13 @@ function normalizeStatusline(value) {
   };
 }
 
-function readConfig(projectRoot = null) {
+// projectText replaces the project file on disk: its text, or null for no project file.
+function readConfig(projectRoot = null, { projectText } = {}) {
   const paths = locations(projectRoot);
   const user = readFile(paths.configFile);
-  const project = paths.projectConfigFile ? readFile(paths.projectConfigFile) : { exists: false, value: null };
+  const absent = { exists: false, value: null };
+  const project = !paths.projectConfigFile || projectText === null ? absent
+    : projectText === undefined ? readFile(paths.projectConfigFile) : readText(projectText);
   const problems = [];
   const unknown = [];
   let protectionValid = true;

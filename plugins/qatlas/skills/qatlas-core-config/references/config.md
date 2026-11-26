@@ -11,7 +11,7 @@ Standardwerten abweicht, und Init legt keine an. Eine fehlende Datei ist der Nor
 | Datei | Blöcke | Zweck |
 |---|---|---|
 | `~/.qatlas/plugins/config.json` | `protection`, `memory`, `statusline`, `run`, `backlog` | Nutzerweite Einstellungen für alle Projekte |
-| `<repo>/.qatlas/plugins/config.json` | `protection`, `memory` | Versionierte Projektwerte: Ein gesetzter Wert überschreibt den nutzerweiten, ein fehlender erbt |
+| `<repo>/.qatlas/plugins/config.json` | `protection`, `memory` | Versionierte Projektwerte: Ein gesetzter Wert überschreibt den nutzerweiten, ein fehlender erbt. Ein geänderter Projektwert gilt für die Schutzprüfung vor dem Commit erst, wenn die Datei mit ihm gestagt ist, für den lokalen Backlog erst, wenn sie mit ihm committet ist |
 
 Jede Datei trägt `"format": 1`. Ohne diese Angabe ist sie ungültig. Ein Block in der falschen Datei und ein
 unbekannter Schlüssel werden ignoriert. Doctor meldet beide. Eine ungültige Datei oder ein ungültiger Wert in
@@ -40,13 +40,11 @@ Prüfung bleibt stumm. Ob ein Repo öffentlich oder privat ist, leitet Qatlas ni
 drückt diese Absicht aus.
 
 Ein vom Nutzer bestätigter Fehlalarm für `personal-data` kann dauerhaft freigegeben werden, damit spätere
-Commits ihn nicht erneut melden. Sie gilt nur für `personal-data` mit `ask` oder `warn`. Secrets und `block`
-lassen sich nie freigeben, und geänderter Inhalt wird erneut gemeldet. Ein Eintrag enthält nur Kennungen,
-keinen Klartext. Ihn legt
-`node <plugin-root>/scripts/qatlas-protection-check.js --target <repo-root> --allow <kennung>` in der
-Projektdatei an. Dort gilt er erst, wenn die Datei mit ihm gestagt ist, und ist so im Commit sichtbar. Mit
-zusätzlich `--local` landet er in der Nutzerdatei, gilt sofort und nur auf diesem Rechner. Das ist der Weg für
-Repos, die keine Qatlas-Dateien aufnehmen. Die Kennung nennt der Befund in eckigen Klammern.
+Commits ihn nicht erneut melden. Die Freigabe gilt nur für `personal-data` mit `ask` oder `warn`. Secrets und
+`block` lassen sich nie freigeben, und geänderter Inhalt wird erneut gemeldet. Ein Eintrag enthält nur
+Kennungen, keinen Klartext. In der Projektdatei ist er im Commit sichtbar, in der Nutzerdatei gilt er sofort
+und nur auf diesem Rechner. Trage ihn im Ablauf
+[Commit und Push](../../qatlas-core-git/references/playbook-commit.md) ein.
 
 ## `backlog`
 

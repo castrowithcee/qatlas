@@ -284,7 +284,9 @@ function commit(store, message) {
   const tip = tipOf(store, REF);
   if (tip && store.git(['rev-parse', tip + '^{tree}']) === tree) return;
   const made = store.git(['commit-tree', tree, ...(tip ? ['-p', tip] : []), '-m', message]);
-  if (require('./runtime/config-loader.js').readConfig(store.project).config.protection.secrets !== 'allow') {
+  // The project value counts only as committed in the project, so an uncommitted edit cannot switch the check off.
+  const projectText = store.git(['show', 'HEAD:.qatlas/plugins/config.json'], { allowFail: true });
+  if (require('./runtime/config-loader.js').readConfig(store.project, { projectText }).config.protection.secrets !== 'allow') {
     const patch = store.git(['show', '--format=', '-p', '--unified=0', '--no-color', '--no-ext-diff', made]);
     const secrets = require('./qatlas-protection-check.js').scanSecrets(patch).map(hit => hit.item);
     if (secrets.length) {
@@ -310,7 +312,7 @@ function abandoned(lock) {
 // starts may meet a project without a backlog; every other one is refused before anything is created.
 function locked(start, action, starts = false) {
   const at = locate(start);
-  if (!starts && !tipOf(at, REF) && !remoteTip(at)) refuse('This project has no local backlog yet. add starts one.');
+  if (!starts && !tipOf(at, REF) && !remoteTip(at)) refuse('This project has no local backlog yet. add, fields add or sync starts one.');
   excludeLocal(at.project);
   fs.mkdirSync(at.state, { recursive: true });
   const lock = path.join(at.state, 'backlog.lock');

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// Scans the staged diff for secrets and personal data per the effective protection config.
+// Scans the staged diff for secrets and personal data per the effective protection config. The project file
+// <repo>/.qatlas/plugins/config.json counts in its staged version, the user file from disk.
 // Usage: node qatlas-protection-check.js [--target <repo>] [--print-config] [--allow <id> [--local]]
 // Exit: 0 proceed (output only for warn findings), 1 block, 2 ask, 3 check not possible.
 //
@@ -94,13 +95,19 @@ function scan(lines, rules) {
   return found;
 }
 
-// The project file counts only in its staged copy, so an unstaged edit in the repo cannot suppress a
-// finding. The user file and --allow read from disk.
+// The project file counts only in its staged copy, levels and allowlist alike, so an unstaged edit in the
+// repo can neither relax the check nor suppress a finding. null: the file is not in the index.
+function stagedText(file) {
+  try { return git(['show', ':' + path.relative(root, file).split(path.sep).join('/')]); }
+  catch { return null; }
+}
+
+// The user file and --allow read from disk.
 function readAllow(file, staged) {
   let source;
   if (staged) {
-    try { source = git(['show', ':' + path.relative(root, file).split(path.sep).join('/')]); }
-    catch { return { entries: [], problems: [] }; }
+    source = stagedText(file);
+    if (source === null) return { entries: [], problems: [] };
   } else {
     try { source = fs.readFileSync(file, 'utf8'); }
     catch (error) {
@@ -152,7 +159,10 @@ let root = null;
 function main() {
   try { root = git(['rev-parse', '--show-toplevel']).trim(); } catch { /* not a git repo */ }
 
-  const state = readConfig(root || target);
+  const projectFile = root ? locations(root).projectConfigFile : null;
+  // --print-config shows the files as they are on disk.
+  const state = root && !argv.includes('--print-config')
+    ? readConfig(root, { projectText: stagedText(projectFile) }) : readConfig(root || target);
   if (!state.protectionValid) {
     process.stdout.write('protection: check not possible, invalid configuration.\n'
       + state.problems.map(line => '- ' + line).join('\n') + '\n');
@@ -176,7 +186,6 @@ function main() {
   }
 
   const recording = argv.includes('--allow');
-  const projectFile = locations(root).projectConfigFile;
   const userFile = locations().configFile;
   const allowFile = argv.includes('--local') ? userFile : projectFile;
   const sources = recording ? [readAllow(allowFile, false)] : [readAllow(projectFile, true), readAllow(userFile, false)];

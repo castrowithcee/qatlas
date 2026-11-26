@@ -21,4 +21,6 @@ description: >
 6. **Frontmatter:** Setze es für Markdown nach dem Frontmatter-Schema.
 7. **Navigation:** Muss der neue Inhalt für bestimmte Arbeit gelesen werden, ergänze eine eindeutige
    Lesebedingung: bei einer reservierten Datei unter `Projektwissen` in `AGENTS.md`, bei einer Datei in
-   ihrem Ordner in der reservierten Datei, sonst in der README des Geltungsbereichs.
+   ihrem Ordner in der reservierten Datei, bei einer Datei in `knowledge/` oder `playbooks/` des
+   Wissensraums in der reservierten Datei, deren Aufgabe sie betrifft, und bei Inhalt außerhalb des
+   Wissensraums in der README des Geltungsbereichs.

@@ -1,7 +1,7 @@
 ---
 description: >
-  Startvorlage einer Bindung an GitHub-Issues mit Status über Labels, für Projekte ohne eigene Vorgabe zum
-  Planungssystem.
+  Verweist auf die GitHub-Issues des Repos als maßgebliches Planungssystem und bindet Zugang, Statusmerkmale
+  über Labels, Reihenfolge und Lesepolitik ohne lokalen Spiegel.
 edit: shared
 ---
 

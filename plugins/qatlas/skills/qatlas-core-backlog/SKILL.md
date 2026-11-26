@@ -138,6 +138,8 @@ Eintrag, so vollständig, dass der Nutzer ohne Task, Diff und Verlauf antworten 
 - Ohne Vorgabe des Nutzers oder des Projekts gilt der lokale Backlog. Seine Bindung ist
   `<plugin-root>/scaffold/.qatlas-brain/backlog/BACKLOG.md`, mit `<plugin-root>` als im Sessionkontext
   genanntem `QATLAS PLUGIN ROOT`. Übernimm sie unverändert, wenn ein Projekt zum lokalen Backlog wechselt.
+- Fehlt `.qatlas-brain/`, gilt der lokale Backlog mit dieser Bindung. Lege dafür keine Datei des Wissensraums
+  an und nenne dem Nutzer einmal `qatlas-core init`.
 - Lege die Bindung an ein anderes System aus [der Bindungsvorlage](assets/external-binding.md) an und prüfe
   eine bestehende gegen deren Zeilen. Bei normaler Taskarbeit liest du nur `BACKLOG.md`.
 - Beantworte die Zeilen der Vorlage in dieser Reihenfolge: aus Vorgaben des Nutzers oder des Projekts zum

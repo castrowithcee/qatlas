@@ -25,7 +25,7 @@ festen Ordner, und jede nimmt nur auf, was zu ihrer Aufgabe gehört.
   `CLAUDE.md`, `MEMORY.md`, `BACKLOG.md`, `PROJECT.md`, `CONVENTIONS.md`, `ARCHITECTURE.md`,
   `TESTING.md`, `CONTRIBUTING.md`, `OPERATIONS.md` und `FRAMEWORK.md`. Bestehende Funktionsdateien behalten
   ihren Zweck und ihren lokalen Geltungsbereich.
-- Dateien in einem Ordner des Wissensraums beginnen mit dem Namen dieses Ordners in der Einzahl.
+- Dateien in einem Ordner des Wissensraums beginnen mit dem Präfix dieses Ordners.
 - Daten werden als `YYYY-MM-DD` geschrieben. Chronologische Dateien dürfen mit diesem Datum beginnen.
 - ä, ö, ü und ß werden in deutschen Dateien direkt geschrieben.
 

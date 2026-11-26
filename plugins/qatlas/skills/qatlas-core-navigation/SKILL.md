@@ -17,8 +17,8 @@ Aufgabe braucht.
 1. Beginne mit dem Abschnitt `Projektwissen` der bereits geladenen Projektanweisungen. Er nennt die
    reservierten Dateien von `.qatlas-brain/` mit ihren Lesebedingungen. Folge nur denen, die zur Aufgabe
    passen. Eine reservierte Datei, die ohne Zeile dort existiert, gilt trotzdem unter ihrer
-   Standard-Lesebedingung. Nennt eine reservierte Datei eine Datei ihres Ordners mit eigener
-   Lesebedingung, folge dieser ebenso.
+   Standard-Lesebedingung. Nennt eine reservierte Datei eine Datei ihres Ordners oder eine aus `knowledge/`
+   oder `playbooks/` mit eigener Lesebedingung, folge dieser ebenso.
 2. Nimm Aufgabe und diese Dateien für den nächsten relevanten Scope. Lies die `README.md` eines Scopes beim
    ersten Betreten, wenn sie als Einstieg für diesen Scope dient, und folge nur passenden Lesebedingungen.
    Verweist sie für die aktuelle Arbeit auf eine danebenliegende `FRAMEWORK.md`, lies diese vor der Arbeit.
@@ -27,7 +27,10 @@ Aufgabe braucht.
 4. Lies denselben Knoten nicht erneut, solange er sich nicht geändert hat.
 
 Suche innerhalb eines gewählten Scopes zuerst in `description`, `tags` und `type` des Frontmatters,
-öffne dann nur die Rümpfe passender Treffer und weite erst danach auf die Volltextsuche aus.
+öffne dann nur die Rümpfe passender Treffer und weite erst danach auf die Volltextsuche aus. Suche so auch
+in `knowledge/` und `playbooks/` des Wissensraums, sobald die Aufgabe Fachwissen oder einen wiederholbaren
+Ablauf braucht: Eine Datei dort steht nur dann in einer reservierten Datei, wenn sie vor bestimmter Arbeit
+gelesen werden muss.
 
 ## Geltung des Gelesenen
 

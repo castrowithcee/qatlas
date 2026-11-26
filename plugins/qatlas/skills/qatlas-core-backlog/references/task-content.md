@@ -22,8 +22,9 @@ in einem vollständigen Lesen eigenständig ausführbar:
 - Lass in Warum, Ergebnis, Scope, Leitplanken, Abhängigkeiten, Vorgehen und Abnahmekriterien nur Aussagen
   stehen, die noch gelten. Arbeite eine getroffene Entscheidung an ihrer Stelle ein und entferne die dadurch
   überholten Alternativen.
-- Arbeite eine Entscheidung, die über den Task hinaus bindet, in die reservierte Datei von `.qatlas-brain/`
-  ein, die sie betrifft, oder in `AGENTS.md`, wenn sie in jeder Session gelten muss.
+- Lege eine Entscheidung, die über den Task hinaus bindet, nach
+  [Projektwissen aktuell halten](../../qatlas-core-filing/references/playbook-keep-current.md) vor und trage
+  sie erst nach der Bestätigung ein.
 - Fasse eine stabile Repo-Quelle kurz zusammen, statt sie zu duplizieren. Jede Grenze und Entscheidung, die
   die Ausführung braucht, bleibt im Task.
 - Halte rohe Logs, vollständige Befehlsausgaben, allgemeine Kommunikation, verworfene Versuche und eine

@@ -4,8 +4,8 @@
       { "matcher": "startup|resume|clear|compact",
         "hooks": [
           { "type": "command",
-            "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" qatlas; exit 0",
-            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if ($root -and (Get-Command node -ErrorAction SilentlyContinue)) { node \"$root\\hooks\\qatlas-context.js\" qatlas }; exit 0",
+            "command": "if command -v node >/dev/null 2>&1; then node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" qatlas; else echo 'QATLAS: Node.js is missing, so rules, project state and checks are not loaded. Install Node.js 18.15 or newer.'; fi; exit 0",
+            "commandWindows": "$root = if ($env:CLAUDE_PLUGIN_ROOT) { $env:CLAUDE_PLUGIN_ROOT } else { $env:PLUGIN_ROOT }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { Write-Output 'QATLAS: Node.js is missing, so rules, project state and checks are not loaded. Install Node.js 18.15 or newer.' } elseif ($root) { node \"$root\\hooks\\qatlas-context.js\" qatlas }; exit 0",
             "timeout": 5, "statusMessage": "Loading Qatlas context..." },
           { "type": "command",
             "command": "command -v node >/dev/null 2>&1 && node \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/qatlas-context.js\" memory; exit 0",
