@@ -11,8 +11,9 @@
 // on the answer to its open signal. The integrator's wait also lists every open unanswered handover as "queue",
 // so a handover it skipped or forgot is offered again, unless a lead's own integration is still open.
 // Usage:
-//   qatlas-run.js begin --repo <root> [--discard]
-//     Resumes an unfinished run; --discard archives it and starts anew.
+//   qatlas-run.js begin --repo <root> [--discard | --takeover]
+//     Resumes an unfinished run; --discard archives it and starts anew. Refuses to resume a run that another
+//     session still controls: one that showed activity within the last 600 s; --takeover resumes it anyway.
 //   qatlas-run.js plan --repo <root> --package <package> --tasks <id,id,...>
 //   qatlas-run.js ask --repo <root> (--package <package> | --role integrator) --question <text> [--timeout <s>]
 //   qatlas-run.js handover --repo <root> [--code-repo <path>] --package <package> --task <id> --report <file|text> [--timeout <s>]
@@ -103,6 +104,14 @@ const runDir = (repo, write = false) => {
 };
 const eventsFile = (repo, write = false) => { const dir = runDir(repo, write); return dir && path.join(dir, 'events.jsonl'); };
 
+// Sign of life of a run: every event and every poll of a waiting call renews it, and begin takes a run as
+// abandoned once it is older than this. A lock held by a process would have gaps, because none runs while a
+// lead works and the supervisor handles an event; the grace covers them.
+// shortcut: a wait orphaned by a killed session renews it until its own timeout, add a parent check if --takeover is needed often.
+const ALIVE_SECONDS = 600;
+const beat = repo => { try { fs.writeFileSync(path.join(runDir(repo), 'alive'), ''); } catch { /* no run folder yet */ } };
+const idleSeconds = repo => { try { return (Date.now() - fs.statSync(path.join(runDir(repo), 'alive')).mtimeMs) / 1000; } catch { return Infinity; } };
+
 // O_APPEND keeps single-line appends atomic with several writers.
 function record(repo, type, fields = {}) {
   const file = eventsFile(repo, true);
@@ -110,6 +119,7 @@ function record(repo, type, fields = {}) {
   const entry = { at: new Date().toISOString(), type };
   for (const key of ['sender', 'package', 'task', 'tasks', 'rest', 'text', 'report', 'session']) if (fields[key]) entry[key] = fields[key];
   fs.appendFileSync(file, JSON.stringify(entry) + '\n');
+  beat(repo);
 }
 
 function events(repo) {
@@ -157,6 +167,8 @@ function idList(name) {
 const ended = all => all.some(e => e.type === 'end');
 const closed = all => all.some(e => e.type === 'close');
 const attached = all => all.some(e => e.type === 'attach');
+// The begin or resume that last took control of the run.
+const controller = all => all.filter(e => e.type === 'begin' || e.type === 'resume').pop();
 
 // Own integrations a lead announced and has not closed yet. A lead that hands over or ends is not integrating
 // itself, so both close what it left open. closedAt is the seq of the latest closing event: a handover held
@@ -180,7 +192,15 @@ function begin() {
   const all = events(repo);
   if (all.length) {
     if (!ended(all) && !opts.includes('--discard')) {
-      record(repo, 'resume', { session: process.env.CLAUDE_CODE_SESSION_ID });
+      const own = process.env.CLAUDE_CODE_SESSION_ID;
+      const holder = (controller(all) || {}).session;
+      const idle = idleSeconds(repo);
+      // A second writer on the branches and worktrees of a living run; the own session may always resume.
+      if (idle < ALIVE_SECONDS && !opts.includes('--takeover') && !(own && holder === own)) {
+        fail(`Run not resumed: ${holder ? 'session ' + holder : 'a session'} still controls it, last activity ${Math.round(idle)} s ago. `
+          + `begin resumes it after ${ALIVE_SECONDS} s without activity, or at once with --takeover, only on the user's explicit instruction.`, 2);
+      }
+      record(repo, 'resume', { session: own });
       return out({ resumed: true, cursor: all.length + 1 });
     }
     fs.renameSync(eventsFile(repo), path.join(runDir(repo, true), `events-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`));
@@ -279,6 +299,7 @@ async function raise(kind, text, task) {
   }
   const end = Date.now() + timeout * 1000;
   for (;;) {
+    beat(repo);
     const current = lastSignals(events(repo)).get(who);
     if (current && current.answer !== null) {
       if (!current.picked) record(repo, 'picked', { sender: who, task: current.task });
@@ -321,6 +342,7 @@ async function waitLead(repo, name) {
   if (name === INTEGRATOR) fail('Reserved package name: integrator', 2);
   const end = Date.now() + positive('--timeout', WAIT_TIMEOUT) * 1000;
   for (;;) {
+    beat(repo);
     const open = openSignals(events(repo)).get(name);
     const answered = Boolean(open && open.answer !== null);
     if (answered || Date.now() >= end) return out({ answered, timeout: !answered });
@@ -341,6 +363,7 @@ async function wait() {
   const end = Date.now() + positive('--timeout', WAIT_TIMEOUT) * 1000;
   const minFree = positive('--min-free', 5);
   for (;;) {
+    beat(repo);
     if (role === 'supervisor') checkDisk(repo, minFree);
     const all = events(repo);
     // A new run starts a new log, so an old cursor would match nothing and wait would hang silently.
@@ -598,7 +621,7 @@ function sessionRuns(input, over = ended) {
   return [input.cwd, process.env.CLAUDE_PROJECT_DIR].filter(Boolean).some(dir => {
     const all = events(dir);
     if (!all.some(e => e.type === 'begin') || over(all)) return false;
-    const started = all.filter(e => e.type === 'begin' || e.type === 'resume').pop();
+    const started = controller(all);
     return Boolean(started.session) && started.session === input.session_id;
   });
 }

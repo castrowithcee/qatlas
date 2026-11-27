@@ -33,5 +33,3 @@ Jeder Core-Skill lädt zuerst nur seinen kurzen Kern und liest Details für die 
   `qatlas-dev-review` prüft eine Änderung und `qatlas-dev-audit` ein ganzes Repo.
 - **`qatlas-design`:** Art Direction und ein strikter Hausstil für Webseiten und App-Screens, geprüft in einem
   echten Browser.
-- **`qatlas-sentinel`:** Beta eines Leitstands über mehrere Projekte. Eine Session meldet alle 45 Minuten,
-  was in ihren Läufen und Issues neu ist, und entscheidet nichts.

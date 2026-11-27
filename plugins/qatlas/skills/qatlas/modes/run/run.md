@@ -90,8 +90,10 @@ das Laufbudget.
 2. **Planungssystem:** Ist ein vorgeschriebenes externes Planungssystem nicht erreichbar, starte nicht und
    nenne das Hindernis.
 3. **Voriger Lauf:** Zeigt `<run> report` einen `cursor` über 0 und `ended: false`, rufe `<run> begin` auf,
-   das den Lauf fortsetzt, und mache danach nach „Fortsetzen“ weiter. Verwirf den vorigen Lauf mit
-   `<run> begin --discard` nur auf ausdrückliche Anweisung im Aufruf. Sonst beginne den Lauf mit `<run> begin`.
+   das den Lauf fortsetzt, und mache danach nach „Fortsetzen“ weiter. Verweigert `begin`, weil eine andere
+   Session den Lauf noch steuert, starte nicht und nenne dem Nutzer das Hindernis mit der Meldung von `begin`.
+   Übernimm den Lauf mit `<run> begin --takeover` und verwirf ihn mit `<run> begin --discard` nur auf
+   ausdrückliche Anweisung im Aufruf. Sonst beginne den Lauf mit `<run> begin`.
 4. **Basis:** Die Integrationsbasis `<basis>` ist bei Integration über Pull Requests `origin/<control-branch>`,
    sonst der lokale `<control-branch>`.
 5. **Testergebnisse:** Lösche die Testergebnisse des vorigen Laufs mit `<tools> slot results --clear --repo
