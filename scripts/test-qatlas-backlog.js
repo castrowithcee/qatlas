@@ -56,7 +56,7 @@ function testFieldsAndIssues() {
 
   const preview = d.ok('fields');
   assert.strictEqual(preview.created, false, 'Reading starts no backlog.');
-  assert.deepStrictEqual(preview.type.map(entry => entry.name), ['task', 'feature', 'bug', 'idea']);
+  assert.deepStrictEqual(preview.type.map(entry => entry.name), ['task', 'feature', 'bug', 'idea', 'epic']);
   assert.strictEqual(preview.status.length, 7);
   assert.strictEqual(fs.existsSync(path.join(d.project, '.qatlas')), false, 'Reading writes nothing.');
   assert.deepStrictEqual(d.ok('list').issues, []);
@@ -173,6 +173,22 @@ function testFieldsAndIssues() {
   fs.rmSync(path.join(d.project, '.qatlas'), { recursive: true });
   assert.strictEqual(d.ok('list', '--all').issues.length, 5);
   assert.strictEqual(git(d.home, tree, 'status', '--porcelain'), '');
+
+  // An epic is no work, counts apart from ideas and only closes.
+  const epic = d.ok('add', '--title', 'Frontend', '--type', 'epic');
+  assert.ok(!('status' in epic) && !('rank' in epic), 'An epic carries no status.');
+  const ideas = d.ok('list').counts.types.idea || 0;
+  d.ok('add', '--title', 'Later', '--type', 'idea');
+  const open = d.ok('list');
+  assert.ok(!open.issues.some(issue => issue.id === epic.id), 'An epic is no work.');
+  assert.deepStrictEqual([open.counts.types.epic, open.counts.types.idea], [1, ideas + 1]);
+  assert.ok(d.refused('set', epic.id, '--status', 'ready').includes('no status but done'));
+  assert.strictEqual(d.ok('set', epic.id, '--status', 'done').means, 'done');
+  assert.strictEqual(d.ok('set', epic.id, '--title', 'Frontend, cut').means, 'done', 'A closed epic stays closed.');
+  assert.deepStrictEqual(d.ok('list', '--type', 'epic').issues, [], 'A closed epic leaves the open ones.');
+  assert.strictEqual(d.ok('list', '--type', 'epic', '--all').issues.length, 1);
+  assert.strictEqual(d.ok('list').counts.types.epic, undefined);
+  assert.deepStrictEqual(require(script).check(d.project), []);
 }
 
 async function testParallelWriters() {
