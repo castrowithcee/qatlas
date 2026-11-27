@@ -1029,6 +1029,8 @@ try {
     // The machine's real free space must not add disk events where a test does not ask for them.
     const supervise = since => ok('wait', '--since', String(since), '--timeout', '0.1', '--min-free', '0.000001');
     const integrate = since => ok('wait', '--role', 'integrator', '--since', String(since), '--timeout', '0.1');
+    // Ages the sign of life of the run past the grace of begin, as if its session had gone.
+    const abandon = () => { const old = new Date(Date.now() - 3600e3); fs.utimesSync(path.join(stateOf(repo), 'run', 'alive'), old, old); };
 
     refused(/start one with begin/, 'plan', '--package', 'a', '--tasks', '1,2');
     assert.strictEqual(ok('begin').cursor, 1);
@@ -1158,6 +1160,10 @@ try {
     const tmpFile = path.join(repo, '.qatlas', 'local', 'run', 'tmp', 'a', 'x.txt');
     fs.mkdirSync(path.dirname(tmpFile), { recursive: true });
     fs.writeFileSync(tmpFile, '');
+    // A run with activity inside the grace is not resumed by a session that cannot prove it is its own.
+    refused(/Run not resumed: a session still controls it/, 'begin');
+    assert.strictEqual(ok('report').cursor, rep.cursor, 'a refused begin writes no event');
+    abandon();
     assert.deepStrictEqual(ok('begin'), { resumed: true, cursor: rep.cursor + 1 });
     assert.ok(fs.existsSync(tmpFile), 'resume keeps run/tmp');
     const resumed = ok('report');
@@ -1175,7 +1181,7 @@ try {
     refused(/past the end of the log/, 'wait', '--since', String(last.cursor), '--timeout', '0.1');
     assert.strictEqual(fs.readdirSync(path.join(stateOf(repo), 'run')).filter(n => /^events-.*\.jsonl$/.test(n)).length, 1);
     ok('plan', '--package', 'z', '--tasks', '1');
-    assert.strictEqual(ok('begin').resumed, true);
+    assert.strictEqual(ok('begin', '--takeover').resumed, true);
     assert.deepStrictEqual(Object.keys(ok('report').packages), ['z']);
     assert.strictEqual(archives(), 1);
     fs.mkdirSync(path.dirname(tmpFile), { recursive: true });
@@ -1248,6 +1254,19 @@ try {
         input: JSON.stringify({ session_id: 's1', cwd: other, stop_hook_active: false, background_tasks: [] }) });
       assert.strictEqual(JSON.parse(mixed.stdout).decision, 'block', mixed.stderr);
       allowed({ cwd: undefined });
+      // A second session does not resume the run its living session controls; that session itself may.
+      const count = lines().length;
+      const second = spawnSync(process.execPath, [runner, 'begin', '--repo', repo], { encoding: 'utf8', env: { ...cleanEnv, CLAUDE_CODE_SESSION_ID: 's2' } });
+      assert.strictEqual(second.status, 2, second.stdout);
+      assert.match(second.stderr, /Run not resumed: session s1 still controls it/);
+      assert.strictEqual(lines().length, count, 'a refused begin writes no event');
+      withSession('s1', 'begin');
+      assert.deepStrictEqual([lines().length, lines().pop().type, lines().pop().session], [count + 1, 'resume', 's1']);
+      // A waiting call of the run renews the sign of life; without one the run counts as abandoned.
+      abandon();
+      supervise(0);
+      assert.strictEqual(spawnSync(process.execPath, [runner, 'begin', '--repo', repo], { encoding: 'utf8', env: { ...cleanEnv, CLAUDE_CODE_SESSION_ID: 's2' } }).status, 2);
+      abandon();
       // Resume records the new session; the old one no longer blocks.
       withSession('s2', 'begin');
       assert.strictEqual(lines().pop().type, 'resume');
@@ -1255,7 +1274,7 @@ try {
       allowed({ session_id: 's1' });
       assert.strictEqual(JSON.parse(hook({ session_id: 's2' }).stdout).decision, 'block');
       // Resume without the variable: no session, so no block.
-      withSession(null, 'begin');
+      withSession(null, 'begin', '--takeover');
       assert.strictEqual('session' in lines().pop(), false);
       allowed({ session_id: 's2' });
       // Only a closed run allows the stop; close needs an ended run, runs the user's hook once and never fails.
@@ -1494,7 +1513,7 @@ try {
 
     // Report: attachment and every planned package, also after begin resumes the run.
     ok('plan', '--package', 'd', '--tasks', '8,9,10');
-    assert.strictEqual(ok('begin').resumed, true);
+    assert.strictEqual(ok('begin', '--takeover').resumed, true);
     const rep = ok('report');
     assert.deepStrictEqual([rep.integrator.attached, Object.keys(rep.packages)], [true, ['a', 'b', 'd']]);
     assert.deepStrictEqual(rep.notes, {});
