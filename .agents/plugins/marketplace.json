@@ -16,11 +16,6 @@
       "source": { "source": "local", "path": "./plugins/qatlas-design" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity",
-      "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22, Chrome and internet access. Requires qatlas." },
-    { "name": "qatlas-sentinel",
-      "source": { "source": "local", "path": "./plugins/qatlas-sentinel" },
-      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
-      "category": "Productivity",
-      "description": "Beta-Pack Wächter: Eine Session prüft auf Aufruf alle 45 Minuten die Qatlas-Läufe und Planungssysteme ausgewählter Projekte und meldet nur, was den Nutzer braucht. Braucht qatlas." }
+      "description": "Design pack: researched art direction, a strict no-ornament house style checked in a real browser, and a look-and-fix loop for web pages and app screens. Needs Node 22, Chrome and internet access. Requires qatlas." }
   ]
 }

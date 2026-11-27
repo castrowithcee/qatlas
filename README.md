@@ -107,8 +107,6 @@ Planungssystem arbeiten, Git sicher bedienen und Einstellungen ändern.
 | `qatlas` | Das Fundament und die einzige Standardinstallation |
 | `qatlas-dev` | Optional. Methode für Codearbeit: die kleinste Änderung, die eine Aufgabe vollständig löst, dazu Review einer Änderung und Audit eines Repos |
 | `qatlas-design` | Optional. Art Direction für Webseiten und App-Screens, geprüft in einem echten Browser. Es lädt Bilder aus offenen Sammlungen, und die fertige Seite bindet Schriften und Skripte fremder Server ein, solange sie nicht lokal abgelegt sind |
-| `qatlas-sentinel` | Optional, Beta. Eine Sitzung behält mehrere Projekte im Blick und meldet alle 45 Minuten, was dich braucht |
-
 Die optionalen Packs brauchen `qatlas`.
 
 ## Unterschiede zwischen den Hosts
@@ -118,8 +116,6 @@ Die optionalen Packs brauchen `qatlas`.
 | Rollen im Lauf | eigene Agententypen für Lead, Integrator und Worker | allgemeiner Unteragent, der die Rollendatei liest |
 | Modellwahl im Lauf | wird erzwungen | setzt allein der Agent |
 | Statuszeile | eigene Zeile mit 13 Bausteinen | Auswahl aus den eingebauten Feldern |
-| `qatlas-sentinel` | läuft über einmalige Termine | nur, wo die Oberfläche einen Termin in derselben Sitzung planen kann |
-
 ## Fehler melden
 
 Unter https://github.com/castrowithcee/qatlas/issues mit der Vorlage für Fehlermeldungen. Trage dort keine
