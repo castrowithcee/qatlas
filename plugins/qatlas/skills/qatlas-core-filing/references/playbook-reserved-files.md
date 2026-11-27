@@ -91,6 +91,9 @@ aus dem, was die übrigen reservierten Dateien über Kopplungen und Abhängigkei
 2. Welcher Teil darf welchen kennen oder aufrufen, und wie fließen die Daten?
 3. Welche Grenzen gelten unbedingt, etwa zwischen öffentlich und privat oder an einer Sicherheitsgrenze?
 4. Welche Entscheidungen sind bindend, und aus welchem Grund? Frage nach dem Grund, wenn ihn nichts belegt.
+5. In welchen Bereichen können mehrere Agents oder Menschen parallel arbeiten, ohne dieselben Stellen zu
+   ändern, und über welche Schnittstellen berühren sie sich? In einem Projekt ohne Code sind das Themen oder
+   Ordner.
 
 ## OPERATIONS.md
 

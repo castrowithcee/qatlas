@@ -16,6 +16,7 @@ edit: shared
   Backlog-Norm.
 - **Arbeitspakete:** ein Issue pro Task.
 - **Entwürfe:** Issues mit dem Status `draft`, Ideen als Issues eines Typs ohne Status.
+- **Epics:** Issues des Typs `epic`, geschlossen mit dem Status für `done`.
 - **Status:** das Feld `status`. Der Befehl `fields` zeigt jeden Wert und wofür er steht.
 - **Abschluss:** der Status für `done`. Verworfen und Duplikat nennt der Abschlussbericht.
 - **Reihenfolge:** die Reihenfolge von `list`, Abhängigkeiten im Feld `depends`.

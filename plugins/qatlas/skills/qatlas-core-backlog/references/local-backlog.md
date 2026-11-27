@@ -1,7 +1,8 @@
 ---
 description: >
   Arbeit im lokalen Qatlas-Backlog über das Backlog-Skript: Issues lesen, anlegen, ändern, ordnen, bündeln
-  und abschließen, Felder und ihre Auswahl pflegen, Ideen führen und den Backlog mit dem Remote abgleichen.
+  und abschließen, Felder und ihre Auswahl pflegen, Ideen und Epics führen und den Backlog mit dem Remote
+  abgleichen.
 ---
 
 # Lokaler Backlog
@@ -27,7 +28,7 @@ Arbeitsverzeichnis außerhalb des Projekts liegt.
 - Lies die offene Arbeit in ihrer Reihenfolge mit `list`. Jedes Issue trägt seinen eigenen Status, unter
   `means` den Status der Backlog-Norm und unter `executable`, ob ein `ready`-Task keine offene Abhängigkeit
   hat. Filtere mit `--status`, `--type`, `--label`, `--parent` und `--where <feld>=<wert>`. `--all` nimmt
-  Erledigtes und Ideen dazu.
+  Erledigtes, Ideen und Epics dazu.
 - Lies ein Issue vollständig mit `show <id>`. Die Ausgabe nennt auch den Pfad seiner Datei.
 
 Lies neben den gewählten Issues nur ihre echten Blocker. Ein ausdrücklich genanntes Issue darfst du sofort
@@ -73,9 +74,9 @@ Option lehnt jeder Befehl ab.
 
 - Lege einen Status, Typ, ein Label oder ein eigenes Feld nur auf Wunsch des Nutzers an:
   `fields add status <name> --means <status der norm>`, `fields add type <name>`, mit `--no-work` für einen
-  Typ ohne Status, `fields add labels <name>`, `fields add <feld> <wert>` für ein Feld mit Auswahl und
-  `fields add <feld>` für ein Feld mit freiem Text. `fields remove <feld> <wert>` entfernt einen Wert, den
-  kein Issue mehr trägt.
+  Typ ohne Status, dessen Issues nur den Abschluss mit `--status done` kennen, `fields add labels <name>`,
+  `fields add <feld> <wert>` für ein Feld mit Auswahl und `fields add <feld>` für ein Feld mit freiem Text.
+  `fields remove <feld> <wert>` entfernt einen Wert, den kein Issue mehr trägt.
 - Setze ein eigenes Feld mit `set <id> --set <feld>=<wert>`. Qatlas wertet nur Status, Reihenfolge, Bündelung
   und Abhängigkeiten aus. Hat der Backlog ein Feld `priority`, sortiert `list` zuerst danach.
 
@@ -84,6 +85,14 @@ Option lehnt jeder Befehl ab.
 Lege eine Idee als Issue eines Typs ohne Status an, ab Werk `idea`: `add --title "<Idee>" --type idea`. Sie
 erscheint nicht in der offenen Arbeit, `list --type idea` zeigt sie. Wird eine Idee bewusst zu Arbeit, gib
 ihr mit `set <id> --type <typ> --body-file <Datei>` einen Typ mit Status und den Text eines Tasks.
+
+## Epics
+
+Lege ein Epic als Issue des Typs an, den die Bindung nennt, ab Werk `epic`:
+`add --title "<Bereich>" --type epic --body-file <Datei>`. Es trägt keinen Status und erscheint nicht in der
+offenen Arbeit, `list --type epic` zeigt die offenen. Kürze seinen Text nach „Text ändern“ und schließe es mit
+`set <id> --status done`. Fehlt der Typ in einem bestehenden Backlog, lege ihn nach „Felder“ an:
+`fields add type epic --no-work`.
 
 ## Abgleich
 

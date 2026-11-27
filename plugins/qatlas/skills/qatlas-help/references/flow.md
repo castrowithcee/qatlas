@@ -12,8 +12,10 @@ description: >
    den `shape` in Tasks zerlegt. Der Plan bleibt im Gespräch. Eine Datei entsteht nur mit deiner Zustimmung.
    Mit `--check` bewerten vorab mehrere unabhängige Subagents die Idee, bevor ein Plan entsteht.
 3. **Shape:** `qatlas shape` hält bestätigtes Wissen aus dem geklärten Gesprächskontext fest und schneidet
-   kleine, ausführungsreife Tasks zu. `qatlas shape <Datei>` tut das für eine Datei. `qatlas shape <Task>`
-   schärft einen bestehenden Task, `qatlas shape backlog` ordnet bestehende Arbeit neu.
+   kleine, ausführungsreife Tasks zu. `qatlas shape <Datei>` tut das für eine Datei. Trägt ein Vorhaben
+   mehrere Bereiche, schneidet es über mehrere zugleich, damit parallel gearbeitet werden kann, und hält den
+   noch nicht geschnittenen Umfang je Bereich als Epic im Planungssystem fest. `qatlas shape <Task>` schärft
+   einen bestehenden Task, `qatlas shape backlog` lässt Entwürfe reifen und schneidet offene Epics weiter.
 4. **Run:** `qatlas run` verteilt die ausführbaren Tasks unverändert auf bis zu vier unabhängige Pakete, mit
    `--limit <n>` bis zu `n`, und lässt jedes parallel von einem eigenen Lead als Subagent abarbeiten. Ein
    Lead mit mehreren Tasks verteilt Aufträge an Worker und prüft deren Ergebnisse, ein Lead mit einem
@@ -21,7 +23,9 @@ description: >
    Übergabe ab und committet lokal. Sonst integriert jeder Lead selbst, bis ein weiteres Paket im selben Repo
    einen Integrator nötig macht. Der Lauf arbeitet die Tasks ab, die zu Beginn in seine Pakete passen: Fällt
    einer aus, rückt keiner nach, und der Rest bleibt für den nächsten Lauf. Nennst du während des Laufs
-   ausdrücklich weitere Tasks, nimmt er sie wie einen neuen Aufruf auf. Der Lauf
+   ausdrücklich weitere Tasks, nimmt er sie wie einen neuen Aufruf auf. Am Ende klärt er die Reife der im
+   Lauf erfassten Entwürfe und schneidet aus offenen Epics nach, was ohne deine Entscheidung ausführbar ist.
+   Diese Tasks starten erst im nächsten Lauf. Der Lauf
    arbeitet immer ohne erreichbaren Nutzer: Er entscheidet, nimmt an oder übergibt an `review`, nachdem
    integriert ist, was geprüft ist, und setzt einen unfertigen vorigen Lauf ohne Rückfrage fort. Brichst du
    einen Lauf ab, sichert er jeden begonnenen Task so, dass der nächste Lauf ihn fortsetzt. Push und

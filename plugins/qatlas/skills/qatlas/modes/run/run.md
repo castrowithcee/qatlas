@@ -226,6 +226,29 @@ der Datei ins Planungssystem und setze den Task auf `ready`. Bei `offen` bleibt 
 `shape` dafür startet. Nenne unter `Neu` im Abschlussblock jeden Entwurf mit seinem Status, bei `draft` mit
 der offenen Frage. Ein reif gewordener Task startet in diesem Lauf nicht.
 
+Hat der Aufruf keine Tasks ausdrücklich genannt und zeigt die Übersicht des Planungssystems im Scope offene
+Epics, lass im selben Schritt aus ihnen nachschneiden. Gib sie demselben Worker mit und ergänze seinen
+Auftrag um den folgenden Absatz. Ohne Entwürfe ist der Absatz der ganze Auftrag eines Workers mit demselben
+Profil:
+
+> Schneide aus diesen offenen Epics nach: <IDs oder Pfade>. Lies
+> `<plugin-root>/skills/qatlas-core-backlog/SKILL.md` und
+> `<plugin-root>/skills/qatlas-core-backlog/references/task-cutting.md` vollständig. Schneide nur, was der
+> Text eines Epics als Umfang nennt und was im aktuellen Stand die Ausführungsreife ohne Nutzerentscheidung
+> erfüllt, über mehrere Bereiche und nicht nur den nächsten Schritt eines Bereichs. Ändere nichts außer
+> Dateien unter `<tmp>`. Schreibe je neuem Task den vollständigen Taskvertrag nach `<tmp>/<Epic-ID>-<n>.md` und
+> nenne darin einen anderen neuen Task über dessen Dateinamen. Bleibt nach deinem Schnitt ungeschnittener
+> Umfang im Epic, schreibe seinen Text ohne den geschnittenen Teil nach `<tmp>/<Epic-ID>.md`. Gib je
+> genanntem Epic genau eine Zeile zurück: `unverändert`, wenn du nichts schneidest, sonst die Dateinamen der
+> neuen Tasks in ihrer Reihenfolge und `gekürzt` oder `leer`.
+
+Lege jeden Vertrag unverändert aus seiner Datei als `ready`-Task an, ersetze dabei jeden Dateinamen eines
+anderen neuen Tasks durch dessen ID und protokolliere ihn als `erfasst`. Ersetze den Text eines gekürzten Epics und schließe ein
+leeres. Was der Worker nicht schneidet, bleibt im Epic, bis der Nutzer `shape` dafür startet. Auch diese
+Tasks starten in diesem Lauf nicht und stehen unter `Neu`.
+
+Hat der Lauf weder Entwürfe noch offene Epics im Scope, starte dafür keinen Worker.
+
 ## Ende eines Subagents
 
 - **Lead `done` mit `rest`:** Starte für dasselbe Paket einen Nachfolger mit genau den Tasks aus `rest`. Er

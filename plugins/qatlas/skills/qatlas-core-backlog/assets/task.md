@@ -19,7 +19,8 @@ description: >
 ## Kontext und Leitplanken
 <!-- Erforderlicher Projektkontext, geltende Architektur- und Qualitätsgrenzen sowie relevante Daten-,
 Sicherheits- oder Kompatibilitätsanforderungen. Stabile Repo-Quellen exakt nennen und nur den für die
-Ausführung nötigen Inhalt zusammenfassen, nicht umfangreich duplizieren. -->
+Ausführung nötigen Inhalt zusammenfassen, nicht umfangreich duplizieren. Hat das Projekt Bereiche, den Bereich
+dieser Aufgabe als eigene Zeile `Bereich: <Name>` nennen. -->
 
 ## Ausführungsgrundlage
 <!-- Belegter Ist-Stand für Arbeit an einem vorhandenen System. Bei einer Aufgabe ohne vorhandenen Bestand

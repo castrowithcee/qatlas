@@ -63,7 +63,7 @@ function defaultFields() {
   return {
     format: 1,
     status: QATLAS_STATUS.map(name => ({ name, means: name })),
-    type: [{ name: 'task' }, { name: 'feature' }, { name: 'bug' }, { name: 'idea', work: false }],
+    type: [{ name: 'task' }, { name: 'feature' }, { name: 'bug' }, { name: 'idea', work: false }, { name: 'epic', work: false }],
     labels: [],
     custom: {},
   };
@@ -180,7 +180,7 @@ function issueProblems(issue, fields, ids) {
   if (!fields.type.some(entry => entry.name === meta.type)) say('unknown type ' + meta.type + '.');
   else if (isWork(fields, meta.type)) {
     if (!fields.status.some(entry => entry.name === meta.status)) say('unknown status ' + meta.status + '.');
-  } else if ('status' in meta) say('the type ' + meta.type + ' carries no status.');
+  } else if ('status' in meta && meansOf(fields, meta.status) !== 'done') say('the type ' + meta.type + ' carries no status but done.');
   if ('rank' in meta && typeof meta.rank !== 'number') say('rank must be a number.');
   if ('parent' in meta && (meta.parent === issue.id || !ids.has(meta.parent))) say('unknown parent ' + meta.parent + '.');
   for (const key of ['depends', 'labels']) {
@@ -401,11 +401,14 @@ function ordered(store, issues) {
 }
 
 function counts(store) {
-  const out = { ideas: 0 };
+  const out = { types: {} };
   for (const issue of store.issues) {
     const meta = issue.meta || {};
-    if (!isWork(store.fields, meta.type)) { out.ideas += 1; continue; }
     const key = meansOf(store.fields, meta.status) || 'no-status';
+    if (!isWork(store.fields, meta.type)) {
+      if (key !== 'done') out.types[meta.type] = (out.types[meta.type] || 0) + 1;
+      continue;
+    }
     out[key] = (out[key] || 0) + 1;
   }
   return out;
@@ -421,7 +424,7 @@ function summary(start) {
     const fields = JSON.parse(fs.readFileSync(path.join(dir, 'fields.json'), 'utf8'));
     const found = counts({ fields, issues: readIssues(dir) });
     const parts = [...QATLAS_STATUS, 'no-status'].filter(key => key !== 'done' && found[key]).map(key => found[key] + ' ' + key);
-    if (found.ideas) parts.push(found.ideas + ' ideas');
+    for (const type of Object.keys(found.types)) parts.push(found.types[type] + ' ' + type);
     return parts.length ? parts.join(', ') : 'no open issues';
   } catch { return null; }
 }
@@ -476,8 +479,11 @@ function applyOptions(store, issue, args) {
       meta.rank = Math.max(0, ...store.issues.map(entry => (entry.meta && typeof entry.meta.rank === 'number' ? entry.meta.rank : 0))) + 1;
     }
   } else {
-    if (one('status') !== undefined) refuse('The type ' + meta.type + ' carries no status.');
-    delete meta.status;
+    // An issue that is no work only closes: done is the one status it may carry.
+    const closing = one('status') === undefined ? meta.status : resolveStatus(store.fields, one('status'));
+    if (meansOf(store.fields, closing) === 'done') meta.status = closing;
+    else if (one('status') !== undefined) refuse('The type ' + meta.type + ' carries no status but done.');
+    else delete meta.status;
     delete meta.rank;
   }
   if (options['no-parent']) delete meta.parent;

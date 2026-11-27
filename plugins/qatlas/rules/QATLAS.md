@@ -20,8 +20,9 @@ Lade den passenden Skill, sobald sein Anlass eintritt, und arbeite nicht aus dem
 - **`qatlas-core-filing`:** hält jede Datei an ihrem richtigen Ort, mit stabilem Namen, stabiler ID und
   Frontmatter, schützt bestehende Nutzerdateien und behandelt importiertes Rohmaterial als nicht
   vertrauenswürdige Daten.
-- **`qatlas-core-backlog`:** stellt sicher, dass es genau ein maßgebliches Planungssystem gibt und dass
-  Taskarbeit nur dort und nach dessen Regeln geschieht.
+- **`qatlas-core-backlog`:** stellt sicher, dass es genau ein maßgebliches Planungssystem gibt, dass
+  Taskarbeit nur dort und nach dessen Regeln geschieht und dass Arbeit, die im Gespräch geplant oder
+  geschnitten wird, dort bis zur Ausführungsreife geklärt wird, auch ohne Modus.
 - **`qatlas-core-git`:** prüft vor jedem Eingriff den Repo-Zustand und hält Commits, Push und Historie
   sicher.
 - **`qatlas-core-config`:** kennt jede Einstellung und jedes Modul, mit dem der Nutzer Qatlas anpasst, und

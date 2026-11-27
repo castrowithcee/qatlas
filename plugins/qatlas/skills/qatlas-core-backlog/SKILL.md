@@ -1,10 +1,11 @@
 ---
 name: qatlas-core-backlog
 description: >
-  Taskarbeit im maßgeblichen Planungssystem: Aufgaben anlegen, auswählen, beanspruchen, Status setzen,
-  übergeben oder abschließen, Issues, Felder und Ideen des lokalen Qatlas-Backlogs führen sowie das
+  Planungs- und Taskarbeit im maßgeblichen Planungssystem: ein Vorhaben oder einen Vorschlag im Gespräch
+  planen, bewerten oder in Tasks schneiden, Aufgaben anlegen, auswählen, beanspruchen, Status setzen,
+  übergeben oder abschließen, Issues, Felder, Ideen und Epics des lokalen Qatlas-Backlogs führen sowie das
   Planungssystem eines Projekts anbinden, prüfen oder wechseln. Verwenden, sobald Planungs- oder Taskarbeit
-  über das bloße Anzeigen des geladenen Backlogs hinausgeht.
+  über das bloße Anzeigen des geladenen Backlogs hinausgeht, auch ohne Modus.
 ---
 
 # qatlas-core-backlog
@@ -17,7 +18,7 @@ Nutzer- oder Projektvorgaben haben Vorrang.
   als Spiegel. Lege Ideen am Entwurfsobjekt ab, das die Bindung nennt.
 - Die Einheit eines Planungssystems ist ein Issue. Das System behält seine eigenen Namen, Statuswerte, Typen
   und Felder. Ein Issue, dessen Merkmal nach der Bindung für einen Status dieser Norm steht, ist ein Task.
-  Ein Issue ohne solches Merkmal, etwa eine Idee, ist keiner.
+  Ein Issue ohne solches Merkmal, etwa eine Idee oder ein Epic, ist keiner.
 - Widersprechen sich native Projektanweisungen und `BACKLOG.md`, ändere nichts und kläre, welche Aussage
   aktualisiert werden muss.
 
@@ -68,6 +69,27 @@ Zulässige Wege:
 - Technische Schwierigkeit allein macht einen Task weder zu `draft`, `review` noch `waiting`.
 - Ein Issue ohne erkennbaren Status hat keinen. Behandle es nicht als `draft`, wähle es nicht aus und
   setze ihm ohne Auftrag keinen Status. Nenne die Anzahl, wo sie für Auswahl oder Übersicht zählt.
+
+## Planen und Zuschneiden
+
+Lies vor dem Anlegen oder Schneiden eines Tasks, in jedem Planungssystem und auch ohne Modus, vollständig
+[Tasks zuschneiden](references/task-cutting.md).
+
+Kläre, was du im Gespräch mit dem Nutzer planst oder schneidest, in diesem Gespräch bis `ready`. Lege eine
+offene Entscheidung dort mit begründeter Empfehlung vor, statt sie im Task zu sammeln und den Nutzer auf
+später zu verweisen. `draft` bleibt nur, was das Gespräch nicht beantworten kann.
+
+## Epic
+
+Ein Epic trägt den Umfang eines Bereichs, der noch nicht in Tasks geschnitten ist, und nennt, was zum
+Schneiden noch fehlt. Woran das System ein Epic zeigt und wie es schließt, sagt die Bindung.
+
+- Lege ein Epic nur an, wenn nach einem Zuschnitt bestätigter Umfang ungeschnitten bleibt, eines je Bereich.
+- Ein Epic ist kein Task: Es trägt keinen Status, hat keine Abnahme und kein Epic unter sich. Wähle es nie zur
+  Ausführung aus und behandle es nicht als `draft`.
+- Entferne beim Schneiden den geschnittenen Teil aus dem Epic. Schließe es, sobald kein ungeschnittener Umfang
+  mehr darin steht. Seine Zugehörigkeit zeigt ein geschnittener Task über seinen Bereich, eine Verknüpfung
+  mit dem Epic braucht er nicht.
 
 ## Abhängigkeiten
 

@@ -15,6 +15,8 @@ edit: shared
 - **Zugang:** <werkzeug oder verbindung für lesen und schreiben, nötige laufzeitvoraussetzung, keine secrets>
 - **Arbeitspakete:** <objekttyp und container, ein objekt pro task>
 - **Entwürfe:** <wo unausgereifte arbeit und ideen leben>
+- **Epics:** <merkmal am issue, an dem ein epic erkennbar ist, etwa typ, label oder titelpräfix, und wie es
+  schließt>
 - **Status:** `draft` = <merkmal>, `ready` = <merkmal>, `in-progress` = <merkmal>, `review` = <merkmal>,
   `waiting` = <merkmal>, `deferred` = <merkmal>. <wie ein wechsel das bisherige merkmal ersetzt>
 - **Abschluss:** `done` = <merkmal und schreibschritt>, verworfen = <merkmal>, Duplikat = <merkmal>

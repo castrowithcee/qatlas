@@ -16,6 +16,7 @@ edit: shared
   anderer MCP-Server, mit der nötigen Anmeldung, keine secrets>
 - **Arbeitspakete:** ein Issue pro Task
 - **Entwürfe:** offenes Issue mit Label `draft`
+- **Epics:** offenes Issue mit Label `epic` und ohne Status-Label, geschlossen mit Grund `completed`
 - **Status:** offenes Issue mit genau einem der Labels `draft`, `ready`, `in-progress`, `review`, `waiting`,
   `deferred`. Ein Wechsel ersetzt das bisherige Status-Label. Offen ohne Status-Label hat keinen Status.
 - **Abschluss:** `done` = geschlossen mit Grund `completed`, verworfen = `not planned`, Duplikat =

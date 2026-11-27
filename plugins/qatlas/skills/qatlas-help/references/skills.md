@@ -21,7 +21,7 @@ passt.
 |---|---|---|
 | `qatlas-core-navigation` | eine Anfrage Kontext aus dem Repo braucht | Findet Wissen über Einstiegspunkte, Lesebedingungen und Frontmatter |
 | `qatlas-core-filing` | Dateien angelegt, geändert, verschoben oder importiert werden | Setzt Ort, Name, Kennung und Frontmatter und hält Verweise konsistent |
-| `qatlas-core-backlog` | Planungs- oder Taskarbeit ansteht | Arbeitet im einzigen maßgeblichen Planungssystem nach dessen Regeln und bindet oder wechselt es auf Auftrag |
+| `qatlas-core-backlog` | Planungs- oder Taskarbeit ansteht, auch im Gespräch ohne Modus | Arbeitet im einzigen maßgeblichen Planungssystem nach dessen Regeln, schneidet Tasks zu, klärt sie im Gespräch bis `ready` und bindet oder wechselt das System auf Auftrag |
 | `qatlas-core-git` | in einem Repo gearbeitet wird oder Commits und Pushes anstehen | Prüft den Zustand, schützt parallele Arbeit und hält Commits sauber |
 | `qatlas-core-config` | eine Einstellung oder ein Nutzermodul angesehen, geändert oder eingerichtet wird | Kennt die Konfigurationsdateien, ihre Blöcke und die Module unter `~/.qatlas/plugins/hooks/` |
 
